@@ -1,0 +1,140 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Buch-Fortschritt</title>
+<style>
+/* Layout: manuscript page — slogan as masthead, progress bar, then 11 chapter cards in reading order */
+:root{
+  --paper:#f7f3ec;
+  --sheet:#ffffff;
+  --line:#e3dac8;
+  --ink:#2b241a;
+  --muted:#8a7f6a;
+  --accent:#8a3324;
+  --accent-soft:#f1e0da;
+  --done:#5c6b4a;
+  --done-soft:#e4e9da;
+  --special:#9a7b2e;
+  --special-soft:#f3ead2;
+  --f-display:'Fraunces', Georgia, serif;
+  --f-body:'Source Serif 4', Georgia, serif;
+  --f-mono:'JetBrains Mono', ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#1c1812; --sheet:#241f18; --line:#3a3326; --ink:#ece4d4; --muted:#a79a81;
+    --accent:#d98a73; --accent-soft:#3a2420; --done:#9bad87; --done-soft:#2a3222;
+    --special:#d8bb6f; --special-soft:#352b16;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1c1812; --sheet:#241f18; --line:#3a3326; --ink:#ece4d4; --muted:#a79a81;
+  --accent:#d98a73; --accent-soft:#3a2420; --done:#9bad87; --done-soft:#2a3222;
+  --special:#d8bb6f; --special-soft:#352b16;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{ background:var(--paper); color:var(--ink); font-family:var(--f-body); margin:0; padding-inline:20px; padding-block:32px; }
+.wrap{ max-width:720px; margin:0 auto; }
+
+.eyebrow{ font-family:var(--f-mono); font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:0 0 8px; }
+h1{ font-family:var(--f-display); font-size:clamp(30px,6vw,42px); margin:0 0 10px; font-weight:600; text-wrap:balance; }
+.slogan{ font-style:italic; color:var(--muted); font-size:16px; margin:0 0 22px; max-width:48ch; line-height:1.5; }
+
+.progress-row{ display:flex; align-items:center; gap:12px; margin-bottom:28px; }
+.bar{ flex:1; height:6px; border-radius:3px; background:var(--accent-soft); overflow:hidden; }
+.bar-fill{ height:100%; background:var(--accent); border-radius:3px; }
+.progress-label{ font-family:var(--f-mono); font-size:13px; color:var(--muted); white-space:nowrap; }
+
+.chapters{ display:flex; flex-direction:column; gap:12px; }
+.card{ background:var(--sheet); border:1px solid var(--line); border-radius:12px; padding:16px 18px; }
+.card-head{ display:flex; align-items:baseline; gap:10px; justify-content:space-between; }
+.num{ font-family:var(--f-mono); color:var(--muted); font-size:13px; flex:none; }
+.title{ font-family:var(--f-display); font-weight:600; font-size:18px; flex:1; min-width:0; }
+.chips{ display:flex; gap:6px; flex:none; flex-wrap:wrap; justify-content:flex-end; }
+.chip{ font-family:var(--f-mono); font-size:11px; padding:3px 9px; border-radius:999px; white-space:nowrap; }
+.chip.done{ background:var(--done-soft); color:var(--done); }
+.chip.open{ background:var(--accent-soft); color:var(--accent); }
+.chip.special{ background:var(--special-soft); color:var(--special); }
+.desc{ color:var(--muted); font-size:14px; margin-top:8px; line-height:1.5; }
+.testq{ margin-top:10px; padding:10px 12px; background:var(--accent-soft); border-radius:8px; font-size:13.5px; line-height:1.5; }
+.testq b{ font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--accent); display:block; margin-bottom:4px; font-style:normal; }
+.testq span{ font-style:italic; }
+
+footer{ text-align:center; color:var(--muted); font-size:12px; margin-top:26px; font-family:var(--f-mono); }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Source+Serif+4:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<div class="wrap">
+  <p class="eyebrow">Sport &amp; Selbstoptimierung im Alltag</p>
+  <h1>Dein Buch</h1>
+  <p class="slogan">„Ein Buch über die Reise, sich selbst zu finden – und das Fundament zu bauen, das diesen Weg trägt.“</p>
+
+  <div class="progress-row">
+    <div class="bar"><div class="bar-fill" style="width:55%"></div></div>
+    <span class="progress-label">6 / 11 Kapitel</span>
+  </div>
+
+  <div class="chapters">
+
+    <div class="card">
+      <div class="card-head"><span class="num">01</span><span class="title">Der Test</span><div class="chips"><span class="chip done">geschrieben</span></div></div>
+      <p class="desc">Einstiegsfragen zum Status quo – körperlich und sozial/mental. Spiegelt bereits typische Tiefpunkt-Situationen.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="num">02–03</span><span class="title">Der Tiefpunkt / Die Wende</span><div class="chips"><span class="chip done">geschrieben</span></div></div>
+      <p class="desc">Corona, Gaming, Gewichtszunahme, Leistungseinbruch im Fußball – und wie daraus über Struktur, Training und Routinen eine echte Wende wurde.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="num">04</span><span class="title">Wenn Optimierung zur Falle wird</span><div class="chips"><span class="chip special">special</span><span class="chip done">geschrieben</span></div></div>
+      <p class="desc">Psychologie der Besessenheit – Dopaminfalle, soziale Entfremdung, die Lehre: Plan und Grenzen statt grenzenloses Mehr.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="num">05</span><span class="title">Stärker in beide Richtungen</span><div class="chips"><span class="chip done">geschrieben</span></div></div>
+      <p class="desc">Leistungsfähigkeit und Traumkörper ergänzen sich, statt sich zu stören – eigenes Beispiel aus Lauf- und Kraftphasen.</p>
+      <div class="testq"><b>Testfrage</b><span>„Hattest du schon mal das Gefühl, deine Leistung extrem gesteigert zu haben, aber dein Erscheinungsbild darunter gelitten hat – und du so nie das maximal Mögliche rausgeholt hast?“</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="num">06</span><span class="title">Das Fundament – die maximale Versorgung</span><div class="chips"><span class="chip done">geschrieben</span></div></div>
+      <p class="desc">Ernährung als Basis von allem: Grundernährung, Routine mit „Super-Mitteln“, essenzielle Supplemente.</p>
+      <div class="testq"><b>Testfrage</b><span>„Hattest du nach einem schönen Essen mit Familie oder Freunden schon mal das Gefühl ‚verloren‘ zu haben – weil du dadurch bezüglich deiner Ernährung versagt hast?“</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="num">07</span><span class="title">Die Kunst des Nichtstuns</span><div class="chips"><span class="chip open">offen</span></div></div>
+      <p class="desc">Erholung &amp; Schlaf als unterschätzter Hebel – Wissenschaft zu Regeneration, warum Pausen Leistung ermöglichen statt sie zu bremsen.</p>
+      <div class="testq"><b>Testfrage</b><span>„Hast du dich an einem Tag ohne Training schon mal so unproduktiv gefühlt, dass du am liebsten alle deine Ziele hingeschmissen hättest – obwohl genau diese Ruhe das Fundament für deinen späteren Erfolg bildet?“</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="num">08</span><span class="title">Wer du wirst, wenn sich alles verändert</span><div class="chips"><span class="chip open">offen</span></div></div>
+      <p class="desc">Mindset, Selbstbewusstsein, Umfeld/Sozialität – Gewohnheitsbildung, Umgang mit Veränderung im sozialen Umfeld, eigene Routinen.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="num">09</span><span class="title">Fortschritt, den man nicht sieht</span><div class="chips"><span class="chip special">special</span><span class="chip open">offen</span></div></div>
+      <p class="desc">Plateaus und unsichtbare Fortschritte – Psychologie von Stagnation, Periodisierung als Konzept.</p>
+      <div class="testq"><b>Testfrage</b><span>„Hast du das Gefühl, mehr zu geben als andere – aber keinen wirklichen Unterschied bezüglich des Erfolges zu sehen?“</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="num">10</span><span class="title">Der Alltag damit</span><div class="chips"><span class="chip open">offen</span></div></div>
+      <p class="desc">Wie sich das Leben konkret verändert, wenn man alles anwendet – praktische Beispiele für Tag und Woche.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="num">11</span><span class="title">Der Test (Teil 2) + Fahrplan</span><div class="chips"><span class="chip open">offen</span></div></div>
+      <p class="desc">Dieselben Eingangsfragen erneut – direkter Vergleich für den Leser, Ausblick und nächste Schritte.</p>
+    </div>
+
+  </div>
+
+  <footer>Zielgruppe: Fortgeschrittene, die stagnieren — und alle, die ihr Leben verbessern wollen</footer>
+</div>
+
+</body></html>

@@ -33,6 +33,10 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 - [[MVP-Fortschritt]]: was erledigt ist, was als Nächstes kommt
 - [[Roadmap nach dem MVP]]: Ausbaustufen für später
 
+### Buch
+- [[Buch – Übersicht]]: Buch „Sport & Selbstoptimierung im Alltag“, 6 von 11 Kapiteln geschrieben
+- [[Buchkonzept]] · [[Der Test – Fragebogen]] · [[Buch-Fortschritt]]
+
 ### Sonstiges
 - [[Offene Fragen]]: noch zu klärende Punkte und Widersprüche
 - [[Quellen]]: woher die Infos in diesem Vault stammen
@@ -46,7 +50,10 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 Konzept/          Idee, Kernmechanik, Technik
 Datenstruktur/    Datenmodell und Tabellen
 Fortschritt/      MVP-Stand und Roadmap
+Buch/             Buch: Konzept, Fragebogen, Fortschritt
+  Kapitel/        Kapiteltexte (Abschriften)
 Offene Fragen/    Ungeklärtes
 Quellen/          Herkunft der Infos, Originaldokumente
   Anhänge/        Originaldateien (.docx, .html)
+    Buch/         Originale des Buchs
 ```
