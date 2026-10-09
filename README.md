@@ -36,7 +36,9 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 ### Sonstiges
 - [[Offene Fragen]]: noch zu klärende Punkte und Widersprüche
 - [[Quellen]]: woher die Infos in diesem Vault stammen
-- [[App-Fortschritt]]: Originalseite „App-Fortschritt“ aus Claude
+
+### Originaldokumente
+- [[App-Konzept (Original)]] · [[App-Datenstruktur (Original)]] · [[App-Fortschritt]]: wortgetreue Abschriften; Originaldateien in `Quellen/Anhänge/`
 
 ## Ordnerstruktur
 
@@ -45,5 +47,6 @@ Konzept/          Idee, Kernmechanik, Technik
 Datenstruktur/    Datenmodell und Tabellen
 Fortschritt/      MVP-Stand und Roadmap
 Offene Fragen/    Ungeklärtes
-Quellen/          Herkunft der Infos
+Quellen/          Herkunft der Infos, Originaldokumente
+  Anhänge/        Originaldateien (.docx, .html)
 ```
