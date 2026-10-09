@@ -1,0 +1,135 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>App-Fortschritt</title>
+<style>
+/* Layout: build dashboard — concept banner, MVP checklist with progress, data model as three linked cards */
+:root{
+  --bg:#f4f6f5;
+  --sheet:#ffffff;
+  --line:#dde3e0;
+  --ink:#1c2420;
+  --muted:#6c7a74;
+  --accent:#1f6f5c;
+  --accent-soft:#dcece6;
+  --later:#9a8c5e;
+  --later-soft:#f1ead8;
+  --f-display:'Space Grotesk', system-ui, sans-serif;
+  --f-body:'Inter', system-ui, sans-serif;
+  --f-mono:'JetBrains Mono', ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141a17; --sheet:#1b2320; --line:#2b3531; --ink:#e6ece9; --muted:#8fa099;
+    --accent:#5bcab0; --accent-soft:#1d332c; --later:#d9c37c; --later-soft:#332c1a;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141a17; --sheet:#1b2320; --line:#2b3531; --ink:#e6ece9; --muted:#8fa099;
+  --accent:#5bcab0; --accent-soft:#1d332c; --later:#d9c37c; --later-soft:#332c1a;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{ background:var(--bg); color:var(--ink); font-family:var(--f-body); margin:0; padding-inline:20px; padding-block:32px; font-size:14.5px; }
+.wrap{ max-width:720px; margin:0 auto; }
+
+.eyebrow{ font-family:var(--f-mono); font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:0 0 8px; }
+h1{ font-family:var(--f-display); font-size:clamp(28px,6vw,38px); margin:0 0 10px; font-weight:600; text-wrap:balance; }
+.pitch{ color:var(--muted); font-size:15px; max-width:56ch; line-height:1.55; margin:0 0 26px; }
+.pitch b{ color:var(--ink); }
+
+section{ margin-bottom:26px; }
+h2{ font-family:var(--f-display); font-size:16px; font-weight:600; margin:0 0 4px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+h2 .count{ font-family:var(--f-mono); font-size:12.5px; color:var(--muted); font-weight:400; white-space:nowrap; }
+.section-note{ color:var(--muted); font-size:13px; margin:0 0 14px; }
+
+.bar{ height:6px; border-radius:3px; background:var(--accent-soft); overflow:hidden; margin-bottom:14px; }
+.bar-fill{ height:100%; background:var(--accent); border-radius:3px; }
+
+.steps{ display:flex; flex-direction:column; gap:2px; }
+.step{ display:flex; align-items:flex-start; gap:10px; padding:9px 2px; border-radius:8px; }
+.dot{ flex:none; width:18px; height:18px; border-radius:5px; border:1.5px solid var(--line); margin-top:1px; display:flex; align-items:center; justify-content:center; font-family:var(--f-mono); font-size:10px; }
+.step.done .dot{ background:var(--accent); border-color:var(--accent); color:var(--sheet); }
+.step.later .dot{ border-style:dashed; color:var(--later); border-color:var(--later); }
+.step-text{ font-size:14px; line-height:1.4; }
+.step.done .step-text{ color:var(--muted); }
+.tag{ font-family:var(--f-mono); font-size:10.5px; padding:1px 7px; border-radius:999px; background:var(--later-soft); color:var(--later); margin-left:6px; white-space:nowrap; }
+
+.model{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+.m-card{ background:var(--sheet); border:1px solid var(--line); border-radius:10px; padding:13px 14px; }
+.m-card h3{ font-family:var(--f-mono); font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--accent); margin:0 0 8px; }
+.m-card ul{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:4px; }
+.m-card li{ font-size:12.5px; color:var(--muted); line-height:1.4; }
+.arrow{ display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:14px; }
+@media (max-width:540px){ .arrow{ display:none; } }
+
+.stack{ display:flex; gap:8px; flex-wrap:wrap; }
+.pill{ background:var(--sheet); border:1px solid var(--line); border-radius:999px; padding:6px 13px; font-size:13px; }
+.pill b{ font-family:var(--f-mono); font-weight:600; }
+
+footer{ text-align:center; color:var(--muted); font-size:12px; margin-top:8px; font-family:var(--f-mono); }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+<div class="wrap">
+  <p class="eyebrow">Sport &amp; Selbstoptimierung — adaptive Coaching-App</p>
+  <h1>Die App</h1>
+  <p class="pitch">Täglicher <b>conversationeller Feed</b> statt starrer Formulare: Training, Ernährung/Gefühl, Schlaf, Energie. Die KI antwortet individuell, mit Gedächtnis über die letzten Tage — daraus entsteht ein <b>Fortschritts-Graph</b>, der zeigt, wie der Bedarf an Tipps über die Zeit sinkt.</p>
+
+  <section>
+    <h2>MVP-Baustellen <span class="count">1 / 5</span></h2>
+    <div class="bar"><div class="bar-fill" style="width:20%"></div></div>
+    <div class="steps">
+      <div class="step done"><span class="dot">✓</span><span class="step-text">Konzept &amp; Datenstruktur festgelegt</span></div>
+      <div class="step"><span class="dot"></span><span class="step-text">Onboarding-Fragebogen (Ziel, Level, Ausgangssituation)</span></div>
+      <div class="step"><span class="dot"></span><span class="step-text">Täglicher Feed mit den vier Kernfragen</span></div>
+      <div class="step"><span class="dot"></span><span class="step-text">KI-Antwort mit einfacher Regellogik</span></div>
+      <div class="step"><span class="dot"></span><span class="step-text">Einfache Fortschritts-Ansicht</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Später <span class="tag">nicht Teil des MVP</span></h2>
+    <div class="steps">
+      <div class="step later"><span class="dot">·</span><span class="step-text">Freischaltbare, tiefere Coaching-Tipps (Monetarisierung)</span></div>
+      <div class="step later"><span class="dot">·</span><span class="step-text">Erinnerungen / Notifications fürs tägliche Tracking</span></div>
+      <div class="step later"><span class="dot">·</span><span class="step-text">Datenschutzerklärung, Name/Branding</span></div>
+      <div class="step later"><span class="dot">·</span><span class="step-text">Verbindung zu Buch &amp; Content, Community-Elemente</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Datenmodell</h2>
+    <p class="section-note">Ein Nutzer hat viele Check-ins, jeder Check-in genau eine KI-Antwort. Der Fortschritts-Graph wird direkt daraus aggregiert — keine eigene Tabelle.</p>
+    <div class="model">
+      <div class="m-card">
+        <h3>Nutzer</h3>
+        <ul><li>Name, E-Mail</li><li>Abo-Status</li><li>Ziel &amp; Level (Onboarding)</li></ul>
+      </div>
+      <div class="arrow">→</div>
+      <div class="m-card">
+        <h3>Check-in (täglich)</h3>
+        <ul><li>Training (Freitext)</li><li>Ernährung/Gefühl (Freitext)</li><li>Schlaf &amp; Energie (Freitext)</li></ul>
+      </div>
+      <div class="arrow">→</div>
+      <div class="m-card">
+        <h3>KI-Antwort</h3>
+        <ul><li>Feedback-Text</li><li>einfach / tief (bezahlt)</li><li>Bewertungs-Kennzahl 1–10</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Technischer Ansatz</h2>
+    <div class="stack">
+      <span class="pill"><b>FlutterFlow</b> — No-Code UI</span>
+      <span class="pill"><b>LLM-API</b> — Antworten &amp; Bewertung</span>
+      <span class="pill">Flatrate-Abo, 9,99 €/Monat</span>
+    </div>
+  </section>
+
+  <footer>Bewusst weggelassen: Lebensmittel- oder Übungsdatenbank, Kalorien-/Makro-Felder</footer>
+</div>
+
+</body></html>

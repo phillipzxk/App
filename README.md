@@ -36,6 +36,7 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 ### Sonstiges
 - [[Offene Fragen]]: noch zu klärende Punkte und Widersprüche
 - [[Quellen]]: woher die Infos in diesem Vault stammen
+- [[App-Fortschritt]]: Originalseite „App-Fortschritt“ aus Claude
 
 ## Ordnerstruktur
 
