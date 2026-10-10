@@ -3,7 +3,7 @@ title: Onboarding-Fragebogen
 tags: [umsetzung, onboarding, mvp, flutterflow]
 aliases: [Onboarding, Einstiegs-Fragebogen]
 erstellt: 2026-10-10
-status: entwurf
+status: fertig geplant
 ---
 
 # Onboarding-Fragebogen
@@ -69,10 +69,10 @@ Vier Fragen, davon drei mit festen Antworten (ein Tipp = Antwort gespeichert und
 
 | Button-Text | Speicherwert | Feld |
 |---|---|---|
-| Zu wenig Zeit | `zeit` | `ausgangssituation` ⚠️ |
-| Ich bleibe nicht dran | `motivation` | `ausgangssituation` ⚠️ |
-| Ich weiß nicht genau, was richtig ist | `wissen` | `ausgangssituation` ⚠️ |
-| Wenig Energie oder schlechter Schlaf | `erholung` | `ausgangssituation` ⚠️ |
+| Zu wenig Zeit | `zeit` | `ausgangssituation` |
+| Ich bleibe nicht dran | `motivation` | `ausgangssituation` |
+| Ich weiß nicht genau, was richtig ist | `wissen` | `ausgangssituation` |
+| Wenig Energie oder schlechter Schlaf | `erholung` | `ausgangssituation` |
 
 ### Bildschirm 4: In eigenen Worten (optional)
 
@@ -80,7 +80,7 @@ Vier Fragen, davon drei mit festen Antworten (ein Tipp = Antwort gespeichert und
 - **Frage:** Was möchtest du in drei Monaten anders machen?
 - **Untertitel:** Erzähl es in eigenen Worten. Ein Satz reicht.
 - **Textfeld-Platzhalter:** z. B. „Morgens fit aufwachen und dreimal die Woche trainieren“
-- **Button:** Weiter → speichert den Text in `onboarding_notiz` ⚠️
+- **Button:** Weiter → speichert den Text in `onboarding_notiz`
 - **Kleiner Text-Button darunter:** Überspringen
 
 ### Bildschirm 5: Fertig
@@ -89,8 +89,8 @@ Vier Fragen, davon drei mit festen Antworten (ein Tipp = Antwort gespeichert und
 - **Text:** Ab jetzt fragt dich die App einmal am Tag, wie es dir geht. Antworte einfach in eigenen Worten, dein Coach kümmert sich um den Rest.
 - **Button:** Zum ersten Check-in
 
-> [!warning] ⚠️ Neue Felder, noch nicht entschieden
-> `ziel` und `level` gibt es schon in der Tabelle [[Nutzer]]. Für Frage 3 und 4 wären **zwei neue Felder** nötig: `ausgangssituation` und `onboarding_notiz`. Im aktuellen [[Datenmodell]] sind „Ausgangssituation / Level“ noch ein gemeinsames Feld. Die Entscheidung steht in [[Offene Fragen#Onboarding]]. Bis dahin ist das hier ein Vorschlag.
+> [!note] Neue Felder
+> Für Frage 3 und 4 hat die Tabelle [[Nutzer]] seit 2026-10-10 zwei neue Felder: `ausgangssituation` und `onboarding_notiz` (entschieden von Phillip, siehe [[Datenmodell]]).
 
 ## Warum Speicherwerte statt Button-Text?
 
@@ -129,8 +129,8 @@ Dadurch sind schon die ersten Tipps persönlich, bevor es einen Verlauf aus [[Ch
 2. Auf **+ Add Field** klicken und nacheinander anlegen, jeweils Typ **String**:
    - `ziel`
    - `level`
-   - `ausgangssituation` (nur wenn die neuen Felder bestätigt sind)
-   - `onboarding_notiz` (nur wenn die neuen Felder bestätigt sind)
+   - `ausgangssituation`
+   - `onboarding_notiz`
 3. Speichern.
 
 ### Schritt 2: Sechs leere Seiten anlegen

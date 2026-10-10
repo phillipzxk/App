@@ -15,7 +15,7 @@ aktualisiert: 2026-10-10
 
 Aus dem Entwurf [[Onboarding-Fragebogen]] (2026-10-10):
 
-- **Zwei neue Felder in [[Nutzer]]?** Vorschlag: `ausgangssituation` (Antwort auf „Was hält dich gerade am meisten zurück?“) und `onboarding_notiz` (optionaler Freitext). Bisher sind „Ausgangssituation / Level“ ein gemeinsames Feld, das [[Datenmodell]] ist deshalb noch **nicht** geändert. Alternative: Frage 3 und 4 weglassen, dann reichen `ziel` und `level`.
+- ~~Zwei neue Felder in [[Nutzer]]?~~ **Entschieden 2026-10-10: ja.** `ausgangssituation` und `onboarding_notiz` sind im [[Datenmodell]] ergänzt.
 - **Backend:** Die FlutterFlow-Anleitung geht von **Firebase** aus (siehe auch [[Technischer Ansatz]]). Noch nicht festgelegt.
 - **Antworten später ändern:** Soll es eine Profil-Seite geben, auf der Ziel und Level angepasst werden können? Im MVP bisher nicht vorgesehen.
 

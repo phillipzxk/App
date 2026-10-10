@@ -14,7 +14,7 @@ gesamt: 5
 - [x] Konzept & Datenstruktur festgelegt → [[App-Konzept]], [[Datenmodell]]
 - [ ] Onboarding-Fragebogen (Ziel, Level, Ausgangssituation) → [[Onboarding-Fragebogen]]
     - [x] Fragen, Bildschirmtexte und FlutterFlow-Anleitung entworfen (2026-10-10)
-    - [ ] Neue Felder entschieden, siehe [[Offene Fragen#Onboarding]]
+    - [x] Neue Felder entschieden und im [[Datenmodell]] ergänzt (2026-10-10)
     - [ ] In FlutterFlow gebaut und getestet
 - [ ] Täglicher Feed mit den vier Kernfragen → [[Kernmechanik#2. Täglicher Feed (Kernbildschirm)]]
 - [ ] KI-Antwort mit einfacher Regellogik → [[Kernmechanik#3. KI-Antwort]]
