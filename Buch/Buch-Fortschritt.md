@@ -2,12 +2,12 @@
 title: Buch-Fortschritt
 tags: [buch, fortschritt, original]
 quelle: https://claude.ai/artifact/WMWBpk9rbzfB47RRBXD9Zg
-gespeichert: 2026-10-09
+gespeichert: 2026-10-10
 ---
 
 # Buch-Fortschritt (Originalseite)
 
-Wortgetreue Abschrift der Claude-Seite „Buch-Fortschritt“, Stand 2026-10-09. Die Originaldatei mit Layout liegt daneben: [[Buch-Fortschritt.html]] (im Browser öffnen). Online: https://claude.ai/artifact/WMWBpk9rbzfB47RRBXD9Zg
+Wortgetreue Abschrift der Claude-Seite „Buch-Fortschritt“, Stand 2026-10-10. Die Originaldatei mit Layout liegt daneben: [[Buch-Fortschritt.html]] (im Browser öffnen). Online: https://claude.ai/artifact/WMWBpk9rbzfB47RRBXD9Zg
 
 Übersicht: [[Buch – Übersicht]].
 
@@ -19,7 +19,7 @@ Wortgetreue Abschrift der Claude-Seite „Buch-Fortschritt“, Stand 2026-10-09.
 
 „Ein Buch über die Reise, sich selbst zu finden – und das Fundament zu bauen, das diesen Weg trägt.“
 
-**6 / 11 Kapitel**
+**7 / 11 Kapitel**
 
 **01 Der Test** · geschrieben
 Einstiegsfragen zum Status quo – körperlich und sozial/mental. Spiegelt bereits typische Tiefpunkt-Situationen.
@@ -38,7 +38,7 @@ Leistungsfähigkeit und Traumkörper ergänzen sich, statt sich zu stören – e
 Ernährung als Basis von allem: Grundernährung, Routine mit „Super-Mitteln“, essenzielle Supplemente.
 > Testfrage: „Hattest du nach einem schönen Essen mit Familie oder Freunden schon mal das Gefühl ‚verloren‘ zu haben – weil du dadurch bezüglich deiner Ernährung versagt hast?“
 
-**07 Die Kunst des Nichtstuns** · offen
+**07 Die Kunst des Nichtstuns** · geschrieben
 Erholung & Schlaf als unterschätzter Hebel – Wissenschaft zu Regeneration, warum Pausen Leistung ermöglichen statt sie zu bremsen.
 > Testfrage: „Hast du dich an einem Tag ohne Training schon mal so unproduktiv gefühlt, dass du am liebsten alle deine Ziele hingeschmissen hättest – obwohl genau diese Ruhe das Fundament für deinen späteren Erfolg bildet?“
 
