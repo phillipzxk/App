@@ -14,8 +14,9 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 
 ## Stand
 
-- **MVP:** 1 von 5 Bausteinen erledigt (Konzept & Datenstruktur), Onboarding als Entwurf fertig, siehe [[MVP-Fortschritt]]
-- **Code:** noch keiner; geplant mit FlutterFlow (No-Code) und einer LLM-API, siehe [[Technischer Ansatz]]
+- **MVP:** 1 von 5 Bausteinen erledigt (Konzept & Datenstruktur), Onboarding programmiert, siehe [[MVP-Fortschritt]]
+- **Code:** Flutter-App im Ordner `code/`, von Claude geschrieben; Onboarding fertig, siehe [[App-Code]] und [[Technischer Ansatz]]
+- **Vorschau im Browser:** https://claude.ai/artifact/BtH78uqJJJ6vrDVTeBpvcP
 - **Name/Branding:** noch offen, siehe [[Offene Fragen]]
 
 ## Notizen
@@ -30,7 +31,8 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 - [[Nutzer]] · [[Check-ins]] · [[KI-Antworten]] · [[Fortschritts-Verlauf]]
 
 ### Umsetzung
-- [[Onboarding-Fragebogen]]: Fragen, Bildschirmtexte und Schritt-für-Schritt-Anleitung für FlutterFlow (Entwurf)
+- [[App-Code]]: Aufbau und Stand des Codes
+- [[Onboarding-Fragebogen]]: Fragen, Bildschirmtexte und Speicherwerte
 
 ### Fortschritt
 - [[MVP-Fortschritt]]: was erledigt ist, was als Nächstes kommt
@@ -52,7 +54,8 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 ```
 Konzept/          Idee, Kernmechanik, Technik
 Datenstruktur/    Datenmodell und Tabellen
-Umsetzung/        Bauanleitungen für die App-Bausteine
+Umsetzung/        Pläne für die App-Bausteine
+code/             Flutter-Code der App
 Fortschritt/      MVP-Stand und Roadmap
 Buch/             Buch: Konzept, Fragebogen, Fortschritt
   Kapitel/        Kapiteltexte (Abschriften)

@@ -16,7 +16,7 @@ aktualisiert: 2026-10-10
 Aus dem Entwurf [[Onboarding-Fragebogen]] (2026-10-10):
 
 - ~~Zwei neue Felder in [[Nutzer]]?~~ **Entschieden 2026-10-10: ja.** `ausgangssituation` und `onboarding_notiz` sind im [[Datenmodell]] ergänzt.
-- **Backend:** Die FlutterFlow-Anleitung geht von **Firebase** aus (siehe auch [[Technischer Ansatz]]). Noch nicht festgelegt.
+- **Backend:** Die App speichert die Antworten vorerst nur auf dem Gerät. Für Anmeldung und Online-Speicherung ist **Firebase** vorgeschlagen; dafür braucht es ein Firebase-Projekt in Phillips Google-Konto (siehe [[Technischer Ansatz]]). Noch nicht festgelegt.
 - **Antworten später ändern:** Soll es eine Profil-Seite geben, auf der Ziel und Level angepasst werden können? Im MVP bisher nicht vorgesehen.
 
 ## Laut Konzept später zu klären

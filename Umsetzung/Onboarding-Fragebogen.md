@@ -3,7 +3,7 @@ title: Onboarding-Fragebogen
 tags: [umsetzung, onboarding, mvp, flutterflow]
 aliases: [Onboarding, Einstiegs-Fragebogen]
 erstellt: 2026-10-10
-status: fertig geplant
+status: programmiert
 ---
 
 # Onboarding-Fragebogen
@@ -113,6 +113,9 @@ Dadurch sind schon die ersten Tipps persönlich, bevor es einen Verlauf aus [[Ch
 ---
 
 ## Schritt für Schritt in FlutterFlow
+
+> [!note] Nicht mehr nötig
+> Seit 2026-10-10 baut Claude die App als Code (siehe [[Technischer Ansatz]]). Die Anleitung bleibt nur als Referenz stehen, falls doch wieder FlutterFlow genutzt wird.
 
 > [!info] Annahme: Firebase
 > Diese Anleitung nutzt **Firebase** (Anmeldung + Firestore-Datenbank), weil FlutterFlow das direkt eingebaut hat und es für Einsteiger am einfachsten ist. Ob es dabei bleibt, steht in [[Offene Fragen#Onboarding]]. Menünamen können je nach FlutterFlow-Version leicht abweichen.
