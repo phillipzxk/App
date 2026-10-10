@@ -2,7 +2,7 @@
 title: Buch – Übersicht
 tags: [buch, index]
 erstellt: 2026-10-09
-aktualisiert: 2026-10-10
+aktualisiert: 2026-10-09
 ---
 
 # Buch: Sport & Selbstoptimierung im Alltag
@@ -13,7 +13,7 @@ Personalisiertes Buch, das mit einem Selbsttest beginnt und endet (Vorher-Nachhe
 
 ## Stand
 
-**7 von 11 Kapiteln geschrieben** (Stand 2026-10-10), siehe [[Buch-Fortschritt]].
+**6 von 11 Kapiteln geschrieben** (Stand 2026-10-09), siehe [[Buch-Fortschritt]].
 
 | Nr. | Kapitel | Status |
 |---|---|---|
@@ -22,7 +22,7 @@ Personalisiertes Buch, das mit einem Selbsttest beginnt und endet (Vorher-Nachhe
 | 4 | [[Kapitel 4 – Wenn Optimierung zur Falle wird]] (Special) | geschrieben |
 | 5 | [[Kapitel 5 – Stärker in beide Richtungen]] | geschrieben |
 | 6 | [[Kapitel 6 – Das Fundament]] – die maximale Versorgung | geschrieben |
-| 7 | [[Kapitel 7 – Die Kunst des Nichtstuns]] | geschrieben |
+| 7 | Die Kunst des Nichtstuns | offen |
 | 8 | Wer du wirst, wenn sich alles verändert | offen |
 | 9 | Fortschritt, den man nicht sieht (Special) | offen |
 | 10 | Der Alltag damit | offen |
