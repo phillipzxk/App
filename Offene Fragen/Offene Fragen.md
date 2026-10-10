@@ -1,7 +1,7 @@
 ---
 title: Offene Fragen
 tags: [offen, entscheidungen]
-aktualisiert: 2026-10-09
+aktualisiert: 2026-10-10
 ---
 
 # Offene Fragen
@@ -10,6 +10,14 @@ aktualisiert: 2026-10-09
 
 - **Preis:** Die Fortschritts-Übersicht nennt ein **Flatrate-Abo für 9,99 €/Monat**, das App-Konzept sagt dagegen „Monetarisierung im Detail später zu klären“. Ist 9,99 €/Monat entschieden?
 - **Vier Fragen vs. drei Felder:** Der tägliche Feed hat vier Kernfragen (Training, Ernährung/Gefühl, Schlaf, Energie), die [[Check-ins]] speichern aber drei Freitextfelder (Schlaf & Energie zusammen). Bleibt das so?
+
+## Onboarding
+
+Aus dem Entwurf [[Onboarding-Fragebogen]] (2026-10-10):
+
+- **Zwei neue Felder in [[Nutzer]]?** Vorschlag: `ausgangssituation` (Antwort auf „Was hält dich gerade am meisten zurück?“) und `onboarding_notiz` (optionaler Freitext). Bisher sind „Ausgangssituation / Level“ ein gemeinsames Feld, das [[Datenmodell]] ist deshalb noch **nicht** geändert. Alternative: Frage 3 und 4 weglassen, dann reichen `ziel` und `level`.
+- **Backend:** Die FlutterFlow-Anleitung geht von **Firebase** aus (siehe auch [[Technischer Ansatz]]). Noch nicht festgelegt.
+- **Antworten später ändern:** Soll es eine Profil-Seite geben, auf der Ziel und Level angepasst werden können? Im MVP bisher nicht vorgesehen.
 
 ## Laut Konzept später zu klären
 

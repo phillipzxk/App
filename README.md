@@ -2,7 +2,7 @@
 title: App – Startseite
 tags: [app, index]
 erstellt: 2026-10-09
-aktualisiert: 2026-10-09
+aktualisiert: 2026-10-10
 ---
 
 # App – Sport & Selbstoptimierung
@@ -14,7 +14,7 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 
 ## Stand
 
-- **MVP:** 1 von 5 Bausteinen erledigt (Konzept & Datenstruktur), siehe [[MVP-Fortschritt]]
+- **MVP:** 1 von 5 Bausteinen erledigt (Konzept & Datenstruktur), Onboarding als Entwurf fertig, siehe [[MVP-Fortschritt]]
 - **Code:** noch keiner; geplant mit FlutterFlow (No-Code) und einer LLM-API, siehe [[Technischer Ansatz]]
 - **Name/Branding:** noch offen, siehe [[Offene Fragen]]
 
@@ -28,6 +28,9 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 ### Datenstruktur
 - [[Datenmodell]]: Überblick und Beziehungen
 - [[Nutzer]] · [[Check-ins]] · [[KI-Antworten]] · [[Fortschritts-Verlauf]]
+
+### Umsetzung
+- [[Onboarding-Fragebogen]]: Fragen, Bildschirmtexte und Schritt-für-Schritt-Anleitung für FlutterFlow (Entwurf)
 
 ### Fortschritt
 - [[MVP-Fortschritt]]: was erledigt ist, was als Nächstes kommt
@@ -49,6 +52,7 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 ```
 Konzept/          Idee, Kernmechanik, Technik
 Datenstruktur/    Datenmodell und Tabellen
+Umsetzung/        Bauanleitungen für die App-Bausteine
 Fortschritt/      MVP-Stand und Roadmap
 Buch/             Buch: Konzept, Fragebogen, Fortschritt
   Kapitel/        Kapiteltexte (Abschriften)

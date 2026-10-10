@@ -19,4 +19,6 @@ Teil von [[Datenmodell]].
 | Ziel | aus dem [[Kernmechanik#1. Onboarding|Onboarding]], z. B. Muskelaufbau, mehr Energie, bessere Routinen |
 | Ausgangssituation / Level | aus dem Onboarding |
 
+Mögliche Werte für Ziel und Level: siehe [[Onboarding-Fragebogen]].
+
 Ein Nutzer hat viele [[Check-ins]].
