@@ -31,7 +31,7 @@ Aus dem Entwurf [[Onboarding-Fragebogen]] (2026-10-10):
 ## Technik
 
 - **Bewertungs-Richtung:** Heißt 10 „brauchte kaum Tipps“? Laut [[App-Gesamtübersicht (Original)]] noch von Phillip zu bestätigen.
-- **FlutterFlow oder Code?** Die Gesamtübersicht sieht FlutterFlow („Betterlifeapp“) vor, am 2026-10-10 wurde Code von Claude entschieden. Klärung läuft.
+- ~~FlutterFlow oder Code?~~ **Entschieden 2026-10-11:** Code von Claude. Das FlutterFlow-Projekt „Betterlifeapp“ ruht.
 
 - Welcher LLM-Anbieter bzw. welches Modell? (siehe [[Technischer Ansatz]])
 - Wie die „einfache Regellogik“ der KI-Antwort im MVP konkret aussieht
