@@ -1,74 +1,75 @@
 import '../data/user_profile.dart';
 
-/// One answer button: what the user reads and what gets stored.
-class AnswerOption {
-  const AnswerOption(this.label, this.value);
-
-  final String label;
-  final String value;
-}
-
-/// A multiple-choice question of the onboarding.
-class ChoiceQuestion {
-  const ChoiceQuestion({
+/// One onboarding question, answered in the user's own words.
+class OnboardingQuestion {
+  const OnboardingQuestion({
+    required this.topic,
     required this.question,
-    required this.subtitle,
-    required this.options,
+    required this.read,
     required this.apply,
   });
 
+  /// Short label, e.g. "Ziel".
+  final String topic;
   final String question;
-  final String subtitle;
-  final List<AnswerOption> options;
 
-  /// Writes the chosen value into the profile.
-  final UserProfile Function(UserProfile profile, String value) apply;
+  /// Reads this question's answer from the profile.
+  final String Function(UserProfile profile) read;
+
+  /// Writes the answer into the profile.
+  final UserProfile Function(UserProfile profile, String answer) apply;
 }
 
-/// Texts and storage codes as defined in Umsetzung/Onboarding-Fragebogen.md.
-final List<ChoiceQuestion> choiceQuestions = [
-  ChoiceQuestion(
-    question: 'Was ist dein wichtigstes Ziel?',
-    subtitle: 'Wähle das, was dir gerade am meisten am Herzen liegt.',
-    options: const [
-      AnswerOption('Muskeln aufbauen', 'muskelaufbau'),
-      AnswerOption('Mehr Energie im Alltag', 'energie'),
-      AnswerOption('Bessere Routinen entwickeln', 'routinen'),
-      AnswerOption('Insgesamt fitter werden', 'fitness'),
-    ],
-    apply: (p, v) => p.copyWith(ziel: v),
+/// The six questions decided with Phillip on 2026-10-11, same for everyone,
+/// in this order (see Umsetzung/Onboarding-Fragebogen.md).
+final List<OnboardingQuestion> onboardingQuestions = [
+  OnboardingQuestion(
+    topic: 'Ziel',
+    question:
+        'Wie stellst du dir dein Leben vor, wenn du endlich glücklich bist und '
+        'im Inneren Erfolg spürst? Was machst du dann anders als heute?',
+    read: (p) => p.ziel,
+    apply: (p, a) => p.copyWith(ziel: a),
   ),
-  ChoiceQuestion(
-    question: 'Wie aktiv bist du im Moment?',
-    subtitle: 'Sei ehrlich, hier gibt es kein Richtig oder Falsch.',
-    options: const [
-      AnswerOption('Kaum oder gar nicht', 'einsteiger'),
-      AnswerOption('1 bis 2 Mal pro Woche', 'gelegentlich'),
-      AnswerOption('3 bis 4 Mal pro Woche', 'regelmaessig'),
-      AnswerOption('5 Mal oder öfter pro Woche', 'sehr_aktiv'),
-    ],
-    apply: (p, v) => p.copyWith(level: v),
+  OnboardingQuestion(
+    topic: 'Motivation',
+    question:
+        'Was ist der wahre Grund, warum du dich und dein Leben jetzt verändern '
+        'willst?',
+    read: (p) => p.motivation,
+    apply: (p, a) => p.copyWith(motivation: a),
   ),
-  ChoiceQuestion(
-    question: 'Was hält dich gerade am meisten zurück?',
-    subtitle: 'Damit dein Coach weiß, wo er ansetzen kann.',
-    options: const [
-      AnswerOption('Zu wenig Zeit', 'zeit'),
-      AnswerOption('Ich bleibe nicht dran', 'motivation'),
-      AnswerOption('Ich weiß nicht genau, was richtig ist', 'wissen'),
-      AnswerOption('Wenig Energie oder schlechter Schlaf', 'erholung'),
-    ],
-    apply: (p, v) => p.copyWith(ausgangssituation: v),
+  OnboardingQuestion(
+    topic: 'Level',
+    question:
+        'Wie würde jemand, der dich gut kennt, deine Essgewohnheiten, deinen '
+        'Sport, deine Energie, dein Verhalten und mögliche positive '
+        'Veränderungen in letzter Zeit beschreiben?',
+    read: (p) => p.level,
+    apply: (p, a) => p.copyWith(level: a),
+  ),
+  OnboardingQuestion(
+    topic: 'Training',
+    question:
+        'Wo bist du dir bei deinem Training und deiner körperlichen Verfassung '
+        'gerade unsicher, oder was ist dir noch unklar?',
+    read: (p) => p.training,
+    apply: (p, a) => p.copyWith(training: a),
+  ),
+  OnboardingQuestion(
+    topic: 'Ernährung',
+    question:
+        'Wie fühlst du dich gerade mit deiner Ernährung, und wo bist du dir '
+        'unsicher, ob sie dir wirklich guttut?',
+    read: (p) => p.ernaehrung,
+    apply: (p, a) => p.copyWith(ernaehrung: a),
+  ),
+  OnboardingQuestion(
+    topic: 'Schlaf & Energie',
+    question:
+        'Wie erholt fühlst du dich morgens wirklich, und wann im Alltag merkst '
+        'du, dass dir Energie fehlt?',
+    read: (p) => p.schlafEnergie,
+    apply: (p, a) => p.copyWith(schlafEnergie: a),
   ),
 ];
-
-/// Choice questions plus the free-text question.
-int get questionCount => choiceQuestions.length + 1;
-
-/// Button text for a stored value, e.g. for showing the profile.
-String labelFor(int questionIndex, String value) {
-  for (final option in choiceQuestions[questionIndex].options) {
-    if (option.value == value) return option.label;
-  }
-  return value;
-}

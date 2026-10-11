@@ -14,8 +14,8 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 
 ## Stand
 
-- **MVP:** 1 von 5 Bausteinen erledigt (Konzept & Datenstruktur), Onboarding programmiert, siehe [[MVP-Fortschritt]]
-- **Code:** Flutter-App im Ordner `code/`, von Claude geschrieben; Onboarding fertig, siehe [[App-Code]] und [[Technischer Ansatz]]
+- **MVP:** 1 von 5 Bausteinen erledigt (Konzept & Datenstruktur), Onboarding mit den 6 gemeinsam festgelegten Fragen programmiert (KI-Auswertung folgt), siehe [[MVP-Fortschritt]]
+- **Code:** Flutter-App im Ordner `code/`, von Claude geschrieben; Onboarding programmiert, siehe [[App-Code]] und [[Technischer Ansatz]]
 - **Vorschau im Browser:** https://claude.ai/artifact/BtH78uqJJJ6vrDVTeBpvcP
 - **Name/Branding:** noch offen, siehe [[Offene Fragen]]
 
@@ -32,7 +32,7 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 
 ### Umsetzung
 - [[App-Code]]: Aufbau und Stand des Codes
-- [[Onboarding-Fragebogen]]: Fragen, Bildschirmtexte und Speicherwerte
+- [[Onboarding-Fragebogen]]: Prinzip, die 6 Fragen und die Bildschirme
 
 ### Fortschritt
 - [[MVP-Fortschritt]]: was erledigt ist, was als Nächstes kommt

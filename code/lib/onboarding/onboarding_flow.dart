@@ -2,236 +2,283 @@ import 'package:flutter/material.dart';
 
 import '../data/profile_store.dart';
 import '../data/user_profile.dart';
+import '../ui/coach_style.dart';
+import 'onboarding_evaluator.dart';
 import 'onboarding_questions.dart';
 
-/// The onboarding questionnaire: welcome, three choice questions, one
-/// optional free-text question, done.
+/// The onboarding: six questions answered in the user's own words, then the
+/// AI reads all answers at once and shows "So sehe ich dich gerade".
 ///
-/// The profile is saved once the free-text step is passed, so a user who
-/// quits halfway starts over next time.
+/// The profile is saved once all six answers are given, so a user who quits
+/// halfway starts over next time.
 class OnboardingFlow extends StatefulWidget {
   const OnboardingFlow({
     super.key,
     required this.store,
+    required this.evaluator,
     required this.onFinished,
   });
 
   final ProfileStore store;
+  final OnboardingEvaluator evaluator;
   final ValueChanged<UserProfile> onFinished;
 
   @override
   State<OnboardingFlow> createState() => _OnboardingFlowState();
 }
 
-class _OnboardingFlowState extends State<OnboardingFlow> {
-  // 0 = welcome, 1..n = choice questions, n+1 = free text, n+2 = done.
-  int _step = 0;
-  UserProfile _profile = const UserProfile();
-  final _noteController = TextEditingController();
+enum _Phase { questions, evaluating, summary }
 
-  int get _freeTextStep => choiceQuestions.length + 1;
-  int get _doneStep => choiceQuestions.length + 2;
+class _OnboardingFlowState extends State<OnboardingFlow> {
+  _Phase _phase = _Phase.questions;
+  int _index = 0;
+  UserProfile _profile = const UserProfile();
+  late final List<TextEditingController> _controllers = [
+    for (final _ in onboardingQuestions) TextEditingController(),
+  ];
 
   @override
   void dispose() {
-    _noteController.dispose();
+    for (final c in _controllers) {
+      c.dispose();
+    }
     super.dispose();
   }
 
-  void _choose(ChoiceQuestion question, String value) {
-    setState(() {
-      _profile = question.apply(_profile, value);
-      _step++;
-    });
-  }
+  bool get _isLast => _index == onboardingQuestions.length - 1;
 
-  Future<void> _finishFreeText({required bool skip}) async {
-    final note = skip ? '' : _noteController.text.trim();
-    final profile = _profile.copyWith(onboardingNotiz: note);
+  Future<void> _next() async {
+    if (!_isLast) {
+      setState(() => _index++);
+      return;
+    }
+    var profile = const UserProfile();
+    for (var i = 0; i < onboardingQuestions.length; i++) {
+      profile = onboardingQuestions[i].apply(
+        profile,
+        _controllers[i].text.trim(),
+      );
+    }
+    setState(() => _phase = _Phase.evaluating);
+    final summary = await widget.evaluator.summarize(profile);
+    profile = profile.copyWith(zusammenfassung: summary ?? '');
     await widget.store.save(profile);
     if (!mounted) return;
     setState(() {
       _profile = profile;
-      _step = _doneStep;
+      _phase = _Phase.summary;
     });
   }
 
-  void _back() => setState(() => _step--);
-
   @override
   Widget build(BuildContext context) {
-    final showBack = _step > 0 && _step < _doneStep;
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        leading: showBack
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                tooltip: 'Zurück',
-                onPressed: _back,
-              )
-            : null,
-      ),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: _buildStep(context),
-            ),
-          ),
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: _phase == _Phase.summary
+              ? CoachStyle.summaryBackground
+              : CoachStyle.questionBackground,
         ),
-      ),
-    );
-  }
-
-  Widget _buildStep(BuildContext context) {
-    if (_step == 0) {
-      return _InfoStep(
-        title: 'Schön, dass du da bist!',
-        text:
-            'Bevor es losgeht, vier kurze Fragen. So kann dein Coach dir von '
-            'Anfang an Tipps geben, die wirklich zu dir passen. '
-            'Dauert keine Minute.',
-        buttonLabel: "Los geht's",
-        onPressed: () => setState(() => _step = 1),
-      );
-    }
-    if (_step <= choiceQuestions.length) {
-      final question = choiceQuestions[_step - 1];
-      return _QuestionStep(
-        number: _step,
-        question: question.question,
-        subtitle: question.subtitle,
-        children: [
-          for (final option in question.options)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(56),
-                  alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                ),
-                onPressed: () => _choose(question, option.value),
-                child: Text(option.label),
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                child: switch (_phase) {
+                  _Phase.questions => _buildQuestion(),
+                  _Phase.evaluating => const _Evaluating(),
+                  _Phase.summary => _Summary(
+                    summary: _profile.zusammenfassung,
+                    onContinue: () => widget.onFinished(_profile),
+                  ),
+                },
               ),
             ),
-        ],
-      );
-    }
-    if (_step == _freeTextStep) {
-      return _QuestionStep(
-        number: _step,
-        question: 'Was möchtest du in drei Monaten anders machen?',
-        subtitle: 'Erzähl es in eigenen Worten. Ein Satz reicht.',
-        children: [
-          TextField(
-            controller: _noteController,
-            maxLines: 4,
-            maxLength: 300,
-            decoration: const InputDecoration(
-              hintText:
-                  'z. B. „Morgens fit aufwachen und dreimal die Woche '
-                  'trainieren“',
-              border: OutlineInputBorder(),
-            ),
           ),
-          const SizedBox(height: 12),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(52),
-            ),
-            onPressed: () => _finishFreeText(skip: false),
-            child: const Text('Weiter'),
-          ),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: () => _finishFreeText(skip: true),
-            child: const Text('Überspringen'),
-          ),
-        ],
-      );
-    }
-    return _InfoStep(
-      title: "Alles klar, los geht's!",
-      text:
-          'Ab jetzt fragt dich die App einmal am Tag, wie es dir geht. '
-          'Antworte einfach in eigenen Worten, dein Coach kümmert sich um '
-          'den Rest.',
-      buttonLabel: 'Zum ersten Check-in',
-      onPressed: () => widget.onFinished(_profile),
+        ),
+      ),
     );
   }
-}
 
-class _InfoStep extends StatelessWidget {
-  const _InfoStep({
-    required this.title,
-    required this.text,
-    required this.buttonLabel,
-    required this.onPressed,
-  });
-
-  final String title;
-  final String text;
-  final String buttonLabel;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  Widget _buildQuestion() {
+    final question = onboardingQuestions[_index];
+    final controller = _controllers[_index];
     return Column(
+      key: ValueKey(_index),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 48),
-        Text(title, style: theme.textTheme.headlineMedium),
+        _ProgressBar(done: _index + 1),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            if (_index > 0)
+              IconButton(
+                icon: const Icon(Icons.arrow_back, color: CoachStyle.inkSoft),
+                tooltip: 'Zurück',
+                onPressed: () => setState(() => _index--),
+              ),
+            Expanded(
+              child: Text(
+                'FRAGE ${_index + 1} VON ${onboardingQuestions.length} · '
+                '${question.topic.toUpperCase()}',
+                style: CoachStyle.label,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(question.question, style: CoachStyle.question),
+        const SizedBox(height: 20),
+        Expanded(
+          child: TextField(
+            controller: controller,
+            expands: true,
+            maxLines: null,
+            textAlignVertical: TextAlignVertical.top,
+            style: CoachStyle.body,
+            cursorColor: CoachStyle.ink,
+            onChanged: (_) => setState(() {}),
+            decoration: InputDecoration(
+              hintText: 'Schreib in deinen eigenen Worten …',
+              hintStyle: CoachStyle.body.copyWith(color: CoachStyle.inkSoft),
+              filled: true,
+              fillColor: Colors.white.withValues(alpha: 0.08),
+              contentPadding: const EdgeInsets.all(16),
+              enabledBorder: _border(0.18),
+              focusedBorder: _border(0.5),
+            ),
+          ),
+        ),
         const SizedBox(height: 16),
-        Text(text, style: theme.textTheme.bodyLarge),
-        const SizedBox(height: 40),
-        FilledButton(
-          style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
-          onPressed: onPressed,
-          child: Text(buttonLabel),
+        _MainButton(
+          label: _isLast ? 'Fertig' : 'Weiter',
+          onPressed: controller.text.trim().isEmpty ? null : _next,
+        ),
+      ],
+    );
+  }
+
+  static OutlineInputBorder _border(double alpha) => OutlineInputBorder(
+    borderRadius: BorderRadius.circular(16),
+    borderSide: BorderSide(color: Colors.white.withValues(alpha: alpha)),
+  );
+}
+
+class _ProgressBar extends StatelessWidget {
+  const _ProgressBar({required this.done});
+
+  final int done;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        for (var i = 0; i < onboardingQuestions.length; i++)
+          Expanded(
+            child: Container(
+              height: 4,
+              margin: const EdgeInsets.symmetric(horizontal: 1.5),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(2),
+                color: i < done
+                    ? CoachStyle.ink
+                    : Colors.white.withValues(alpha: 0.18),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _Evaluating extends StatelessWidget {
+  const _Evaluating();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        CircularProgressIndicator(color: CoachStyle.gold),
+        SizedBox(height: 20),
+        Text(
+          'Ich lese deine Antworten …',
+          style: CoachStyle.question,
+          textAlign: TextAlign.center,
         ),
       ],
     );
   }
 }
 
-class _QuestionStep extends StatelessWidget {
-  const _QuestionStep({
-    required this.number,
-    required this.question,
-    required this.subtitle,
-    required this.children,
-  });
+class _Summary extends StatelessWidget {
+  const _Summary({required this.summary, required this.onContinue});
 
-  final int number;
-  final String question;
-  final String subtitle;
-  final List<Widget> children;
+  final String summary;
+  final VoidCallback onContinue;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Frage $number von $questionCount',
-          style: theme.textTheme.labelMedium,
+        const SizedBox(height: 12),
+        const Text('DEIN START', style: CoachStyle.label),
+        const SizedBox(height: 12),
+        const Text('So sehe ich dich gerade', style: CoachStyle.question),
+        const SizedBox(height: 20),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.08),
+            border: const Border(
+              left: BorderSide(color: CoachStyle.gold, width: 3),
+            ),
+            borderRadius: const BorderRadius.horizontal(
+              right: Radius.circular(12),
+            ),
+          ),
+          child: Text(
+            summary.isNotEmpty
+                ? summary
+                : 'Deine Antworten sind gespeichert. Deine persönliche '
+                      'Auswertung kommt bald, sobald dein Coach '
+                      'freigeschaltet ist.',
+            style: CoachStyle.body,
+          ),
         ),
-        const SizedBox(height: 8),
-        LinearProgressIndicator(value: number / questionCount),
-        const SizedBox(height: 24),
-        Text(question, style: theme.textTheme.headlineSmall),
-        const SizedBox(height: 8),
-        Text(subtitle, style: theme.textTheme.bodyMedium),
-        const SizedBox(height: 24),
-        ...children,
+        const Spacer(),
+        _MainButton(label: "Los geht's", onPressed: onContinue),
       ],
+    );
+  }
+}
+
+class _MainButton extends StatelessWidget {
+  const _MainButton({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return FilledButton(
+      style: FilledButton.styleFrom(
+        minimumSize: const Size.fromHeight(52),
+        backgroundColor: CoachStyle.ink,
+        foregroundColor: CoachStyle.tealDeep,
+        disabledBackgroundColor: Colors.white.withValues(alpha: 0.18),
+        disabledForegroundColor: CoachStyle.inkSoft,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        textStyle: const TextStyle(
+          fontFamily: 'Figtree',
+          fontWeight: FontWeight.w600,
+          fontSize: 16,
+        ),
+      ),
+      onPressed: onPressed,
+      child: Text(label),
     );
   }
 }

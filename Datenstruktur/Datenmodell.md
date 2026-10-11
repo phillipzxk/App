@@ -2,7 +2,7 @@
 title: Datenmodell
 tags: [datenstruktur]
 aliases: [Datenstruktur]
-aktualisiert: 2026-10-10
+aktualisiert: 2026-10-11
 ---
 
 # Datenmodell (Grobkonzept)
@@ -21,8 +21,11 @@ erDiagram
         enum abo_status
         text ziel
         text level
-        text ausgangssituation
-        text onboarding_notiz
+        text motivation
+        text training
+        text ernaehrung
+        text schlaf_energie
+        text zusammenfassung
     }
     CHECK_IN {
         id check_in_id

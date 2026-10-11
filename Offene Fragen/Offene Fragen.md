@@ -15,9 +15,10 @@ aktualisiert: 2026-10-10
 
 Aus dem Entwurf [[Onboarding-Fragebogen]] (2026-10-10):
 
-- ~~Zwei neue Felder in [[Nutzer]]?~~ **Entschieden 2026-10-10: ja.** `ausgangssituation` und `onboarding_notiz` sind im [[Datenmodell]] ergänzt.
+- ~~Zwei neue Felder in [[Nutzer]]?~~ **Entschieden 2026-10-10: ja.** Seit dem 2026-10-11 ersetzt durch die sechs Freitext-Felder der neuen Fragen und `zusammenfassung`, siehe [[Datenmodell]].
+- **KI-Schlüssel:** Für die Zusammenfassung „So sehe ich dich gerade“ braucht es einen API-Schlüssel von Anthropic (console.anthropic.com). Phillip legt ihn an; er kommt ins Backend, nicht in die App.
 - **Backend:** Die App speichert die Antworten vorerst nur auf dem Gerät. Für Anmeldung und Online-Speicherung ist **Firebase** vorgeschlagen; dafür braucht es ein Firebase-Projekt in Phillips Google-Konto (siehe [[Technischer Ansatz]]). Noch nicht festgelegt.
-- **Antworten später ändern:** Soll es eine Profil-Seite geben, auf der Ziel und Level angepasst werden können? Im MVP bisher nicht vorgesehen.
+- **Antworten später ändern:** Soll es eine Profil-Seite geben, auf der die Onboarding-Antworten angepasst werden können? Im MVP bisher nicht vorgesehen.
 
 ## Laut Konzept später zu klären
 

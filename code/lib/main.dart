@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'data/profile_store.dart';
 import 'data/user_profile.dart';
 import 'home/home_page.dart';
+import 'onboarding/onboarding_evaluator.dart';
 import 'onboarding/onboarding_flow.dart';
 
 void main() {
@@ -10,9 +11,14 @@ void main() {
 }
 
 class CoachApp extends StatelessWidget {
-  const CoachApp({super.key, required this.store});
+  const CoachApp({
+    super.key,
+    required this.store,
+    this.evaluator = const NoEvaluator(),
+  });
 
   final ProfileStore store;
+  final OnboardingEvaluator evaluator;
 
   @override
   Widget build(BuildContext context) {
@@ -22,24 +28,25 @@ class CoachApp extends StatelessWidget {
       theme: ThemeData(
         colorSchemeSeed: Colors.teal,
         useMaterial3: true,
-        fontFamily: 'Roboto',
+        fontFamily: 'Figtree',
       ),
       darkTheme: ThemeData(
         colorSchemeSeed: Colors.teal,
         brightness: Brightness.dark,
         useMaterial3: true,
-        fontFamily: 'Roboto',
+        fontFamily: 'Figtree',
       ),
-      home: StartGate(store: store),
+      home: StartGate(store: store, evaluator: evaluator),
     );
   }
 }
 
 /// Shows the onboarding on first start, otherwise the home page.
 class StartGate extends StatefulWidget {
-  const StartGate({super.key, required this.store});
+  const StartGate({super.key, required this.store, required this.evaluator});
 
   final ProfileStore store;
+  final OnboardingEvaluator evaluator;
 
   @override
   State<StartGate> createState() => _StartGateState();
@@ -70,6 +77,7 @@ class _StartGateState extends State<StartGate> {
     if (!profile.isOnboarded) {
       return OnboardingFlow(
         store: widget.store,
+        evaluator: widget.evaluator,
         onFinished: (p) => setState(() => _profile = p),
       );
     }

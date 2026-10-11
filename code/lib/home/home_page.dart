@@ -37,14 +37,18 @@ class HomePage extends StatelessWidget {
                   style: theme.textTheme.titleSmall,
                 ),
                 const SizedBox(height: 8),
-                _Row('Ziel', labelFor(0, profile.ziel)),
-                _Row('Aktivität', labelFor(1, profile.level)),
-                _Row(
-                  'Hält dich zurück',
-                  labelFor(2, profile.ausgangssituation),
-                ),
-                if (profile.onboardingNotiz.isNotEmpty)
-                  _Row('In deinen Worten', profile.onboardingNotiz),
+                for (final q in onboardingQuestions)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(q.topic),
+                    subtitle: Text(q.read(profile)),
+                  ),
+                if (profile.zusammenfassung.isNotEmpty)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('So sehe ich dich gerade'),
+                    subtitle: Text(profile.zusammenfassung),
+                  ),
                 const SizedBox(height: 32),
                 TextButton(
                   onPressed: onRestartOnboarding,
@@ -55,22 +59,6 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _Row extends StatelessWidget {
-  const _Row(this.label, this.value);
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: Text(label),
-      subtitle: Text(value),
     );
   }
 }
