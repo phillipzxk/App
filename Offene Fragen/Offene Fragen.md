@@ -8,7 +8,7 @@ aktualisiert: 2026-10-10
 
 ## Widersprüche in den Unterlagen
 
-- **Preis:** Die Fortschritts-Übersicht nennt ein **Flatrate-Abo für 9,99 €/Monat**, das App-Konzept sagt dagegen „Monetarisierung im Detail später zu klären“. Ist 9,99 €/Monat entschieden?
+- ~~**Preis:**~~ **Entschieden** laut [[App-Gesamtübersicht (Original)]]: reines Flatrate-Abo mit weicher Begrenzung, vorerst 9,99 €/Monat.
 - **Vier Fragen vs. drei Felder:** Der tägliche Feed hat vier Kernfragen (Training, Ernährung/Gefühl, Schlaf, Energie), die [[Check-ins]] speichern aber drei Freitextfelder (Schlaf & Energie zusammen). Bleibt das so?
 
 ## Onboarding
@@ -29,6 +29,9 @@ Aus dem Entwurf [[Onboarding-Fragebogen]] (2026-10-10):
 - Mögliche Community-Elemente
 
 ## Technik
+
+- **Bewertungs-Richtung:** Heißt 10 „brauchte kaum Tipps“? Laut [[App-Gesamtübersicht (Original)]] noch von Phillip zu bestätigen.
+- **FlutterFlow oder Code?** Die Gesamtübersicht sieht FlutterFlow („Betterlifeapp“) vor, am 2026-10-10 wurde Code von Claude entschieden. Klärung läuft.
 
 - Welcher LLM-Anbieter bzw. welches Modell? (siehe [[Technischer Ansatz]])
 - Wie die „einfache Regellogik“ der KI-Antwort im MVP konkret aussieht
