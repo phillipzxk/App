@@ -47,6 +47,7 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 - [[Quellen]]: woher die Infos in diesem Vault stammen
 
 ### Originaldokumente
+- [[App-Gesamtübersicht (Original)]]: Phillips aktuelle Gesamtübersicht (Stand 2026-10-11), **wichtigste Quelle**
 - [[App-Konzept (Original)]] · [[App-Datenstruktur (Original)]] · [[App-Fortschritt]]: wortgetreue Abschriften; Originaldateien in `Quellen/Anhänge/`
 
 ## Ordnerstruktur
