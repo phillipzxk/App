@@ -1,15 +1,24 @@
 ---
 title: Offene Fragen
 tags: [offen, entscheidungen]
-aktualisiert: 2026-10-09
+aktualisiert: 2026-10-10
 ---
 
 # Offene Fragen
 
 ## Widersprüche in den Unterlagen
 
-- **Preis:** Die Fortschritts-Übersicht nennt ein **Flatrate-Abo für 9,99 €/Monat**, das App-Konzept sagt dagegen „Monetarisierung im Detail später zu klären“. Ist 9,99 €/Monat entschieden?
+- ~~**Preis:**~~ **Entschieden** laut [[App-Gesamtübersicht (Original)]]: reines Flatrate-Abo mit weicher Begrenzung, vorerst 9,99 €/Monat.
 - **Vier Fragen vs. drei Felder:** Der tägliche Feed hat vier Kernfragen (Training, Ernährung/Gefühl, Schlaf, Energie), die [[Check-ins]] speichern aber drei Freitextfelder (Schlaf & Energie zusammen). Bleibt das so?
+
+## Onboarding
+
+Aus dem Entwurf [[Onboarding-Fragebogen]] (2026-10-10):
+
+- ~~Zwei neue Felder in [[Nutzer]]?~~ **Entschieden 2026-10-10: ja.** Seit dem 2026-10-11 ersetzt durch die sechs Freitext-Felder der neuen Fragen und `zusammenfassung`, siehe [[Datenmodell]].
+- **KI-Schlüssel:** Für die Zusammenfassung „So sehe ich dich gerade“ braucht es einen API-Schlüssel von Anthropic (console.anthropic.com). Phillip legt ihn an; er kommt ins Backend, nicht in die App.
+- **Backend:** Die App speichert die Antworten vorerst nur auf dem Gerät. Für Anmeldung und Online-Speicherung ist **Firebase** vorgeschlagen; dafür braucht es ein Firebase-Projekt in Phillips Google-Konto (siehe [[Technischer Ansatz]]). Noch nicht festgelegt.
+- **Antworten später ändern:** Soll es eine Profil-Seite geben, auf der die Onboarding-Antworten angepasst werden können? Im MVP bisher nicht vorgesehen.
 
 ## Laut Konzept später zu klären
 
@@ -21,6 +30,9 @@ aktualisiert: 2026-10-09
 - Mögliche Community-Elemente
 
 ## Technik
+
+- **Bewertungs-Richtung:** Heißt 10 „brauchte kaum Tipps“? Laut [[App-Gesamtübersicht (Original)]] noch von Phillip zu bestätigen.
+- ~~FlutterFlow oder Code?~~ **Entschieden 2026-10-11:** Code von Claude. Das FlutterFlow-Projekt „Betterlifeapp“ ruht.
 
 - Welcher LLM-Anbieter bzw. welches Modell? (siehe [[Technischer Ansatz]])
 - Wie die „einfache Regellogik“ der KI-Antwort im MVP konkret aussieht

@@ -2,7 +2,7 @@
 title: App – Startseite
 tags: [app, index]
 erstellt: 2026-10-09
-aktualisiert: 2026-10-09
+aktualisiert: 2026-10-10
 ---
 
 # App – Sport & Selbstoptimierung
@@ -14,8 +14,9 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 
 ## Stand
 
-- **MVP:** 1 von 5 Bausteinen erledigt (Konzept & Datenstruktur), siehe [[MVP-Fortschritt]]
-- **Code:** noch keiner; geplant mit FlutterFlow (No-Code) und einer LLM-API, siehe [[Technischer Ansatz]]
+- **MVP:** 1 von 5 Bausteinen erledigt (Konzept & Datenstruktur), Onboarding mit den 6 gemeinsam festgelegten Fragen programmiert (KI-Auswertung folgt), siehe [[MVP-Fortschritt]]
+- **Code:** Flutter-App im Ordner `code/`, von Claude geschrieben; Onboarding programmiert, siehe [[App-Code]] und [[Technischer Ansatz]]
+- **Vorschau im Browser:** https://claude.ai/artifact/BtH78uqJJJ6vrDVTeBpvcP
 - **Name/Branding:** noch offen, siehe [[Offene Fragen]]
 
 ## Notizen
@@ -28,6 +29,10 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 ### Datenstruktur
 - [[Datenmodell]]: Überblick und Beziehungen
 - [[Nutzer]] · [[Check-ins]] · [[KI-Antworten]] · [[Fortschritts-Verlauf]]
+
+### Umsetzung
+- [[App-Code]]: Aufbau und Stand des Codes
+- [[Onboarding-Fragebogen]]: Prinzip, die 6 Fragen und die Bildschirme
 
 ### Fortschritt
 - [[MVP-Fortschritt]]: was erledigt ist, was als Nächstes kommt
@@ -42,6 +47,7 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 - [[Quellen]]: woher die Infos in diesem Vault stammen
 
 ### Originaldokumente
+- [[App-Gesamtübersicht (Original)]]: Phillips aktuelle Gesamtübersicht (Stand 2026-10-11), **wichtigste Quelle**
 - [[App-Konzept (Original)]] · [[App-Datenstruktur (Original)]] · [[App-Fortschritt]]: wortgetreue Abschriften; Originaldateien in `Quellen/Anhänge/`
 
 ## Ordnerstruktur
@@ -49,6 +55,8 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 ```
 Konzept/          Idee, Kernmechanik, Technik
 Datenstruktur/    Datenmodell und Tabellen
+Umsetzung/        Pläne für die App-Bausteine
+code/             Flutter-Code der App
 Fortschritt/      MVP-Stand und Roadmap
 Buch/             Buch: Konzept, Fragebogen, Fortschritt
   Kapitel/        Kapiteltexte (Abschriften)

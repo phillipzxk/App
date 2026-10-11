@@ -1,7 +1,7 @@
 ---
 title: Kernmechanik
 tags: [konzept, features]
-aktualisiert: 2026-10-09
+aktualisiert: 2026-10-10
 ---
 
 # Kernmechanik
@@ -10,7 +10,7 @@ Teil von [[App-Konzept]].
 
 ## 1. Onboarding
 
-Ein Einstiegs-Fragebogen zu Beginn, um die App direkt zu personalisieren, z. B. Ziel, aktuelles Level, Ausgangssituation. Die Antworten landen beim [[Nutzer]].
+Ein Einstiegs-Fragebogen zu Beginn, um die App direkt zu personalisieren, z. B. Ziel, aktuelles Level, Ausgangssituation. Die Antworten landen beim [[Nutzer]]. Ausgearbeitet in [[Onboarding-Fragebogen]].
 
 ## 2. Täglicher Feed (Kernbildschirm)
 

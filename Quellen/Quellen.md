@@ -12,6 +12,10 @@ Der Inhalt dieses Vaults wurde am 2026-10-09 aus diesen Unterlagen zusammengeste
 - **App-Datenstruktur.docx** ([[App-Datenstruktur.docx|Original]], Abschrift: [[App-Datenstruktur (Original)]]): Tabellen Nutzer, Check-ins, KI-Antworten, Fortschritts-Verlauf → [[Datenmodell]]
 - **App-Fortschritt** (Übersichtsseite in Claude), Original: [[App-Fortschritt.html]], Abschrift: [[App-Fortschritt]]: MVP-Stand 1/5, Preis 9,99 €/Monat → [[MVP-Fortschritt]]
 
+## Gesamtübersicht (gespeichert 2026-10-11)
+
+- **App – Gesamtübersicht** aus Phillips eigenem Obsidian (Business/App), Stand 2026-10-11, Abschrift: [[App-Gesamtübersicht (Original)]]. Neuester und vollständigster Stand; geht bei Widersprüchen vor.
+
 ## Buch (gespeichert 2026-10-09)
 
 - **Buchkonzept.docx**, **Der-Test-Fragebogen.docx**, **Kapitel-1-Der-Test.docx**, **Kapitel-2-3.docx**, **Kapitel-4.docx**, **Kapitel-5.docx**, **Kapitel-6.docx**: wortgetreu abgeschrieben im Ordner `Buch/`, Einstieg: [[Buch – Übersicht]]
