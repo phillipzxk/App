@@ -19,7 +19,7 @@ Wortgetreue Abschrift der Claude-Seite „Buch-Fortschritt“, Stand 2026-10-12.
 
 „Ein Buch über die Reise, sich selbst zu finden – und das Fundament zu bauen, das diesen Weg trägt.“
 
-**8 / 11 Kapitel**
+**9 / 11 Kapitel**
 
 **01 Der Test** · geschrieben
 Einstiegsfragen zum Status quo – körperlich und sozial/mental. Spiegelt bereits typische Tiefpunkt-Situationen.
@@ -46,9 +46,9 @@ Ruhe und Erholung als unterschätzter Hebel – warum Ruhetage zum Fundament geh
 Dankbarkeit statt Sucht nach Veränderung, der „dunkle Tunnel“, Charakter und Persönlichkeit bei Erfolg, eigene Erfahrung mit Freunden und Familie, Neid und Kommentare aus dem Umfeld.
 > Testfrage: „Warst du schon mal bei Freunden, aber innerlich gar nicht wirklich im Moment – weil Optimierungsängste deinen Kopf eingenommen und dich vom direkten Kontakt abgewendet haben?“
 
-**09 Fortschritt, den man nicht sieht** · special · offen
-Plateaus und unsichtbare Fortschritte – Psychologie von Stagnation, Periodisierung als Konzept.
-> Testfrage: „Hast du das Gefühl, mehr zu geben als andere – aber keinen wirklichen Unterschied bezüglich des Erfolges zu sehen?“
+**09 Fortschritt, den man nicht sieht** · special · geschrieben
+Dranbleiben trotz unsichtbarer Fortschritte – Körperdysmorphie, Vergleich mit anderen, Schule und Ernährung als eigenes Beispiel, Dankbarkeit als Entscheidung, Plateaus und Periodisierung.
+> Testfrage: „Hast du das Gefühl, mehr zu geben als andere – mehr zu lernen, öfter zu trainieren, mehr auf deine Ernährung zu achten – aber keinen wirklichen Unterschied bezüglich des Erfolges zwischen dir und anderen zu sehen?“
 
 **10 Der Alltag damit** · offen
 Wie sich das Leben konkret verändert, wenn man alles anwendet – praktische Beispiele für Tag und Woche.
