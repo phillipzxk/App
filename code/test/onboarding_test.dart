@@ -1,24 +1,10 @@
-import 'package:coach_app/data/profile_store.dart';
 import 'package:coach_app/data/user_profile.dart';
 import 'package:coach_app/main.dart';
 import 'package:coach_app/onboarding/onboarding_evaluator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class MemoryProfileStore implements ProfileStore {
-  MemoryProfileStore([this.profile = const UserProfile()]);
-
-  UserProfile profile;
-
-  @override
-  Future<UserProfile> load() async => profile;
-
-  @override
-  Future<void> save(UserProfile p) async => profile = p;
-
-  @override
-  Future<void> clear() async => profile = const UserProfile();
-}
+import 'helpers.dart';
 
 class FixedEvaluator implements OnboardingEvaluator {
   const FixedEvaluator(this.text);
@@ -41,7 +27,9 @@ Future<void> answerAll(WidgetTester tester) async {
 void main() {
   testWidgets('six answers are stored in the right fields', (tester) async {
     final store = MemoryProfileStore();
-    await tester.pumpWidget(CoachApp(store: store));
+    await tester.pumpWidget(
+      CoachApp(store: store, diary: MemoryDiaryStore(), clock: fixedClock),
+    );
     await tester.pumpAndSettle();
 
     expect(find.textContaining('FRAGE 1 VON 6 · ZIEL'), findsOneWidget);
@@ -72,17 +60,17 @@ void main() {
 
     await tester.tap(find.text("Los geht's"));
     await tester.pumpAndSettle();
-    expect(
-      find.text('Hier kommt bald dein täglicher Check-in.'),
-      findsOneWidget,
-    );
-    expect(find.text('Antwort 2'), findsOneWidget);
+    expect(find.textContaining('FRAGE 1 VON 4 · TRAINING'), findsOneWidget);
   });
 
   testWidgets('summary from the evaluator is shown and saved', (tester) async {
     final store = MemoryProfileStore();
     await tester.pumpWidget(
-      CoachApp(store: store, evaluator: const FixedEvaluator('Du bist dran.')),
+      CoachApp(
+        store: store,
+        diary: MemoryDiaryStore(),
+        evaluator: const FixedEvaluator('Du bist dran.'),
+      ),
     );
     await tester.pumpAndSettle();
     await answerAll(tester);
@@ -92,7 +80,13 @@ void main() {
   });
 
   testWidgets('empty answer cannot continue', (tester) async {
-    await tester.pumpWidget(CoachApp(store: MemoryProfileStore()));
+    await tester.pumpWidget(
+      CoachApp(
+        store: MemoryProfileStore(),
+        diary: MemoryDiaryStore(),
+        clock: fixedClock,
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), '   ');
     await tester.pump();
@@ -102,7 +96,13 @@ void main() {
   });
 
   testWidgets('back keeps the earlier answer', (tester) async {
-    await tester.pumpWidget(CoachApp(store: MemoryProfileStore()));
+    await tester.pumpWidget(
+      CoachApp(
+        store: MemoryProfileStore(),
+        diary: MemoryDiaryStore(),
+        clock: fixedClock,
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'Mein Ziel');
     await tester.pump();
@@ -116,13 +116,12 @@ void main() {
     expect(find.text('Mein Ziel'), findsOneWidget);
   });
 
-  testWidgets('onboarded users skip the questionnaire', (tester) async {
+  testWidgets('onboarded users go straight to the check-in', (tester) async {
     final store = MemoryProfileStore(const UserProfile(ziel: 'Frei sein'));
-    await tester.pumpWidget(CoachApp(store: store));
-    await tester.pumpAndSettle();
-    expect(
-      find.text('Hier kommt bald dein täglicher Check-in.'),
-      findsOneWidget,
+    await tester.pumpWidget(
+      CoachApp(store: store, diary: MemoryDiaryStore(), clock: fixedClock),
     );
+    await tester.pumpAndSettle();
+    expect(find.textContaining('FRAGE 1 VON 4'), findsOneWidget);
   });
 }

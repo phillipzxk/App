@@ -2,7 +2,7 @@
 title: Datenmodell
 tags: [datenstruktur]
 aliases: [Datenstruktur]
-aktualisiert: 2026-10-11
+aktualisiert: 2026-10-12
 ---
 
 # Datenmodell (Grobkonzept)
@@ -13,6 +13,7 @@ Jeder [[Nutzer]] hat viele [[Check-ins]], jeder Check-in hat genau eine [[KI-Ant
 erDiagram
     NUTZER ||--o{ CHECK_IN : "hat viele (1 pro Tag)"
     CHECK_IN ||--|| KI_ANTWORT : "hat genau eine"
+    NUTZER ||--o{ GEWICHT : "freiwillig"
     NUTZER {
         id nutzer_id
         text name
@@ -32,8 +33,14 @@ erDiagram
         id nutzer_id
         date datum
         text training
-        text ernaehrung_gefuehl
-        text schlaf_energie
+        text ernaehrung
+        text schlaf
+        text mindset
+    }
+    GEWICHT {
+        id nutzer_id
+        datetime datum
+        float kilogramm
     }
     KI_ANTWORT {
         id antwort_id
