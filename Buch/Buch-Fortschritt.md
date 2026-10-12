@@ -2,12 +2,12 @@
 title: Buch-Fortschritt
 tags: [buch, fortschritt, original]
 quelle: https://claude.ai/artifact/WMWBpk9rbzfB47RRBXD9Zg
-gespeichert: 2026-10-10
+gespeichert: 2026-10-12
 ---
 
 # Buch-Fortschritt (Originalseite)
 
-Wortgetreue Abschrift der Claude-Seite „Buch-Fortschritt“, Stand 2026-10-10. Die Originaldatei mit Layout liegt daneben: [[Buch-Fortschritt.html]] (im Browser öffnen). Online: https://claude.ai/artifact/WMWBpk9rbzfB47RRBXD9Zg
+Wortgetreue Abschrift der Claude-Seite „Buch-Fortschritt“, Stand 2026-10-12. Die Originaldatei mit Layout liegt daneben: [[Buch-Fortschritt.html]] (im Browser öffnen). Online: https://claude.ai/artifact/WMWBpk9rbzfB47RRBXD9Zg
 
 Übersicht: [[Buch – Übersicht]].
 
@@ -19,7 +19,7 @@ Wortgetreue Abschrift der Claude-Seite „Buch-Fortschritt“, Stand 2026-10-10.
 
 „Ein Buch über die Reise, sich selbst zu finden – und das Fundament zu bauen, das diesen Weg trägt.“
 
-**7 / 11 Kapitel**
+**8 / 11 Kapitel**
 
 **01 Der Test** · geschrieben
 Einstiegsfragen zum Status quo – körperlich und sozial/mental. Spiegelt bereits typische Tiefpunkt-Situationen.
@@ -42,8 +42,9 @@ Ernährung als Basis von allem: Grundernährung, Routine mit „Super-Mitteln“
 Ruhe und Erholung als unterschätzter Hebel – warum Ruhetage zum Fundament gehören, was man an ihnen tun kann und warum Fortschritt nie linear verläuft.
 > Testfrage: „Hast du dich an einem Tag ohne Training schon mal so unproduktiv gefühlt, dass du am liebsten alle deine Ziele hingeschmissen hättest – obwohl genau diese Ruhe das Fundament für deinen späteren Erfolg bildet?“
 
-**08 Wer du wirst, wenn sich alles verändert** · offen
-Mindset, Selbstbewusstsein, Umfeld/Sozialität – Gewohnheitsbildung, Umgang mit Veränderung im sozialen Umfeld, eigene Routinen.
+**08 Wer du wirst, wenn sich alles verändert** · geschrieben
+Dankbarkeit statt Sucht nach Veränderung, der „dunkle Tunnel“, Charakter und Persönlichkeit bei Erfolg, eigene Erfahrung mit Freunden und Familie, Neid und Kommentare aus dem Umfeld.
+> Testfrage: „Warst du schon mal bei Freunden, aber innerlich gar nicht wirklich im Moment – weil Optimierungsängste deinen Kopf eingenommen und dich vom direkten Kontakt abgewendet haben?“
 
 **09 Fortschritt, den man nicht sieht** · special · offen
 Plateaus und unsichtbare Fortschritte – Psychologie von Stagnation, Periodisierung als Konzept.
