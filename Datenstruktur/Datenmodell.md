@@ -18,6 +18,7 @@ erDiagram
     NUTZER ||--o{ ABENDROUTINE : "Schritte"
     NUTZER ||--o| KCAL_PROFIL : "hat eins"
     NUTZER ||--o{ COACH_FRAGE : "hat viele"
+    NUTZER ||--o{ SCHLAFDAUER : "1 pro Tag"
     NUTZER {
         id nutzer_id
         text name
@@ -62,6 +63,11 @@ erDiagram
         enum geschlecht
         enum aktivitaet
     }
+    SCHLAFDAUER {
+        id nutzer_id
+        date datum
+        float stunden
+    }
     COACH_FRAGE {
         id nutzer_id
         datetime datum
@@ -85,7 +91,7 @@ erDiagram
 3. [[KI-Antworten]]
 4. [[Fortschritts-Verlauf]] (abgeleitet, keine Tabelle)
 5. [[Gewicht]]
-6. [[Trainingsplan]], [[Abendroutine]], [[kcal-Profil]], [[Coach-Fragen]] (für den [[Main Feed]], 2026-10-12)
+6. [[Trainingsplan]], [[Abendroutine]], [[kcal-Profil]], [[Coach-Fragen]], [[Schlafdauer]] (für den [[Main Feed]], 2026-10-12)
 
 ## Bewusst weggelassen
 

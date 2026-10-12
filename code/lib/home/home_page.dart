@@ -7,6 +7,7 @@ import '../feed/feed_coach.dart';
 import '../feed/feed_data.dart';
 import '../feed/feed_store.dart';
 import '../feed/kcal.dart';
+import '../sleep/sleep.dart';
 import '../ui/coach_style.dart';
 import '../weight/weight.dart';
 import 'mindset_tab.dart';
@@ -45,6 +46,7 @@ class _HomePageState extends State<HomePage> {
   int _tab = 0;
   List<CheckIn> _checkIns = const [];
   List<WeightEntry> _weights = const [];
+  List<SleepEntry> _sleep = const [];
   TrainingPlan _plan = TrainingPlan.empty();
   List<RoutineStep> _routine = const [];
   KcalProfil? _kcal;
@@ -59,6 +61,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _reload() async {
     final checkIns = await widget.store.loadCheckIns();
     final weights = await widget.store.loadWeights();
+    final sleep = await widget.store.loadSleep();
     final plan = await widget.feed.loadPlan();
     final routine = await widget.feed.loadRoutine();
     final kcal = await widget.feed.loadKcal();
@@ -68,6 +71,7 @@ class _HomePageState extends State<HomePage> {
       _loaded = true;
       _checkIns = checkIns;
       _weights = weights;
+      _sleep = sleep;
       _plan = plan;
       _routine = routine;
       _kcal = kcal;
@@ -114,6 +118,16 @@ class _HomePageState extends State<HomePage> {
     await _reload();
   }
 
+  Future<void> _addSleep() async {
+    final h = await showDialog<double>(
+      context: context,
+      builder: (context) => const SleepDialog(),
+    );
+    if (h == null) return;
+    await widget.store.saveSleep(SleepEntry(widget.clock(), h));
+    await _reload();
+  }
+
   Future<void> _saveKcal(KcalProfil profil, double? kg) async {
     await widget.feed.saveKcal(profil);
     if (kg != null) {
@@ -151,7 +165,10 @@ class _HomePageState extends State<HomePage> {
       ),
       SleepTab(
         routine: _routine,
+        sleep: _sleep,
+        today: widget.clock(),
         fragen: _todayFragen(Bereich.schlaf),
+        onAddSleep: _addSleep,
         onSaveRoutine: (steps) async {
           await widget.feed.saveRoutine(steps);
           await _reload();

@@ -25,7 +25,7 @@ Nicht alles auf eine Seite (Phillip, 2026-10-12): Unten ist eine Leiste mit 5 Se
 | **Heute** | Datum, Coach-Antwort zum Check-in, Fokus der Woche, alle 4 Bereiche auf einen Blick (antippen öffnet die Seite), Deine Muster |
 | **Training** | Verlauf, eigener Trainingsplan mit Wochenübersicht (heute hervorgehoben), Feld „Wie war dein Training?“ |
 | **Ernährung** | Verlauf, kcal-Ziel, Feld „Wie sieht deine Ernährung heute aus?“, Gewicht mit Wochenschnitt |
-| **Schlaf** | Verlauf, Abendroutine, Feld „Frag zu deinem Schlaf“ |
+| **Schlaf** | Verlauf, Abendroutine, Feld „Frag zu deinem Schlaf“, Schlafdauer |
 | **Mindset** | Verlauf, Durchgezogen, Dein Warum, Feld „Wovor drückst du dich gerade?“ |
 
 ## Beschlüsse (alle 2026-10-12, gemeinsam mit Phillip)
@@ -37,6 +37,8 @@ Nicht alles auf eine Seite (Phillip, 2026-10-12): Unten ist eine Leiste mit 5 Se
 - **Ernährungs-Einschätzung**: Bei Interesse schreibt der Nutzer grob, wie seine Ernährung heute aussieht. Die KI schätzt das passend zum kcal-Ziel ein (gut, zu wenig, geht noch was) und gibt z. B. einen Tipp für ein Gericht.
 - **Gewicht** ist fest dabei und wird immer wieder neu eingetragen, siehe [[Gewicht]]. Wochenschnitt statt Tageswert, getrennt vom [[Fortschritts-Verlauf]].
 - **Abendroutine**: einmal festgelegt wie der Trainingsplan. Die KI arbeitet damit und passt sie an, wenn Schlafprobleme öfter auftreten. Gespeichert in [[Abendroutine]].
+- **Schlafdauer** (Idee von Phillip): unten auf der Schlaf-Seite trägt man ein, wie lange man geschlafen hat. Jede Nacht als eigener Balken (letzte 14 Nächte), dazu der Schnitt der letzten 7 Nächte und die Veränderung zur Vorwoche. Gespeichert in [[Schlafdauer]].
+- **Mindset** bekommt keine Zahl zum Eintragen; der Verlaufsgraph kommt aus der KI-Bewertung der Mindset-Antworten im Check-in.
 - **Schreibfelder** in allen 4 Bereichen: Der Nutzer schreibt, der Coach antwortet individuell. Gespeichert in [[Coach-Fragen]].
 
 Zum kcal-Ziel: Die [[App-Gesamtübersicht (Original)|Gesamtübersicht]] sagt „Kein Kalorien- oder Makro-Zählen“. Das bleibt so: Es wird nichts gezählt, das Ziel dient nur als Orientierung für die Einschätzung der KI.
@@ -44,7 +46,7 @@ Zum kcal-Ziel: Die [[App-Gesamtübersicht (Original)|Gesamtübersicht]] sagt „
 ## Stand im Code (2026-10-12)
 
 - Die 5 Seiten mit der Leiste unten sind programmiert.
-- **Funktioniert und wird gespeichert:** Trainingsplan, Abendroutine, kcal-Ziel (mit erstem Gewicht, falls noch keins da ist), Gewicht, alles was in die Schreibfelder geschrieben wird.
+- **Funktioniert und wird gespeichert:** Trainingsplan, Abendroutine, Schlafdauer, kcal-Ziel (mit erstem Gewicht, falls noch keins da ist), Gewicht, alles was in die Schreibfelder geschrieben wird.
 - **kcal-Ziel bis zur KI:** berechnet nach Mifflin-St Jeor mal Aktivitätsfaktor (1,2 / 1,375 / 1,55 / 1,725), auf 50 kcal gerundet. Das ist der Bedarf, um das Gewicht zu halten. Die Anpassung an das Ziel aus dem Onboarding übernimmt die KI.
 - **Platzhalter bis zur KI:** Antworten in den Schreibfeldern, die Graphen der 4 Bereiche, Fokus der Woche, Deine Muster, Durchgezogen. Dein Warum wird bis dahin immer gezeigt, mit Hinweis.
 - Unten auf „Heute“: „Fragebogen neu starten“, nur zum Testen.

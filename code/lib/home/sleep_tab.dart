@@ -1,21 +1,30 @@
 import 'package:flutter/material.dart';
 
 import '../feed/feed_data.dart';
+import '../sleep/sleep.dart';
+import '../sleep/sleep_chart.dart';
 import '../ui/coach_style.dart';
+import '../ui/coach_widgets.dart';
 import 'feed_widgets.dart';
 
-/// Schlaf page: progress, the evening routine (set once) and a field for
-/// sleep tips.
+/// Schlaf page: progress, the evening routine (set once), a field for
+/// sleep tips and the sleep duration per night.
 class SleepTab extends StatelessWidget {
   const SleepTab({
     super.key,
     required this.routine,
+    required this.sleep,
+    required this.today,
     required this.fragen,
     required this.onSaveRoutine,
+    required this.onAddSleep,
     required this.onAsk,
   });
 
   final List<RoutineStep> routine;
+  final List<SleepEntry> sleep;
+  final DateTime today;
+  final VoidCallback onAddSleep;
   final List<CoachFrage> fragen;
   final Future<void> Function(List<RoutineStep> steps) onSaveRoutine;
   final Future<void> Function(String text) onAsk;
@@ -77,6 +86,127 @@ class SleepTab extends StatelessWidget {
           today: fragen,
           onSend: onAsk,
         ),
+        SleepCard(entries: sleep, today: today, onAdd: onAddSleep),
+      ],
+    );
+  }
+}
+
+/// Hours slept per night: average of the last 7 nights, change to the
+/// week before and one bar per night for the last 14 nights.
+class SleepCard extends StatelessWidget {
+  const SleepCard({
+    super.key,
+    required this.entries,
+    required this.today,
+    required this.onAdd,
+  });
+
+  final List<SleepEntry> entries;
+  final DateTime today;
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    final nights = lastNights(entries, today, 14);
+    final thisWeek = average(nights.sublist(7));
+    final lastWeek = average(nights.sublist(0, 7));
+    if (thisWeek == null && lastWeek == null) {
+      return FeedCard(
+        title: 'Schlafdauer',
+        children: [
+          const HintText(
+            'Trag jeden Morgen ein, wie lange du geschlafen hast. Dann siehst '
+            'du hier jede Nacht als Balken und deinen Schnitt.',
+          ),
+          const SizedBox(height: 16),
+          MainButton(label: 'Schlaf eintragen', onPressed: onAdd),
+        ],
+      );
+    }
+    final diff = thisWeek != null && lastWeek != null
+        ? thisWeek - lastWeek
+        : null;
+    return FeedCard(
+      title: 'Schlafdauer · letzte 14 Nächte',
+      children: [
+        Text(
+          thisWeek == null
+              ? 'Diese Woche noch nichts'
+              : 'Ø ${formatHours(thisWeek)} Std.',
+          style: CoachStyle.question,
+        ),
+        if (diff != null)
+          Text(
+            '${diff > 0
+                ? '+'
+                : diff < 0
+                ? '−'
+                : '±'}'
+            '${formatHours(diff.abs())} Std. zur Vorwoche',
+            style: CoachStyle.body.copyWith(color: CoachStyle.inkSoft),
+          ),
+        const SizedBox(height: 12),
+        SleepChart(nights: nights),
+        const SizedBox(height: 8),
+        const HintText(
+          'Jeder Balken ist eine Nacht, ganz rechts heute. Die gestrichelte '
+          'Linie liegt bei 8 Stunden. Der Schnitt zählt die letzten 7 Nächte.',
+        ),
+        const SizedBox(height: 16),
+        MainButton(label: 'Schlaf eintragen', onPressed: onAdd),
+      ],
+    );
+  }
+}
+
+class SleepDialog extends StatefulWidget {
+  const SleepDialog({super.key});
+
+  @override
+  State<SleepDialog> createState() => _SleepDialogState();
+}
+
+class _SleepDialogState extends State<SleepDialog> {
+  final _controller = TextEditingController();
+  String? _error;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final h = parseHours(_controller.text);
+    if (h == null) {
+      setState(() => _error = 'Bitte zwischen 1 und 16 Stunden, z. B. 7,5.');
+      return;
+    }
+    Navigator.of(context).pop(h);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Wie lange hast du letzte Nacht geschlafen?'),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        keyboardType: TextInputType.datetime,
+        decoration: InputDecoration(
+          suffixText: 'Std.',
+          hintText: 'z. B. 7,5 oder 7:30',
+          errorText: _error,
+        ),
+        onSubmitted: (_) => _save(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Abbrechen'),
+        ),
+        FilledButton(onPressed: _save, child: const Text('Speichern')),
       ],
     );
   }

@@ -2,6 +2,7 @@ import 'package:coach_app/data/user_profile.dart';
 import 'package:coach_app/feed/feed_data.dart';
 import 'package:coach_app/feed/kcal.dart';
 import 'package:coach_app/main.dart';
+import 'package:coach_app/sleep/sleep.dart';
 import 'package:coach_app/weight/weight.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -185,5 +186,44 @@ void main() {
       find.text('Kommt, sobald die KI angeschlossen ist.'),
       findsOneWidget,
     );
+  });
+
+  test('sleep hours parse, average and per-night list', () {
+    expect(parseHours('7,5'), 7.5);
+    expect(parseHours('7:30'), 7.5);
+    expect(parseHours('7:75'), isNull);
+    expect(parseHours('20'), isNull);
+    final nights = lastNights(
+      [
+        SleepEntry(DateTime(2026, 10, 12, 7), 6),
+        SleepEntry(DateTime(2026, 10, 10), 8),
+      ],
+      fixedNow,
+      14,
+    );
+    expect(nights.length, 14);
+    expect(nights.last, 6);
+    expect(nights[11], 8);
+    expect(nights[12], isNull);
+    expect(average(nights.sublist(7)), 7);
+  });
+
+  testWidgets('sleep duration can be entered and shows the average', (
+    tester,
+  ) async {
+    final (diary, _) = await _openFeed(tester);
+    diary.sleep.add(SleepEntry(DateTime(2026, 10, 1), 6));
+    await openTab(tester, 'Schlaf');
+    await scrollTo(tester, find.text('Schlaf eintragen'));
+    await tester.tap(find.text('Schlaf eintragen'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).last, '7:30');
+    await tester.tap(find.text('Speichern'));
+    await tester.pumpAndSettle();
+
+    expect(diary.sleep.last.stunden, 7.5);
+    await scrollTo(tester, find.text('Ø 7,5 Std.'));
+    expect(find.text('Ø 7,5 Std.'), findsOneWidget);
+    expect(find.text('+1,5 Std. zur Vorwoche'), findsOneWidget);
   });
 }

@@ -28,7 +28,7 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 
 ### Datenstruktur
 - [[Datenmodell]]: Überblick und Beziehungen
-- [[Nutzer]] · [[Check-ins]] · [[KI-Antworten]] · [[Fortschritts-Verlauf]] · [[Gewicht]] · [[Trainingsplan]] · [[Abendroutine]] · [[kcal-Profil]] · [[Coach-Fragen]]
+- [[Nutzer]] · [[Check-ins]] · [[KI-Antworten]] · [[Fortschritts-Verlauf]] · [[Gewicht]] · [[Trainingsplan]] · [[Abendroutine]] · [[kcal-Profil]] · [[Coach-Fragen]] · [[Schlafdauer]]
 
 ### Umsetzung
 - [[App-Code]]: Aufbau und Stand des Codes

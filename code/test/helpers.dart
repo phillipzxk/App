@@ -7,6 +7,7 @@ import 'package:coach_app/data/user_profile.dart';
 import 'package:coach_app/feed/feed_data.dart';
 import 'package:coach_app/feed/feed_store.dart';
 import 'package:coach_app/feed/kcal.dart';
+import 'package:coach_app/sleep/sleep.dart';
 import 'package:coach_app/weight/weight.dart';
 
 class MemoryProfileStore implements ProfileStore {
@@ -43,6 +44,18 @@ class MemoryDiaryStore implements DiaryStore {
 
   @override
   Future<void> addWeight(WeightEntry e) async => weights.add(e);
+
+  final sleep = <SleepEntry>[];
+
+  @override
+  Future<List<SleepEntry>> loadSleep() async => List.of(sleep);
+
+  @override
+  Future<void> saveSleep(SleepEntry e) async {
+    sleep
+      ..removeWhere((x) => dayKey(x.datum) == dayKey(e.datum))
+      ..add(e);
+  }
 }
 
 class MemoryFeedStore implements FeedStore {
