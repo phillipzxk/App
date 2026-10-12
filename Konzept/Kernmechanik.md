@@ -1,7 +1,7 @@
 ---
 title: Kernmechanik
 tags: [konzept, features]
-aktualisiert: 2026-10-10
+aktualisiert: 2026-10-12
 ---
 
 # Kernmechanik
@@ -14,11 +14,7 @@ Ein Einstiegs-Fragebogen zu Beginn, um die App direkt zu personalisieren, z. B. 
 
 ## 2. Täglicher Feed (Kernbildschirm)
 
-Conversationelle, offene Fragen statt starrer Formulare, z. B.:
-
-- „Wie war dein Training heute?“
-- „Was hast du heute gegessen, und wie fühlst du dich damit?“
-- „Wie hast du geschlafen, und wie ist dein Energielevel heute?“
+Conversationelle, offene Fragen statt starrer Formulare. Seit 2026-10-12 ausgearbeitet in [[Täglicher Check-in]]: 4 Fragen zu Training, Ernährung, Schlaf und Mindset, die die KI jeden Tag persönlich anpasst, danach eine KI-Antwort zum ganzen Tag. Startseite der App ist der [[Main Feed]] mit dem freiwilligen Gewichtstracker.
 
 Der Nutzer antwortet frei in eigenen Worten. Kein Kalorien-/Makro-Zählen, keine Übungsdatenbank. Gespeichert als [[Check-ins]].
 

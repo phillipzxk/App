@@ -2,14 +2,14 @@
 title: MVP-Fortschritt
 tags: [fortschritt, mvp]
 aliases: [MVP, Fortschritt]
-stand: 2026-10-11
+stand: 2026-10-12
 erledigt: 1
 gesamt: 5
 ---
 
 # MVP-Fortschritt
 
-**Stand 2026-10-11: 1 von 5 erledigt (20 %)**
+**Stand 2026-10-12: 1 von 5 erledigt (20 %)**
 
 - [x] Konzept & Datenstruktur festgelegt → [[App-Konzept]], [[Datenmodell]]
 - [ ] Onboarding-Fragebogen (6 Fragen in eigenen Worten) → [[Onboarding-Fragebogen]]
@@ -20,7 +20,10 @@ gesamt: 5
     - [x] Neue Fragen programmiert und getestet (2026-10-11)
     - [ ] KI-Auswertung „So sehe ich dich gerade“ anbinden (wartet auf KI-Schlüssel und Backend)
     - [ ] Antworten online speichern (wartet auf Entscheidung zum Backend, siehe [[Offene Fragen#Onboarding]])
-- [ ] Täglicher Feed mit den vier Kernfragen → [[Kernmechanik#2. Täglicher Feed (Kernbildschirm)]]
+- [ ] Täglicher Check-in mit 4 Fragen → [[Täglicher Check-in]]
+    - [x] Prinzip, Leitfragen und Ablauf gemeinsam festgelegt, Mockup abgenommen (2026-10-12)
+    - [x] Programmiert und getestet, mit [[Main Feed]] und Gewichtstracker (2026-10-12)
+    - [ ] KI passt die Fragen an und schreibt die Antwort (wartet auf KI-Schlüssel und Backend)
 - [ ] KI-Antwort mit einfacher Regellogik → [[Kernmechanik#3. KI-Antwort]]
 - [ ] Einfache Fortschritts-Ansicht → [[Fortschritts-Verlauf]]
 

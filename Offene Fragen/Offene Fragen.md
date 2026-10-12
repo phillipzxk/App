@@ -9,7 +9,7 @@ aktualisiert: 2026-10-10
 ## Widersprüche in den Unterlagen
 
 - ~~**Preis:**~~ **Entschieden** laut [[App-Gesamtübersicht (Original)]]: reines Flatrate-Abo mit weicher Begrenzung, vorerst 9,99 €/Monat.
-- **Vier Fragen vs. drei Felder:** Der tägliche Feed hat vier Kernfragen (Training, Ernährung/Gefühl, Schlaf, Energie), die [[Check-ins]] speichern aber drei Freitextfelder (Schlaf & Energie zusammen). Bleibt das so?
+- ~~**Vier Fragen vs. drei Felder?**~~ **Entschieden 2026-10-12:** 4 Fragen und 4 Felder (Training, Ernährung, Schlaf, Mindset), Energie wird bei Schlaf oder Mindset mit abgefragt. Siehe [[Täglicher Check-in]].
 
 ## Onboarding
 

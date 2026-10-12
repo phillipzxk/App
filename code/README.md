@@ -11,7 +11,8 @@ Der Code der App, geschrieben von Claude. Hintergrund: [[Technischer Ansatz]].
 ## Stand
 
 - **Onboarding-Fragebogen** mit den 6 Fragen vom 2026-10-11 fertig, siehe [[Onboarding-Fragebogen]]. Die Antworten werden vorerst nur auf dem Gerät gespeichert. Die KI-Zusammenfassung fehlt noch, bis dahin steht dort ein Hinweis.
-- **Startseite** ist ein Platzhalter für den täglichen Check-in und zeigt, was das Onboarding gespeichert hat.
+- **Täglicher Check-in** mit den 4 Leitfragen, siehe [[Täglicher Check-in]]. Die KI-Antwort fehlt noch, bis dahin steht dort ein Hinweis.
+- **Main Feed** (Startseite) mit Check-in-Karte und freiwilligem Gewichtstracker, siehe [[Main Feed]].
 
 ## Aufbau
 
@@ -23,8 +24,12 @@ lib/onboarding/onboarding_questions.dart  Die 6 Fragen
 lib/onboarding/onboarding_flow.dart   Die Onboarding-Bildschirme
 lib/onboarding/onboarding_evaluator.dart  KI-Auswertung (noch Platzhalter)
 lib/ui/coach_style.dart               Farben und Schriften aus dem Mockup
-lib/home/home_page.dart               Startseite (Platzhalter)
-test/onboarding_test.dart             Automatische Tests
+lib/home/home_page.dart               Main Feed (Startseite)
+lib/checkin/                          Täglicher Check-in: Fragen, Ablauf, KI-Antwort (Platzhalter)
+lib/weight/                           Gewicht: Wochenschnitt und Diagramm
+lib/data/diary_store.dart             Speichern von Check-ins und Gewicht (lokal)
+lib/ui/coach_widgets.dart             Gemeinsame Bausteine der Bildschirme
+test/                                 Automatische Tests
 ```
 
 ## Für Entwickler
