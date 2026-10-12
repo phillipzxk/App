@@ -31,6 +31,7 @@ void main() {
     tester,
   ) async {
     final diary = MemoryDiaryStore()
+      ..checkIns.add(checkInOn(fixedNow))
       ..weights.add(WeightEntry(DateTime(2026, 10, 6), 83));
     await tester.pumpWidget(
       CoachApp(
@@ -56,7 +57,7 @@ void main() {
   });
 
   testWidgets('implausible weight shows an error', (tester) async {
-    final diary = MemoryDiaryStore();
+    final diary = MemoryDiaryStore()..checkIns.add(checkInOn(fixedNow));
     await tester.pumpWidget(
       CoachApp(
         store: MemoryProfileStore(const UserProfile(ziel: 'Frei sein')),

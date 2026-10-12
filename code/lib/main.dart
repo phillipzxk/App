@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'checkin/checkin.dart';
 import 'checkin/checkin_evaluator.dart';
+import 'checkin/checkin_flow.dart';
 import 'data/diary_store.dart';
 import 'data/profile_store.dart';
 import 'data/user_profile.dart';
@@ -50,6 +52,8 @@ class CoachApp extends StatelessWidget {
 }
 
 /// Shows the onboarding on first start, otherwise the home page.
+/// Decides what to show: the onboarding on first start, then every day the
+/// check-in until it is answered, after that the Main Feed.
 class StartGate extends StatefulWidget {
   const StartGate({super.key, required this.app});
 
@@ -61,12 +65,22 @@ class StartGate extends StatefulWidget {
 
 class _StartGateState extends State<StartGate> {
   UserProfile? _profile;
+  bool _checkedInToday = false;
 
   @override
   void initState() {
     super.initState();
-    widget.app.store.load().then((profile) {
-      if (mounted) setState(() => _profile = profile);
+    _load();
+  }
+
+  Future<void> _load() async {
+    final profile = await widget.app.store.load();
+    final checkIns = await widget.app.diary.loadCheckIns();
+    final today = dayKey(widget.app.clock());
+    if (!mounted) return;
+    setState(() {
+      _profile = profile;
+      _checkedInToday = checkIns.any((c) => dayKey(c.datum) == today);
     });
   }
 
@@ -88,10 +102,17 @@ class _StartGateState extends State<StartGate> {
         onFinished: (p) => setState(() => _profile = p),
       );
     }
+    if (!_checkedInToday) {
+      return CheckInFlow(
+        profile: profile,
+        store: widget.app.diary,
+        evaluator: widget.app.checkInEvaluator,
+        today: widget.app.clock(),
+        onFinished: (_) => setState(() => _checkedInToday = true),
+      );
+    }
     return HomePage(
-      profile: profile,
       store: widget.app.diary,
-      evaluator: widget.app.checkInEvaluator,
       clock: widget.app.clock,
       onRestartOnboarding: _restartOnboarding,
     );

@@ -17,11 +17,11 @@ class FixedReply implements CheckInEvaluator {
       text;
 }
 
-Future<MemoryDiaryStore> openFeed(
-  WidgetTester tester, {
+Future<void> openApp(
+  WidgetTester tester,
+  MemoryDiaryStore diary, {
   CheckInEvaluator evaluator = const NoCheckInEvaluator(),
 }) async {
-  final diary = MemoryDiaryStore();
   await tester.pumpWidget(
     CoachApp(
       store: MemoryProfileStore(const UserProfile(ziel: 'Frei sein')),
@@ -31,12 +31,9 @@ Future<MemoryDiaryStore> openFeed(
     ),
   );
   await tester.pumpAndSettle();
-  return diary;
 }
 
 Future<void> answerAll(WidgetTester tester) async {
-  await tester.tap(find.text('Check-in starten'));
-  await tester.pumpAndSettle();
   for (var i = 1; i <= 4; i++) {
     await tester.enterText(find.byType(TextField), 'Antwort $i');
     await tester.pump();
@@ -46,29 +43,19 @@ Future<void> answerAll(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('feed shows the date and an open check-in', (tester) async {
-    await openFeed(tester);
-    expect(find.text('Montag, 12. Oktober'), findsOneWidget);
-    expect(find.text('Check-in starten'), findsOneWidget);
-  });
-
-  testWidgets('check-in saves four answers for today', (tester) async {
-    final diary = await openFeed(tester);
-    await tester.tap(find.text('Check-in starten'));
-    await tester.pumpAndSettle();
+  testWidgets('check-in opens by itself and saves four answers', (
+    tester,
+  ) async {
+    final diary = MemoryDiaryStore();
+    await openApp(tester, diary);
     expect(find.textContaining('FRAGE 1 VON 4 · TRAINING'), findsOneWidget);
     expect(
       find.textContaining('falls du heute nicht trainiert'),
       findsOneWidget,
     );
+    expect(find.byTooltip('Zurück'), findsNothing);
 
-    for (var i = 1; i <= 4; i++) {
-      await tester.enterText(find.byType(TextField), 'Antwort $i');
-      await tester.pump();
-      await tester.tap(find.text(i < 4 ? 'Weiter' : 'Absenden'));
-      await tester.pumpAndSettle();
-    }
-
+    await answerAll(tester);
     final c = diary.checkIns.single;
     expect(dayKey(c.datum), '2026-10-12');
     expect(
@@ -82,33 +69,48 @@ void main() {
 
     await tester.tap(find.text('Fertig'));
     await tester.pumpAndSettle();
-    expect(find.text('Erledigt für heute ✓'), findsOneWidget);
-    expect(find.text('Antwort ansehen'), findsOneWidget);
+    expect(find.text('Montag, 12. Oktober'), findsOneWidget);
+    expect(find.text('DEIN COACH · HEUTE'), findsOneWidget);
+    expect(find.text('Check-in starten'), findsNothing);
   });
 
-  testWidgets('AI reply is shown and can be opened again', (tester) async {
-    final diary = await openFeed(
-      tester,
-      evaluator: const FixedReply('Guter Tag.'),
-    );
+  testWidgets('AI reply is shown and appears in the Main Feed', (tester) async {
+    final diary = MemoryDiaryStore();
+    await openApp(tester, diary, evaluator: const FixedReply('Guter Tag.'));
     await answerAll(tester);
     expect(find.text('Guter Tag.'), findsOneWidget);
     expect(diary.checkIns.single.kiAntwort, 'Guter Tag.');
 
     await tester.tap(find.text('Fertig'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Antwort ansehen'));
-    await tester.pumpAndSettle();
     expect(find.text('Guter Tag.'), findsOneWidget);
   });
 
-  testWidgets('closing on the first question saves nothing', (tester) async {
-    final diary = await openFeed(tester);
-    await tester.tap(find.text('Check-in starten'));
+  testWidgets('after today\'s check-in the app opens the Main Feed', (
+    tester,
+  ) async {
+    final diary = MemoryDiaryStore()
+      ..checkIns.add(checkInOn(fixedNow, reply: 'Weiter so.'));
+    await openApp(tester, diary);
+    expect(find.text('Montag, 12. Oktober'), findsOneWidget);
+    expect(find.text('Weiter so.'), findsOneWidget);
+  });
+
+  testWidgets('yesterday\'s check-in does not count for today', (tester) async {
+    final diary = MemoryDiaryStore()
+      ..checkIns.add(checkInOn(DateTime(2026, 10, 11)));
+    await openApp(tester, diary);
+    expect(find.textContaining('FRAGE 1 VON 4'), findsOneWidget);
+  });
+
+  testWidgets('back keeps earlier answers', (tester) async {
+    await openApp(tester, MemoryDiaryStore());
+    await tester.enterText(find.byType(TextField), 'Gut trainiert');
+    await tester.pump();
+    await tester.tap(find.text('Weiter'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Schließen'));
+    await tester.tap(find.byTooltip('Zurück'));
     await tester.pumpAndSettle();
-    expect(diary.checkIns, isEmpty);
-    expect(find.text('Check-in starten'), findsOneWidget);
+    expect(find.text('Gut trainiert'), findsOneWidget);
   });
 }

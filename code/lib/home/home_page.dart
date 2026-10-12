@@ -1,31 +1,25 @@
 import 'package:flutter/material.dart';
 
 import '../checkin/checkin.dart';
-import '../checkin/checkin_evaluator.dart';
 import '../checkin/checkin_flow.dart';
 import '../data/diary_store.dart';
-import '../data/user_profile.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import '../weight/weight.dart';
 import '../weight/weight_chart.dart';
 
-/// The Main Feed: start page with today's check-in and the optional weight
-/// analysis. Later it also shows help that reacts to the check-in answers
-/// (see Umsetzung/Main Feed.md).
+/// The Main Feed: opens after the daily check-in and is tailored to that
+/// day. Shows the coach's reply and the optional weight analysis; later also
+/// help that reacts to the check-in answers (see Umsetzung/Main Feed.md).
 class HomePage extends StatefulWidget {
   const HomePage({
     super.key,
-    required this.profile,
     required this.store,
-    required this.evaluator,
     required this.clock,
     required this.onRestartOnboarding,
   });
 
-  final UserProfile profile;
   final DiaryStore store;
-  final CheckInEvaluator evaluator;
   final DateTime Function() clock;
   final VoidCallback onRestartOnboarding;
 
@@ -61,35 +55,6 @@ class _HomePageState extends State<HomePage> {
     return null;
   }
 
-  Future<void> _startCheckIn() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => CheckInFlow(
-          profile: widget.profile,
-          store: widget.store,
-          evaluator: widget.evaluator,
-          today: widget.clock(),
-          onFinished: (_) => Navigator.of(context).pop(),
-        ),
-      ),
-    );
-    await _reload();
-  }
-
-  void _showReply(CheckIn checkIn) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => CoachPage(
-          gradient: CoachStyle.summaryBackground,
-          child: CheckInReply(
-            reply: checkIn.kiAntwort,
-            onDone: () => Navigator.of(context).pop(),
-          ),
-        ),
-      ),
-    );
-  }
-
   Future<void> _addWeight() async {
     final kg = await showDialog<double>(
       context: context,
@@ -116,28 +81,17 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 8),
           Text(germanDate(widget.clock()), style: CoachStyle.question),
           const SizedBox(height: 24),
-          _Card(
-            title: 'Check-in',
-            children: [
-              Text(
-                today == null
-                    ? 'Dein Check-in für heute wartet: 4 kurze Fragen zu '
-                          'Training, Ernährung, Schlaf und Mindset.'
-                    : 'Erledigt für heute ✓',
-                style: CoachStyle.body,
-              ),
-              const SizedBox(height: 16),
-              today == null
-                  ? MainButton(
-                      label: 'Check-in starten',
-                      onPressed: _startCheckIn,
-                    )
-                  : MainButton(
-                      label: 'Antwort ansehen',
-                      onPressed: () => _showReply(today),
-                    ),
-            ],
-          ),
+          if (today != null)
+            _Card(
+              title: 'Dein Coach · heute',
+              children: [
+                CoachNote(
+                  text: today.kiAntwort.isNotEmpty
+                      ? today.kiAntwort
+                      : noReplyYet,
+                ),
+              ],
+            ),
           const SizedBox(height: 16),
           _WeightCard(weights: _weights, onAdd: _addWeight),
           const SizedBox(height: 24),

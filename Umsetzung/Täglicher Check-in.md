@@ -16,6 +16,7 @@ Dritter Baustein im [[MVP-Fortschritt]] (Grundidee: [[Kernmechanik#2. Täglicher
 2. **Die KI passt die Fragen jeden Tag an den Nutzer an**, mit seinen [[Onboarding-Fragebogen|Onboarding-Antworten]] und den letzten Tagen. Grundlage sind feste Leitfragen (unten).
 3. **Jeden Tag alle Bereiche:** 4 kurze Fragen zu Training, Ernährung, Schlaf und Mindset. Energie fragt die KI bei Schlaf oder Mindset mit ab. Mindset heißt hier: mental stärker werden und Dinge durchziehen, vor denen man sich früher gedrückt hat.
 4. **Eine Frage nach der anderen**, wie im Onboarding. Fühlt sich wie ein Gespräch an.
+6. **Kommt automatisch** (Phillip, 2026-10-12): Beim ersten Öffnen der App am Tag erscheint der Check-in von selbst, wie das Onboarding, ohne Knopf zum Starten. Erst wenn er beantwortet ist, öffnet sich der [[Main Feed]], zugeschnitten auf diesen Tag.
 5. **Eine KI-Antwort nach allen 4 Fragen.** Die KI schaut auf den ganzen Tag, erkennt Zusammenhänge zwischen den Bereichen (z. B. schlecht geschlafen und deshalb Heißhunger) und gibt 1–2 konkrete Tipps. Dabei vergibt sie intern die Bewertung für den [[Fortschritts-Verlauf]].
 
 ## Leitfragen
@@ -33,15 +34,15 @@ Beispiel, wie die KI eine Leitfrage persönlich macht: „Du wolltest wissen, ob
 
 ```mermaid
 flowchart LR
-    M[Main Feed] --> T[1 Training] --> E[2 Ernährung] --> S[3 Schlaf] --> Mi[4 Mindset]
-    Mi --> L[Ich schaue mir deinen Tag an …] --> A[KI-Antwort zum Tag] --> M
+    O[App öffnen, noch kein Check-in heute] --> T[1 Training] --> E[2 Ernährung] --> S[3 Schlaf] --> Mi[4 Mindset]
+    Mi --> L[Ich schaue mir deinen Tag an …] --> A[KI-Antwort zum Tag] --> M[Main Feed]
 ```
 
 ## Stand im Code
 
 - Programmiert am 2026-10-12, siehe [[App-Code]].
 - Solange die KI nicht angebunden ist, zeigt der Check-in die Leitfragen ohne persönlichen Bezug, speichert die Antworten und zeigt statt der KI-Antwort: „Deine Antworten sind gespeichert. Sobald dein Coach freigeschaltet ist, bekommst du hier jeden Tag eine persönliche Antwort zu deinem Tag.“
-- Ein Check-in pro Tag. Danach steht im [[Main Feed]] „Erledigt für heute ✓“ und die Antwort lässt sich wieder öffnen.
+- Ein Check-in pro Tag. Er öffnet sich automatisch, solange er für heute fehlt, und hat keinen Schließen-Knopf. Danach zeigt der [[Main Feed]] die Antwort des Coaches zum Tag. Auch direkt nach dem Onboarding folgt am selben Tag der Check-in.
 
 ## Weiter
 

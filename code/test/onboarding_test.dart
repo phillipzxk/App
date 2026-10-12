@@ -60,7 +60,7 @@ void main() {
 
     await tester.tap(find.text("Los geht's"));
     await tester.pumpAndSettle();
-    expect(find.text('Check-in starten'), findsOneWidget);
+    expect(find.textContaining('FRAGE 1 VON 4 · TRAINING'), findsOneWidget);
   });
 
   testWidgets('summary from the evaluator is shown and saved', (tester) async {
@@ -116,12 +116,12 @@ void main() {
     expect(find.text('Mein Ziel'), findsOneWidget);
   });
 
-  testWidgets('onboarded users skip the questionnaire', (tester) async {
+  testWidgets('onboarded users go straight to the check-in', (tester) async {
     final store = MemoryProfileStore(const UserProfile(ziel: 'Frei sein'));
     await tester.pumpWidget(
       CoachApp(store: store, diary: MemoryDiaryStore(), clock: fixedClock),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Check-in starten'), findsOneWidget);
+    expect(find.textContaining('FRAGE 1 VON 4'), findsOneWidget);
   });
 }

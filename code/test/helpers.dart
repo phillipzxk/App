@@ -43,3 +43,12 @@ class MemoryDiaryStore implements DiaryStore {
 /// Monday, 12 October 2026, 18:00.
 final fixedNow = DateTime(2026, 10, 12, 18);
 DateTime fixedClock() => fixedNow;
+
+CheckIn checkInOn(DateTime day, {String reply = ''}) => CheckIn(
+  datum: DateTime(day.year, day.month, day.day),
+  training: 't',
+  ernaehrung: 'e',
+  schlaf: 's',
+  mindset: 'm',
+  kiAntwort: reply,
+);

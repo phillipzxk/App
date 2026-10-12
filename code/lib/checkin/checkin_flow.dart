@@ -14,7 +14,8 @@ const noReplyYet =
     'bekommst du hier jeden Tag eine persönliche Antwort zu deinem Tag.';
 
 /// The daily check-in: four questions one at a time, then one AI reply to
-/// the whole day.
+/// the whole day. Opens by itself on the first app start of each day; the
+/// Main Feed only comes after it (decided with Phillip on 2026-10-12).
 class CheckInFlow extends StatefulWidget {
   const CheckInFlow({
     super.key,
@@ -30,8 +31,8 @@ class CheckInFlow extends StatefulWidget {
   final CheckInEvaluator evaluator;
   final DateTime today;
 
-  /// Called with the saved check-in, or null if the user closed it early.
-  final ValueChanged<CheckIn?> onFinished;
+  /// Called with the saved check-in once the user has seen the reply.
+  final ValueChanged<CheckIn> onFinished;
 
   @override
   State<CheckInFlow> createState() => _CheckInFlowState();
@@ -102,7 +103,7 @@ class _CheckInFlowState extends State<CheckInFlow> {
         ),
         _Phase.reply => CheckInReply(
           reply: _saved!.kiAntwort,
-          onDone: () => widget.onFinished(_saved),
+          onDone: () => widget.onFinished(_saved!),
         ),
       },
     );
@@ -119,16 +120,12 @@ class _CheckInFlowState extends State<CheckInFlow> {
         const SizedBox(height: 8),
         Row(
           children: [
-            IconButton(
-              icon: Icon(
-                _index == 0 ? Icons.close : Icons.arrow_back,
-                color: CoachStyle.inkSoft,
+            if (_index > 0)
+              IconButton(
+                icon: const Icon(Icons.arrow_back, color: CoachStyle.inkSoft),
+                tooltip: 'Zurück',
+                onPressed: () => setState(() => _index--),
               ),
-              tooltip: _index == 0 ? 'Schließen' : 'Zurück',
-              onPressed: _index == 0
-                  ? () => widget.onFinished(null)
-                  : () => setState(() => _index--),
-            ),
             Expanded(
               child: Text(
                 'HEUTE · FRAGE ${_index + 1} VON ${checkInQuestions.length} · '
@@ -157,7 +154,7 @@ class _CheckInFlowState extends State<CheckInFlow> {
   }
 }
 
-/// The coach's reply to the day; also opened again from the Main Feed.
+/// The coach's reply to the day, shown right after the check-in.
 class CheckInReply extends StatelessWidget {
   const CheckInReply({super.key, required this.reply, required this.onDone});
 
