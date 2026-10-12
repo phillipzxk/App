@@ -26,6 +26,7 @@ Future<void> openApp(
     CoachApp(
       store: MemoryProfileStore(const UserProfile(ziel: 'Frei sein')),
       diary: diary,
+      feed: MemoryFeedStore(),
       checkInEvaluator: evaluator,
       clock: fixedClock,
     ),

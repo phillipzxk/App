@@ -6,12 +6,20 @@ import 'checkin/checkin_flow.dart';
 import 'data/diary_store.dart';
 import 'data/profile_store.dart';
 import 'data/user_profile.dart';
+import 'feed/feed_coach.dart';
+import 'feed/feed_store.dart';
 import 'home/home_page.dart';
 import 'onboarding/onboarding_evaluator.dart';
 import 'onboarding/onboarding_flow.dart';
 
 void main() {
-  runApp(CoachApp(store: LocalProfileStore(), diary: LocalDiaryStore()));
+  runApp(
+    CoachApp(
+      store: LocalProfileStore(),
+      diary: LocalDiaryStore(),
+      feed: LocalFeedStore(),
+    ),
+  );
 }
 
 class CoachApp extends StatelessWidget {
@@ -19,15 +27,19 @@ class CoachApp extends StatelessWidget {
     super.key,
     required this.store,
     required this.diary,
+    required this.feed,
     this.evaluator = const NoEvaluator(),
     this.checkInEvaluator = const NoCheckInEvaluator(),
+    this.feedCoach = const NoFeedCoach(),
     this.clock = DateTime.now,
   });
 
   final ProfileStore store;
   final DiaryStore diary;
+  final FeedStore feed;
   final OnboardingEvaluator evaluator;
   final CheckInEvaluator checkInEvaluator;
+  final FeedCoach feedCoach;
   final DateTime Function() clock;
 
   @override
@@ -51,7 +63,6 @@ class CoachApp extends StatelessWidget {
   }
 }
 
-/// Shows the onboarding on first start, otherwise the home page.
 /// Decides what to show: the onboarding on first start, then every day the
 /// check-in until it is answered, after that the Main Feed.
 class StartGate extends StatefulWidget {
@@ -112,7 +123,10 @@ class _StartGateState extends State<StartGate> {
       );
     }
     return HomePage(
+      profile: profile,
       store: widget.app.diary,
+      feed: widget.app.feed,
+      coach: widget.app.feedCoach,
       clock: widget.app.clock,
       onRestartOnboarding: _restartOnboarding,
     );

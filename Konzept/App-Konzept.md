@@ -20,7 +20,7 @@ Der Nutzer trackt täglich in einem conversationellen Feed sein Training, seine 
 - Freie Antworten in eigenen Worten statt Formulare
 - KI mit Gedächtnis über die letzten Tage/Wochen, dadurch wirklich adaptive Tipps
 - Fortschritt = sinkender Bedarf an Tipps (siehe [[Fortschritts-Verlauf]])
-- Bewusst **kein** Kalorien-/Makro-Zählen und keine Übungsdatenbank
+- Bewusst **kein** Kalorien-/Makro-Zählen und keine Übungsdatenbank. Seit 2026-10-12 zeigt der [[Main Feed]] ein kcal-Ziel nur als Orientierung, gezählt wird weiterhin nichts
 
 ## Weiter
 

@@ -23,6 +23,7 @@ gesamt: 5
 - [ ] Täglicher Check-in mit 4 Fragen → [[Täglicher Check-in]]
     - [x] Prinzip, Leitfragen und Ablauf gemeinsam festgelegt, Mockup abgenommen (2026-10-12)
     - [x] Programmiert und getestet, mit [[Main Feed]] und Gewichtstracker (2026-10-12)
+    - [x] Main Feed gemeinsam festgelegt (5 Seiten: Heute, Training, Ernährung, Schlaf, Mindset), Mockup abgenommen, programmiert (2026-10-12)
     - [ ] KI passt die Fragen an und schreibt die Antwort (wartet auf KI-Schlüssel und Backend)
 - [ ] KI-Antwort mit einfacher Regellogik → [[Kernmechanik#3. KI-Antwort]]
 - [ ] Einfache Fortschritts-Ansicht → [[Fortschritts-Verlauf]]
