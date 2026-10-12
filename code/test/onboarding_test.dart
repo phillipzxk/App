@@ -28,7 +28,12 @@ void main() {
   testWidgets('six answers are stored in the right fields', (tester) async {
     final store = MemoryProfileStore();
     await tester.pumpWidget(
-      CoachApp(store: store, diary: MemoryDiaryStore(), clock: fixedClock),
+      CoachApp(
+        store: store,
+        diary: MemoryDiaryStore(),
+        feed: MemoryFeedStore(),
+        clock: fixedClock,
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -69,6 +74,7 @@ void main() {
       CoachApp(
         store: store,
         diary: MemoryDiaryStore(),
+        feed: MemoryFeedStore(),
         evaluator: const FixedEvaluator('Du bist dran.'),
       ),
     );
@@ -84,6 +90,7 @@ void main() {
       CoachApp(
         store: MemoryProfileStore(),
         diary: MemoryDiaryStore(),
+        feed: MemoryFeedStore(),
         clock: fixedClock,
       ),
     );
@@ -100,6 +107,7 @@ void main() {
       CoachApp(
         store: MemoryProfileStore(),
         diary: MemoryDiaryStore(),
+        feed: MemoryFeedStore(),
         clock: fixedClock,
       ),
     );
@@ -119,7 +127,12 @@ void main() {
   testWidgets('onboarded users go straight to the check-in', (tester) async {
     final store = MemoryProfileStore(const UserProfile(ziel: 'Frei sein'));
     await tester.pumpWidget(
-      CoachApp(store: store, diary: MemoryDiaryStore(), clock: fixedClock),
+      CoachApp(
+        store: store,
+        diary: MemoryDiaryStore(),
+        feed: MemoryFeedStore(),
+        clock: fixedClock,
+      ),
     );
     await tester.pumpAndSettle();
     expect(find.textContaining('FRAGE 1 VON 4'), findsOneWidget);

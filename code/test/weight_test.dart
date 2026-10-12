@@ -33,21 +33,25 @@ void main() {
     final diary = MemoryDiaryStore()
       ..checkIns.add(checkInOn(fixedNow))
       ..weights.add(WeightEntry(DateTime(2026, 10, 6), 83));
+    tallView(tester);
     await tester.pumpWidget(
       CoachApp(
         store: MemoryProfileStore(const UserProfile(ziel: 'Frei sein')),
         diary: diary,
+        feed: MemoryFeedStore(),
         clock: fixedClock,
       ),
     );
     await tester.pumpAndSettle();
+    await openTab(tester, 'Ernährung');
+    await scrollTo(tester, find.text('Gewicht eintragen'));
     expect(find.text('83,0 kg'), findsOneWidget);
 
     await tester.ensureVisible(find.text('Gewicht eintragen'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Gewicht eintragen'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), '82,4');
+    await tester.enterText(find.byType(TextField).last, '82,4');
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
 
@@ -58,19 +62,22 @@ void main() {
 
   testWidgets('implausible weight shows an error', (tester) async {
     final diary = MemoryDiaryStore()..checkIns.add(checkInOn(fixedNow));
+    tallView(tester);
     await tester.pumpWidget(
       CoachApp(
         store: MemoryProfileStore(const UserProfile(ziel: 'Frei sein')),
         diary: diary,
+        feed: MemoryFeedStore(),
         clock: fixedClock,
       ),
     );
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Gewicht eintragen'));
+    await openTab(tester, 'Ernährung');
+    await scrollTo(tester, find.text('Gewicht eintragen'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Gewicht eintragen'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), '5');
+    await tester.enterText(find.byType(TextField).last, '5');
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
     expect(find.textContaining('zwischen 30 und 300'), findsOneWidget);

@@ -28,13 +28,13 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 
 ### Datenstruktur
 - [[Datenmodell]]: Überblick und Beziehungen
-- [[Nutzer]] · [[Check-ins]] · [[KI-Antworten]] · [[Fortschritts-Verlauf]] · [[Gewicht]]
+- [[Nutzer]] · [[Check-ins]] · [[KI-Antworten]] · [[Fortschritts-Verlauf]] · [[Gewicht]] · [[Trainingsplan]] · [[Abendroutine]] · [[kcal-Profil]] · [[Coach-Fragen]]
 
 ### Umsetzung
 - [[App-Code]]: Aufbau und Stand des Codes
 - [[Onboarding-Fragebogen]]: Prinzip, die 6 Fragen und die Bildschirme
 - [[Täglicher Check-in]]: die 4 Leitfragen und der Ablauf
-- [[Main Feed]]: Startseite mit Gewichtstracker
+- [[Main Feed]]: Startseite mit 5 Seiten (Heute, Training, Ernährung, Schlaf, Mindset)
 
 ### Fortschritt
 - [[MVP-Fortschritt]]: was erledigt ist, was als Nächstes kommt

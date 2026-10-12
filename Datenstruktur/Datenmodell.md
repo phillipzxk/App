@@ -13,7 +13,11 @@ Jeder [[Nutzer]] hat viele [[Check-ins]], jeder Check-in hat genau eine [[KI-Ant
 erDiagram
     NUTZER ||--o{ CHECK_IN : "hat viele (1 pro Tag)"
     CHECK_IN ||--|| KI_ANTWORT : "hat genau eine"
-    NUTZER ||--o{ GEWICHT : "freiwillig"
+    NUTZER ||--o{ GEWICHT : "hat viele"
+    NUTZER ||--o| TRAININGSPLAN : "hat einen"
+    NUTZER ||--o{ ABENDROUTINE : "Schritte"
+    NUTZER ||--o| KCAL_PROFIL : "hat eins"
+    NUTZER ||--o{ COACH_FRAGE : "hat viele"
     NUTZER {
         id nutzer_id
         text name
@@ -42,6 +46,29 @@ erDiagram
         datetime datum
         float kilogramm
     }
+    TRAININGSPLAN {
+        id nutzer_id
+        text montag_bis_sonntag
+    }
+    ABENDROUTINE {
+        id nutzer_id
+        text uhrzeit
+        text was
+    }
+    KCAL_PROFIL {
+        id nutzer_id
+        int groesse_cm
+        int alter
+        enum geschlecht
+        enum aktivitaet
+    }
+    COACH_FRAGE {
+        id nutzer_id
+        datetime datum
+        enum bereich
+        text text
+        text antwort
+    }
     KI_ANTWORT {
         id antwort_id
         id check_in_id
@@ -57,6 +84,8 @@ erDiagram
 2. [[Check-ins]]
 3. [[KI-Antworten]]
 4. [[Fortschritts-Verlauf]] (abgeleitet, keine Tabelle)
+5. [[Gewicht]]
+6. [[Trainingsplan]], [[Abendroutine]], [[kcal-Profil]], [[Coach-Fragen]] (für den [[Main Feed]], 2026-10-12)
 
 ## Bewusst weggelassen
 
