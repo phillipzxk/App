@@ -66,10 +66,12 @@ flutter:
           weight: 500
         - asset: assets/fonts/Figtree-SemiBold.ttf
           weight: 600
-    - family: Fraunces
+    - family: Sora
       fonts:
-        - asset: assets/fonts/Fraunces-SemiBold.ttf
+        - asset: assets/fonts/Sora-SemiBold.ttf
           weight: 600
+        - asset: assets/fonts/Sora-Bold.ttf
+          weight: 700
 
   # To add assets to your application, add an assets section, like this:
   # assets:

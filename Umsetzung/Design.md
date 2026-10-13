@@ -3,12 +3,12 @@ title: Design
 tags: [umsetzung, design, branding]
 erstellt: 2026-10-13
 aktualisiert: 2026-10-13
-status: Name, Farben, Schrift und Logo entschieden, noch nicht programmiert
+status: entschieden und programmiert (wartet auf Phillips Ja zum Übernehmen)
 ---
 
 # Design
 
-Name und Aussehen der App, gemeinsam mit Phillip Schritt für Schritt festgelegt am 2026-10-13. Ersetzt das bisherige Platzhalter-Grün. Programmiert wird erst nach einem Gesamtentwurf und Phillips Ja.
+Name und Aussehen der App, gemeinsam mit Phillip Schritt für Schritt festgelegt am 2026-10-13. Ersetzt das bisherige Platzhalter-Grün. Nach dem Gesamtentwurf wollte Phillip das Weiß etwas dunkler und mehr besondere Details; er hat die Version „Neu“ gewählt, die dann programmiert wurde.
 
 ## Festgelegt
 
@@ -16,7 +16,7 @@ Name und Aussehen der App, gemeinsam mit Phillip Schritt für Schritt festgelegt
 |---|---|
 | Name | **Groundset**: Ground (Fundament) und Mindset. Passt zum Buch „Das Fundament“. |
 | Grundstimmung | Modern, sportlich, clean. Hell, mit Weiß und Gold. |
-| Farben | Warmes Weiß `#faf8f4` als Hintergrund, weiße Karten mit feiner Linie `#ede7dc`, Champagner-Gold `#b08a4f` für Hervorhebungen, Dunkelbraun `#2a2620` für Text und Knöpfe (Knopfschrift `#f3e3c2`). |
+| Farben | Sandweiß `#efe9de` als Hintergrund (Phillips Wahl „Neu“, etwas dunkler als das erste `#faf8f4`), helle Karten `#f9f6f0` mit feiner Linie `#e0d6c4`, Champagner-Gold `#b08a4f` für Hervorhebungen, Dunkelbraun `#2a2620` für Text und Knöpfe (Knopfschrift `#f3e3c2`). |
 | Schrift | **Sora** für Überschriften und Knöpfe, **Figtree** für den Text. |
 | Logo | **Wurzeln und Trieb**: unter einer dunklen Bodenlinie die Wurzeln, darüber ein goldener Trieb. Steht für Kapitel 9 „Fortschritt, den man nicht sieht“: erst wächst es unten, dann sieht man es oben. Schriftzug gestapelt unter dem Symbol, weit gesperrte Großbuchstaben (Sora), GROUND dunkel und SET in Gold. Ausgewählt aus drei Runden mit neun Ideen. |
 
@@ -27,6 +27,16 @@ Name und Aussehen der App, gemeinsam mit Phillip Schritt für Schritt festgelegt
 - Domains: groundset.com ist vergeben, groundset.org, .shop und .store waren frei. Nichts gekauft.
 - Vor dem Start: offizielle Markenprüfung beim DPMA und EUIPO.
 
+## Besondere Details (gewählt 13.10.2026)
+
+1. Kopfbereich jeder Seite mit feinen goldenen Ringen wie Jahresringe und einer goldenen Bodenlinie wie im Logo; auf „Heute“ dazu Logo und Schriftzug.
+2. Dunkle Coach-Karte mit Gold für die Antwort des Coaches (Heute, Antwort zum Check-in).
+3. „Tage am Stück“: wie viele Tage in Folge eingecheckt wurde, mit Punkten für die letzten 7 Tage.
+4. Jeder Bereich hat ein eigenes Symbol und die Bewertung von heute (bis die KI angeschlossen ist ein Strich).
+5. Fokus der Woche mit sieben Strichen; Abhaken kommt mit dem Fokus, sobald die KI angeschlossen ist.
+
+Dazu ein Startbild mit Logo und dem Satz „Das Fundament für jeden Tag.“ und das Logo auf dem Namens-Bildschirm.
+
 ## Entwürfe
 
 - Farben: https://claude.ai/artifact/QppYJLeDpFeuCEgdJeRM3t
@@ -35,5 +45,7 @@ Name und Aussehen der App, gemeinsam mit Phillip Schritt für Schritt festgelegt
 - Schriftzug-Varianten: https://claude.ai/artifact/M3hwyD5CiX7c2gn1NUVVxv
 - **Endgültiges Logo:** https://claude.ai/artifact/ENS6JWmYyVMf146PPELPgs
 - Alle Bildschirme im neuen Design (Entwurf, 13.10.2026): https://claude.ai/artifact/FHd47YHCn7sT6Xy4yKDLgD
+- Dunkleres Weiß und Details: https://claude.ai/artifact/4jxwySJepuvJNNj6WyUWYY
+- Zum Ausprobieren (echte App): https://claude.ai/artifact/BtH78uqJJJ6vrDVTeBpvcP
 
 Siehe auch [[Coach-Stil]] und [[Offene Fragen]].

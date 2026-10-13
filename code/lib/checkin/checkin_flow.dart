@@ -93,9 +93,6 @@ class _CheckInFlowState extends State<CheckInFlow> {
   @override
   Widget build(BuildContext context) {
     return CoachPage(
-      gradient: _phase == _Phase.reply
-          ? CoachStyle.summaryBackground
-          : CoachStyle.questionBackground,
       child: switch (_phase) {
         _Phase.questions => _buildQuestion(),
         _Phase.reading => const ReadingIndicator(
@@ -167,11 +164,14 @@ class CheckInReply extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 12),
-        const Text('DEIN COACH · HEUTE', style: CoachStyle.label),
+        const Text('HEUTE', style: CoachStyle.goldLabel),
         const SizedBox(height: 12),
         const Text('Dein Tag', style: CoachStyle.question),
         const SizedBox(height: 20),
-        CoachNote(text: reply.isNotEmpty ? reply : noReplyYet),
+        CoachCard(
+          label: 'Dein Coach',
+          text: reply.isNotEmpty ? reply : noReplyYet,
+        ),
         const Spacer(),
         MainButton(label: 'Fertig', onPressed: onDone),
       ],

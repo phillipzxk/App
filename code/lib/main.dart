@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'checkin/checkin.dart';
@@ -11,6 +13,8 @@ import 'feed/feed_store.dart';
 import 'home/home_page.dart';
 import 'onboarding/onboarding_evaluator.dart';
 import 'onboarding/onboarding_flow.dart';
+import 'ui/coach_style.dart';
+import 'ui/logo.dart';
 
 void main() {
   runApp(
@@ -18,6 +22,7 @@ void main() {
       store: LocalProfileStore(),
       diary: LocalDiaryStore(),
       feed: LocalFeedStore(),
+      splash: const Duration(milliseconds: 1500),
     ),
   );
 }
@@ -32,6 +37,7 @@ class CoachApp extends StatelessWidget {
     this.checkInEvaluator = const NoCheckInEvaluator(),
     this.feedCoach = const NoFeedCoach(),
     this.clock = DateTime.now,
+    this.splash = Duration.zero,
   });
 
   final ProfileStore store;
@@ -42,19 +48,21 @@ class CoachApp extends StatelessWidget {
   final FeedCoach feedCoach;
   final DateTime Function() clock;
 
+  /// How long the start screen with the logo stays at least.
+  final Duration splash;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Coach',
+      title: 'Groundset',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorSchemeSeed: Colors.teal,
-        useMaterial3: true,
-        fontFamily: 'Figtree',
-      ),
-      darkTheme: ThemeData(
-        colorSchemeSeed: Colors.teal,
-        brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: CoachStyle.gold,
+          primary: CoachStyle.gold,
+          surface: CoachStyle.card,
+        ),
+        scaffoldBackgroundColor: CoachStyle.page,
         useMaterial3: true,
         fontFamily: 'Figtree',
       ),
@@ -77,11 +85,25 @@ class StartGate extends StatefulWidget {
 class _StartGateState extends State<StartGate> {
   UserProfile? _profile;
   bool _checkedInToday = false;
+  late bool _splashing = widget.app.splash > Duration.zero;
+  Timer? _splashTimer;
 
   @override
   void initState() {
     super.initState();
+    if (_splashing) {
+      _splashTimer = Timer(
+        widget.app.splash,
+        () => setState(() => _splashing = false),
+      );
+    }
     _load();
+  }
+
+  @override
+  void dispose() {
+    _splashTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -103,9 +125,7 @@ class _StartGateState extends State<StartGate> {
   @override
   Widget build(BuildContext context) {
     final profile = _profile;
-    if (profile == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+    if (profile == null || _splashing) return const SplashScreen();
     if (!profile.isOnboarded) {
       return OnboardingFlow(
         store: widget.app.store,
@@ -129,6 +149,36 @@ class _StartGateState extends State<StartGate> {
       coach: widget.app.feedCoach,
       clock: widget.app.clock,
       onRestartOnboarding: _restartOnboarding,
+    );
+  }
+}
+
+/// Start screen with the logo, shown briefly when the app opens.
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: CoachStyle.page,
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const LogoMark(size: 120),
+            const SizedBox(height: 14),
+            const Wordmark(fontSize: 18),
+            const SizedBox(height: 28),
+            Text(
+              'Das Fundament für jeden Tag.',
+              style: CoachStyle.body.copyWith(
+                color: CoachStyle.inkSoft,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

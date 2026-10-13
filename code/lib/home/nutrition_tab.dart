@@ -288,13 +288,9 @@ class _KcalEditorState extends State<KcalEditor> {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: on
-                ? CoachStyle.gold.withValues(alpha: 0.18)
-                : Colors.white.withValues(alpha: 0.06),
+            color: on ? const Color(0xFFF1E6D2) : CoachStyle.card,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: on ? CoachStyle.gold : Colors.white.withValues(alpha: 0.2),
-            ),
+            border: Border.all(color: on ? CoachStyle.gold : CoachStyle.line),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

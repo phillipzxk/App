@@ -4,6 +4,7 @@ import '../data/profile_store.dart';
 import '../data/user_profile.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
+import '../ui/logo.dart';
 import 'onboarding_evaluator.dart';
 import 'onboarding_questions.dart';
 
@@ -77,9 +78,6 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   @override
   Widget build(BuildContext context) {
     return CoachPage(
-      gradient: _phase == _Phase.summary
-          ? CoachStyle.summaryBackground
-          : CoachStyle.questionBackground,
       child: switch (_phase) {
         _Phase.name => _buildName(),
         _Phase.questions => _buildQuestion(),
@@ -100,7 +98,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 12),
-        const Text('BEVOR WIR STARTEN', style: CoachStyle.label),
+        const Align(alignment: Alignment.centerLeft, child: LogoMark(size: 56)),
+        const SizedBox(height: 16),
+        const Text('BEVOR WIR STARTEN', style: CoachStyle.goldLabel),
         const SizedBox(height: 12),
         const Text('Wie heißt du?', style: CoachStyle.question),
         const SizedBox(height: 6),
@@ -186,7 +186,7 @@ class _Summary extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 12),
-        const Text('DEIN START', style: CoachStyle.label),
+        const Text('DEIN START', style: CoachStyle.goldLabel),
         const SizedBox(height: 12),
         const Text('So sehe ich dich gerade', style: CoachStyle.question),
         const SizedBox(height: 20),

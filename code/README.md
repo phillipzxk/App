@@ -23,7 +23,8 @@ lib/data/profile_store.dart           Speichern (lokal, später online)
 lib/onboarding/onboarding_questions.dart  Die 6 Fragen
 lib/onboarding/onboarding_flow.dart   Die Onboarding-Bildschirme
 lib/onboarding/onboarding_evaluator.dart  KI-Auswertung (noch Platzhalter)
-lib/ui/coach_style.dart               Farben und Schriften aus dem Mockup
+lib/ui/coach_style.dart               Groundset-Farben und Schriften (siehe Umsetzung/Design)
+lib/ui/logo.dart                      Logo „Wurzeln und Trieb“ und Schriftzug
 lib/home/                            Main Feed: Leiste unten und die 5 Seiten
 lib/feed/                            Trainingsplan, Abendroutine, kcal-Ziel, Coach-Fragen und Speichern
 lib/checkin/                          Täglicher Check-in: Fragen, Ablauf, KI-Antwort (Platzhalter)

@@ -45,7 +45,7 @@ class _ChartPainter extends CustomPainter {
     }
 
     final grid = Paint()
-      ..color = Colors.white.withValues(alpha: 0.12)
+      ..color = CoachStyle.line
       ..strokeWidth = 1;
     for (final y in [pad, size.height / 2, size.height - pad]) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);

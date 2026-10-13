@@ -119,8 +119,8 @@ class _WeekRow extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
               decoration: BoxDecoration(
                 color: i == today.weekday - 1
-                    ? CoachStyle.gold
-                    : Colors.white.withValues(alpha: 0.05),
+                    ? CoachStyle.dark
+                    : const Color(0xFFF1ECE2),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Column(
@@ -131,7 +131,7 @@ class _WeekRow extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                       color: i == today.weekday - 1
-                          ? const Color(0xFF2B2008)
+                          ? CoachStyle.goldSoft
                           : CoachStyle.ink,
                     ),
                   ),
@@ -145,7 +145,7 @@ class _WeekRow extends StatelessWidget {
                       fontSize: 11,
                       height: 1.2,
                       color: i == today.weekday - 1
-                          ? const Color(0xFF2B2008)
+                          ? CoachStyle.goldSoft
                           : CoachStyle.inkSoft,
                     ),
                   ),

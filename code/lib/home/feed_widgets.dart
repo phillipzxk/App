@@ -3,33 +3,80 @@ import 'package:flutter/material.dart';
 import '../feed/feed_data.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
+import '../ui/logo.dart';
 
 /// Shown wherever the AI will write something once it is connected.
 const aiPending = 'Kommt, sobald die KI angeschlossen ist.';
 
-/// Title of a page in the Main Feed, e.g. "BEREICH" over "Training".
+/// Head of a page in the Main Feed: fine golden rings in the corner, like
+/// tree rings, and a gold ground line as in the logo. On "Heute" it also
+/// carries the logo.
 class PageHeader extends StatelessWidget {
-  const PageHeader({super.key, required this.label, required this.title});
+  const PageHeader({
+    super.key,
+    required this.label,
+    required this.title,
+    this.brand = false,
+  });
 
   final String label;
   final String title;
+  final bool brand;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 12),
-        Text(label.toUpperCase(), style: CoachStyle.label),
-        const SizedBox(height: 6),
-        Text(title, style: CoachStyle.question),
-        const SizedBox(height: 20),
-      ],
+    return Container(
+      margin: const EdgeInsets.only(bottom: 18),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: CoachStyle.gold, width: 2)),
+      ),
+      child: CustomPaint(
+        painter: _RingsPainter(),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(2, 16, 2, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (brand) ...[
+                const Row(
+                  children: [
+                    LogoMark(size: 26),
+                    SizedBox(width: 6),
+                    Wordmark(fontSize: 11),
+                  ],
+                ),
+                const SizedBox(height: 14),
+              ],
+              Text(label.toUpperCase(), style: CoachStyle.label),
+              const SizedBox(height: 4),
+              Text(title, style: CoachStyle.title),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
 
-/// Rounded, slightly lighter box that holds one function of the feed.
+class _RingsPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.clipRect(Offset.zero & size);
+    final paint = Paint()
+      ..color = CoachStyle.gold.withValues(alpha: 0.16)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    final center = Offset(size.width * 0.88, -size.height * 0.25);
+    for (var r = 14.0; r < size.width * 0.7; r += 14) {
+      canvas.drawCircle(center, r, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Rounded light card that holds one function of the feed.
 class FeedCard extends StatelessWidget {
   const FeedCard({
     super.key,
@@ -50,12 +97,10 @@ class FeedCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: highlight ? 0.1 : 0.07),
+        color: CoachStyle.card,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: highlight
-              ? CoachStyle.gold.withValues(alpha: 0.5)
-              : Colors.white.withValues(alpha: 0.12),
+          color: highlight ? const Color(0xFFE2CFA9) : CoachStyle.line,
         ),
       ),
       child: Column(
@@ -63,9 +108,7 @@ class FeedCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(
-                child: Text(title.toUpperCase(), style: CoachStyle.label),
-              ),
+              Expanded(child: Text(title, style: CoachStyle.cardTitle)),
               ?trailing,
             ],
           ),
@@ -100,12 +143,12 @@ class Tag extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
     decoration: BoxDecoration(
-      color: Colors.white.withValues(alpha: 0.12),
+      color: const Color(0xFFF1E6D2),
       borderRadius: BorderRadius.circular(99),
     ),
     child: Text(
       text,
-      style: CoachStyle.label.copyWith(fontSize: 11, letterSpacing: 0),
+      style: CoachStyle.goldLabel.copyWith(fontSize: 11, letterSpacing: 0),
     ),
   );
 }
@@ -123,7 +166,12 @@ class GhostButton extends StatelessWidget {
     child: OutlinedButton(
       style: OutlinedButton.styleFrom(
         foregroundColor: CoachStyle.ink,
-        side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+        side: const BorderSide(color: CoachStyle.line, width: 1.5),
+        textStyle: const TextStyle(
+          fontFamily: 'Sora',
+          fontWeight: FontWeight.w600,
+          fontSize: 13.5,
+        ),
         shape: const StadiumBorder(),
       ),
       onPressed: onPressed,
@@ -160,7 +208,7 @@ class _BaselinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.18)
+      ..color = CoachStyle.bar
       ..strokeWidth = 1.5;
     final y = size.height / 2;
     for (var x = 0.0; x < size.width; x += 10) {
@@ -229,15 +277,15 @@ class _AskCoachCardState extends State<AskCoachCard> {
           minLines: 2,
           maxLines: 5,
           style: CoachStyle.body,
-          cursorColor: CoachStyle.ink,
+          cursorColor: CoachStyle.gold,
           decoration: InputDecoration(
             hintText: widget.hint,
             hintStyle: CoachStyle.body.copyWith(color: CoachStyle.inkSoft),
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.06),
+            fillColor: Colors.white,
             contentPadding: const EdgeInsets.all(12),
-            enabledBorder: _border(0.25),
-            focusedBorder: _border(0.5),
+            enabledBorder: _border(CoachStyle.line),
+            focusedBorder: _border(CoachStyle.gold),
           ),
         ),
         const SizedBox(height: 10),
@@ -254,13 +302,13 @@ class _AskCoachCardState extends State<AskCoachCard> {
     );
   }
 
-  static OutlineInputBorder _border(double alpha) => OutlineInputBorder(
+  static OutlineInputBorder _border(Color color) => OutlineInputBorder(
     borderRadius: BorderRadius.circular(14),
-    borderSide: BorderSide(color: Colors.white.withValues(alpha: alpha)),
+    borderSide: BorderSide(color: color),
   );
 }
 
-/// Full-screen editor page on the dark background with a save button.
+/// Full-screen editor page with a save button.
 class EditorPage extends StatelessWidget {
   const EditorPage({
     super.key,
@@ -334,7 +382,7 @@ class EditorField extends StatelessWidget {
     return TextField(
       controller: controller,
       style: CoachStyle.body,
-      cursorColor: CoachStyle.ink,
+      cursorColor: CoachStyle.gold,
       minLines: 1,
       maxLines: multiline ? 4 : 1,
       keyboardType: number
@@ -350,14 +398,14 @@ class EditorField extends StatelessWidget {
         suffixStyle: const TextStyle(color: CoachStyle.inkSoft),
         errorText: error,
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.06),
+        fillColor: CoachStyle.card,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
+          borderSide: const BorderSide(color: CoachStyle.line),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.5)),
+          borderSide: const BorderSide(color: CoachStyle.gold),
         ),
       ),
     );
