@@ -25,7 +25,7 @@ Aus dem Entwurf [[Onboarding-Fragebogen]] (2026-10-10):
 - Monetarisierung im Detail: was ist kostenlos, was kostenpflichtig (vgl. Antwort-Typ in [[KI-Antworten]])
 - Erinnerungen/Notifications für tägliches Tracking
 - Datenschutz / Datenschutzerklärung
-- ~~Name und Branding der App~~ **Entschieden 2026-10-13:** Groundset, siehe [[Design]] (Logo noch offen)
+- ~~Name und Branding der App~~ **Entschieden 2026-10-13:** Groundset mit Logo „Wurzeln und Trieb“, siehe [[Design]]
 - Verbindung zu Buch und Content
 - Mögliche Community-Elemente
 

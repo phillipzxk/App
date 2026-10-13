@@ -17,7 +17,7 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 - **MVP:** 1 von 5 Bausteinen erledigt (Konzept & Datenstruktur), Onboarding (6 Fragen) und täglicher Check-in (4 Fragen) mit Main Feed und Gewichtstracker programmiert, die KI folgt, siehe [[MVP-Fortschritt]]
 - **Code:** Flutter-App im Ordner `code/`, von Claude geschrieben; Onboarding, Check-in und Main Feed programmiert, siehe [[App-Code]] und [[Technischer Ansatz]]
 - **Vorschau im Browser:** https://claude.ai/artifact/BtH78uqJJJ6vrDVTeBpvcP
-- **Name/Branding:** Name **Groundset**, Farben und Schrift entschieden, Logo in Auswahl, siehe [[Design]]
+- **Name/Branding:** Name **Groundset**, Farben, Schrift und Logo entschieden, siehe [[Design]]
 
 ## Notizen
 
@@ -36,7 +36,7 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 - [[Täglicher Check-in]]: die 4 Leitfragen und der Ablauf
 - [[Main Feed]]: Startseite mit 5 Seiten (Heute, Training, Ernährung, Schlaf, Mindset)
 - [[Coach-Stil]]: wie die KI als Coach schreibt, mit Beispielen
-- [[Design]]: Name Groundset, Farben, Schrift und Logo
+- [[Design]]: Name Groundset, Farben, Schrift und Logo (Wurzeln und Trieb)
 
 ### Fortschritt
 - [[MVP-Fortschritt]]: was erledigt ist, was als Nächstes kommt
