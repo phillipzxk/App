@@ -1,47 +1,66 @@
 import 'package:flutter/material.dart';
 
-/// Colours and text styles of the approved onboarding mockup
-/// (https://claude.ai/artifact/JdmD7NVMayHub5fh3MN9Xn).
+/// Groundset design, decided with Phillip on 2026-10-13 (vault note
+/// Umsetzung/Design.md): warm sand white, champagne gold, dark buttons with
+/// gold text, Sora for headings and Figtree for text.
 abstract final class CoachStyle {
-  static const teal = Color(0xFF1F8F7A);
-  static const tealDeep = Color(0xFF0F3D35);
-  static const gold = Color(0xFFE8B04B);
-  static const ink = Color(0xFFF3F7F5);
-  static const inkSoft = Color(0xFFB8CBC5);
-
-  static const questionBackground = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    stops: [0, 0.7],
-    colors: [teal, tealDeep],
-  );
-
-  static const summaryBackground = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    stops: [0, 0.55, 1],
-    colors: [Color(0xFF2B5A4F), tealDeep, Color(0xFF3A2F12)],
-  );
+  static const page = Color(0xFFEFE9DE);
+  static const card = Color(0xFFF9F6F0);
+  static const line = Color(0xFFE0D6C4);
+  static const bar = Color(0xFFDED2BC);
+  static const gold = Color(0xFFB08A4F);
+  static const goldLight = Color(0xFFC9A86D);
+  static const goldSoft = Color(0xFFF3E3C2);
+  static const dark = Color(0xFF2A2620);
+  static const ink = dark;
+  static const inkSoft = Color(0xFF7D7466);
+  static const onDark = Color(0xFFF1EBE0);
 
   static const label = TextStyle(
     fontFamily: 'Figtree',
-    fontSize: 12,
-    letterSpacing: 1,
+    fontWeight: FontWeight.w600,
+    fontSize: 11.5,
+    letterSpacing: 1.4,
     color: inkSoft,
   );
 
-  static const question = TextStyle(
-    fontFamily: 'Fraunces',
+  static const goldLabel = TextStyle(
+    fontFamily: 'Figtree',
     fontWeight: FontWeight.w600,
-    fontSize: 24,
+    fontSize: 11.5,
+    letterSpacing: 1.4,
+    color: gold,
+  );
+
+  static const question = TextStyle(
+    fontFamily: 'Sora',
+    fontWeight: FontWeight.w600,
+    fontSize: 23,
     height: 1.3,
+    letterSpacing: -0.2,
+    color: ink,
+  );
+
+  static const title = TextStyle(
+    fontFamily: 'Sora',
+    fontWeight: FontWeight.w700,
+    fontSize: 26,
+    height: 1.2,
+    letterSpacing: -0.3,
+    color: ink,
+  );
+
+  static const cardTitle = TextStyle(
+    fontFamily: 'Sora',
+    fontWeight: FontWeight.w600,
+    fontSize: 15,
     color: ink,
   );
 
   static const body = TextStyle(
     fontFamily: 'Figtree',
     fontSize: 16,
-    height: 1.55,
+    height: 1.5,
     color: ink,
   );
 }

@@ -79,14 +79,6 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  CheckIn? get _today {
-    final key = dayKey(widget.clock());
-    for (final c in _checkIns) {
-      if (dayKey(c.datum) == key) return c;
-    }
-    return null;
-  }
-
   List<CoachFrage> _todayFragen(Bereich b) {
     final key = dayKey(widget.clock());
     return [
@@ -140,8 +132,10 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final pages = [
       TodayTab(
+        name: widget.profile.name,
         date: germanDate(widget.clock()),
-        checkIn: _today,
+        today: widget.clock(),
+        checkIns: _checkIns,
         onOpenArea: (b) => setState(() => _tab = b.index + 1),
         onRestartOnboarding: widget.onRestartOnboarding,
       ),
@@ -182,9 +176,9 @@ class _HomePageState extends State<HomePage> {
       ),
     ];
     return Scaffold(
-      backgroundColor: CoachStyle.tealDeep,
+      backgroundColor: CoachStyle.page,
       body: DecoratedBox(
-        decoration: const BoxDecoration(gradient: _background),
+        decoration: const BoxDecoration(color: CoachStyle.page),
         child: SafeArea(
           bottom: false,
           child: Center(
@@ -206,7 +200,8 @@ class _HomePageState extends State<HomePage> {
       ),
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
-          backgroundColor: const Color(0xFF0A2621),
+          backgroundColor: const Color(0xFFF6F2EA),
+          surfaceTintColor: Colors.transparent,
           indicatorColor: CoachStyle.gold,
           labelTextStyle: WidgetStateProperty.resolveWith(
             (states) => TextStyle(
@@ -215,14 +210,14 @@ class _HomePageState extends State<HomePage> {
                   ? FontWeight.w600
                   : FontWeight.w400,
               color: states.contains(WidgetState.selected)
-                  ? CoachStyle.gold
+                  ? CoachStyle.ink
                   : CoachStyle.inkSoft,
             ),
           ),
           iconTheme: WidgetStateProperty.resolveWith(
             (states) => IconThemeData(
               color: states.contains(WidgetState.selected)
-                  ? CoachStyle.tealDeep
+                  ? Colors.white
                   : CoachStyle.inkSoft,
             ),
           ),
@@ -236,28 +231,15 @@ class _HomePageState extends State<HomePage> {
               icon: Icon(Icons.fitness_center),
               label: 'Training',
             ),
-            NavigationDestination(
-              icon: Icon(Icons.restaurant),
-              label: 'Ernährung',
-            ),
+            NavigationDestination(icon: Icon(Icons.eco), label: 'Ernährung'),
             NavigationDestination(icon: Icon(Icons.bedtime), label: 'Schlaf'),
-            NavigationDestination(
-              icon: Icon(Icons.psychology),
-              label: 'Mindset',
-            ),
+            NavigationDestination(icon: Icon(Icons.spa), label: 'Mindset'),
           ],
         ),
       ),
     );
   }
 }
-
-const _background = LinearGradient(
-  begin: Alignment.topCenter,
-  end: Alignment.bottomCenter,
-  stops: [0, 0.3],
-  colors: [CoachStyle.teal, CoachStyle.tealDeep],
-);
 
 /// E.g. "Montag, 12. Oktober".
 String germanDate(DateTime d) {

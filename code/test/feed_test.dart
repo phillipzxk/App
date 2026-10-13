@@ -55,12 +55,17 @@ void main() {
 
   testWidgets('bottom bar and area tiles switch pages', (tester) async {
     await _openFeed(tester);
-    expect(find.text('Montag, 12. Oktober'), findsOneWidget);
+    expect(find.text('MONTAG, 12. OKTOBER'), findsOneWidget);
     expect(find.text('DEIN COACH · HEUTE'), findsOneWidget);
 
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('bereich-schlaf')).hitTestable(),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.byKey(const ValueKey('bereich-schlaf')));
     await tester.pumpAndSettle();
-    expect(find.text('DEINE ABENDROUTINE'), findsOneWidget);
+    expect(find.text('Deine Abendroutine'), findsOneWidget);
 
     await openTab(tester, 'Mindset');
     expect(find.text('„Ich will stolz auf mich sein.“'), findsOneWidget);
@@ -115,7 +120,7 @@ void main() {
 
     expect(feed.kcal?.aktivitaet, Aktivitaet.aktiv);
     expect(diary.weights.single.kg, 82.4);
-    expect(find.text('DEIN KCAL-ZIEL HEUTE'), findsOneWidget);
+    expect(find.text('Dein kcal-Ziel heute'), findsOneWidget);
     expect(find.textContaining('2.800'), findsOneWidget);
   });
 

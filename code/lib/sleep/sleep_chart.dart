@@ -31,7 +31,7 @@ class _BarPainter extends CustomPainter {
     double y(double h) => size.height * (1 - h / _max);
 
     final guide = Paint()
-      ..color = Colors.white.withValues(alpha: 0.2)
+      ..color = CoachStyle.inkSoft.withValues(alpha: 0.4)
       ..strokeWidth = 1;
     for (var x = 0.0; x < size.width; x += 8) {
       canvas.drawLine(Offset(x, y(8)), Offset(x + 4, y(8)), guide);
@@ -44,10 +44,10 @@ class _BarPainter extends CustomPainter {
       final left = slot * i + (slot - width) / 2;
       final paint = Paint()
         ..color = h == null
-            ? Colors.white.withValues(alpha: 0.08)
+            ? CoachStyle.bar.withValues(alpha: 0.5)
             : i == nights.length - 1
             ? CoachStyle.gold
-            : CoachStyle.gold.withValues(alpha: 0.7);
+            : CoachStyle.bar;
       final top = h == null ? size.height - 4 : y(h.clamp(0, _max));
       canvas.drawRRect(
         RRect.fromLTRBR(

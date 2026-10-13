@@ -15,7 +15,15 @@ class FixedEvaluator implements OnboardingEvaluator {
   Future<String?> summarize(UserProfile answers) async => text;
 }
 
+Future<void> enterName(WidgetTester tester, [String name = 'Max']) async {
+  await tester.enterText(find.byType(TextField), name);
+  await tester.pump();
+  await tester.tap(find.text('Weiter'));
+  await tester.pumpAndSettle();
+}
+
 Future<void> answerAll(WidgetTester tester) async {
+  await enterName(tester);
   for (var i = 1; i <= 6; i++) {
     await tester.enterText(find.byType(TextField), 'Antwort $i');
     await tester.pump();
@@ -37,10 +45,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('FRAGE 1 VON 6 · ZIEL'), findsOneWidget);
+    expect(find.text('Wie heißt du?'), findsOneWidget);
     await answerAll(tester);
 
     final p = store.profile;
+    expect(p.name, 'Max');
     expect(
       [
         p.ziel,
@@ -85,6 +94,23 @@ void main() {
     expect(store.profile.zusammenfassung, 'Du bist dran.');
   });
 
+  testWidgets('empty name cannot continue', (tester) async {
+    await tester.pumpWidget(
+      CoachApp(
+        store: MemoryProfileStore(),
+        diary: MemoryDiaryStore(),
+        feed: MemoryFeedStore(),
+        clock: fixedClock,
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '  ');
+    await tester.pump();
+    await tester.tap(find.text('Weiter'));
+    await tester.pumpAndSettle();
+    expect(find.text('Wie heißt du?'), findsOneWidget);
+  });
+
   testWidgets('empty answer cannot continue', (tester) async {
     await tester.pumpWidget(
       CoachApp(
@@ -95,6 +121,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await enterName(tester);
     await tester.enterText(find.byType(TextField), '   ');
     await tester.pump();
     await tester.tap(find.text('Weiter'));
@@ -112,6 +139,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await enterName(tester);
     await tester.enterText(find.byType(TextField), 'Mein Ziel');
     await tester.pump();
     await tester.tap(find.text('Weiter'));
@@ -122,6 +150,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('FRAGE 1 VON 6'), findsOneWidget);
     expect(find.text('Mein Ziel'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Zurück'));
+    await tester.pumpAndSettle();
+    expect(find.text('Wie heißt du?'), findsOneWidget);
+    expect(find.text('Max'), findsOneWidget);
   });
 
   testWidgets('onboarded users go straight to the check-in', (tester) async {

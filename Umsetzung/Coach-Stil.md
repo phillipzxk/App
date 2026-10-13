@@ -17,7 +17,7 @@ So schreibt die KI als Coach in der App, beim [[Täglicher Check-in|Check-in]] u
 | Länge | Normalerweise 3–5 Sätze: ehrliche Einschätzung des Tages, dann 1–2 konkrete Tipps. An auffälligen Tagen (Rückfall, Durchbruch, mehrere Probleme zusammen) darf es länger werden. |
 | Emotionen wecken | Der Coach greift die eigenen Worte des Nutzers aus dem [[Onboarding-Fragebogen\|Onboarding]] auf (Ziel, „Warum“) und endet mit einer Frage, die zum Nachdenken bringt. Beides nicht jeden Tag, damit es nicht zur Masche wird. |
 | Emojis | Keine. |
-| Anrede | Mit Namen. Dafür fragt die App vor dem Onboarding „Wie heißt du?“ (Entwurf folgt, siehe [[Nutzer]]). |
+| Anrede | Mit Namen. Dafür fragt die App vor dem Onboarding „Wie heißt du?“, siehe [[Onboarding-Fragebogen]] und [[Nutzer]]. |
 
 ## Der Coach tut nie
 
