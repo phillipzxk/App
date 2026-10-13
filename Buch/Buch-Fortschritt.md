@@ -2,12 +2,12 @@
 title: Buch-Fortschritt
 tags: [buch, fortschritt, original]
 quelle: https://claude.ai/artifact/WMWBpk9rbzfB47RRBXD9Zg
-gespeichert: 2026-10-12
+gespeichert: 2026-10-13
 ---
 
 # Buch-Fortschritt (Originalseite)
 
-Wortgetreue Abschrift der Claude-Seite „Buch-Fortschritt“, Stand 2026-10-12. Die Originaldatei mit Layout liegt daneben: [[Buch-Fortschritt.html]] (im Browser öffnen). Online: https://claude.ai/artifact/WMWBpk9rbzfB47RRBXD9Zg
+Wortgetreue Abschrift der Claude-Seite „Buch-Fortschritt“, Stand 2026-10-13. Die Originaldatei mit Layout liegt daneben: [[Buch-Fortschritt.html]] (im Browser öffnen). Online: https://claude.ai/artifact/WMWBpk9rbzfB47RRBXD9Zg
 
 Übersicht: [[Buch – Übersicht]].
 
@@ -19,7 +19,7 @@ Wortgetreue Abschrift der Claude-Seite „Buch-Fortschritt“, Stand 2026-10-12.
 
 „Ein Buch über die Reise, sich selbst zu finden – und das Fundament zu bauen, das diesen Weg trägt.“
 
-**9 / 11 Kapitel**
+**10 / 11 Kapitel**
 
 **01 Der Test** · geschrieben
 Einstiegsfragen zum Status quo – körperlich und sozial/mental. Spiegelt bereits typische Tiefpunkt-Situationen.
@@ -50,8 +50,8 @@ Dankbarkeit statt Sucht nach Veränderung, der „dunkle Tunnel“, Charakter un
 Dranbleiben trotz unsichtbarer Fortschritte – Körperdysmorphie, Vergleich mit anderen, Schule und Ernährung als eigenes Beispiel, Dankbarkeit als Entscheidung, Plateaus und Periodisierung.
 > Testfrage: „Hast du das Gefühl, mehr zu geben als andere – mehr zu lernen, öfter zu trainieren, mehr auf deine Ernährung zu achten – aber keinen wirklichen Unterschied bezüglich des Erfolges zwischen dir und anderen zu sehen?“
 
-**10 Der Alltag damit** · offen
-Wie sich das Leben konkret verändert, wenn man alles anwendet – praktische Beispiele für Tag und Woche.
+**10 Der Alltag damit** · geschrieben
+Ehrlicher Blick auf den eigenen Alltag: Morgenroutine, Arbeit, Training und Essen ohne Perfektion, wirklich da sein bei Familie und Freunden, Ruhetage, Fortschritt in Wellen.
 
 **11 Der Test (Teil 2) + Fahrplan** · offen
 Dieselben Eingangsfragen erneut – direkter Vergleich für den Leser, Ausblick und nächste Schritte.
