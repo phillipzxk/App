@@ -13,7 +13,7 @@ Personalisiertes Buch, das mit einem Selbsttest beginnt und endet (Vorher-Nachhe
 
 ## Stand
 
-**10 von 11 Kapiteln geschrieben** (Stand 2026-10-13), siehe [[Buch-Fortschritt]].
+**Alle 11 Kapitel geschrieben** (Stand 2026-10-13). Das komplette Manuskript liegt als [[Buch-komplett.docx]] vor., siehe [[Buch-Fortschritt]].
 
 | Nr. | Kapitel | Status |
 |---|---|---|
@@ -26,7 +26,7 @@ Personalisiertes Buch, das mit einem Selbsttest beginnt und endet (Vorher-Nachhe
 | 8 | [[Kapitel 8 – Wer du wirst, wenn sich alles verändert]] | geschrieben |
 | 9 | [[Kapitel 9 – Fortschritt, den man nicht sieht]] (Special) | geschrieben |
 | 10 | [[Kapitel 10 – Der Alltag damit]] | geschrieben |
-| 11 | Der Test (Teil 2) + Fahrplan | offen |
+| 11 | [[Kapitel 11 – Der Test (Teil 2) + Fahrplan]] | geschrieben |
 
 ## Notizen
 

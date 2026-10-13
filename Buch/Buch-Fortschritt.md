@@ -19,7 +19,7 @@ Wortgetreue Abschrift der Claude-Seite „Buch-Fortschritt“, Stand 2026-10-13.
 
 „Ein Buch über die Reise, sich selbst zu finden – und das Fundament zu bauen, das diesen Weg trägt.“
 
-**10 / 11 Kapitel**
+**11 / 11 Kapitel**
 
 **01 Der Test** · geschrieben
 Einstiegsfragen zum Status quo – körperlich und sozial/mental. Spiegelt bereits typische Tiefpunkt-Situationen.
@@ -53,7 +53,7 @@ Dranbleiben trotz unsichtbarer Fortschritte – Körperdysmorphie, Vergleich mit
 **10 Der Alltag damit** · geschrieben
 Ehrlicher Blick auf den eigenen Alltag: Morgenroutine, Arbeit, Training und Essen ohne Perfektion, wirklich da sein bei Familie und Freunden, Ruhetage, Fortschritt in Wellen.
 
-**11 Der Test (Teil 2) + Fahrplan** · offen
-Dieselben Eingangsfragen erneut – direkter Vergleich für den Leser, Ausblick und nächste Schritte.
+**11 Der Test (Teil 2) + Fahrplan** · geschrieben
+Fahrplan mit acht Wegweisern aus dem Buch, Schlusswort – und zum Abschluss dieselben sieben Fragen wie am Anfang, zum direkten Vergleich.
 
 Zielgruppe: Fortgeschrittene, die stagnieren — und alle, die ihr Leben verbessern wollen
