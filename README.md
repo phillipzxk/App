@@ -2,7 +2,7 @@
 title: App – Startseite
 tags: [app, index]
 erstellt: 2026-10-09
-aktualisiert: 2026-10-12
+aktualisiert: 2026-10-13
 ---
 
 # App – Sport & Selbstoptimierung
@@ -35,6 +35,7 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 - [[Onboarding-Fragebogen]]: Prinzip, die 6 Fragen und die Bildschirme
 - [[Täglicher Check-in]]: die 4 Leitfragen und der Ablauf
 - [[Main Feed]]: Startseite mit 5 Seiten (Heute, Training, Ernährung, Schlaf, Mindset)
+- [[Coach-Stil]]: wie die KI als Coach schreibt, mit Beispielen
 
 ### Fortschritt
 - [[MVP-Fortschritt]]: was erledigt ist, was als Nächstes kommt
