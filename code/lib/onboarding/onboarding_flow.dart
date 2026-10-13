@@ -7,8 +7,9 @@ import '../ui/coach_widgets.dart';
 import 'onboarding_evaluator.dart';
 import 'onboarding_questions.dart';
 
-/// The onboarding: six questions answered in the user's own words, then the
-/// AI reads all answers at once and shows "So sehe ich dich gerade".
+/// The onboarding: first the user's name, then six questions answered in the
+/// user's own words, then the AI reads all answers at once and shows
+/// "So sehe ich dich gerade".
 ///
 /// The profile is saved once all six answers are given, so a user who quits
 /// halfway starts over next time.
@@ -28,18 +29,20 @@ class OnboardingFlow extends StatefulWidget {
   State<OnboardingFlow> createState() => _OnboardingFlowState();
 }
 
-enum _Phase { questions, evaluating, summary }
+enum _Phase { name, questions, evaluating, summary }
 
 class _OnboardingFlowState extends State<OnboardingFlow> {
-  _Phase _phase = _Phase.questions;
+  _Phase _phase = _Phase.name;
   int _index = 0;
   UserProfile _profile = const UserProfile();
+  final _nameController = TextEditingController();
   late final List<TextEditingController> _controllers = [
     for (final _ in onboardingQuestions) TextEditingController(),
   ];
 
   @override
   void dispose() {
+    _nameController.dispose();
     for (final c in _controllers) {
       c.dispose();
     }
@@ -53,7 +56,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       setState(() => _index++);
       return;
     }
-    var profile = const UserProfile();
+    var profile = UserProfile(name: _nameController.text.trim());
     for (var i = 0; i < onboardingQuestions.length; i++) {
       profile = onboardingQuestions[i].apply(
         profile,
@@ -78,6 +81,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           ? CoachStyle.summaryBackground
           : CoachStyle.questionBackground,
       child: switch (_phase) {
+        _Phase.name => _buildName(),
         _Phase.questions => _buildQuestion(),
         _Phase.evaluating => const ReadingIndicator(
           text: 'Ich lese deine Antworten …',
@@ -87,6 +91,36 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           onContinue: () => widget.onFinished(_profile),
         ),
       },
+    );
+  }
+
+  Widget _buildName() {
+    return Column(
+      key: const ValueKey('name'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 12),
+        const Text('BEVOR WIR STARTEN', style: CoachStyle.label),
+        const SizedBox(height: 12),
+        const Text('Wie heißt du?', style: CoachStyle.question),
+        const SizedBox(height: 6),
+        Text(
+          'So spricht dich dein Coach an.',
+          style: CoachStyle.body.copyWith(color: CoachStyle.inkSoft),
+        ),
+        const SizedBox(height: 20),
+        NameField(
+          controller: _nameController,
+          onChanged: (_) => setState(() {}),
+        ),
+        const Spacer(),
+        MainButton(
+          label: 'Weiter',
+          onPressed: _nameController.text.trim().isEmpty
+              ? null
+              : () => setState(() => _phase = _Phase.questions),
+        ),
+      ],
     );
   }
 
@@ -101,12 +135,17 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         const SizedBox(height: 8),
         Row(
           children: [
-            if (_index > 0)
-              IconButton(
-                icon: const Icon(Icons.arrow_back, color: CoachStyle.inkSoft),
-                tooltip: 'Zurück',
-                onPressed: () => setState(() => _index--),
-              ),
+            IconButton(
+              icon: const Icon(Icons.arrow_back, color: CoachStyle.inkSoft),
+              tooltip: 'Zurück',
+              onPressed: () => setState(() {
+                if (_index > 0) {
+                  _index--;
+                } else {
+                  _phase = _Phase.name;
+                }
+              }),
+            ),
             Expanded(
               child: Text(
                 'FRAGE ${_index + 1} VON ${onboardingQuestions.length} · '

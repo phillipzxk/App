@@ -12,7 +12,7 @@ Teil von [[Datenmodell]].
 | Feld | Beschreibung |
 |---|---|
 | Nutzer-ID | automatisch |
-| Name / Anzeigename | Vorname; der Coach spricht den Nutzer damit an (entschieden 2026-10-13, siehe [[Coach-Stil]]). Abfrage „Wie heißt du?“ vor dem Onboarding, noch nicht programmiert. |
+| Name / Anzeigename | Vorname; der Coach spricht den Nutzer damit an (entschieden 2026-10-13, siehe [[Coach-Stil]]). Abfrage „Wie heißt du?“ vor dem [[Onboarding-Fragebogen|Onboarding]], Feld `name`. |
 | E-Mail | |
 | Registrierungsdatum | |
 | Abo-Status | kostenlos / aktiv-bezahlt / gekündigt |

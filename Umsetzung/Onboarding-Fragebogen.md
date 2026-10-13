@@ -3,7 +3,7 @@ title: Onboarding-Fragebogen
 tags: [umsetzung, onboarding, mvp]
 aliases: [Onboarding, Einstiegs-Fragebogen]
 erstellt: 2026-10-10
-aktualisiert: 2026-10-11
+aktualisiert: 2026-10-13
 status: programmiert, KI-Auswertung fehlt noch
 ---
 
@@ -25,7 +25,7 @@ Alles hier haben Phillip und Claude am 2026-10-11 gemeinsam festgelegt, Frage f�
 
 ```mermaid
 flowchart LR
-    F1[1 Ziel] --> F2[2 Motivation] --> F3[3 Level] --> F4[4 Training] --> F5[5 Ernährung] --> F6[6 Schlaf & Energie]
+    N[Wie heißt du?] --> F1[1 Ziel] --> F2[2 Motivation] --> F3[3 Level] --> F4[4 Training] --> F5[5 Ernährung] --> F6[6 Schlaf & Energie]
     F6 --> A[Auswertung durch die KI] --> Z[So sehe ich dich gerade] --> H[Täglicher Feed]
 ```
 
@@ -42,7 +42,8 @@ flowchart LR
 
 ## Bildschirme
 
-- **Fragen 1–6:** oben ein Fortschrittsbalken in 6 Teilen und klein „Frage X von 6 · Thema“, darunter die Frage und ein großes Textfeld („Schreib in deinen eigenen Worten …“). Button „Weiter“, bei Frage 6 „Fertig“. Weiter geht es erst, wenn etwas eingetragen ist. Ab Frage 2 führt ein Pfeil zurück, die bisherige Antwort bleibt erhalten.
+- **Wie heißt du?** (neu seit 2026-10-13, mit Phillip festgelegt): Einmal ganz am Anfang. Klein „Bevor wir starten“, darunter „Wie heißt du?“ und „So spricht dich dein Coach an.“, ein einzeiliges Feld „Dein Vorname“, Button „Weiter“ (erst wenn etwas drinsteht). Gespeichert als `name` in [[Nutzer]]; der Coach spricht den Nutzer damit an, siehe [[Coach-Stil]].
+- **Fragen 1–6:** oben ein Fortschrittsbalken in 6 Teilen und klein „Frage X von 6 · Thema“, darunter die Frage und ein großes Textfeld („Schreib in deinen eigenen Worten …“). Button „Weiter“, bei Frage 6 „Fertig“. Weiter geht es erst, wenn etwas eingetragen ist. Ein Pfeil führt zurück (von Frage 1 zur Namensfrage), die bisherige Antwort bleibt erhalten.
 - **Auswertung:** „Ich lese deine Antworten …“ während die KI arbeitet.
 - **So sehe ich dich gerade:** die Zusammenfassung der KI (Feld `zusammenfassung`), Button „Los geht's“.
 

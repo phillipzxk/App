@@ -23,6 +23,7 @@ class LocalProfileStore implements ProfileStore {
     'ernaehrung',
     'schlaf_energie',
     'zusammenfassung',
+    'name',
   ];
 
   /// Keys of the first onboarding version, removed on save and clear.
@@ -40,6 +41,7 @@ class LocalProfileStore implements ProfileStore {
       ernaehrung: v[4],
       schlafEnergie: v[5],
       zusammenfassung: v[6],
+      name: v[7],
     );
   }
 
@@ -54,6 +56,7 @@ class LocalProfileStore implements ProfileStore {
       p.ernaehrung,
       p.schlafEnergie,
       p.zusammenfassung,
+      p.name,
     ];
     for (var i = 0; i < _keys.length; i++) {
       await prefs.setString(_keys[i], values[i]);

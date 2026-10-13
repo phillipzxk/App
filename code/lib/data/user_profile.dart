@@ -1,10 +1,12 @@
 /// Profile of the user, filled by the onboarding.
 ///
-/// Holds the answers to the six onboarding questions in the user's own
-/// words (see Umsetzung/Onboarding-Fragebogen.md) and the short AI summary
+/// Holds the first name (asked once before the questions; the coach
+/// addresses the user with it, see Umsetzung/Coach-Stil.md), the answers to
+/// the six onboarding questions in the user's own words (see Umsetzung/Onboarding-Fragebogen.md) and the short AI summary
 /// "So sehe ich dich gerade", which stays empty until the AI is connected.
 class UserProfile {
   const UserProfile({
+    this.name = '',
     this.ziel = '',
     this.motivation = '',
     this.level = '',
@@ -14,6 +16,7 @@ class UserProfile {
     this.zusammenfassung = '',
   });
 
+  final String name;
   final String ziel;
   final String motivation;
   final String level;
@@ -27,6 +30,7 @@ class UserProfile {
   bool get isOnboarded => ziel.isNotEmpty;
 
   UserProfile copyWith({
+    String? name,
     String? ziel,
     String? motivation,
     String? level,
@@ -36,6 +40,7 @@ class UserProfile {
     String? zusammenfassung,
   }) {
     return UserProfile(
+      name: name ?? this.name,
       ziel: ziel ?? this.ziel,
       motivation: motivation ?? this.motivation,
       level: level ?? this.level,

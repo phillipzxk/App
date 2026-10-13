@@ -32,6 +32,38 @@ class SegmentBar extends StatelessWidget {
 }
 
 /// Large free-text field on the dark background.
+/// One-line field for the user's first name.
+class NameField extends StatelessWidget {
+  const NameField({
+    super.key,
+    required this.controller,
+    required this.onChanged,
+  });
+
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      textCapitalization: TextCapitalization.words,
+      style: CoachStyle.body,
+      cursorColor: CoachStyle.ink,
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        hintText: 'Dein Vorname',
+        hintStyle: CoachStyle.body.copyWith(color: CoachStyle.inkSoft),
+        filled: true,
+        fillColor: Colors.white.withValues(alpha: 0.08),
+        contentPadding: const EdgeInsets.all(16),
+        enabledBorder: AnswerField._border(0.18),
+        focusedBorder: AnswerField._border(0.5),
+      ),
+    );
+  }
+}
+
 class AnswerField extends StatelessWidget {
   const AnswerField({
     super.key,
