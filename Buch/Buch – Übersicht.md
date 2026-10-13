@@ -5,7 +5,9 @@ erstellt: 2026-10-09
 aktualisiert: 2026-10-13
 ---
 
-# Buch: Sport & Selbstoptimierung im Alltag
+# Buch: Das Fundament
+
+**Untertitel:** Lernen aus einem Weg, der schon gegangen wurde (Titel festgelegt am 2026-10-13; Arbeitstitel war „Sport & Selbstoptimierung im Alltag“)
 
 „Ein Buch über die Reise, sich selbst zu finden – und das Fundament zu bauen, das diesen Weg trägt.“
 

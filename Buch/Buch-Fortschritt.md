@@ -13,9 +13,9 @@ Wortgetreue Abschrift der Claude-Seite „Buch-Fortschritt“, Stand 2026-10-13.
 
 ---
 
-*Sport & Selbstoptimierung im Alltag*
+*Lernen aus einem Weg, der schon gegangen wurde*
 
-## Dein Buch
+## Das Fundament
 
 „Ein Buch über die Reise, sich selbst zu finden – und das Fundament zu bauen, das diesen Weg trägt.“
 
