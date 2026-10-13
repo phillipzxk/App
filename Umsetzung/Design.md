@@ -34,5 +34,6 @@ Name und Aussehen der App, gemeinsam mit Phillip Schritt für Schritt festgelegt
 - Logo-Ideen: https://claude.ai/artifact/PY6EzHxPkQNHLp3y1z4tc5, https://claude.ai/artifact/TkuuHq63RA7N758uMib1EG, https://claude.ai/artifact/WriT1hw3DkqxCBtputQrL5
 - Schriftzug-Varianten: https://claude.ai/artifact/M3hwyD5CiX7c2gn1NUVVxv
 - **Endgültiges Logo:** https://claude.ai/artifact/ENS6JWmYyVMf146PPELPgs
+- Alle Bildschirme im neuen Design (Entwurf, 13.10.2026): https://claude.ai/artifact/FHd47YHCn7sT6Xy4yKDLgD
 
 Siehe auch [[Coach-Stil]] und [[Offene Fragen]].
