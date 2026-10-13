@@ -2,7 +2,7 @@
 title: Nutzer
 tags: [datenstruktur, tabelle]
 aliases: [Users]
-aktualisiert: 2026-10-11
+aktualisiert: 2026-10-13
 ---
 
 # Nutzer (Users)
@@ -12,7 +12,7 @@ Teil von [[Datenmodell]].
 | Feld | Beschreibung |
 |---|---|
 | Nutzer-ID | automatisch |
-| Name / Anzeigename | |
+| Name / Anzeigename | Vorname; der Coach spricht den Nutzer damit an (entschieden 2026-10-13, siehe [[Coach-Stil]]). Abfrage „Wie heißt du?“ vor dem Onboarding, noch nicht programmiert. |
 | E-Mail | |
 | Registrierungsdatum | |
 | Abo-Status | kostenlos / aktiv-bezahlt / gekündigt |

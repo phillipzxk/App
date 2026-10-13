@@ -17,7 +17,7 @@ Dritter Baustein im [[MVP-Fortschritt]] (Grundidee: [[Kernmechanik#2. Täglicher
 3. **Jeden Tag alle Bereiche:** 4 kurze Fragen zu Training, Ernährung, Schlaf und Mindset. Energie fragt die KI bei Schlaf oder Mindset mit ab. Mindset heißt hier: mental stärker werden und Dinge durchziehen, vor denen man sich früher gedrückt hat.
 4. **Eine Frage nach der anderen**, wie im Onboarding. Fühlt sich wie ein Gespräch an.
 6. **Kommt automatisch** (Phillip, 2026-10-12): Beim ersten Öffnen der App am Tag erscheint der Check-in von selbst, wie das Onboarding, ohne Knopf zum Starten. Erst wenn er beantwortet ist, öffnet sich der [[Main Feed]], zugeschnitten auf diesen Tag.
-5. **Eine KI-Antwort nach allen 4 Fragen.** Die KI schaut auf den ganzen Tag, erkennt Zusammenhänge zwischen den Bereichen (z. B. schlecht geschlafen und deshalb Heißhunger) und gibt 1–2 konkrete Tipps. Dabei vergibt sie intern die Bewertung für den [[Fortschritts-Verlauf]].
+5. **Eine KI-Antwort nach allen 4 Fragen.** Die KI schaut auf den ganzen Tag, erkennt Zusammenhänge zwischen den Bereichen (z. B. schlecht geschlafen und deshalb Heißhunger) und gibt 1–2 konkrete Tipps, im festgelegten [[Coach-Stil]]. Dabei vergibt sie intern die Bewertung für den [[Fortschritts-Verlauf]].
 
 ## Leitfragen
 
