@@ -18,8 +18,8 @@ Eine Karte, die online bezahlen kann: eine Visa- oder Mastercard-Debitkarte von 
 ## Schritt 1: KI-Konto bei Anthropic (kostet Guthaben)
 
 1. Geh auf console.anthropic.com und leg ein Konto an.
-2. Unter **Billing** lädst du Guthaben auf. Zum Testen reichen 10 Dollar für viele Wochen. Später rechnen wir mit etwa 5 bis 10 Cent pro aktivem Nutzer und Tag.
-3. Unter **Limits** stellst du ein monatliches Ausgabenlimit ein, zum Beispiel 20 Dollar. Dann kann nie mehr abgebucht werden.
+2. Unter **Billing** lädst du einmal den kleinsten Betrag auf (meist 5 Dollar). Mehr musst du nicht ausgeben: Mit dem günstigen Modell Claude Haiku 5.5 kostet eine Coach-Antwort weniger als 0,1 Cent. 5 Dollar reichen damit für viele tausend Antworten, beim Testen also für Monate.
+3. Unter **Limits** stellst du ein niedriges monatliches Limit ein, zum Beispiel 5 Dollar. Dann kann nie mehr abgebucht werden. Es gibt kein Abo, abgebucht wird nur, was du selbst auflädst.
 4. Unter **API Keys** klickst du auf **Create Key** und nennst ihn „Groundset“. Kopier den Schlüssel (er beginnt mit `sk-ant-`). Er wird nur einmal angezeigt.
 
 ## Schritt 2: Vermittler bei Cloudflare (kostenlos, keine Karte nötig)
@@ -48,7 +48,11 @@ Schick mir die Schlüssel bitte nie hier im Chat. So trägst du sie sicher ein:
 2. Ich schließe nacheinander an: die Antwort zum Check-in, „So sehe ich dich gerade“ nach dem Onboarding und die Coach-Felder auf den 5 Seiten. Alles im Coach-Stil, den wir festgelegt haben.
 3. Du testest in der Vorschau mit echten Antworten. Was dir nicht gefällt, ändern wir zusammen.
 
-## Alternative
+## Ganz ohne Geld
+
+Komplett kostenlos geht es nur mit einem freien KI-Modell direkt bei Cloudflare (kleines Gratis-Kontingent pro Tag, keine Karte). Das schreibt aber deutlich schwächeres Deutsch und trifft den Coach-Stil schlechter. Für Tests mit echten Nutzern würde ich es nicht nehmen.
+
+## Alternative zu Cloudflare
 
 Statt Cloudflare ginge auch Firebase von Google. Das braucht aber zusätzlich den Bezahl-Tarif „Blaze“ mit Karte und ist umständlicher einzurichten. Für den Anfang ist Cloudflare einfacher.
 
