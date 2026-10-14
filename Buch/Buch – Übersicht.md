@@ -15,15 +15,16 @@ Personalisiertes Buch, das mit einem Selbsttest beginnt und endet (Vorher-Nachhe
 
 ## Stand
 
-**Alle 11 Kapitel geschrieben** (Stand 2026-10-13). Das komplette Manuskript liegt als [[Buch-komplett.docx]] vor., siehe [[Buch-Fortschritt]].
+**Alle 11 Kapitel geschrieben** (Stand 2026-10-13). Das komplette Manuskript liegt als [[Buch-komplett.docx]] vor, gesetzt als [[Buch-komplett.pdf]]. Korrekturrunde eingearbeitet am 2026-10-14. Siehe [[Buch-Fortschritt]].
 
 | Nr. | Kapitel | Status |
 |---|---|---|
+| – | [[Bevor du beginnst]] | geschrieben |
 | 1 | [[Kapitel 1 – Der Test]] | geschrieben |
 | 2–3 | [[Kapitel 2-3 – Der Tiefpunkt, Die Wende\|Der Tiefpunkt / Die Wende]] | geschrieben |
 | 4 | [[Kapitel 4 – Wenn Optimierung zur Falle wird]] (Special) | geschrieben |
 | 5 | [[Kapitel 5 – Stärker in beide Richtungen]] | geschrieben |
-| 6 | [[Kapitel 6 – Das Fundament]] – die maximale Versorgung | geschrieben |
+| 6 | [[Kapitel 6 – Das Fundament\|Die maximale Versorgung]] | geschrieben |
 | 7 | [[Kapitel 7 – Die Kunst des Nichtstuns]] | geschrieben |
 | 8 | [[Kapitel 8 – Wer du wirst, wenn sich alles verändert]] | geschrieben |
 | 9 | [[Kapitel 9 – Fortschritt, den man nicht sieht]] (Special) | geschrieben |
