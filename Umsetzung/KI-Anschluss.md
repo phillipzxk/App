@@ -2,7 +2,7 @@
 title: KI-Anschluss
 tags: [umsetzung, ki, backend]
 stand: 2026-10-14
-status: Anleitung an Phillip geschickt, wartet auf Karte und Schlüssel
+status: Vermittler und App-Anschluss vorbereitet, wartet auf Karte und Schlüssel
 ---
 
 # KI-Anschluss
@@ -39,12 +39,16 @@ Schick mir die Schlüssel bitte nie hier im Chat. So trägst du sie sicher ein:
    - `ANTHROPIC_API_KEY` = dein Schlüssel aus Schritt 1
    - `CLOUDFLARE_API_TOKEN` = der Token aus Schritt 2
    - `CLOUDFLARE_ACCOUNT_ID` = die Account ID aus Schritt 2
-4. Speichern. Die neue Umgebung gilt für Unterhaltungen, die danach starten.
-5. Schreib mir dann einfach „Schlüssel sind drin“.
+4. Im selben Fenster unter **Network access**: Lass die Stufe auf „Limited“ und trag unter **Allowed domains** diese zwei Adressen ein (das Häkchen bei den Paketmanagern bleibt an):
+   - `api.cloudflare.com`
+   - `*.workers.dev`
+   Sonst darf ich Cloudflare von hier aus nicht erreichen.
+5. Speichern. Die neue Umgebung gilt für Unterhaltungen, die danach starten.
+6. Schreib mir dann einfach „Schlüssel sind drin“.
 
 ## Was ich danach mache
 
-1. Ich baue den Vermittler und stelle ihn bei Cloudflare online. Den KI-Schlüssel lege ich dort als Geheimnis ab, er landet nie in der App.
+1. Den Vermittler habe ich schon gebaut (Ordner `backend/` im Projekt). Ich stelle ihn bei Cloudflare online. Den KI-Schlüssel lege ich dort als Geheimnis ab, er landet nie in der App.
 2. Ich schließe nacheinander an: die Antwort zum Check-in, „So sehe ich dich gerade“ nach dem Onboarding und die Coach-Felder auf den 5 Seiten. Alles im Coach-Stil, den wir festgelegt haben.
 3. Du testest in der Vorschau mit echten Antworten. Was dir nicht gefällt, ändern wir zusammen.
 
