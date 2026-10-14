@@ -15,7 +15,7 @@ Personalisiertes Buch, das mit einem Selbsttest beginnt und endet (Vorher-Nachhe
 
 ## Stand
 
-**Alle 11 Kapitel geschrieben** (Stand 2026-10-13). Das komplette Manuskript liegt als [[Buch-komplett.docx]] vor, gesetzt als [[Buch-komplett.pdf]]. Korrekturrunde eingearbeitet am 2026-10-14. Siehe [[Buch-Fortschritt]].
+**Alle 11 Kapitel geschrieben** (Stand 2026-10-13). Das komplette Manuskript liegt als [[Buch-komplett.docx]] vor, gesetzt als [[Buch-komplett.pdf]]. Korrekturrunde eingearbeitet am 2026-10-14. Umfang: rund 13.600 Wörter, 60 Seiten (A5). Siehe [[Buch-Fortschritt]].
 
 | Nr. | Kapitel | Status |
 |---|---|---|
