@@ -16,6 +16,7 @@ Kernfeature aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Absch
 | Punkt | Entscheidung | Datum |
 |---|---|---|
 | Wer legt das Training fest? | **Eigener Plan + KI.** Der Nutzer schreibt seinen [[Trainingsplan]] wie bisher selbst in eigenen Worten (siehe [[Main Feed]]). Die KI passt ihn jede Woche an Termine und Check-ins an. | 2026-10-15 |
+| Wo stehen die Termine? | **Erst eigener Kalender, später beides.** Im MVP werden Termine nur in der App eingetragen, per Freitext an die KI. Das Verbinden mit Google- oder Apple-Kalender kommt nach dem MVP dazu. | 2026-10-15 |
 
 ## Ideen aus der Notiz, noch nicht besprochen
 
