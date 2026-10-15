@@ -7,6 +7,7 @@ import 'package:coach_app/data/user_profile.dart';
 import 'package:coach_app/feed/feed_data.dart';
 import 'package:coach_app/feed/feed_store.dart';
 import 'package:coach_app/feed/kcal.dart';
+import 'package:coach_app/planner/planner_data.dart';
 import 'package:coach_app/sleep/sleep.dart';
 import 'package:coach_app/weight/weight.dart';
 
@@ -87,6 +88,25 @@ class MemoryFeedStore implements FeedStore {
 
   @override
   Future<void> addFrage(CoachFrage f) async => fragen.add(f);
+
+  final termine = <Termin>[];
+  int? mahlzeiten;
+
+  @override
+  Future<List<Termin>> loadTermine() async => List.of(termine);
+
+  @override
+  Future<void> addTermin(Termin t) async => termine.add(t);
+
+  @override
+  Future<void> removeTermin(Termin t) async =>
+      termine.removeWhere((x) => x.erstellt == t.erstellt);
+
+  @override
+  Future<int?> loadMahlzeiten() async => mahlzeiten;
+
+  @override
+  Future<void> saveMahlzeiten(int n) async => mahlzeiten = n;
 }
 
 /// Monday, 12 October 2026, 18:00.

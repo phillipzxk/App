@@ -2,11 +2,13 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../planner/planner_data.dart';
 import 'feed_data.dart';
 import 'kcal.dart';
 
 /// Loads and saves what the user sets up in the Main Feed: training plan,
-/// evening routine, kcal data and what they wrote into the coach fields.
+/// evening routine, kcal data, what they wrote into the coach fields, and
+/// for the day plan their appointments and how many meals they want.
 ///
 /// Like the other stores, only a local implementation exists until the
 /// backend (Firebase) is set up.
@@ -24,6 +26,15 @@ abstract class FeedStore {
   /// All coach questions, oldest first.
   Future<List<CoachFrage>> loadFragen();
   Future<void> addFrage(CoachFrage frage);
+
+  /// All appointments of the day plan, in the order they were written.
+  Future<List<Termin>> loadTermine();
+  Future<void> addTermin(Termin termin);
+  Future<void> removeTermin(Termin termin);
+
+  /// Meals per day for the day plan; null until the user has set it.
+  Future<int?> loadMahlzeiten();
+  Future<void> saveMahlzeiten(int anzahl);
 }
 
 class LocalFeedStore implements FeedStore {
@@ -31,6 +42,8 @@ class LocalFeedStore implements FeedStore {
   static const _routineKey = 'abendroutine';
   static const _kcalKey = 'kcal_profil';
   static const _fragenKey = 'coach_fragen';
+  static const _termineKey = 'termine';
+  static const _mahlzeitenKey = 'mahlzeiten_pro_tag';
 
   Future<Object?> _read(String key) async {
     final raw = (await SharedPreferences.getInstance()).getString(key);
@@ -90,4 +103,33 @@ class LocalFeedStore implements FeedStore {
       ..add(frage);
     await _write(_fragenKey, [for (final f in all) f.toJson()]);
   }
+
+  @override
+  Future<List<Termin>> loadTermine() async {
+    final json = await _read(_termineKey) as List?;
+    return [
+      for (final e in json ?? const [])
+        Termin.fromJson(e as Map<String, dynamic>),
+    ];
+  }
+
+  @override
+  Future<void> addTermin(Termin termin) async {
+    final all = await loadTermine()
+      ..add(termin);
+    await _write(_termineKey, [for (final t in all) t.toJson()]);
+  }
+
+  @override
+  Future<void> removeTermin(Termin termin) async {
+    final all = await loadTermine()
+      ..removeWhere((t) => t.erstellt == termin.erstellt);
+    await _write(_termineKey, [for (final t in all) t.toJson()]);
+  }
+
+  @override
+  Future<int?> loadMahlzeiten() async => await _read(_mahlzeitenKey) as int?;
+
+  @override
+  Future<void> saveMahlzeiten(int anzahl) => _write(_mahlzeitenKey, anzahl);
 }
