@@ -7,7 +7,7 @@ aktualisiert: 2026-10-15
 
 # Tages-Planer: Kalender + Training
 
-Kernfeature aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Abschrift in [[App-Fortschritt]]). Grundlage für die KI-Automatisierung in der App. Wird ab 2026-10-15 mit Phillip Schritt für Schritt ausgearbeitet. Noch nicht gebaut.
+Kernfeature aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Abschrift in [[App-Fortschritt]]). Grundlage für die KI-Automatisierung in der App. Am 2026-10-15 mit Phillip Schritt für Schritt ausgearbeitet, alle Punkte aus der Notiz sind entschieden. Noch nicht gebaut.
 
 **Ziel (Phillip):** Kalender, Training und Essen wissen voneinander. Der Plan ist immer machbar, deshalb gibt es keine Ausreden mehr.
 
@@ -28,13 +28,13 @@ Kernfeature aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Absch
 | Wann macht die KI das Training wegen Schlaf/Energie leichter? | **Bei klarem Muster.** Erst ab einem klaren Muster aus den Check-ins (z. B. 2 schlechte Nächte hintereinander oder mehrere müde Tage) plant die KI leichter. Ein einzelner schlechter Tag reicht nicht. So darf die KI nachgeben („Keine Ausreden“ heißt nicht „kein Nachgeben“), ohne unnötig Fortschritt zu verlieren. | 2026-10-15 |
 | Wer legt die Mahlzeiten fest? | **Nutzer gibt die Zahl vor, die KI plant.** Der Nutzer gibt einmal an, wie viele Mahlzeiten er am Tag essen möchte. Zusammen mit seinem kcal-Ziel (beides wird in der App angezeigt, siehe [[Main Feed]]) stellt die KI daraus die Mahlzeiten im Tagesplan dar, angepasst an Termine und Arbeit. | 2026-10-15 |
 | Kalorien pro Mahlzeit anzeigen? | **Nein, nur Zeit + Größe.** Jede Mahlzeit zeigt Uhrzeit und Größe in Worten (z. B. „Hauptmahlzeit“, „kleiner Snack“). Das kcal-Ziel steuert im Hintergrund, wie groß die Mahlzeiten sind. Kein Zählen. | 2026-10-15 |
+| Wie taucht der Schlaf im Plan auf? | **KI rechnet die Bettzeit.** Die KI setzt die Bettzeit passend zum nächsten Morgen (Weckzeit, frühe Termine, spätes Training) und erinnert an die [[Abendroutine]]. | 2026-10-15 |
 
 ## Entwurf
 
 - Seite „Heute“ mit Tagesplan (Beispieltag, 2026-10-15): https://claude.ai/artifact/919CYY84MWcJ2HX2gAWgHG. Phillip: „top“.
 
-## Aus der Notiz, noch nicht besprochen
+## Aus der Notiz, zur Info
 
-- Schlaf in der Tagesansicht (wie er im Tagesplan auftaucht).
 - Hintergrund (Phillip): Vorsprung ist die Trainingsintelligenz: KI-Kalender gibt es schon (Motion, Reclaim, Google/Apple), die Kombination mit Trainingssteuerung und Essen nicht.
 - Erster Test ohne App: 4 Wochen mit Claude planen, notieren, wie oft kein Training ausgefallen ist; dazu Content „So plant KI meine Woche“.
