@@ -25,13 +25,10 @@ Kernfeature aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Absch
 | Erinnerungen im MVP? | **Ja, ins MVP.** Die App erinnert per Benachrichtigung an Termine und an das geplante Training des Tages. (Bisher standen Erinnerungen unter „Später“, siehe [[Roadmap nach dem MVP]].) | 2026-10-15 |
 | Ändert die KI selbst oder fragt sie? | **Selbst + rückgängig.** Die KI ändert den Trainingsplan sofort selbst und schreibt kurz dazu, warum. Der Nutzer kann die Änderung mit einem Tipp zurücknehmen. | 2026-10-15 |
 | Passt die KI das Essen genauso stark an wie das Training? | **Nein, Fokus auf Sport.** Das Training wird voll an den Kalender angepasst. Die Ernährung läuft leicht mit: Essenszeiten richten sich nach Training und Terminen, dazu der Tipp des Tages. Keine Speisepläne, kein Zählen. Grund: Der Vorsprung ist die Trainingsintelligenz, und der Plan soll machbar bleiben. | 2026-10-15 |
+| Wann macht die KI das Training wegen Schlaf/Energie leichter? | **Bei klarem Muster.** Erst ab einem klaren Muster aus den Check-ins (z. B. 2 schlechte Nächte hintereinander oder mehrere müde Tage) plant die KI leichter. Ein einzelner schlechter Tag reicht nicht. So darf die KI nachgeben („Keine Ausreden“ heißt nicht „kein Nachgeben“), ohne unnötig Fortschritt zu verlieren. | 2026-10-15 |
 
-## Ideen aus der Notiz, noch nicht besprochen
+## Aus der Notiz, noch nicht besprochen
 
-- Termine einfach schreiben („Mathe-Klausur Donnerstag, Freitag Geburtstag“), die KI trägt sie ein, sortiert sie und erinnert per Benachrichtigung.
-- Die KI passt Einheiten, Intensität und Volumen an (Klausurwoche = weniger Volumen, Ferien = Aufbauphase).
-- Tagesansicht mit Schule, Terminen, Training, Mahlzeiten und Schlaf.
-- Check-ins (Schlaf, Energie) fließen in die Planung der nächsten Tage ein.
-- Regel: „Keine Ausreden“ heißt nicht „kein Nachgeben“. Die KI darf sagen „diese Woche nur 2 leichte Einheiten, Prüfungen gehen vor“.
-- Vorsprung ist die Trainingsintelligenz: KI-Kalender gibt es schon (Motion, Reclaim, Google/Apple), die Kombination mit Trainingssteuerung und Essen nicht.
+- Schlaf in der Tagesansicht (wie er im Tagesplan auftaucht).
+- Hintergrund (Phillip): Vorsprung ist die Trainingsintelligenz: KI-Kalender gibt es schon (Motion, Reclaim, Google/Apple), die Kombination mit Trainingssteuerung und Essen nicht.
 - Erster Test ohne App: 4 Wochen mit Claude planen, notieren, wie oft kein Training ausgefallen ist; dazu Content „So plant KI meine Woche“.
