@@ -27,6 +27,7 @@ Kernfeature aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Absch
 | Passt die KI das Essen genauso stark an wie das Training? | **Nein, Fokus auf Sport.** Das Training wird voll an den Kalender angepasst. Die Ernährung läuft leicht mit: Essenszeiten richten sich nach Training und Terminen, dazu der Tipp des Tages. Keine Speisepläne, kein Zählen. Grund: Der Vorsprung ist die Trainingsintelligenz, und der Plan soll machbar bleiben. | 2026-10-15 |
 | Wann macht die KI das Training wegen Schlaf/Energie leichter? | **Bei klarem Muster.** Erst ab einem klaren Muster aus den Check-ins (z. B. 2 schlechte Nächte hintereinander oder mehrere müde Tage) plant die KI leichter. Ein einzelner schlechter Tag reicht nicht. So darf die KI nachgeben („Keine Ausreden“ heißt nicht „kein Nachgeben“), ohne unnötig Fortschritt zu verlieren. | 2026-10-15 |
 | Wer legt die Mahlzeiten fest? | **Nutzer gibt die Zahl vor, die KI plant.** Der Nutzer gibt einmal an, wie viele Mahlzeiten er am Tag essen möchte. Zusammen mit seinem kcal-Ziel (beides wird in der App angezeigt, siehe [[Main Feed]]) stellt die KI daraus die Mahlzeiten im Tagesplan dar, angepasst an Termine und Arbeit. | 2026-10-15 |
+| Kalorien pro Mahlzeit anzeigen? | **Nein, nur Zeit + Größe.** Jede Mahlzeit zeigt Uhrzeit und Größe in Worten (z. B. „Hauptmahlzeit“, „kleiner Snack“). Das kcal-Ziel steuert im Hintergrund, wie groß die Mahlzeiten sind. Kein Zählen. | 2026-10-15 |
 
 ## Entwurf
 
