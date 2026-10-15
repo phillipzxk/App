@@ -10,7 +10,7 @@ aktualisiert: 2026-10-12
 Nicht Teil des [[MVP-Fortschritt|MVP]]. Reihenfolge noch nicht festgelegt.
 
 - [ ] Freischaltbare, tiefere Coaching-Tipps (Monetarisierung) → [[Kernmechanik#5. Freischaltbare Coaching-Tipps]]
-- [ ] Erinnerungen / Notifications fürs tägliche Tracking
+- [ ] Erinnerungen / Notifications fürs tägliche Tracking (Erinnerungen an Termine und geplantes Training kommen schon ins MVP, siehe [[Tages-Planer]], beschlossen 2026-10-15)
 - [ ] Datenschutz / Datenschutzerklärung
 - [ ] Name, Branding und Design der App: eigener Schritt nach Check-in und Gewichtstracker, vor echten Testern (beschlossen 2026-10-12). Phillip will etwas Besonderes, nicht nur eine Farbe.
 - [ ] [[Main Feed]]: individuelle Hilfen als Reaktion auf die Check-in-Antworten
