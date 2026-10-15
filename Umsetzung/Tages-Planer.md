@@ -24,6 +24,7 @@ Kernfeature aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Absch
 | Wann plant die KI um? | **Sonntag + sofort.** Jeden Sonntag macht die KI den Trainingsplan für die neue Woche passend zu den Terminen. Kommt unter der Woche ein Termin dazu, passt sie die betroffenen Tage sofort an. | 2026-10-15 |
 | Erinnerungen im MVP? | **Ja, ins MVP.** Die App erinnert per Benachrichtigung an Termine und an das geplante Training des Tages. (Bisher standen Erinnerungen unter „Später“, siehe [[Roadmap nach dem MVP]].) | 2026-10-15 |
 | Ändert die KI selbst oder fragt sie? | **Selbst + rückgängig.** Die KI ändert den Trainingsplan sofort selbst und schreibt kurz dazu, warum. Der Nutzer kann die Änderung mit einem Tipp zurücknehmen. | 2026-10-15 |
+| Passt die KI das Essen genauso stark an wie das Training? | **Nein, Fokus auf Sport.** Das Training wird voll an den Kalender angepasst. Die Ernährung läuft leicht mit: Essenszeiten richten sich nach Training und Terminen, dazu der Tipp des Tages. Keine Speisepläne, kein Zählen. Grund: Der Vorsprung ist die Trainingsintelligenz, und der Plan soll machbar bleiben. | 2026-10-15 |
 
 ## Ideen aus der Notiz, noch nicht besprochen
 
