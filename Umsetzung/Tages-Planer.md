@@ -11,6 +11,8 @@ Kernfeature aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Absch
 
 **Ziel (Phillip):** Kalender, Training und Essen wissen voneinander. Der Plan ist immer machbar, deshalb gibt es keine Ausreden mehr.
 
+**Grundregel (Phillip, 2026-10-15):** Der Kalender ist für alles, nicht nur für Schule: Arbeit, Termine, Schule, Privates. Kommen Termine dazu, passt die KI das Training optimal an, sodass möglichst wenig Trainingsfluss, Intensität und Fortschritt verloren geht.
+
 ## Festgelegt
 
 | Punkt | Entscheidung | Datum |
