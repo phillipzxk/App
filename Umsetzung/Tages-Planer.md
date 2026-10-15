@@ -22,6 +22,7 @@ Kernfeature aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Absch
 | Wo kommt die Tagesansicht hin? | **In die Seite „Heute“** im [[Main Feed]]. Oben bleiben Coach-Antwort und Fokus der Woche, darunter kommt der Tagesplan mit dem Feld zum Termine-Schreiben. Es bleibt bei 5 Seiten. | 2026-10-15 |
 | Was zeigt der Plan bei den Mahlzeiten? | **Essenszeiten + KI-Tipp.** Der Plan zeigt, wann man isst, passend zu Training und Terminen, dazu pro Tag ein kurzer KI-Tipp, was zum Tag passt (z. B. „Klausurtag: leicht zu Mittag, damit du wach bleibst“). Kein Zählen, keine Lebensmitteldatenbank. | 2026-10-15 |
 | Wann plant die KI um? | **Sonntag + sofort.** Jeden Sonntag macht die KI den Trainingsplan für die neue Woche passend zu den Terminen. Kommt unter der Woche ein Termin dazu, passt sie die betroffenen Tage sofort an. | 2026-10-15 |
+| Erinnerungen im MVP? | **Ja, ins MVP.** Die App erinnert per Benachrichtigung an Termine und an das geplante Training des Tages. (Bisher standen Erinnerungen unter „Später“, siehe [[Roadmap nach dem MVP]].) | 2026-10-15 |
 
 ## Ideen aus der Notiz, noch nicht besprochen
 
