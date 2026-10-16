@@ -252,7 +252,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: CoachStyle.page,
       body: DecoratedBox(
-        decoration: const BoxDecoration(color: CoachStyle.page),
+        decoration: const BoxDecoration(gradient: CoachStyle.pageGradient),
         child: SafeArea(
           bottom: false,
           child: Center(

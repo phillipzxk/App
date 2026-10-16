@@ -27,54 +27,13 @@ class SupplementHinweis extends StatelessWidget {
     final text = next == null
         ? 'heute alles genommen'
         : '$offen offen, nächste ${next.zeit} ${next.name}';
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Material(
-        color: CoachStyle.card,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-          side: const BorderSide(color: CoachStyle.line),
-        ),
-        child: InkWell(
-          key: const ValueKey('supp-hinweis'),
-          borderRadius: BorderRadius.circular(14),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-            child: Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: next == null ? CoachStyle.line : CoachStyle.gold,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        const TextSpan(
-                          text: 'Supplements',
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        TextSpan(text: ' · $text'),
-                      ],
-                    ),
-                    style: CoachStyle.body.copyWith(fontSize: 13.5),
-                  ),
-                ),
-                const Text(
-                  '›',
-                  style: TextStyle(color: CoachStyle.gold, fontSize: 20),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+    return HinweisFeld(
+      key: const ValueKey('supp-hinweis'),
+      icon: Icons.medication_outlined,
+      title: 'Supplements',
+      text: text,
+      done: next == null,
+      onTap: onTap,
     );
   }
 }

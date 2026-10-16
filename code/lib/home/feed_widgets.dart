@@ -76,6 +76,113 @@ class _RingsPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+/// Small field on "Heute" that only shows the state of one function and
+/// leads to its page on tap: gold edge, dark round symbol, arrow.
+class HinweisFeld extends StatelessWidget {
+  const HinweisFeld({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.text,
+    required this.onTap,
+    this.done = false,
+  });
+
+  final IconData icon;
+  final String title;
+  final String text;
+  final VoidCallback onTap;
+
+  /// Nothing open any more: calmer, without the gold glow.
+  final bool done;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(14);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: radius,
+          gradient: done
+              ? CoachStyle.cardGradient
+              : CoachStyle.reminderGradient,
+          border: Border.all(
+            color: done ? CoachStyle.edge : CoachStyle.goldEdge,
+          ),
+          boxShadow: done ? CoachStyle.cardShadow : CoachStyle.goldShadow,
+        ),
+        child: ClipRRect(
+          borderRadius: radius,
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              onTap: onTap,
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      width: 4,
+                      color: done ? CoachStyle.line : CoachStyle.gold,
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(10, 10, 12, 10),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 30,
+                              height: 30,
+                              decoration: const BoxDecoration(
+                                color: CoachStyle.dark,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                icon,
+                                size: 16,
+                                color: CoachStyle.goldSoft,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text.rich(
+                                TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: title,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    TextSpan(text: ' · $text'),
+                                  ],
+                                ),
+                                style: CoachStyle.body.copyWith(fontSize: 13.5),
+                              ),
+                            ),
+                            const Text(
+                              '›',
+                              style: TextStyle(
+                                color: CoachStyle.gold,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Rounded light card that holds one function of the feed.
 class FeedCard extends StatelessWidget {
   const FeedCard({
@@ -97,11 +204,12 @@ class FeedCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: CoachStyle.card,
+        gradient: CoachStyle.cardGradient,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: highlight ? const Color(0xFFE2CFA9) : CoachStyle.line,
+          color: highlight ? CoachStyle.goldEdge : CoachStyle.edge,
         ),
+        boxShadow: CoachStyle.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

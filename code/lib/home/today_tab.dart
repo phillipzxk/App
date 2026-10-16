@@ -266,77 +266,84 @@ class _AreaTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: CoachStyle.card,
-      shape: RoundedRectangleBorder(
+    return DecoratedBox(
+      decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        side: const BorderSide(color: CoachStyle.line),
+        gradient: CoachStyle.cardGradient,
+        boxShadow: CoachStyle.cardShadow,
       ),
-      child: InkWell(
-        key: ValueKey('bereich-${bereich.name}'),
-        borderRadius: BorderRadius.circular(14),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(11),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 24,
-                    height: 24,
-                    decoration: const BoxDecoration(
-                      color: CoachStyle.dark,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      _icons[bereich],
-                      size: 14,
-                      color: CoachStyle.goldLight,
-                    ),
-                  ),
-                  const SizedBox(width: 7),
-                  Expanded(
-                    child: Text(
-                      bereich.label,
-                      overflow: TextOverflow.ellipsis,
-                      style: CoachStyle.cardTitle.copyWith(fontSize: 13),
-                    ),
-                  ),
-                  Text(
-                    '–',
-                    style: CoachStyle.cardTitle.copyWith(
-                      color: CoachStyle.inkSoft,
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  for (final h in const [10.0, 14.0, 8.0, 12.0])
-                    Expanded(
-                      child: Container(
-                        height: h,
-                        margin: const EdgeInsets.symmetric(horizontal: 1.5),
-                        decoration: BoxDecoration(
-                          color: CoachStyle.bar.withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
+      child: Material(
+        type: MaterialType.transparency,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: const BorderSide(color: CoachStyle.edge),
+        ),
+        child: InkWell(
+          key: ValueKey('bereich-${bereich.name}'),
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(11),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: const BoxDecoration(
+                        color: CoachStyle.dark,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _icons[bereich],
+                        size: 14,
+                        color: CoachStyle.goldLight,
                       ),
                     ),
-                ],
-              ),
-              Text(
-                'Verlauf folgt',
-                style: CoachStyle.label.copyWith(
-                  letterSpacing: 0,
-                  fontSize: 11,
+                    const SizedBox(width: 7),
+                    Expanded(
+                      child: Text(
+                        bereich.label,
+                        overflow: TextOverflow.ellipsis,
+                        style: CoachStyle.cardTitle.copyWith(fontSize: 13),
+                      ),
+                    ),
+                    Text(
+                      '–',
+                      style: CoachStyle.cardTitle.copyWith(
+                        color: CoachStyle.inkSoft,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    for (final h in const [10.0, 14.0, 8.0, 12.0])
+                      Expanded(
+                        child: Container(
+                          height: h,
+                          margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                          decoration: BoxDecoration(
+                            color: CoachStyle.bar.withValues(alpha: 0.6),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                Text(
+                  'Verlauf folgt',
+                  style: CoachStyle.label.copyWith(
+                    letterSpacing: 0,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

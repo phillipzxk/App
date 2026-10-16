@@ -191,13 +191,16 @@ class CoachPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CoachStyle.page,
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-              child: child,
+      body: DecoratedBox(
+        decoration: const BoxDecoration(gradient: CoachStyle.pageGradient),
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                child: child,
+              ),
             ),
           ),
         ),
@@ -219,8 +222,10 @@ class CoachCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
       decoration: BoxDecoration(
-        color: CoachStyle.dark,
+        gradient: CoachStyle.coachGradient,
         borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFF4A4134)),
+        boxShadow: CoachStyle.darkShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
