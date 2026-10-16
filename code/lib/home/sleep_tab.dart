@@ -44,6 +44,7 @@ class SleepTab extends StatelessWidget {
         const AreaChart(),
         FeedCard(
           title: 'Deine Abendroutine',
+          icon: Icons.nightlight_outlined,
           children: [
             if (routine.isEmpty)
               const HintText(
@@ -114,6 +115,7 @@ class SleepCard extends StatelessWidget {
     if (thisWeek == null && lastWeek == null) {
       return FeedCard(
         title: 'Schlafdauer',
+        icon: Icons.bedtime_outlined,
         children: [
           const HintText(
             'Trag jeden Morgen ein, wie lange du geschlafen hast. Dann siehst '
@@ -129,6 +131,7 @@ class SleepCard extends StatelessWidget {
         : null;
     return FeedCard(
       title: 'Schlafdauer · letzte 14 Nächte',
+      icon: Icons.bedtime_outlined,
       children: [
         Text(
           thisWeek == null

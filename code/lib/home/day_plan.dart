@@ -60,6 +60,8 @@ class DayPlanCard extends StatelessWidget {
     final meals = mahlzeiten;
     return FeedCard(
       title: 'Dein Tag',
+      darkHead: true,
+      icon: Icons.calendar_today_outlined,
       trailing: const Tag('passt sich an'),
       children: [
         _TerminField(onAdd: onAddTermin),

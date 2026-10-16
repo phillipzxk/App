@@ -191,11 +191,6 @@ class _HomePageState extends State<HomePage> {
           );
           await _reload();
         },
-        onFotoZukunft: () async {
-          if (await fotoMachen(context, widget.feed, widget.clock())) {
-            await _reload();
-          }
-        },
         supplements: _supplements,
         genommen: _genommen,
         onOpenSupplements: () =>
@@ -252,7 +247,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: CoachStyle.page,
       body: DecoratedBox(
-        decoration: const BoxDecoration(color: CoachStyle.page),
+        decoration: const BoxDecoration(gradient: CoachStyle.pageGradient),
         child: SafeArea(
           bottom: false,
           child: Center(

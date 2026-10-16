@@ -27,6 +27,7 @@ class MindsetTab extends StatelessWidget {
         const AreaChart(),
         const FeedCard(
           title: 'Durchgezogen · diese Woche',
+          icon: Icons.check_circle_outline,
           children: [
             HintText(
               'Hier sammelt der Coach aus deinen Mindset-Antworten im '
@@ -37,6 +38,7 @@ class MindsetTab extends StatelessWidget {
         if (profile.motivation.isNotEmpty)
           FeedCard(
             title: 'Dein Warum',
+            icon: Icons.favorite_border,
             trailing: const Tag('in schwachen Phasen'),
             children: [
               Text(

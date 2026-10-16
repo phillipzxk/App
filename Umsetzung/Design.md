@@ -20,6 +20,9 @@ Name und Aussehen der App, gemeinsam mit Phillip Schritt für Schritt festgelegt
 | Schrift | **Sora** für Überschriften und Knöpfe, **Figtree** für den Text. |
 | Logo | **Wurzeln und Trieb**: unter einer dunklen Bodenlinie die Wurzeln, darüber ein goldener Trieb. Steht für Kapitel 9 „Fortschritt, den man nicht sieht“: erst wächst es unten, dann sieht man es oben. Schriftzug gestapelt unter dem Symbol, weit gesperrte Großbuchstaben (Sora), GROUND dunkel und SET in Gold. Ausgewählt aus drei Runden mit neun Ideen. |
 | Startseite „Heute“ | **Nur zur Übersicht.** Auf „Heute“ steht von jeder Funktion nur ein kleines Feld als Darstellung; die genauen Infos und das Bearbeiten kommen per Klick auf der passenden Seite (Phillip, 16.10.2026, erstmals bei der [[Supplement-Routine]]). So bleibt die Startseite übersichtlich. |
+| Tiefe | **C „Schatten und Ebenen“** (Phillip, 16.10.2026). Farben bleiben gleich. Karten schweben mit weichem Schatten über dem Hintergrund und haben einen ganz leichten Verlauf; die Coach-Karte hat einen dunklen Verlauf mit tieferem Schatten; der Seitenhintergrund ist oben etwas heller. |
+| Erinnerungsfeld | Kleine Felder auf „Heute“ bekommen eine **Gold-Kante links, ein dunkles rundes Symbol und einen Pfeil ›**, mit goldenem Schimmer. Ist nichts mehr offen, wird das Feld ruhiger. Phillip: „sehr geil“, soll auch bei anderen Features öfter vorkommen (16.10.2026). Im Code ein fester Baustein (`HinweisFeld`). |
+| Kontrast | **Jedes Feld klar für sich** (Phillip „sehr geil“, 16.10.2026): Jede Karte hat ein eigenes dunkles rundes Symbol, ist heller als der Hintergrund, mit kräftigerer Kante, tieferem Schatten und feiner Linie unter dem Titel. „Heute“ ist in Gruppen geteilt: „Heute dran“ (Supplements, Dein zukünftiges Ich, Dein Tag), „Deine Woche“ (Fokus, Tage am Stück), „Deine Bereiche“. „Dein zukünftiges Ich“ ist auf „Heute“ nur noch ein goldenes Feld, das zur Seite führt. „Dein Tag“ hat als wichtigste Karte einen dunklen Kopf. |
 
 ## Name: wie es dazu kam
 
@@ -47,6 +50,8 @@ Dazu ein Startbild mit Logo und dem Satz „Das Fundament für jeden Tag.“ und
 - **Endgültiges Logo:** https://claude.ai/artifact/ENS6JWmYyVMf146PPELPgs
 - Alle Bildschirme im neuen Design (Entwurf, 13.10.2026): https://claude.ai/artifact/FHd47YHCn7sT6Xy4yKDLgD
 - Dunkleres Weiß und Details: https://claude.ai/artifact/4jxwySJepuvJNNj6WyUWYY
+- Mehr Tiefe, drei Stufen (16.10.2026): https://claude.ai/artifact/BwvkSiHUUnyVeCQsFVef5b
+- Mehr Kontrast (16.10.2026): https://claude.ai/artifact/RDFmBhN46EXrD8gTad9GcT
 - Zum Ausprobieren (echte App): https://claude.ai/artifact/BtH78uqJJJ6vrDVTeBpvcP
 
 Siehe auch [[Coach-Stil]] und [[Offene Fragen]].
