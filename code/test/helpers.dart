@@ -9,6 +9,7 @@ import 'package:coach_app/feed/feed_store.dart';
 import 'package:coach_app/feed/kcal.dart';
 import 'package:coach_app/future_me/future_me_data.dart';
 import 'package:coach_app/planner/planner_data.dart';
+import 'package:coach_app/supplements/supplement_data.dart';
 import 'package:coach_app/sleep/sleep.dart';
 import 'package:coach_app/weight/weight.dart';
 
@@ -128,6 +129,26 @@ class MemoryFeedStore implements FeedStore {
     wochenFotos
       ..removeWhere((x) => dayKey(x.fototag) == dayKey(f.fototag))
       ..add(f);
+  }
+
+  List<Supplement> supplements = [];
+  final genommen = <String, Set<String>>{};
+
+  @override
+  Future<List<Supplement>> loadSupplements() async => List.of(supplements);
+
+  @override
+  Future<void> saveSupplements(List<Supplement> list) async =>
+      supplements = list;
+
+  @override
+  Future<Set<String>> loadGenommen(DateTime day) async =>
+      Set.of(genommen[dayKey(day)] ?? const {});
+
+  @override
+  Future<void> setGenommen(DateTime day, String id, bool g) async {
+    final ids = genommen.putIfAbsent(dayKey(day), () => {});
+    g ? ids.add(id) : ids.remove(id);
   }
 }
 

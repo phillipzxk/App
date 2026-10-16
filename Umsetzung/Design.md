@@ -19,6 +19,7 @@ Name und Aussehen der App, gemeinsam mit Phillip Schritt für Schritt festgelegt
 | Farben | Sandweiß `#efe9de` als Hintergrund (Phillips Wahl „Neu“, etwas dunkler als das erste `#faf8f4`), helle Karten `#f9f6f0` mit feiner Linie `#e0d6c4`, Champagner-Gold `#b08a4f` für Hervorhebungen, Dunkelbraun `#2a2620` für Text und Knöpfe (Knopfschrift `#f3e3c2`). |
 | Schrift | **Sora** für Überschriften und Knöpfe, **Figtree** für den Text. |
 | Logo | **Wurzeln und Trieb**: unter einer dunklen Bodenlinie die Wurzeln, darüber ein goldener Trieb. Steht für Kapitel 9 „Fortschritt, den man nicht sieht“: erst wächst es unten, dann sieht man es oben. Schriftzug gestapelt unter dem Symbol, weit gesperrte Großbuchstaben (Sora), GROUND dunkel und SET in Gold. Ausgewählt aus drei Runden mit neun Ideen. |
+| Startseite „Heute“ | **Nur zur Übersicht.** Auf „Heute“ steht von jeder Funktion nur ein kleines Feld als Darstellung; die genauen Infos und das Bearbeiten kommen per Klick auf der passenden Seite (Phillip, 16.10.2026, erstmals bei der [[Supplement-Routine]]). So bleibt die Startseite übersichtlich. |
 
 ## Name: wie es dazu kam
 
