@@ -7,6 +7,7 @@ import 'package:coach_app/data/user_profile.dart';
 import 'package:coach_app/feed/feed_data.dart';
 import 'package:coach_app/feed/feed_store.dart';
 import 'package:coach_app/feed/kcal.dart';
+import 'package:coach_app/future_me/future_me_data.dart';
 import 'package:coach_app/planner/planner_data.dart';
 import 'package:coach_app/sleep/sleep.dart';
 import 'package:coach_app/weight/weight.dart';
@@ -107,6 +108,27 @@ class MemoryFeedStore implements FeedStore {
 
   @override
   Future<void> saveMahlzeiten(int n) async => mahlzeiten = n;
+
+  FotoEinstellungen? fotoEinstellungen;
+  final wochenFotos = <WochenFoto>[];
+
+  @override
+  Future<FotoEinstellungen?> loadFotoEinstellungen() async => fotoEinstellungen;
+
+  @override
+  Future<void> saveFotoEinstellungen(FotoEinstellungen e) async =>
+      fotoEinstellungen = e;
+
+  @override
+  Future<List<WochenFoto>> loadWochenFotos() async =>
+      List.of(wochenFotos)..sort((a, b) => a.fototag.compareTo(b.fototag));
+
+  @override
+  Future<void> saveWochenFoto(WochenFoto f) async {
+    wochenFotos
+      ..removeWhere((x) => dayKey(x.fototag) == dayKey(f.fototag))
+      ..add(f);
+  }
 }
 
 /// Monday, 12 October 2026, 18:00.

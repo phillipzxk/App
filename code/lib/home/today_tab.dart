@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../checkin/checkin.dart';
 import '../checkin/checkin_flow.dart';
 import '../feed/feed_data.dart';
+import '../future_me/future_me_card.dart';
+import '../future_me/future_me_data.dart';
 import '../planner/planner_data.dart';
 import 'day_plan.dart';
 import '../ui/coach_style.dart';
@@ -42,7 +44,8 @@ const _icons = {
   Bereich.mindset: Icons.spa,
 };
 
-/// Start page after the check-in: the coach's reply, the focus of the
+/// Start page after the check-in: the coach's reply, "Dein zukünftiges
+/// Ich", the focus of the
 /// week, the day plan, days in a row, all four areas at a glance and the patterns.
 class TodayTab extends StatelessWidget {
   const TodayTab({
@@ -58,6 +61,10 @@ class TodayTab extends StatelessWidget {
     required this.onAddTermin,
     required this.onRemoveTermin,
     required this.onSetMahlzeiten,
+    required this.fotoEinstellungen,
+    required this.wochenFotos,
+    required this.onOpenZukunft,
+    required this.onFotoZukunft,
     required this.onOpenArea,
     required this.onRestartOnboarding,
   });
@@ -73,6 +80,10 @@ class TodayTab extends StatelessWidget {
   final Future<void> Function(String text) onAddTermin;
   final Future<void> Function(Termin termin) onRemoveTermin;
   final Future<void> Function(int anzahl) onSetMahlzeiten;
+  final FotoEinstellungen? fotoEinstellungen;
+  final List<WochenFoto> wochenFotos;
+  final VoidCallback onOpenZukunft;
+  final VoidCallback onFotoZukunft;
   final ValueChanged<Bereich> onOpenArea;
   final VoidCallback onRestartOnboarding;
 
@@ -102,6 +113,13 @@ class TodayTab extends StatelessWidget {
           ),
           const SizedBox(height: 14),
         ],
+        FutureMeCard(
+          today: today,
+          einstellungen: fotoEinstellungen,
+          fotos: wochenFotos,
+          onOpen: onOpenZukunft,
+          onFoto: onFotoZukunft,
+        ),
         FeedCard(
           title: 'Fokus der Woche',
           children: [

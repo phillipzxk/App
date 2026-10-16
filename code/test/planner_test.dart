@@ -82,6 +82,13 @@ void main() {
 
   testWidgets('appointments and meals go into the day plan', (tester) async {
     final feed = await _openToday(tester);
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('termin-feld')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(find.byKey(const ValueKey('termin-eintragen')));
+    await tester.pumpAndSettle();
     expect(find.text('Dein Tag'), findsOneWidget);
 
     await tester.enterText(

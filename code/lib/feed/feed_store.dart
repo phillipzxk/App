@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../checkin/checkin.dart';
+import '../future_me/future_me_data.dart';
 import '../planner/planner_data.dart';
 import 'feed_data.dart';
 import 'kcal.dart';
@@ -35,6 +37,16 @@ abstract class FeedStore {
   /// Meals per day for the day plan; null until the user has set it.
   Future<int?> loadMahlzeiten();
   Future<void> saveMahlzeiten(int anzahl);
+
+  /// "Dein zukünftiges Ich": null until photo day and poses are set up.
+  Future<FotoEinstellungen?> loadFotoEinstellungen();
+  Future<void> saveFotoEinstellungen(FotoEinstellungen e);
+
+  /// The weekly photos, oldest photo day first.
+  Future<List<WochenFoto>> loadWochenFotos();
+
+  /// Adds the week's entry, replacing one for the same photo day.
+  Future<void> saveWochenFoto(WochenFoto foto);
 }
 
 class LocalFeedStore implements FeedStore {
@@ -44,6 +56,8 @@ class LocalFeedStore implements FeedStore {
   static const _fragenKey = 'coach_fragen';
   static const _termineKey = 'termine';
   static const _mahlzeitenKey = 'mahlzeiten_pro_tag';
+  static const _fotoEinstellungenKey = 'foto_einstellungen';
+  static const _wochenFotosKey = 'wochen_fotos';
 
   Future<Object?> _read(String key) async {
     final raw = (await SharedPreferences.getInstance()).getString(key);
@@ -132,4 +146,33 @@ class LocalFeedStore implements FeedStore {
 
   @override
   Future<void> saveMahlzeiten(int anzahl) => _write(_mahlzeitenKey, anzahl);
+
+  @override
+  Future<FotoEinstellungen?> loadFotoEinstellungen() async {
+    final json = await _read(_fotoEinstellungenKey);
+    return json == null
+        ? null
+        : FotoEinstellungen.fromJson(json as Map<String, dynamic>);
+  }
+
+  @override
+  Future<void> saveFotoEinstellungen(FotoEinstellungen e) =>
+      _write(_fotoEinstellungenKey, e.toJson());
+
+  @override
+  Future<List<WochenFoto>> loadWochenFotos() async {
+    final json = await _read(_wochenFotosKey) as List?;
+    return [
+      for (final e in json ?? const [])
+        WochenFoto.fromJson(e as Map<String, dynamic>),
+    ]..sort((a, b) => a.fototag.compareTo(b.fototag));
+  }
+
+  @override
+  Future<void> saveWochenFoto(WochenFoto foto) async {
+    final all = await loadWochenFotos()
+      ..removeWhere((f) => dayKey(f.fototag) == dayKey(foto.fototag))
+      ..add(foto);
+    await _write(_wochenFotosKey, [for (final f in all) f.toJson()]);
+  }
 }
