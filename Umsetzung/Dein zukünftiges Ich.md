@@ -15,11 +15,11 @@ Herzstück aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Abschr
 
 | Punkt | Entscheidung | Datum |
 |---|---|---|
+| Wo steht es in der App? | **Karte auf „Heute“**, die eine eigene Seite öffnet. Unten bleibt es bei 5 Seiten (siehe [[Main Feed]]). | 2026-10-16 |
 | Womit wird fotografiert? | **Eigenes Produkt zum Fotografieren**, das ausschließlich mit der App verbunden ist. Teil der Start-up-Idee (Phillip). Details zum Produkt folgen. | 2026-10-16 |
 
 ## Offen
 
-- Wo „Dein zukünftiges Ich“ in der App steht (Frage gestellt am 2026-10-16).
 - Wie das Foto-Produkt aussieht und wie es mit der App verbunden wird.
 
 ## Aus der Notiz, zur Info
