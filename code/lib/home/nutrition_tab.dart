@@ -60,6 +60,7 @@ class NutritionTab extends StatelessWidget {
         if (p == null || kg == null)
           FeedCard(
             title: 'Dein kcal-Ziel',
+            icon: Icons.restaurant_outlined,
             children: [
               const HintText(
                 'Gib einmal Größe, Alter, Geschlecht und deine Aktivität im '
@@ -76,6 +77,7 @@ class NutritionTab extends StatelessWidget {
         else
           FeedCard(
             title: 'Dein kcal-Ziel heute',
+            icon: Icons.restaurant_outlined,
             trailing: const Tag('passt sich an'),
             children: [
               Text.rich(
@@ -137,6 +139,7 @@ class WeightCard extends StatelessWidget {
     if (weeks.isEmpty) {
       return FeedCard(
         title: 'Gewicht',
+        icon: Icons.monitor_weight_outlined,
         children: [
           const HintText(
             'Trag regelmäßig dein Gewicht ein. Dann siehst du hier deinen '
@@ -154,6 +157,7 @@ class WeightCard extends StatelessWidget {
         : null;
     return FeedCard(
       title: 'Gewicht · Wochenschnitt',
+      icon: Icons.monitor_weight_outlined,
       children: [
         Text('${formatKg(current.kg)} kg', style: CoachStyle.question),
         if (diff != null)

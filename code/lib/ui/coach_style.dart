@@ -21,6 +21,16 @@ abstract final class CoachStyle {
   static const edge = Color(0xFFE6DCCB);
   static const goldEdge = Color(0xFFE2CFA9);
 
+  // More contrast between the cards (Phillip 2026-10-16): cards lighter
+  // than the page, stronger edge, deeper shadow.
+  static const cardBright = Color(0xFFFFFDF9);
+  static const edgeStrong = Color(0xFFD9CCB4);
+
+  static const cardShadowStrong = [
+    BoxShadow(color: Color(0x142A2620), blurRadius: 4, offset: Offset(0, 2)),
+    BoxShadow(color: Color(0x1F2A2620), blurRadius: 26, offset: Offset(0, 12)),
+  ];
+
   static const cardShadow = [
     BoxShadow(color: Color(0x0F2A2620), blurRadius: 2, offset: Offset(0, 1)),
     BoxShadow(color: Color(0x142A2620), blurRadius: 20, offset: Offset(0, 8)),

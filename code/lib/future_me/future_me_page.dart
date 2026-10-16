@@ -159,6 +159,7 @@ class _FutureMePageState extends State<FutureMePage> {
         if (first == null)
           const FeedCard(
             title: 'Dein erstes Foto',
+            icon: Icons.photo_camera_outlined,
             children: [
               HintText(
                 'An deinem Fototag machst du hier dein erstes Foto. Ab dann '
@@ -185,6 +186,7 @@ class _FutureMePageState extends State<FutureMePage> {
         if (e.werte.isNotEmpty)
           FeedCard(
             title: 'Deine Werte',
+            icon: Icons.bar_chart,
             trailing: TextButton(
               onPressed: _edit,
               child: const Text(
@@ -204,6 +206,7 @@ class _FutureMePageState extends State<FutureMePage> {
         if (wochen.isNotEmpty)
           FeedCard(
             title: 'Alle Wochen',
+            icon: Icons.view_week_outlined,
             children: [
               SizedBox(
                 height: 100,
@@ -229,6 +232,7 @@ class _FutureMePageState extends State<FutureMePage> {
         ),
         FeedCard(
           title: 'Einstellungen',
+          icon: Icons.tune,
           children: [
             _SettingRow(
               label: 'Fototag',
@@ -261,6 +265,7 @@ class _Leer extends StatelessWidget {
         const PageHeader(label: 'Fortschritt', title: 'Dein zukünftiges Ich'),
         FeedCard(
           title: 'Fototag und Posen',
+          icon: Icons.photo_camera_outlined,
           children: [
             const HintText(
               'Leg einmal deinen Fototag und deine Posen fest. Dann siehst du '
@@ -413,6 +418,7 @@ class _KiKarte extends StatelessWidget {
   Widget build(BuildContext context) {
     return FeedCard(
       title: title,
+      icon: Icons.auto_awesome,
       trailing: const Tag('KI'),
       children: [
         if (projektion) ...[
@@ -672,6 +678,7 @@ class _AufnahmePageState extends State<AufnahmePage> {
         for (final p in e.posen)
           FeedCard(
             title: p,
+            icon: Icons.accessibility_new,
             trailing: _bilder.containsKey(p) ? const Tag('fertig') : null,
             children: [
               Row(

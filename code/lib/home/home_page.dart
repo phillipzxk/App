@@ -191,11 +191,6 @@ class _HomePageState extends State<HomePage> {
           );
           await _reload();
         },
-        onFotoZukunft: () async {
-          if (await fotoMachen(context, widget.feed, widget.clock())) {
-            await _reload();
-          }
-        },
         supplements: _supplements,
         genommen: _genommen,
         onOpenSupplements: () =>

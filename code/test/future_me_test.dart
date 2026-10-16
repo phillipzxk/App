@@ -117,6 +117,6 @@ void main() {
 
     await tester.tap(find.byTooltip('Zurück'));
     await tester.pumpAndSettle();
-    expect(find.text('Nächstes Foto'), findsOneWidget);
+    expect(find.textContaining('nächstes Foto'), findsOneWidget);
   });
 }

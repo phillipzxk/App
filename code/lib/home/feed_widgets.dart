@@ -131,19 +131,7 @@ class HinweisFeld extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(10, 10, 12, 10),
                         child: Row(
                           children: [
-                            Container(
-                              width: 30,
-                              height: 30,
-                              decoration: const BoxDecoration(
-                                color: CoachStyle.dark,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                icon,
-                                size: 16,
-                                color: CoachStyle.goldSoft,
-                              ),
-                            ),
+                            SymbolBadge(icon),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text.rich(
@@ -183,49 +171,150 @@ class HinweisFeld extends StatelessWidget {
   }
 }
 
-/// Rounded light card that holds one function of the feed.
+/// Dark round symbol used on cards and fields, so each one is easy to tell
+/// apart.
+class SymbolBadge extends StatelessWidget {
+  const SymbolBadge(
+    this.icon, {
+    super.key,
+    this.size = 30,
+    this.onDark = false,
+  });
+
+  final IconData icon;
+  final double size;
+  final bool onDark;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: size,
+    height: size,
+    decoration: BoxDecoration(
+      color: onDark ? const Color(0xFF3A342B) : CoachStyle.dark,
+      shape: BoxShape.circle,
+    ),
+    child: Icon(icon, size: size * 0.53, color: CoachStyle.goldSoft),
+  );
+}
+
+/// Rounded light card that holds one function of the feed: own symbol,
+/// title, a fine line, then the content. [darkHead] gives the title a dark
+/// bar, for the most important card of the day.
 class FeedCard extends StatelessWidget {
   const FeedCard({
     super.key,
     required this.title,
     required this.children,
+    this.icon,
     this.trailing,
     this.highlight = false,
+    this.darkHead = false,
   });
 
   final String title;
   final List<Widget> children;
+  final IconData? icon;
   final Widget? trailing;
   final bool highlight;
+  final bool darkHead;
 
   @override
   Widget build(BuildContext context) {
+    final i = icon;
+    final head = Row(
+      children: [
+        if (i != null) ...[
+          SymbolBadge(i, onDark: darkHead),
+          const SizedBox(width: 10),
+        ],
+        Expanded(
+          child: Text(
+            title,
+            style: darkHead
+                ? CoachStyle.cardTitle.copyWith(color: CoachStyle.goldSoft)
+                : CoachStyle.cardTitle,
+          ),
+        ),
+        ?trailing,
+      ],
+    );
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: CoachStyle.cardGradient,
+        color: CoachStyle.cardBright,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: highlight ? CoachStyle.goldEdge : CoachStyle.edge,
+          color: highlight ? CoachStyle.goldEdge : CoachStyle.edgeStrong,
         ),
-        boxShadow: CoachStyle.cardShadow,
+        boxShadow: CoachStyle.cardShadowStrong,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(child: Text(title, style: CoachStyle.cardTitle)),
-              ?trailing,
-            ],
+          if (darkHead)
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              decoration: const BoxDecoration(
+                gradient: CoachStyle.coachGradient,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(17)),
+              ),
+              child: head,
+            )
+          else
+            Container(
+              margin: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+              padding: const EdgeInsets.only(bottom: 10),
+              decoration: const BoxDecoration(
+                border: Border(bottom: BorderSide(color: CoachStyle.line)),
+              ),
+              child: head,
+            ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: children,
+            ),
           ),
-          const SizedBox(height: 10),
-          ...children,
         ],
       ),
     );
   }
+}
+
+/// Small gold heading that splits "Heute" into groups.
+class GroupLabel extends StatelessWidget {
+  const GroupLabel(this.text, {super.key});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(2, 6, 0, 10),
+    child: Row(
+      children: [
+        Text(
+          text.toUpperCase(),
+          style: CoachStyle.goldLabel.copyWith(
+            fontFamily: 'Sora',
+            fontSize: 11,
+            letterSpacing: 1.6,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Container(
+            height: 1,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [CoachStyle.goldEdge, Color(0x00E2CFA9)],
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 /// Small grey text for explanations inside a card.
@@ -297,6 +386,7 @@ class AreaChart extends StatelessWidget {
   Widget build(BuildContext context) {
     return FeedCard(
       title: 'Verlauf · letzte 14 Tage',
+      icon: Icons.show_chart,
       children: [
         SizedBox(
           height: 48,
@@ -373,6 +463,7 @@ class _AskCoachCardState extends State<AskCoachCard> {
   Widget build(BuildContext context) {
     return FeedCard(
       title: widget.title,
+      icon: Icons.chat_bubble_outline,
       children: [
         for (final f in widget.today) ...[
           Text(f.text, style: CoachStyle.body),

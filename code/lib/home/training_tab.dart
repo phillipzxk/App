@@ -48,6 +48,7 @@ class TrainingTab extends StatelessWidget {
         if (plan.isEmpty)
           FeedCard(
             title: 'Dein Plan',
+            icon: Icons.event_note_outlined,
             children: [
               const HintText(
                 'Leg einmal fest, was du an welchem Tag trainierst, egal ob '
@@ -65,6 +66,7 @@ class TrainingTab extends StatelessWidget {
         else
           FeedCard(
             title: 'Dein Plan · diese Woche',
+            icon: Icons.event_note_outlined,
             children: [
               _WeekRow(plan: plan, today: today),
               const SizedBox(height: 12),

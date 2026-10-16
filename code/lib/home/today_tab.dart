@@ -65,7 +65,6 @@ class TodayTab extends StatelessWidget {
     required this.fotoEinstellungen,
     required this.wochenFotos,
     required this.onOpenZukunft,
-    required this.onFotoZukunft,
     required this.supplements,
     required this.genommen,
     required this.onOpenSupplements,
@@ -87,7 +86,6 @@ class TodayTab extends StatelessWidget {
   final FotoEinstellungen? fotoEinstellungen;
   final List<WochenFoto> wochenFotos;
   final VoidCallback onOpenZukunft;
-  final VoidCallback onFotoZukunft;
   final List<Supplement> supplements;
   final Set<String> genommen;
   final VoidCallback onOpenSupplements;
@@ -120,6 +118,7 @@ class TodayTab extends StatelessWidget {
           ),
           const SizedBox(height: 14),
         ],
+        const GroupLabel('Heute dran'),
         if (supplements.isNotEmpty)
           SupplementHinweis(
             supplements: supplements,
@@ -132,10 +131,21 @@ class TodayTab extends StatelessWidget {
           einstellungen: fotoEinstellungen,
           fotos: wochenFotos,
           onOpen: onOpenZukunft,
-          onFoto: onFotoZukunft,
         ),
+        DayPlanCard(
+          today: today,
+          termine: termine,
+          training: training,
+          mahlzeiten: mahlzeiten,
+          kcalZiel: kcalZiel,
+          onAddTermin: onAddTermin,
+          onRemoveTermin: onRemoveTermin,
+          onSetMahlzeiten: onSetMahlzeiten,
+        ),
+        const GroupLabel('Deine Woche'),
         FeedCard(
           title: 'Fokus der Woche',
+          icon: Icons.track_changes,
           children: [
             const HintText(
               'Ein Fokus für die ganze Woche, abgeleitet aus deinen '
@@ -149,24 +159,13 @@ class TodayTab extends StatelessWidget {
             ),
           ],
         ),
-        DayPlanCard(
-          today: today,
-          termine: termine,
-          training: training,
-          mahlzeiten: mahlzeiten,
-          kcalZiel: kcalZiel,
-          onAddTermin: onAddTermin,
-          onRemoveTermin: onRemoveTermin,
-          onSetMahlzeiten: onSetMahlzeiten,
-        ),
         FeedCard(
           title: streak == 1 ? '1 Tag am Stück' : '$streak Tage am Stück',
+          icon: Icons.local_fire_department_outlined,
           trailing: _Dots(days: lastSevenDays(checkIns, today)),
           children: const [HintText('jeden Tag eingecheckt')],
         ),
-        const SizedBox(height: 4),
-        const Text('DEINE BEREICHE', style: CoachStyle.label),
-        const SizedBox(height: 10),
+        const GroupLabel('Deine Bereiche'),
         GridView.count(
           crossAxisCount: 2,
           shrinkWrap: true,
@@ -182,6 +181,7 @@ class TodayTab extends StatelessWidget {
         const SizedBox(height: 14),
         const FeedCard(
           title: 'Deine Muster',
+          icon: Icons.insights,
           children: [
             HintText(
               'Zusammenhänge zwischen deinen Bereichen, die der Coach über '
@@ -269,14 +269,14 @@ class _AreaTile extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        gradient: CoachStyle.cardGradient,
-        boxShadow: CoachStyle.cardShadow,
+        color: CoachStyle.cardBright,
+        boxShadow: CoachStyle.cardShadowStrong,
       ),
       child: Material(
         type: MaterialType.transparency,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
-          side: const BorderSide(color: CoachStyle.edge),
+          side: const BorderSide(color: CoachStyle.edgeStrong),
         ),
         child: InkWell(
           key: ValueKey('bereich-${bereich.name}'),

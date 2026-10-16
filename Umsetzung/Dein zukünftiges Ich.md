@@ -32,7 +32,7 @@ Herzstück aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Abschr
 
 ## Stand im Code (2026-10-16)
 
-- **Karte auf „Heute“** unter der Coach-Antwort: „Einrichten“, am Fototag „Foto machen“, am Tag danach „Heute nachholen“, sonst „Nächstes Foto“ mit Wochentag und Woche.
+- **Goldenes Feld auf „Heute“** (seit 16.10.2026, Regel „Startseite nur Übersicht“, siehe [[Design]]): „Fototag und Posen festlegen“, am Fototag „Heute Fototag, Woche N · Foto machen“, am Tag danach „gestern verpasst, heute noch nachholen“, sonst „nächstes Foto“ mit Wochentag und Woche. Tippen öffnet die Seite, dort wird das Foto gemacht.
 - **Einrichten:** Fototag (Sonntag vorausgewählt, danach fest), eigene Posen, bis zu 3 eigene Werte. Posen und Werte lassen sich später ändern, der Fototag nicht.
 - **Foto machen:** ein Foto pro Pose, daneben das Startfoto zum Vergleich, dazu die Werte der Woche. Fotos werden verkleinert und nur auf dem Handy gespeichert.
 - **Eigene Seite:** Startfoto neben dem neuesten (Pose wählbar), Werte Start und neuestes, Reihe aller Wochen mit Lücke für verpasste und Wochentag für nachgeholte Fotos, Einstellungen.
