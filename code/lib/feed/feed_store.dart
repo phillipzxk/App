@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../checkin/checkin.dart';
 import '../future_me/future_me_data.dart';
 import '../planner/planner_data.dart';
+import '../supplements/supplement_data.dart';
 import 'feed_data.dart';
 import 'kcal.dart';
 
@@ -47,6 +48,14 @@ abstract class FeedStore {
 
   /// Adds the week's entry, replacing one for the same photo day.
   Future<void> saveWochenFoto(WochenFoto foto);
+
+  /// The supplement routine, empty until set.
+  Future<List<Supplement>> loadSupplements();
+  Future<void> saveSupplements(List<Supplement> list);
+
+  /// Ids of the intakes ticked off on [day].
+  Future<Set<String>> loadGenommen(DateTime day);
+  Future<void> setGenommen(DateTime day, String id, bool genommen);
 }
 
 class LocalFeedStore implements FeedStore {
@@ -58,6 +67,8 @@ class LocalFeedStore implements FeedStore {
   static const _mahlzeitenKey = 'mahlzeiten_pro_tag';
   static const _fotoEinstellungenKey = 'foto_einstellungen';
   static const _wochenFotosKey = 'wochen_fotos';
+  static const _supplementsKey = 'supplements';
+  static const _genommenKey = 'supplements_genommen';
 
   Future<Object?> _read(String key) async {
     final raw = (await SharedPreferences.getInstance()).getString(key);
@@ -174,5 +185,33 @@ class LocalFeedStore implements FeedStore {
       ..removeWhere((f) => dayKey(f.fototag) == dayKey(foto.fototag))
       ..add(foto);
     await _write(_wochenFotosKey, [for (final f in all) f.toJson()]);
+  }
+
+  @override
+  Future<List<Supplement>> loadSupplements() async {
+    final json = await _read(_supplementsKey) as List?;
+    return [
+      for (final e in json ?? const [])
+        Supplement.fromJson(e as Map<String, dynamic>),
+    ];
+  }
+
+  @override
+  Future<void> saveSupplements(List<Supplement> list) =>
+      _write(_supplementsKey, [for (final s in list) s.toJson()]);
+
+  /// Only today's ticks are kept, so the list never grows.
+  @override
+  Future<Set<String>> loadGenommen(DateTime day) async {
+    final json = await _read(_genommenKey) as Map<String, dynamic>?;
+    final ids = json?[dayKey(day)] as List?;
+    return {for (final id in ids ?? const []) id as String};
+  }
+
+  @override
+  Future<void> setGenommen(DateTime day, String id, bool genommen) async {
+    final ids = await loadGenommen(day);
+    genommen ? ids.add(id) : ids.remove(id);
+    await _write(_genommenKey, {dayKey(day): ids.toList()});
   }
 }

@@ -11,6 +11,7 @@ import '../future_me/future_me_data.dart';
 import '../future_me/future_me_page.dart';
 import '../planner/planner_data.dart';
 import '../sleep/sleep.dart';
+import '../supplements/supplement_data.dart';
 import '../ui/coach_style.dart';
 import '../weight/weight.dart';
 import 'mindset_tab.dart';
@@ -58,6 +59,8 @@ class _HomePageState extends State<HomePage> {
   int? _mahlzeiten;
   FotoEinstellungen? _fotoEinstellungen;
   List<WochenFoto> _wochenFotos = const [];
+  List<Supplement> _supplements = const [];
+  Set<String> _genommen = const {};
 
   @override
   void initState() {
@@ -77,6 +80,8 @@ class _HomePageState extends State<HomePage> {
     final mahlzeiten = await widget.feed.loadMahlzeiten();
     final fotoEinstellungen = await widget.feed.loadFotoEinstellungen();
     final wochenFotos = await widget.feed.loadWochenFotos();
+    final supplements = await widget.feed.loadSupplements();
+    final genommen = await widget.feed.loadGenommen(widget.clock());
     if (!mounted) return;
     setState(() {
       _loaded = true;
@@ -91,6 +96,8 @@ class _HomePageState extends State<HomePage> {
       _mahlzeiten = mahlzeiten;
       _fotoEinstellungen = fotoEinstellungen;
       _wochenFotos = wochenFotos;
+      _supplements = supplements;
+      _genommen = genommen;
     });
   }
 
@@ -189,6 +196,10 @@ class _HomePageState extends State<HomePage> {
             await _reload();
           }
         },
+        supplements: _supplements,
+        genommen: _genommen,
+        onOpenSupplements: () =>
+            setState(() => _tab = Bereich.ernaehrung.index + 1),
         onOpenArea: (b) => setState(() => _tab = b.index + 1),
         onRestartOnboarding: widget.onRestartOnboarding,
       ),
@@ -209,6 +220,16 @@ class _HomePageState extends State<HomePage> {
         onSaveKcal: _saveKcal,
         onAddWeight: _addWeight,
         onAsk: _ask(Bereich.ernaehrung),
+        supplements: _supplements,
+        genommen: _genommen,
+        onSaveSupplements: (list) async {
+          await widget.feed.saveSupplements(list);
+          await _reload();
+        },
+        onToggleSupplement: (s, an) async {
+          await widget.feed.setGenommen(widget.clock(), s.id, an);
+          await _reload();
+        },
       ),
       SleepTab(
         routine: _routine,

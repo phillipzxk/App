@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../feed/feed_data.dart';
 import '../feed/kcal.dart';
+import '../supplements/supplement_data.dart';
+import '../supplements/supplement_widgets.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import '../weight/weight.dart';
 import '../weight/weight_chart.dart';
 import 'feed_widgets.dart';
 
-/// Ernährung page: progress, kcal target, the field for today's food and
-/// the weight trend.
+/// Ernährung page: progress, kcal target, the supplement routine, the field
+/// for today's food and the weight trend.
 class NutritionTab extends StatelessWidget {
   const NutritionTab({
     super.key,
@@ -19,6 +21,10 @@ class NutritionTab extends StatelessWidget {
     required this.onSaveKcal,
     required this.onAddWeight,
     required this.onAsk,
+    required this.supplements,
+    required this.genommen,
+    required this.onSaveSupplements,
+    required this.onToggleSupplement,
   });
 
   final KcalProfil? kcal;
@@ -29,6 +35,10 @@ class NutritionTab extends StatelessWidget {
   final Future<void> Function(KcalProfil profil, double? kg) onSaveKcal;
   final VoidCallback onAddWeight;
   final Future<void> Function(String text) onAsk;
+  final List<Supplement> supplements;
+  final Set<String> genommen;
+  final Future<void> Function(List<Supplement> list) onSaveSupplements;
+  final Future<void> Function(Supplement s, bool genommen) onToggleSupplement;
 
   Future<void> _edit(BuildContext context) async {
     final result = await Navigator.of(context).push<(KcalProfil, double?)>(
@@ -95,6 +105,12 @@ class NutritionTab extends StatelessWidget {
               ),
             ],
           ),
+        SupplementCard(
+          supplements: supplements,
+          genommen: genommen,
+          onSave: onSaveSupplements,
+          onToggle: onToggleSupplement,
+        ),
         AskCoachCard(
           title: 'Wie sieht deine Ernährung heute aus?',
           hint:
