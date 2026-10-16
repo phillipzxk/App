@@ -21,11 +21,12 @@ Herzstück aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Abschr
 | Woher kommen die Leistungswerte? | **Beides.** Jetzt legt man einmal 1 bis 3 eigene Werte in eigenen Worten fest (z. B. „Klimmzüge am Stück“, „5 km Zeit“) und trägt sie jede Woche mit dem Foto ein. Später füllt die KI sie aus den Trainings-Check-ins vor. | 2026-10-16 |
 | Wie vergleicht man die Fotos? | **Beides.** Oben groß das erste Foto neben dem neuesten, mit den Werten von damals und heute darunter. Darunter eine Reihe aller Wochenfotos zum Durchwischen. | 2026-10-16 |
 | Wo werden die Fotos gespeichert? | **Nur auf dem Handy.** Zur KI geht ein Foto später nur kurz für die Auswertung und wird dort nicht gespeichert. Neues Handy oder App gelöscht heißt: Fotos weg. Eine verschlüsselte Online-Sicherung kann nach dem MVP kommen. | 2026-10-16 |
-| An welchem Tag ist das Wochenfoto? | **Selbst wählen.** Jeder legt seinen Fototag einmal selbst fest (Sonntag ist vorausgewählt), die Karte auf „Heute“ erinnert an diesem Tag. | 2026-10-16 |
+| An welchem Tag ist das Wochenfoto? | **Selbst wählen.** Jeder legt seinen Fototag einmal selbst fest (Sonntag ist vorausgewählt). **Der Tag bleibt dann fest** (Phillip): Das Foto wird ausschließlich an diesem Tag gemacht, nicht irgendwann zwischendurch. Die Karte auf „Heute“ erinnert an diesem Tag. | 2026-10-16 |
 
 ## Offen
 
 - Entwurf der Karte und der Seite (folgt).
+- Was passiert, wenn man den Fototag verpasst.
 - Wie das Foto-Produkt aussieht und wie es mit der App verbunden wird.
 
 ## Aus der Notiz, zur Info
