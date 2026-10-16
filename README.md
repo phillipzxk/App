@@ -37,7 +37,8 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 - [[Main Feed]]: Startseite mit 5 Seiten (Heute, Training, Ernährung, Schlaf, Mindset)
 - [[Coach-Stil]]: wie die KI als Coach schreibt, mit Beispielen
 - [[Design]]: Name Groundset, Farben, Schrift und Logo (Wurzeln und Trieb)
-- [[Tages-Planer]]: Kalender + Training, KI plant die Woche um Termine herum (in Arbeit)
+- [[Tages-Planer]]: Kalender + Training, KI plant die Woche um Termine herum (Tagesplan gebaut)
+- [[Dein zukünftiges Ich]]: Fortschritt sichtbar machen, Wochenfoto mit eigenem Foto-Produkt, Vorschau 3/6/12 Monate (in Arbeit)
 
 ### Fortschritt
 - [[MVP-Fortschritt]]: was erledigt ist, was als Nächstes kommt
