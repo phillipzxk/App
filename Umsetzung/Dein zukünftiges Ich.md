@@ -23,6 +23,8 @@ Herzstück aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Abschr
 | Wo werden die Fotos gespeichert? | **Nur auf dem Handy.** Zur KI geht ein Foto später nur kurz für die Auswertung und wird dort nicht gespeichert. Neues Handy oder App gelöscht heißt: Fotos weg. Eine verschlüsselte Online-Sicherung kann nach dem MVP kommen. | 2026-10-16 |
 | An welchem Tag ist das Wochenfoto? | **Selbst wählen.** Jeder legt seinen Fototag einmal selbst fest (Sonntag ist vorausgewählt). **Der Tag bleibt dann fest** (Phillip): Das Foto wird ausschließlich an diesem Tag gemacht, nicht irgendwann zwischendurch. Die Karte auf „Heute“ erinnert an diesem Tag. | 2026-10-16 |
 | Fototag verpasst? | **Einen Tag nachholen, freiwillig.** Am Tag nach dem Fototag kann man das Foto einmal nachholen (Phillip: wer es streng gleichmäßig will, lässt es, wem das egal ist, holt nach). Danach fällt die Woche aus und steht als Lücke in der Reihe. Ein nachgeholtes Foto ist in der Reihe mit dem Wochentag markiert. (Erst „Woche fällt aus“ gewählt, kurz danach so geändert.) | 2026-10-16 |
+| Welche Posen? | **Frei wählbar.** Wie viele und welche Posen, entscheidet der Nutzer selbst. Die App gibt als Tipp: jede Woche dieselben, am besten nur eine (Phillip). | 2026-10-16 |
+| Wie wird ausgelöst? | **Automatisch bei exakt gleicher Position.** Die Umrisse des ersten Fotos liegen über dem Kamerabild. Erkennt die App, dass der Nutzer exakt gleich steht wie beim ersten Foto, löst sie von selbst aus. So sind die Ergebnisse immer exakt vergleichbar; das macht das Feature besonders (Phillip). Technisch: Posen-Erkennung direkt auf dem Handy, läuft erst in der Handy-Version, nicht in der Browser-Vorschau. | 2026-10-16 |
 
 ## Offen
 
