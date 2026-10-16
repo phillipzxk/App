@@ -1,13 +1,13 @@
 ---
 title: Dein zukünftiges Ich
-tags: [umsetzung, ki, fortschritt, foto, in-arbeit]
+tags: [umsetzung, ki, fortschritt, foto, teilweise-gebaut]
 erstellt: 2026-10-16
 aktualisiert: 2026-10-16
 ---
 
 # Dein zukünftiges Ich
 
-Herzstück aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Abschrift in [[App-Fortschritt]]). Wird ab 2026-10-16 mit Phillip Schritt für Schritt ausgearbeitet. Noch nicht gebaut.
+Herzstück aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Abschrift in [[App-Fortschritt]]). Am 2026-10-16 mit Phillip Schritt für Schritt ausgearbeitet und nach seinem „Ja“ teilweise gebaut (siehe „Stand im Code“).
 
 **Ziel (Phillip):** Leute sehen ihren Fortschritt. Das ist der Hauptgrund, warum sie aufgeben (Buch: Kapitel 9, Testfrage 7).
 
@@ -30,9 +30,18 @@ Herzstück aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Abschr
 
 - Wie das Foto-Produkt aussieht und wie es mit der App verbunden wird.
 
+## Stand im Code (2026-10-16)
+
+- **Karte auf „Heute“** unter der Coach-Antwort: „Einrichten“, am Fototag „Foto machen“, am Tag danach „Heute nachholen“, sonst „Nächstes Foto“ mit Wochentag und Woche.
+- **Einrichten:** Fototag (Sonntag vorausgewählt, danach fest), eigene Posen, bis zu 3 eigene Werte. Posen und Werte lassen sich später ändern, der Fototag nicht.
+- **Foto machen:** ein Foto pro Pose, daneben das Startfoto zum Vergleich, dazu die Werte der Woche. Fotos werden verkleinert und nur auf dem Handy gespeichert.
+- **Eigene Seite:** Startfoto neben dem neuesten (Pose wählbar), Werte Start und neuestes, Reihe aller Wochen mit Lücke für verpasste und Wochentag für nachgeholte Fotos, Einstellungen.
+- **Platzhalter bis zur KI:** „Was sich verändert hat“ und die Vorschau auf 3, 6 und 12 Monate.
+- **Kommt mit der Handy-Version:** Kamera mit den Umrissen des ersten Fotos und automatisches Auslösen bei exakt gleicher Position, Erinnerung am Fototag. Bis dahin öffnet „Aufnehmen“ die normale Kamera (in der Browser-Vorschau die Dateiauswahl).
+
 ## Entwurf
 
-- Karte auf „Heute“ und eigene Seite (Beispiel Max, Woche 6, 2026-10-16): https://claude.ai/artifact/HN9moCGH9xjVGspSkbeXBy. Wartet auf Phillips Rückmeldung.
+- Karte auf „Heute“, eigene Seite und Foto-Bildschirm (Beispiel Max, Woche 6, 2026-10-16): https://claude.ai/artifact/HN9moCGH9xjVGspSkbeXBy. Phillip: „Ja mach mal“.
 
 ## Aus der Notiz, zur Info
 

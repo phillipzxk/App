@@ -7,6 +7,8 @@ import '../feed/feed_coach.dart';
 import '../feed/feed_data.dart';
 import '../feed/feed_store.dart';
 import '../feed/kcal.dart';
+import '../future_me/future_me_data.dart';
+import '../future_me/future_me_page.dart';
 import '../planner/planner_data.dart';
 import '../sleep/sleep.dart';
 import '../ui/coach_style.dart';
@@ -54,6 +56,8 @@ class _HomePageState extends State<HomePage> {
   List<CoachFrage> _fragen = const [];
   List<Termin> _termine = const [];
   int? _mahlzeiten;
+  FotoEinstellungen? _fotoEinstellungen;
+  List<WochenFoto> _wochenFotos = const [];
 
   @override
   void initState() {
@@ -71,6 +75,8 @@ class _HomePageState extends State<HomePage> {
     final fragen = await widget.feed.loadFragen();
     final termine = await widget.feed.loadTermine();
     final mahlzeiten = await widget.feed.loadMahlzeiten();
+    final fotoEinstellungen = await widget.feed.loadFotoEinstellungen();
+    final wochenFotos = await widget.feed.loadWochenFotos();
     if (!mounted) return;
     setState(() {
       _loaded = true;
@@ -83,6 +89,8 @@ class _HomePageState extends State<HomePage> {
       _fragen = fragen;
       _termine = termine;
       _mahlzeiten = mahlzeiten;
+      _fotoEinstellungen = fotoEinstellungen;
+      _wochenFotos = wochenFotos;
     });
   }
 
@@ -164,6 +172,22 @@ class _HomePageState extends State<HomePage> {
         onSetMahlzeiten: (n) async {
           await widget.feed.saveMahlzeiten(n);
           await _reload();
+        },
+        fotoEinstellungen: _fotoEinstellungen,
+        wochenFotos: _wochenFotos,
+        onOpenZukunft: () async {
+          await Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) =>
+                  FutureMePage(store: widget.feed, clock: widget.clock),
+            ),
+          );
+          await _reload();
+        },
+        onFotoZukunft: () async {
+          if (await fotoMachen(context, widget.feed, widget.clock())) {
+            await _reload();
+          }
         },
         onOpenArea: (b) => setState(() => _tab = b.index + 1),
         onRestartOnboarding: widget.onRestartOnboarding,
