@@ -7,6 +7,7 @@ import '../feed/feed_coach.dart';
 import '../feed/feed_data.dart';
 import '../feed/feed_store.dart';
 import '../feed/kcal.dart';
+import '../planner/planner_data.dart';
 import '../sleep/sleep.dart';
 import '../ui/coach_style.dart';
 import '../weight/weight.dart';
@@ -51,6 +52,8 @@ class _HomePageState extends State<HomePage> {
   List<RoutineStep> _routine = const [];
   KcalProfil? _kcal;
   List<CoachFrage> _fragen = const [];
+  List<Termin> _termine = const [];
+  int? _mahlzeiten;
 
   @override
   void initState() {
@@ -66,6 +69,8 @@ class _HomePageState extends State<HomePage> {
     final routine = await widget.feed.loadRoutine();
     final kcal = await widget.feed.loadKcal();
     final fragen = await widget.feed.loadFragen();
+    final termine = await widget.feed.loadTermine();
+    final mahlzeiten = await widget.feed.loadMahlzeiten();
     if (!mounted) return;
     setState(() {
       _loaded = true;
@@ -76,6 +81,8 @@ class _HomePageState extends State<HomePage> {
       _routine = routine;
       _kcal = kcal;
       _fragen = fragen;
+      _termine = termine;
+      _mahlzeiten = mahlzeiten;
     });
   }
 
@@ -128,6 +135,12 @@ class _HomePageState extends State<HomePage> {
     await _reload();
   }
 
+  int? get _kcalZiel {
+    final p = _kcal;
+    if (p == null || _weights.isEmpty) return null;
+    return kcalZiel(p, _weights.last.kg);
+  }
+
   @override
   Widget build(BuildContext context) {
     final pages = [
@@ -136,6 +149,22 @@ class _HomePageState extends State<HomePage> {
         date: germanDate(widget.clock()),
         today: widget.clock(),
         checkIns: _checkIns,
+        termine: _termine,
+        training: _plan.forDay(widget.clock()),
+        mahlzeiten: _mahlzeiten,
+        kcalZiel: _kcalZiel,
+        onAddTermin: (text) async {
+          await widget.feed.addTermin(parseTermin(text, widget.clock()));
+          await _reload();
+        },
+        onRemoveTermin: (t) async {
+          await widget.feed.removeTermin(t);
+          await _reload();
+        },
+        onSetMahlzeiten: (n) async {
+          await widget.feed.saveMahlzeiten(n);
+          await _reload();
+        },
         onOpenArea: (b) => setState(() => _tab = b.index + 1),
         onRestartOnboarding: widget.onRestartOnboarding,
       ),

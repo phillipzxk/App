@@ -1,13 +1,13 @@
 ---
 title: Tages-Planer
-tags: [umsetzung, ki, training, kalender, in-arbeit]
+tags: [umsetzung, ki, training, kalender, teilweise-gebaut]
 erstellt: 2026-10-15
 aktualisiert: 2026-10-15
 ---
 
 # Tages-Planer: Kalender + Training
 
-Kernfeature aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Abschrift in [[App-Fortschritt]]). Grundlage für die KI-Automatisierung in der App. Am 2026-10-15 mit Phillip Schritt für Schritt ausgearbeitet, alle Punkte aus der Notiz sind entschieden. Noch nicht gebaut.
+Kernfeature aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Abschrift in [[App-Fortschritt]]). Grundlage für die KI-Automatisierung in der App. Am 2026-10-15 mit Phillip Schritt für Schritt ausgearbeitet, alle Punkte aus der Notiz sind entschieden. Am 2026-10-15 nach Phillips „Ja“ teilweise gebaut (siehe „Stand im Code“).
 
 **Ziel (Phillip):** Kalender, Training und Essen wissen voneinander. Der Plan ist immer machbar, deshalb gibt es keine Ausreden mehr.
 
@@ -29,6 +29,17 @@ Kernfeature aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Absch
 | Wer legt die Mahlzeiten fest? | **Nutzer gibt die Zahl vor, die KI plant.** Der Nutzer gibt einmal an, wie viele Mahlzeiten er am Tag essen möchte. Zusammen mit seinem kcal-Ziel (beides wird in der App angezeigt, siehe [[Main Feed]]) stellt die KI daraus die Mahlzeiten im Tagesplan dar, angepasst an Termine und Arbeit. | 2026-10-15 |
 | Kalorien pro Mahlzeit anzeigen? | **Nein, nur Zeit + Größe.** Jede Mahlzeit zeigt Uhrzeit und Größe in Worten (z. B. „Hauptmahlzeit“, „kleiner Snack“). Das kcal-Ziel steuert im Hintergrund, wie groß die Mahlzeiten sind. Kein Zählen. | 2026-10-15 |
 | Wie taucht der Schlaf im Plan auf? | **KI rechnet die Bettzeit.** Die KI setzt die Bettzeit passend zum nächsten Morgen (Weckzeit, frühe Termine, spätes Training) und erinnert an die [[Abendroutine]]. | 2026-10-15 |
+
+## Stand im Code (2026-10-15)
+
+Gebaut als Karte „Dein Tag“ auf der Seite „Heute“, unter Fokus der Woche:
+
+- **Termin-Feld:** Termin in eigenen Worten eintragen (z. B. „Zahnarzt Donnerstag 17 Uhr“). Bis die KI angeschlossen ist, liest die App selbst nur Uhrzeit („17 Uhr“, „17:30“) und Tag („heute“, „morgen“, „übermorgen“, Wochentag) heraus; ohne Tag gilt heute. Termine lassen sich mit X löschen.
+- **Tagesplan:** heutige Termine nach Uhrzeit, dazu Training (aus dem eigenen [[Trainingsplan]] für heute), Essen und Bettzeit.
+- **Mahlzeiten:** Anzahl pro Tag (1 bis 6) einmal festlegen, angezeigt zusammen mit dem kcal-Ziel.
+- **Nächste Termine:** die Termine der kommenden 7 Tage.
+- **Platzhalter bis zur KI:** Uhrzeit/Intensität des Trainings, Lage und Größe der Mahlzeiten, Bettzeit und der Tipp des Tages.
+- **Noch nicht gebaut:** Erinnerungen per Benachrichtigung. Sie brauchen die Handy-Version der App und lassen sich in der Browser-Vorschau nicht zeigen.
 
 ## Entwurf
 

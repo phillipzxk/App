@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../checkin/checkin.dart';
 import '../checkin/checkin_flow.dart';
 import '../feed/feed_data.dart';
+import '../planner/planner_data.dart';
+import 'day_plan.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import 'feed_widgets.dart';
@@ -41,7 +43,7 @@ const _icons = {
 };
 
 /// Start page after the check-in: the coach's reply, the focus of the
-/// week, days in a row, all four areas at a glance and the patterns.
+/// week, the day plan, days in a row, all four areas at a glance and the patterns.
 class TodayTab extends StatelessWidget {
   const TodayTab({
     super.key,
@@ -49,6 +51,13 @@ class TodayTab extends StatelessWidget {
     required this.date,
     required this.today,
     required this.checkIns,
+    required this.termine,
+    required this.training,
+    required this.mahlzeiten,
+    required this.kcalZiel,
+    required this.onAddTermin,
+    required this.onRemoveTermin,
+    required this.onSetMahlzeiten,
     required this.onOpenArea,
     required this.onRestartOnboarding,
   });
@@ -57,6 +66,13 @@ class TodayTab extends StatelessWidget {
   final String date;
   final DateTime today;
   final List<CheckIn> checkIns;
+  final List<Termin> termine;
+  final String training;
+  final int? mahlzeiten;
+  final int? kcalZiel;
+  final Future<void> Function(String text) onAddTermin;
+  final Future<void> Function(Termin termin) onRemoveTermin;
+  final Future<void> Function(int anzahl) onSetMahlzeiten;
   final ValueChanged<Bereich> onOpenArea;
   final VoidCallback onRestartOnboarding;
 
@@ -100,6 +116,16 @@ class TodayTab extends StatelessWidget {
               'Jeder Tag, an dem du deinen Fokus schaffst, füllt einen Strich.',
             ),
           ],
+        ),
+        DayPlanCard(
+          today: today,
+          termine: termine,
+          training: training,
+          mahlzeiten: mahlzeiten,
+          kcalZiel: kcalZiel,
+          onAddTermin: onAddTermin,
+          onRemoveTermin: onRemoveTermin,
+          onSetMahlzeiten: onSetMahlzeiten,
         ),
         FeedCard(
           title: streak == 1 ? '1 Tag am Stück' : '$streak Tage am Stück',
