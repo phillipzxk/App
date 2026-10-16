@@ -22,12 +22,15 @@ Herzstück aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Abschr
 | Wie vergleicht man die Fotos? | **Beides.** Oben groß das erste Foto neben dem neuesten, mit den Werten von damals und heute darunter. Darunter eine Reihe aller Wochenfotos zum Durchwischen. | 2026-10-16 |
 | Wo werden die Fotos gespeichert? | **Nur auf dem Handy.** Zur KI geht ein Foto später nur kurz für die Auswertung und wird dort nicht gespeichert. Neues Handy oder App gelöscht heißt: Fotos weg. Eine verschlüsselte Online-Sicherung kann nach dem MVP kommen. | 2026-10-16 |
 | An welchem Tag ist das Wochenfoto? | **Selbst wählen.** Jeder legt seinen Fototag einmal selbst fest (Sonntag ist vorausgewählt). **Der Tag bleibt dann fest** (Phillip): Das Foto wird ausschließlich an diesem Tag gemacht, nicht irgendwann zwischendurch. Die Karte auf „Heute“ erinnert an diesem Tag. | 2026-10-16 |
+| Fototag verpasst? | **Woche fällt aus.** Verpasst ist verpasst: In der Reihe steht für diese Woche eine Lücke, das nächste Foto gibt es erst am nächsten Fototag. | 2026-10-16 |
 
 ## Offen
 
-- Entwurf der Karte und der Seite (folgt).
-- Was passiert, wenn man den Fototag verpasst.
 - Wie das Foto-Produkt aussieht und wie es mit der App verbunden wird.
+
+## Entwurf
+
+- Karte auf „Heute“ und eigene Seite (Beispiel Max, Woche 6, 2026-10-16): https://claude.ai/artifact/HN9moCGH9xjVGspSkbeXBy. Wartet auf Phillips Rückmeldung.
 
 ## Aus der Notiz, zur Info
 
