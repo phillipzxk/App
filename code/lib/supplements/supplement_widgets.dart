@@ -4,8 +4,8 @@ import '../home/feed_widgets.dart';
 import '../ui/coach_style.dart';
 import 'supplement_data.dart';
 
-/// The small reminder field on "Heute". Tapping it opens the Ernährung
-/// page, where the routine is ticked off.
+/// The small reminder field on "Heute", shown always. Without a routine it
+/// invites to set one up. Tapping it opens the Ernährung page.
 class SupplementHinweis extends StatelessWidget {
   const SupplementHinweis({
     super.key,
@@ -24,7 +24,10 @@ class SupplementHinweis extends StatelessWidget {
   Widget build(BuildContext context) {
     final offen = supplements.where((s) => !genommen.contains(s.id)).length;
     final next = naechsteOffene(supplements, genommen, now);
-    final text = next == null
+    final leer = supplements.isEmpty;
+    final text = leer
+        ? 'Routine festlegen'
+        : next == null
         ? 'heute alles genommen'
         : '$offen offen, nächste ${next.zeit} ${next.name}';
     return HinweisFeld(
@@ -32,7 +35,7 @@ class SupplementHinweis extends StatelessWidget {
       icon: Icons.medication_outlined,
       title: 'Supplements',
       text: text,
-      done: next == null,
+      done: !leer && next == null,
       onTap: onTap,
     );
   }
