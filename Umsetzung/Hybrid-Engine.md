@@ -17,9 +17,12 @@ Idee von Phillip aus [[App-Fortschritt]]: „Powerlifting, Calisthenics und Ausd
 | Woher kennt die KI die geschafften Werte? | **Aus den eigenen Worten.** Der Nutzer schreibt wie bisher frei, z. B. „Bank 3x8 mit 80 kg, Klimmzüge 3x6“ (Check-in oder „Wie war dein Training?“). Die KI liest es heraus, kein neues Feld. Fehlt eine Zahl, fragt die KI im Check-in nach. | 2026-10-17 |
 | Wo steht der nächste Schritt? | **Im Plan.** Auf der Trainingsseite steht unter jedem Trainingstag das nächste Ziel (z. B. „Bank 3x8 mit 82,5 kg“). „Dein Tag“ auf Heute zeigt nur eine kurze Zeile, Tippen führt zur Trainingsseite. | 2026-10-17 |
 | Ändert die KI den Plan bei Ausbremsen selbst? | **Selbst ändern.** Die KI tauscht oder verschiebt Einheiten selbst, mit kurzem Grund und Rückgängig per Tipp, genau wie beim [[Tages-Planer]]. | 2026-10-17 |
+| Was hat Vorrang bei Konflikten? | **Schwerpunkt wählen.** Der Nutzer wählt einmal beim Plan: Kraft, Calisthenics, Ausdauer oder ausgeglichen; jederzeit änderbar. Danach richtet die KI Tausch und Steigerung aus. | 2026-10-17 |
+
+Weniger Training nur bei klarem Muster (z. B. 2 schlechte Nächte), wie im [[Tages-Planer]] beschlossen.
 
 ## Noch offen
 
-- Was hat Vorrang bei Konflikten (Schwerpunkt)?
+- Entwurf der Trainingsseite zeigen, dann nach Ja einbauen (KI-Teile als Platzhalter bis zum KI-Anschluss).
 
 Siehe auch [[Main Feed]], [[KI-Anschluss]].
