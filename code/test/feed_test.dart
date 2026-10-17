@@ -51,6 +51,16 @@ void main() {
     expect(shortDay('Oberkörper: Bankdrücken 3x8'), 'Oberkörper');
     expect(shortDay('Laufen 5 km'), 'Laufen 5 km');
     expect(shortDay('  '), 'frei');
+    expect(shortDay('Push, Laufen\nBankdrücken 5x5'), 'Push, Laufen');
+  });
+
+  test('plan day keeps name and any number of exercises', () {
+    final tag = joinDay('Push + Laufen', 'Bankdrücken 5x5\nDips 3x10');
+    expect(tag, 'Push + Laufen\nBankdrücken 5x5\nDips 3x10');
+    expect(dayDetails(tag), 'Bankdrücken 5x5\nDips 3x10');
+    expect(dayDetails('Oberkörper: Bankdrücken 3x8'), 'Bankdrücken 3x8');
+    expect(dayDetails('Laufen 5 km'), '');
+    expect(joinDay('', 'Laufen 5 km'), 'Laufen 5 km');
   });
 
   testWidgets('bottom bar and area tiles switch pages', (tester) async {
@@ -71,26 +81,69 @@ void main() {
     expect(find.text('„Ich will stolz auf mich sein.“'), findsOneWidget);
   });
 
-  testWidgets('training plan is saved and shows today', (tester) async {
+  testWidgets('training plan is saved with name and exercises', (tester) async {
     final (_, feed) = await _openFeed(tester);
     await openTab(tester, 'Training');
     await tester.tap(find.text('Plan festlegen'));
     await tester.pumpAndSettle();
     await tester.enterText(
-      find.widgetWithText(TextField, 'Montag'),
-      'Oberkörper: Bankdrücken 3x8',
+      find.byKey(const ValueKey('plan-name-0')),
+      'Push + Laufen',
     );
     await tester.enterText(
-      find.widgetWithText(TextField, 'Dienstag'),
+      find.byKey(const ValueKey('plan-uebungen-0')),
+      'Bankdrücken 5x5\nSchulterdrücken 3x8\nDips 3x10\nLaufen 5 km',
+    );
+    await tester.enterText(
+      find.byKey(const ValueKey('plan-name-1')),
       'Kampfsport',
     );
+    await tester.ensureVisible(find.text('Speichern'));
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
 
+    expect(
+      feed.plan.tage[0],
+      'Push + Laufen\nBankdrücken 5x5\nSchulterdrücken 3x8\nDips 3x10\n'
+      'Laufen 5 km',
+    );
     expect(feed.plan.tage[1], 'Kampfsport');
-    expect(find.text('Oberkörper'), findsOneWidget);
-    expect(find.text('Heute: Oberkörper: Bankdrücken 3x8'), findsOneWidget);
+    expect(find.text('Push + Laufen · heute'), findsOneWidget);
+    expect(
+      find.text('Bankdrücken 5x5\nSchulterdrücken 3x8\nDips 3x10\nLaufen 5 km'),
+      findsOneWidget,
+    );
     expect(find.text('Plan bearbeiten'), findsOneWidget);
+
+    await tester.ensureVisible(find.byKey(const ValueKey('schwerpunkt-kraft')));
+    await tester.tap(find.byKey(const ValueKey('schwerpunkt-kraft')));
+    await tester.pumpAndSettle();
+    expect(feed.schwerpunkt, Schwerpunkt.kraft);
+  });
+
+  testWidgets('training in Dein Tag opens the Training page', (tester) async {
+    final (_, feed) = await _openFeed(
+      tester,
+      feed: MemoryFeedStore()
+        ..plan = TrainingPlan([
+          'Push + Laufen\nBankdrücken 5x5',
+          ...List.filled(6, ''),
+        ]),
+    );
+    expect(feed.plan.isEmpty, isFalse);
+    final row = find.byKey(const ValueKey('tag-training'));
+    await tester.scrollUntilVisible(
+      row.hitTestable(),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(
+      find.descendant(of: row, matching: find.text('Push + Laufen')),
+      findsOneWidget,
+    );
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    expect(find.text('Push + Laufen · heute'), findsOneWidget);
   });
 
   testWidgets('kcal setup asks for the first weight and shows the target', (
@@ -176,7 +229,8 @@ void main() {
     await tester.enterText(
       find.widgetWithText(
         TextField,
-        'Was hast du geschafft, was nicht, und warum?',
+        'Was hast du geschafft, was nicht, und warum? Gern mit Gewicht, '
+        'Wiederholungen oder Kilometern.',
       ),
       'Nur die Hälfte, war zu kaputt.',
     );

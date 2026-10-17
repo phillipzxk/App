@@ -14,22 +14,27 @@ const _weekdays = [
   'Sonntag',
 ];
 
-/// Training page: progress, the user's own week plan with today
-/// highlighted, and the field "Wie war dein Training?".
+/// Training page: progress, the user's own week plan with focus, today
+/// highlighted and the next target per day (hybrid engine), and the field
+/// "Wie war dein Training?".
 class TrainingTab extends StatelessWidget {
   const TrainingTab({
     super.key,
     required this.plan,
+    required this.schwerpunkt,
     required this.today,
     required this.fragen,
     required this.onSavePlan,
+    required this.onSchwerpunkt,
     required this.onAsk,
   });
 
   final TrainingPlan plan;
+  final Schwerpunkt? schwerpunkt;
   final DateTime today;
   final List<CoachFrage> fragen;
   final Future<void> Function(TrainingPlan plan) onSavePlan;
+  final Future<void> Function(Schwerpunkt s) onSchwerpunkt;
   final Future<void> Function(String text) onAsk;
 
   Future<void> _edit(BuildContext context) async {
@@ -76,24 +81,24 @@ class TrainingTab extends StatelessWidget {
             icon: Icons.event_note_outlined,
             gold: true,
             children: [
-              _WeekRow(plan: plan, today: today),
-              const SizedBox(height: 12),
-              Text.rich(
-                TextSpan(
-                  children: [
-                    const TextSpan(
-                      text: 'Heute: ',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    TextSpan(
-                      text: plan.forDay(today).trim().isEmpty
-                          ? 'frei'
-                          : plan.forDay(today).trim(),
-                    ),
-                  ],
-                ),
-                style: CoachStyle.body,
+              const Text('Dein Schwerpunkt', style: CoachStyle.label),
+              const SizedBox(height: 6),
+              _SchwerpunktChips(value: schwerpunkt, onPick: onSchwerpunkt),
+              const SizedBox(height: 6),
+              const HintText(
+                'Bremsen sich Einheiten aus, tauscht dein Coach sie passend '
+                'zu deinem Schwerpunkt, sagt dir warum, und du kannst es mit '
+                'einem Tipp zurücknehmen. $aiPending',
               ),
+              const SizedBox(height: 10),
+              for (var i = 0; i < 7; i++)
+                _DayRow(
+                  key: ValueKey('plan-tag-$i'),
+                  tag: _weekdays[i],
+                  text: plan.tage[i],
+                  heute: i == today.weekday - 1,
+                  first: i == 0,
+                ),
               const SizedBox(height: 12),
               GhostButton(
                 label: 'Plan bearbeiten',
@@ -104,7 +109,9 @@ class TrainingTab extends StatelessWidget {
         const GroupLabel('Frag deinen Coach'),
         AskCoachCard(
           title: 'Wie war dein Training?',
-          hint: 'Was hast du geschafft, was nicht, und warum?',
+          hint:
+              'Was hast du geschafft, was nicht, und warum? Gern mit '
+              'Gewicht, Wiederholungen oder Kilometern.',
           today: fragen,
           onSend: onAsk,
         ),
@@ -113,54 +120,39 @@ class TrainingTab extends StatelessWidget {
   }
 }
 
-class _WeekRow extends StatelessWidget {
-  const _WeekRow({required this.plan, required this.today});
+class _SchwerpunktChips extends StatelessWidget {
+  const _SchwerpunktChips({required this.value, required this.onPick});
 
-  final TrainingPlan plan;
-  final DateTime today;
+  final Schwerpunkt? value;
+  final Future<void> Function(Schwerpunkt s) onPick;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
       children: [
-        for (var i = 0; i < 7; i++)
-          Expanded(
+        for (final s in Schwerpunkt.values)
+          InkWell(
+            key: ValueKey('schwerpunkt-${s.name}'),
+            borderRadius: BorderRadius.circular(999),
+            onTap: () => onPick(s),
             child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 2),
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: i == today.weekday - 1
-                    ? CoachStyle.dark
-                    : const Color(0xFFF1ECE2),
-                borderRadius: BorderRadius.circular(10),
+                color: s == value ? CoachStyle.dark : CoachStyle.cardBright,
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(
+                  color: s == value ? CoachStyle.dark : CoachStyle.edgeStrong,
+                ),
               ),
-              child: Column(
-                children: [
-                  Text(
-                    _weekdays[i].substring(0, 2),
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                      color: i == today.weekday - 1
-                          ? CoachStyle.goldSoft
-                          : CoachStyle.ink,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    shortDay(plan.tage[i]),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 11,
-                      height: 1.2,
-                      color: i == today.weekday - 1
-                          ? CoachStyle.goldSoft
-                          : CoachStyle.inkSoft,
-                    ),
-                  ),
-                ],
+              child: Text(
+                s.label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: s == value ? FontWeight.w600 : FontWeight.w400,
+                  color: s == value ? CoachStyle.goldSoft : CoachStyle.inkSoft,
+                ),
               ),
             ),
           ),
@@ -169,7 +161,100 @@ class _WeekRow extends StatelessWidget {
   }
 }
 
-/// One free-text field per weekday; an empty day is a day off.
+/// One weekday of the plan: name, exercises and, on training days, the
+/// next target from the coach.
+class _DayRow extends StatelessWidget {
+  const _DayRow({
+    super.key,
+    required this.tag,
+    required this.text,
+    required this.heute,
+    required this.first,
+  });
+
+  final String tag;
+  final String text;
+  final bool heute;
+  final bool first;
+
+  @override
+  Widget build(BuildContext context) {
+    final frei = text.trim().isEmpty;
+    final details = dayDetails(text);
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+      decoration: BoxDecoration(
+        color: heute ? CoachStyle.gold.withValues(alpha: 0.12) : null,
+        borderRadius: heute ? BorderRadius.circular(10) : null,
+        border: first || heute
+            ? null
+            : const Border(top: BorderSide(color: CoachStyle.line)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 40,
+            child: Text(
+              tag.substring(0, 2),
+              style: CoachStyle.cardTitle.copyWith(
+                fontSize: 13,
+                color: heute ? CoachStyle.gold : CoachStyle.inkSoft,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  heute ? '${shortDay(text)} · heute' : shortDay(text),
+                  style: CoachStyle.body.copyWith(
+                    fontWeight: frei ? FontWeight.w400 : FontWeight.w600,
+                    color: frei ? CoachStyle.inkSoft : CoachStyle.ink,
+                  ),
+                ),
+                if (details.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    details,
+                    style: CoachStyle.body.copyWith(
+                      fontSize: 13.5,
+                      color: CoachStyle.inkSoft,
+                    ),
+                  ),
+                ],
+                if (!frei) ...[
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: CoachStyle.goldSoft,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Text(
+                      'Nächstes Ziel: folgt vom Coach',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        color: Color(0xFF7A5A2A),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Per weekday a short name (e.g. "Push + Laufen") and the exercises in
+/// own words, as many as needed. An empty day is a day off.
 class TrainingPlanEditor extends StatefulWidget {
   const TrainingPlanEditor({super.key, required this.plan});
 
@@ -180,13 +265,18 @@ class TrainingPlanEditor extends StatefulWidget {
 }
 
 class _TrainingPlanEditorState extends State<TrainingPlanEditor> {
-  late final _controllers = [
-    for (final t in widget.plan.tage) TextEditingController(text: t),
+  late final _names = [
+    for (final t in widget.plan.tage)
+      TextEditingController(text: t.trim().isEmpty ? '' : shortDay(t)),
+  ];
+  late final _uebungen = [
+    for (final t in widget.plan.tage)
+      TextEditingController(text: dayDetails(t)),
   ];
 
   @override
   void dispose() {
-    for (final c in _controllers) {
+    for (final c in [..._names, ..._uebungen]) {
       c.dispose();
     }
     super.dispose();
@@ -197,24 +287,41 @@ class _TrainingPlanEditorState extends State<TrainingPlanEditor> {
     return EditorPage(
       title: 'Dein Trainingsplan',
       intro:
-          'Schreib in eigenen Worten, was du an welchem Tag machst. Jede '
-          'Sportart geht. Lass einen Tag leer, wenn er frei ist.',
-      onSave: () =>
-          Navigator.of(context)
-              .pop(TrainingPlan([for (final c in _controllers) c.text.trim()])),
+          'Gib jedem Tag einen kurzen Namen, z. B. „Push + Laufen“, und '
+          'schreib darunter alle Übungen in eigenen Worten, so viele du '
+          'willst. Jede Sportart geht. Lass einen Tag leer, wenn er frei ist.',
+      onSave: () => Navigator.of(context).pop(
+        TrainingPlan([
+          for (var i = 0; i < 7; i++)
+            joinDay(_names[i].text, _uebungen[i].text),
+        ]),
+      ),
       children: [
         for (var i = 0; i < 7; i++) ...[
+          Text(_weekdays[i], style: CoachStyle.cardTitle),
+          const SizedBox(height: 6),
           EditorField(
-            controller: _controllers[i],
-            label: _weekdays[i],
+            key: ValueKey('plan-name-$i'),
+            controller: _names[i],
+            label: 'Name',
             hint: i == 0
-                ? 'z. B. Oberkörper: Bankdrücken 3x8, Klimmzüge 3x6'
+                ? 'z. B. Push + Laufen'
                 : i == 1
-                ? 'z. B. Laufen 5 km locker'
+                ? 'z. B. Pull'
+                : null,
+          ),
+          const SizedBox(height: 8),
+          EditorField(
+            key: ValueKey('plan-uebungen-$i'),
+            controller: _uebungen[i],
+            label: 'Übungen',
+            hint: i == 0
+                ? 'z. B. Bankdrücken 5x5 mit 80 kg\nSchulterdrücken 3x8\n'
+                      'Dips 3x10\nLaufen 5 km locker'
                 : null,
             multiline: true,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 18),
         ],
       ],
     );

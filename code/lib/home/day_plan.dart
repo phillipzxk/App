@@ -21,6 +21,7 @@ class DayPlanCard extends StatelessWidget {
     required this.onAddTermin,
     required this.onRemoveTermin,
     required this.onSetMahlzeiten,
+    this.onOpenTraining,
   });
 
   final DateTime today;
@@ -40,6 +41,9 @@ class DayPlanCard extends StatelessWidget {
   final Future<void> Function(String text) onAddTermin;
   final Future<void> Function(Termin termin) onRemoveTermin;
   final Future<void> Function(int anzahl) onSetMahlzeiten;
+
+  /// Opens the Training page, where exercises and the next target are.
+  final VoidCallback? onOpenTraining;
 
   Future<void> _pickMahlzeiten(BuildContext context) async {
     final n = await showDialog<int>(
@@ -92,8 +96,10 @@ class DayPlanCard extends StatelessWidget {
           titel: training.trim().isEmpty ? 'Heute frei' : shortDay(training),
           text: training.trim().isEmpty
               ? 'Laut deinem Trainingsplan ist heute kein Training.'
-              : '${training.trim()}\nUhrzeit, Intensität und Umfang passt '
-                    'die KI an deine Termine an. $aiPending',
+              : 'Übungen und nächstes Ziel stehen in deinem Plan. Uhrzeit, '
+                    'Intensität und Umfang passt die KI an deine Termine an. '
+                    '$aiPending',
+          onTap: onOpenTraining,
         ),
         _PlanRow(
           zeit: '–',
@@ -275,6 +281,7 @@ class _PlanRow extends StatelessWidget {
     this.dark = false,
     this.last = false,
     this.onRemove,
+    this.onTap,
   });
 
   final String zeit;
@@ -284,10 +291,11 @@ class _PlanRow extends StatelessWidget {
   final bool dark;
   final bool last;
   final VoidCallback? onRemove;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final row = Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         border: last
@@ -344,8 +352,22 @@ class _PlanRow extends StatelessWidget {
               ),
               onPressed: onRemove,
             ),
+          if (onTap != null)
+            const Padding(
+              padding: EdgeInsets.only(left: 6, top: 2),
+              child: Text(
+                '›',
+                style: TextStyle(color: CoachStyle.gold, fontSize: 20),
+              ),
+            ),
         ],
       ),
+    );
+    if (onTap == null) return row;
+    return InkWell(
+      key: const ValueKey('tag-training'),
+      onTap: onTap,
+      child: row,
     );
   }
 }

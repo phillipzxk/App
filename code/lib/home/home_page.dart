@@ -57,6 +57,7 @@ class _HomePageState extends State<HomePage> {
   List<CoachFrage> _fragen = const [];
   List<Termin> _termine = const [];
   int? _mahlzeiten;
+  Schwerpunkt? _schwerpunkt;
   FotoEinstellungen? _fotoEinstellungen;
   List<WochenFoto> _wochenFotos = const [];
   List<Supplement> _supplements = const [];
@@ -78,6 +79,7 @@ class _HomePageState extends State<HomePage> {
     final fragen = await widget.feed.loadFragen();
     final termine = await widget.feed.loadTermine();
     final mahlzeiten = await widget.feed.loadMahlzeiten();
+    final schwerpunkt = await widget.feed.loadSchwerpunkt();
     final fotoEinstellungen = await widget.feed.loadFotoEinstellungen();
     final wochenFotos = await widget.feed.loadWochenFotos();
     final supplements = await widget.feed.loadSupplements();
@@ -94,6 +96,7 @@ class _HomePageState extends State<HomePage> {
       _fragen = fragen;
       _termine = termine;
       _mahlzeiten = mahlzeiten;
+      _schwerpunkt = schwerpunkt;
       _fotoEinstellungen = fotoEinstellungen;
       _wochenFotos = wochenFotos;
       _supplements = supplements;
@@ -200,8 +203,13 @@ class _HomePageState extends State<HomePage> {
       ),
       TrainingTab(
         plan: _plan,
+        schwerpunkt: _schwerpunkt,
         today: widget.clock(),
         fragen: _todayFragen(Bereich.training),
+        onSchwerpunkt: (sp) async {
+          await widget.feed.saveSchwerpunkt(sp);
+          await _reload();
+        },
         onSavePlan: (p) async {
           await widget.feed.savePlan(p);
           await _reload();

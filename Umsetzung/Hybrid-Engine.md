@@ -1,6 +1,6 @@
 ---
 title: Hybrid-Progressions-Engine
-tags: [umsetzung, training, ki, in-arbeit]
+tags: [umsetzung, training, ki, teilweise-gebaut]
 erstellt: 2026-10-17
 aktualisiert: 2026-10-17
 ---
@@ -25,8 +25,17 @@ Weniger Training nur bei klarem Muster (z. B. 2 schlechte Nächte), wie im [[Tag
 
 - Trainingsseite und Heute, Beispiel Max (2026-10-17): https://claude.ai/artifact/19NcDAD6LzaUXyuGLn8kpX
 
+## Änderung von Phillip (2026-10-17)
+
+Beim Ja zum Entwurf: Pro Tag steht ein kurzer **Name** wie „Push + Laufen“, darunter **beliebig viele Übungen** in eigenen Worten. Zwei Übungen pro Tag wie im Entwurf wären zu wenig.
+
+## Stand im Code
+
+- Trainingsseite: Schwerpunkt als Auswahl (Kraft, Calisthenics, Ausdauer, Ausgeglichen), gespeichert. Jeder Wochentag mit Name, allen Übungen und „Nächstes Ziel“ (Platzhalter bis zum KI-Anschluss), heute hervorgehoben.
+- Plan bearbeiten: pro Tag Feld „Name“ und Feld „Übungen“ (mehrzeilig).
+- „Dein Tag“ auf Heute: nur der Name des Trainings, Tippen öffnet die Trainingsseite.
+- Noch mit der KI: Tausch mit Grund und Rückgängig, nächstes Ziel pro Tag, Werte aus den eigenen Worten lesen.
+
 ## Noch offen
 
-- Phillips Ja zum Entwurf, dann einbauen (KI-Teile als Platzhalter bis zum KI-Anschluss).
-
-Siehe auch [[Main Feed]], [[KI-Anschluss]].
+- Die KI-Teile, sobald die KI angeschlossen ist.
