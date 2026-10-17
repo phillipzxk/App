@@ -21,8 +21,12 @@ Idee von Phillip aus [[App-Fortschritt]]: „Powerlifting, Calisthenics und Ausd
 
 Weniger Training nur bei klarem Muster (z. B. 2 schlechte Nächte), wie im [[Tages-Planer]] beschlossen.
 
+## Entwurf
+
+- Trainingsseite und Heute, Beispiel Max (2026-10-17): https://claude.ai/artifact/19NcDAD6LzaUXyuGLn8kpX
+
 ## Noch offen
 
-- Entwurf der Trainingsseite zeigen, dann nach Ja einbauen (KI-Teile als Platzhalter bis zum KI-Anschluss).
+- Phillips Ja zum Entwurf, dann einbauen (KI-Teile als Platzhalter bis zum KI-Anschluss).
 
 Siehe auch [[Main Feed]], [[KI-Anschluss]].
