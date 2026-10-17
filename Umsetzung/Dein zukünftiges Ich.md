@@ -28,7 +28,7 @@ Herzstück aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Abschr
 
 ## Offen
 
-- Wie das Foto-Produkt aussieht und wie es mit der App verbunden wird.
+- Wie das Foto-Produkt aussieht und wie es mit der App verbunden wird. **Auf Phillips To-do-Liste (2026-10-17):** Die Verbindung zwischen App und Foto-Kit des Start-ups muss noch gebaut werden; zusammen ausarbeiten, sobald er dazu kommt.
 
 ## Stand im Code (2026-10-16)
 
