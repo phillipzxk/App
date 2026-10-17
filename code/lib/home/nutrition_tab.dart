@@ -63,6 +63,7 @@ class NutritionTab extends StatelessWidget {
           FeedCard(
             title: 'Dein kcal-Ziel',
             icon: Icons.restaurant_outlined,
+            gold: true,
             children: [
               const HintText(
                 'Gib einmal Größe, Alter, Geschlecht und deine Aktivität im '
@@ -80,6 +81,7 @@ class NutritionTab extends StatelessWidget {
           FeedCard(
             title: 'Dein kcal-Ziel heute',
             icon: Icons.restaurant_outlined,
+            gold: true,
             trailing: const Tag('passt sich an'),
             children: [
               Text.rich(

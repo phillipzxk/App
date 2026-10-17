@@ -51,6 +51,7 @@ class SleepTab extends StatelessWidget {
         FeedCard(
           title: 'Deine Abendroutine',
           icon: Icons.nightlight_outlined,
+          gold: true,
           children: [
             if (routine.isEmpty)
               const HintText(

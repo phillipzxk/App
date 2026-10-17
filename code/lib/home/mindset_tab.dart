@@ -41,6 +41,7 @@ class MindsetTab extends StatelessWidget {
           FeedCard(
             title: 'Dein Warum',
             icon: Icons.favorite_border,
+            gold: true,
             trailing: const Tag('in schwachen Phasen'),
             children: [
               Text(
