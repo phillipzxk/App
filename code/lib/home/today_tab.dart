@@ -119,13 +119,12 @@ class TodayTab extends StatelessWidget {
           const SizedBox(height: 14),
         ],
         const GroupLabel('Heute dran'),
-        if (supplements.isNotEmpty)
-          SupplementHinweis(
-            supplements: supplements,
-            genommen: genommen,
-            now: today,
-            onTap: onOpenSupplements,
-          ),
+        SupplementHinweis(
+          supplements: supplements,
+          genommen: genommen,
+          now: today,
+          onTap: onOpenSupplements,
+        ),
         FutureMeCard(
           today: today,
           einstellungen: fotoEinstellungen,

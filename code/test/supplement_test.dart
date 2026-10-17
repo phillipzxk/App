@@ -50,9 +50,24 @@ void main() {
     return feed;
   }
 
-  testWidgets('no field on Heute while the routine is empty', (tester) async {
+  testWidgets('empty routine: field on Heute invites to set it up', (
+    tester,
+  ) async {
     await start(tester);
-    expect(find.byKey(const ValueKey('supp-hinweis')), findsNothing);
+    final feld = find.byKey(const ValueKey('supp-hinweis'));
+    expect(feld, findsOneWidget);
+    expect(
+      find.descendant(
+        of: feld,
+        matching: find.textContaining('Routine festlegen', findRichText: true),
+      ),
+      findsOneWidget,
+    );
+    await tester.ensureVisible(feld);
+    await tester.pumpAndSettle();
+    await tester.tap(feld);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('supp-festlegen')), findsOneWidget);
   });
 
   testWidgets('set up the routine on Ernährung', (tester) async {
