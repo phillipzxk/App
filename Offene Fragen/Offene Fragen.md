@@ -40,4 +40,4 @@ Aus dem Entwurf [[Onboarding-Fragebogen]] (2026-10-10):
 
 ## Merken für später
 
-- **Foto-Kit verbinden** (Phillip, 2026-10-17): Die App braucht noch die Verbindung zum Foto-Kit seines Start-ups für [[Dein zukünftiges Ich]]. Wie das Kit aussieht und wie es sich verbindet, arbeiten wir zusammen aus.
+- **Foto-Kit verbinden** (Phillip, 2026-10-17): Die App braucht noch die Verbindung zum Foto-Kit seines Start-ups für [[Dein zukünftiges Ich]]. ~~Wie das Kit aussieht und wie es sich verbindet, arbeiten wir zusammen aus.~~ Am 2026-10-17 ausgearbeitet, siehe [[Foto-Kit]]; offen sind dort nur noch Code-Eingabe und Shop-Link.

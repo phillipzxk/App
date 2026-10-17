@@ -28,7 +28,7 @@ Herzstück aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Abschr
 
 ## Offen
 
-- Wie das Foto-Produkt aussieht und wie es mit der App verbunden wird. **Auf Phillips To-do-Liste (2026-10-17):** Die Verbindung zwischen App und Foto-Kit des Start-ups muss noch gebaut werden; zusammen ausarbeiten, sobald er dazu kommt.
+- Verbindung zum Foto-Kit: **am 2026-10-17 ausgearbeitet**, siehe [[Foto-Kit]]. Dabei geändert: Über der Kamera liegt jetzt der Umriss des **letzten** Fotos, nicht des ersten; dazu kommen Schieberegler, Zeitraffer und Teilen.
 
 ## Stand im Code (2026-10-16)
 
