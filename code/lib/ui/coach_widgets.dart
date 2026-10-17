@@ -232,6 +232,8 @@ class CoachCard extends StatelessWidget {
         children: [
           Row(
             children: [
+              const CoachAvatar(),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   label.toUpperCase(),
@@ -240,12 +242,47 @@ class CoachCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const LogoMark(size: 22, ground: CoachStyle.onDark),
             ],
           ),
           const SizedBox(height: 10),
           Text(text, style: CoachStyle.body.copyWith(color: CoachStyle.onDark)),
         ],
+      ),
+    );
+  }
+}
+
+/// The coach's face: the proboscis monkey, round with a gold edge.
+class CoachAvatar extends StatelessWidget {
+  const CoachAvatar({super.key, this.size = 52});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const ValueKey('coach-avatar'),
+      width: size,
+      height: size,
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: CoachStyle.goldLight,
+        boxShadow: [
+          const BoxShadow(color: Color(0xFF2A2620), spreadRadius: 2),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipOval(
+        child: Image.asset(
+          'assets/images/coach.jpg',
+          fit: BoxFit.cover,
+          semanticLabel: 'Dein Coach',
+        ),
       ),
     );
   }

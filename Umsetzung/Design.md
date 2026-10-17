@@ -43,6 +43,14 @@ Name und Aussehen der App, gemeinsam mit Phillip Schritt für Schritt festgelegt
 
 Dazu ein Startbild mit Logo und dem Satz „Das Fundament für jeden Tag.“ und das Logo auf dem Namens-Bildschirm.
 
+## Gesicht des Coachs (17.10.2026)
+
+- **Tier:** Nasenaffe (Phillips Wahl). Gezeichnete Comic-Entwürfe waren ihm zu comicartig.
+- **Bild:** realistisch und leicht comichaft, mit KI erstellt. Freundlicher Blick mit Vorfreude, goldene Pfeife an dunkler Schnur, damit man ihn als Coach erkennt. Dunkelbrauner Hintergrund.
+- **In der App:** rund mit Goldrand links oben auf der dunklen Coach-Karte, ganzes Bild im Kreis (Kopf, Schultern, Pfeife), Platz drumherum. Ersetzt dort das kleine Logo.
+- Bilddatei in der App: `code/assets/images/coach.jpg`; Original im Projektordner `app-docs/coach-nasenaffe.png`.
+- Entwurf: https://claude.ai/artifact/BPEdfiyUJay3VjscnEnDxp
+
 ## Entwürfe
 
 - Farben: https://claude.ai/artifact/QppYJLeDpFeuCEgdJeRM3t
