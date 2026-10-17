@@ -43,8 +43,14 @@ class TrainingTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       children: [
-        const PageHeader(label: 'Bereich', title: 'Training'),
+        const PageHeader(
+          label: 'Bereich',
+          title: 'Training',
+          icon: Icons.fitness_center,
+        ),
+        const GroupLabel('Dein Verlauf'),
         const AreaChart(),
+        const GroupLabel('Deine Basis'),
         if (plan.isEmpty)
           FeedCard(
             title: 'Dein Plan',
@@ -93,6 +99,7 @@ class TrainingTab extends StatelessWidget {
               ),
             ],
           ),
+        const GroupLabel('Frag deinen Coach'),
         AskCoachCard(
           title: 'Wie war dein Training?',
           hint: 'Was hast du geschafft, was nicht, und warum?',

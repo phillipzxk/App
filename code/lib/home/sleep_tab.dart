@@ -40,8 +40,14 @@ class SleepTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       children: [
-        const PageHeader(label: 'Bereich', title: 'Schlaf'),
+        const PageHeader(
+          label: 'Bereich',
+          title: 'Schlaf',
+          icon: Icons.bedtime,
+        ),
+        const GroupLabel('Dein Verlauf'),
         const AreaChart(),
+        const GroupLabel('Deine Basis'),
         FeedCard(
           title: 'Deine Abendroutine',
           icon: Icons.nightlight_outlined,
@@ -81,12 +87,14 @@ class SleepTab extends StatelessWidget {
             ),
           ],
         ),
+        const GroupLabel('Frag deinen Coach'),
         AskCoachCard(
           title: 'Frag zu deinem Schlaf',
           hint: 'Was stört dich gerade beim Schlafen?',
           today: fragen,
           onSend: onAsk,
         ),
+        const GroupLabel('Deine Werte'),
         SleepCard(entries: sleep, today: today, onAdd: onAddSleep),
       ],
     );

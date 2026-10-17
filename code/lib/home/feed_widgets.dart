@@ -17,11 +17,15 @@ class PageHeader extends StatelessWidget {
     required this.label,
     required this.title,
     this.brand = false,
+    this.icon,
   });
 
   final String label;
   final String title;
   final bool brand;
+
+  /// Symbol of the area, shown next to the title like on the cards.
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +53,15 @@ class PageHeader extends StatelessWidget {
               ],
               Text(label.toUpperCase(), style: CoachStyle.label),
               const SizedBox(height: 4),
-              Text(title, style: CoachStyle.title),
+              Row(
+                children: [
+                  if (icon case final i?) ...[
+                    SymbolBadge(i, size: 36),
+                    const SizedBox(width: 12),
+                  ],
+                  Expanded(child: Text(title, style: CoachStyle.title)),
+                ],
+              ),
             ],
           ),
         ),
@@ -464,6 +476,7 @@ class _AskCoachCardState extends State<AskCoachCard> {
     return FeedCard(
       title: widget.title,
       icon: Icons.chat_bubble_outline,
+      darkHead: true,
       children: [
         for (final f in widget.today) ...[
           Text(f.text, style: CoachStyle.body),
