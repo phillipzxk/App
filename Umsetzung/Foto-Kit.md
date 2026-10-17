@@ -36,3 +36,12 @@ Am 2026-10-17 mit Phillip Schritt für Schritt ausgearbeitet.
 - Wo man den Code eingibt (Vorschlag für den Entwurf: Einstellungen auf „Dein zukünftiges Ich“).
 - Shop-Link (Wartelisten-Seite) für die Kit-Zeile.
 - Marker-Erkennung, Ausrichten, Umriss und Auto-Auslöser laufen erst in der Handy-Version.
+
+## Stand im Code (2026-10-17)
+
+In der App seit 17.10.2026 (Phillip: „Okay weiter“ nach der Vorschau):
+- **Dein Tag:** Am Fototag (und am Nachholtag) steht oben „früh · Foto · Woche N“, tippen öffnet die Fotoseite.
+- **Foto machen:** ohne Kit die goldene Zeile „Für 100 % vergleichbare Fotos: das Frame Kit ›“ (tippen zeigt ein Info-Fenster zum Kit), mit Kit das Feld „Frame Kit aktiv“. Neben jeder Pose liegt das Foto der Vorwoche.
+- **Dein zukünftiges Ich:** Vergleich mit Schieberegler und zwei wählbaren Wochen, Zeitraffer, Teilen. Unten „Frame Kit · Code aus dem Kit eingeben“; danach sind vorne, Seite und hinten als Posen gesetzt.
+- **Name in der App:** „Frame Kit“ (Phillip, 17.10.2026). Im Info-Fenster stehen noch die Shop-Namen „Framework Mat/Kit“.
+- **Platzhalter:** Code-Prüfung (jeder Code ab 6 Zeichen, bis der Shop echte Codes hat), Teilen, Matte erkennen, Ausrichten und Auto-Auslöser (Handy-Version), Shop-Link.

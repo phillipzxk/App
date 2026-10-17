@@ -179,3 +179,22 @@ const wochentage = [
   'Samstag',
   'Sonntag',
 ];
+
+/// With the Frame Kit these poses are preselected, matching the foot marks
+/// on the mat; each can be removed (see Umsetzung/Foto-Kit.md).
+const kitPosen = ['Vorne', 'Seite', 'Hinten'];
+
+/// The gold line on the photo screen for users without the kit.
+const kitZeile = 'Für 100 % vergleichbare Fotos: das Frame Kit';
+
+/// Checks the code from the kit's box. Until the shop issues real codes the
+/// preview accepts any code of at least 6 letters or digits.
+bool kitCodeGueltig(String code) =>
+    RegExp(r'^[A-Za-z0-9-]{6,}$').hasMatch(code.trim());
+
+/// Poses after the kit code: the kit poses first, then the user's own.
+List<String> posenMitKit(List<String> eigene) => [
+  ...kitPosen,
+  for (final p in eigene)
+    if (!kitPosen.contains(p)) p,
+];

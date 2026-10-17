@@ -22,6 +22,8 @@ class DayPlanCard extends StatelessWidget {
     required this.onRemoveTermin,
     required this.onSetMahlzeiten,
     this.onOpenTraining,
+    this.foto,
+    this.onOpenFoto,
   });
 
   final DateTime today;
@@ -44,6 +46,11 @@ class DayPlanCard extends StatelessWidget {
 
   /// Opens the Training page, where exercises and the next target are.
   final VoidCallback? onOpenTraining;
+
+  /// On the photo day (or its catch-up day) e.g. "Foto · Woche 7": a fixed
+  /// morning slot that is never moved (see Umsetzung/Foto-Kit.md).
+  final String? foto;
+  final VoidCallback? onOpenFoto;
 
   Future<void> _pickMahlzeiten(BuildContext context) async {
     final n = await showDialog<int>(
@@ -81,6 +88,18 @@ class DayPlanCard extends StatelessWidget {
           onTap: () => _pickMahlzeiten(context),
         ),
         const SizedBox(height: 12),
+        if (foto != null)
+          _PlanRow(
+            key: const ValueKey('tag-foto'),
+            zeit: 'früh',
+            art: 'Foto',
+            dark: true,
+            titel: foto!,
+            text:
+                'Fester Termin, wird nie verschoben. Mit dem Frame Kit '
+                'dauert es 30 Sekunden.',
+            onTap: onOpenFoto,
+          ),
         for (final t in heute)
           _PlanRow(
             key: ObjectKey(t),
