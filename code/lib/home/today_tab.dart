@@ -100,6 +100,21 @@ class TodayTab extends StatelessWidget {
     return null;
   }
 
+  /// "Foto · Woche 7" on the photo day, null on other days.
+  String? get _fotoHeute {
+    final e = fotoEinstellungen;
+    if (e == null) return null;
+    final lage = fotoLage(today, e, wochenFotos);
+    switch (lage.status) {
+      case FotoStatus.heute:
+        return 'Foto · Woche ${lage.woche}';
+      case FotoStatus.nachholen:
+        return 'Foto nachholen · Woche ${lage.woche}';
+      case FotoStatus.spaeter:
+        return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = _todayCheckIn;
@@ -141,6 +156,8 @@ class TodayTab extends StatelessWidget {
           onRemoveTermin: onRemoveTermin,
           onSetMahlzeiten: onSetMahlzeiten,
           onOpenTraining: () => onOpenArea(Bereich.training),
+          foto: _fotoHeute,
+          onOpenFoto: onOpenZukunft,
         ),
         const GroupLabel('Deine Woche'),
         FeedCard(

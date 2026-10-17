@@ -113,10 +113,91 @@ void main() {
 
     expect(feed.wochenFotos.single.werte, {'Klimmzüge am Stück': '6'});
     expect(find.byKey(const ValueKey('seite-foto')), findsNothing);
+    expect(find.byKey(const ValueKey('vergleich-regler')), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Deine Werte'), 200);
     expect(find.text('Deine Werte'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Zurück'));
     await tester.pumpAndSettle();
     expect(find.textContaining('nächstes Foto'), findsOneWidget);
+  });
+
+  test('kit code check and kit poses', () {
+    expect(kitCodeGueltig('FRAME-7K2Q9'), isTrue);
+    expect(kitCodeGueltig('abc'), isFalse);
+    expect(posenMitKit(['Vorne', 'Bizeps']), [
+      'Vorne',
+      'Seite',
+      'Hinten',
+      'Bizeps',
+    ]);
+  });
+
+  Future<MemoryFeedStore> openApp(WidgetTester tester) async {
+    final diary = MemoryDiaryStore()..checkIns.add(checkInOn(fixedNow));
+    final feed = MemoryFeedStore()..fotoEinstellungen = _e(fixedNow.weekday);
+    fotoAufnahme = () async => Uint8List.fromList(_png);
+    tallView(tester);
+    await tester.pumpWidget(
+      CoachApp(
+        store: MemoryProfileStore(_profile),
+        diary: diary,
+        feed: feed,
+        clock: fixedClock,
+      ),
+    );
+    await tester.pumpAndSettle();
+    return feed;
+  }
+
+  testWidgets('photo day: fixed photo slot in Dein Tag', (tester) async {
+    await openApp(tester);
+    expect(find.byKey(const ValueKey('tag-foto')), findsOneWidget);
+    expect(find.text('Foto · Woche 1'), findsOneWidget);
+  });
+
+  testWidgets('without kit the photo screen shows the kit line', (
+    tester,
+  ) async {
+    await openApp(tester);
+    await tester.tap(find.byKey(const ValueKey('zukunft-karte')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('seite-foto')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('kit-zeile')), findsOneWidget);
+  });
+
+  testWidgets('kit code unlocks the kit and preselects three poses', (
+    tester,
+  ) async {
+    final feed = await openApp(tester);
+    await tester.tap(find.byKey(const ValueKey('zukunft-karte')));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('kit-code')),
+      200,
+    );
+    await tester.ensureVisible(find.byKey(const ValueKey('kit-code')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('kit-code')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('kit-code-feld')),
+      'FRAME-7K2Q9',
+    );
+    await tester.tap(find.byKey(const ValueKey('kit-code-ok')));
+    await tester.pumpAndSettle();
+
+    expect(feed.kitAktiv, isTrue);
+    expect(feed.fotoEinstellungen!.posen, kitPosen);
+
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('seite-foto')),
+      -200,
+    );
+    await tester.tap(find.byKey(const ValueKey('seite-foto')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('kit-zeile')), findsNothing);
+    expect(find.byKey(const ValueKey('aufnehmen-Hinten')), findsOneWidget);
   });
 }

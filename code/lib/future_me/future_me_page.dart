@@ -9,6 +9,7 @@ import '../ui/coach_widgets.dart';
 import 'foto_aufnahme.dart';
 import 'future_me_card.dart';
 import 'future_me_data.dart';
+import 'kit_widgets.dart';
 
 /// Starts the photo of today (or the catch-up of yesterday's) and saves it.
 /// Returns true when something was saved.
@@ -20,6 +21,7 @@ Future<bool> fotoMachen(
   final e = await store.loadFotoEinstellungen();
   if (e == null || !context.mounted) return false;
   final fotos = await store.loadWochenFotos();
+  final kit = await store.loadKitAktiv();
   final lage = fotoLage(now, e, fotos);
   if (lage.status == FotoStatus.spaeter || !context.mounted) return false;
   final foto = await Navigator.of(context).push<WochenFoto>(
@@ -30,6 +32,7 @@ Future<bool> fotoMachen(
         erstes: fotos.isEmpty ? null : fotos.first,
         letztes: fotos.isEmpty ? null : fotos.last,
         now: now,
+        kit: kit,
       ),
     ),
   );
@@ -55,6 +58,7 @@ class _FutureMePageState extends State<FutureMePage> {
   bool _loaded = false;
   FotoEinstellungen? _e;
   List<WochenFoto> _fotos = const [];
+  bool _kit = false;
   String? _pose;
 
   @override
@@ -66,22 +70,48 @@ class _FutureMePageState extends State<FutureMePage> {
   Future<void> _reload() async {
     final e = await widget.store.loadFotoEinstellungen();
     final fotos = await widget.store.loadWochenFotos();
+    final kit = await widget.store.loadKitAktiv();
     if (!mounted) return;
     setState(() {
       _loaded = true;
       _e = e;
       _fotos = fotos;
+      _kit = kit;
       if (e != null && !e.posen.contains(_pose)) _pose = e.posen.first;
     });
   }
 
   Future<void> _edit() async {
     final result = await Navigator.of(context).push<FotoEinstellungen>(
-      MaterialPageRoute(builder: (_) => EinrichtenPage(current: _e)),
+      MaterialPageRoute(
+        builder: (_) => EinrichtenPage(current: _e, kit: _kit),
+      ),
     );
     if (result == null) return;
     await widget.store.saveFotoEinstellungen(result);
     await _reload();
+  }
+
+  /// Code from the kit: unlocks the kit functions and preselects the kit
+  /// poses (front, side, back), which can be removed again.
+  Future<void> _kitCode() async {
+    if (!await kitCodeEingeben(context)) return;
+    await widget.store.saveKitAktiv(true);
+    final e = _e;
+    if (e != null) {
+      await widget.store.saveFotoEinstellungen(
+        e.copyWith(posen: posenMitKit(e.posen)),
+      );
+    }
+    await _reload();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Frame Kit freigeschaltet. Dazu ein Monat Groundset gratis.',
+        ),
+      ),
+    );
   }
 
   Future<void> _foto() async {
@@ -109,7 +139,7 @@ class _FutureMePageState extends State<FutureMePage> {
             child: !_loaded
                 ? const SizedBox.shrink()
                 : e == null
-                ? _Leer(onSetup: _edit)
+                ? _Leer(onSetup: _edit, kit: _kit, onKitCode: _kitCode)
                 : _content(e),
           ),
         ],
@@ -169,20 +199,11 @@ class _FutureMePageState extends State<FutureMePage> {
             ],
           )
         else
-          Padding(
-            padding: const EdgeInsets.only(bottom: 14),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: _Shot(foto: first, pose: pose, start: true),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _Shot(foto: last!, pose: pose, start: false),
-                ),
-              ],
-            ),
+          VergleichKarte(
+            key: ValueKey('vergleich-${_fotos.length}'),
+            fotos: _fotos,
+            pose: pose,
+            woche: (f) => wocheVon(_fotos, f.fototag),
           ),
         if (e.werte.isNotEmpty)
           FeedCard(
@@ -240,6 +261,10 @@ class _FutureMePageState extends State<FutureMePage> {
               value: '${wochentage[e.fototag - 1]} · fest',
             ),
             _SettingRow(label: 'Deine Posen', value: e.posen.join(', ')),
+            _SettingRow(
+              label: 'Frame Kit',
+              value: _kit ? 'aktiv' : 'nicht verbunden',
+            ),
             const SizedBox(height: 6),
             GhostButton(label: 'Posen und Werte ändern', onPressed: _edit),
             const SizedBox(height: 10),
@@ -249,15 +274,61 @@ class _FutureMePageState extends State<FutureMePage> {
             ),
           ],
         ),
+        _KitKarte(kit: _kit, onCode: _kitCode),
+      ],
+    );
+  }
+}
+
+/// Settings card for the Frame Kit: enter the code, or what it does once
+/// active.
+class _KitKarte extends StatelessWidget {
+  const _KitKarte({required this.kit, required this.onCode});
+
+  final bool kit;
+  final VoidCallback onCode;
+
+  @override
+  Widget build(BuildContext context) {
+    return FeedCard(
+      title: 'Frame Kit',
+      icon: Icons.crop_free,
+      trailing: kit ? const Tag('aktiv') : null,
+      children: [
+        if (kit)
+          const HintText(
+            'Die Kamera erkennt deine Matte von selbst und richtet jedes Foto '
+            'aus. Vorne, Seite und hinten sind vorausgewählt, einzelne kannst '
+            'du unter „Posen und Werte ändern“ entfernen. Erkennen und '
+            'Ausrichten laufen in der Handy-Version.',
+          )
+        else ...[
+          GhostButton(
+            key: const ValueKey('kit-code'),
+            label: 'Code aus dem Kit eingeben',
+            onPressed: onCode,
+          ),
+          const SizedBox(height: 8),
+          const HintText(
+            'Schaltet die Kit-Funktionen dauerhaft frei, dazu einen Monat '
+            'Groundset gratis.',
+          ),
+        ],
       ],
     );
   }
 }
 
 class _Leer extends StatelessWidget {
-  const _Leer({required this.onSetup});
+  const _Leer({
+    required this.onSetup,
+    required this.kit,
+    required this.onKitCode,
+  });
 
   final VoidCallback onSetup;
+  final bool kit;
+  final VoidCallback onKitCode;
 
   @override
   Widget build(BuildContext context) {
@@ -280,41 +351,7 @@ class _Leer extends StatelessWidget {
             GhostButton(label: 'Einrichten', onPressed: onSetup),
           ],
         ),
-      ],
-    );
-  }
-}
-
-class _Shot extends StatelessWidget {
-  const _Shot({required this.foto, required this.pose, required this.start});
-
-  final WochenFoto foto;
-  final String pose;
-  final bool start;
-
-  @override
-  Widget build(BuildContext context) {
-    final d = foto.gemacht;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        AspectRatio(
-          aspectRatio: 3 / 4,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
-              border: start
-                  ? null
-                  : Border.all(color: CoachStyle.gold, width: 2),
-            ),
-            child: FotoBild(foto: foto, pose: pose, radius: 12),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          '${start ? 'Start' : 'Neuestes'} · ${d.day}.${d.month}.',
-          style: CoachStyle.label.copyWith(letterSpacing: 0, fontSize: 12),
-        ),
+        _KitKarte(kit: kit, onCode: onKitCode),
       ],
     );
   }
@@ -489,9 +526,12 @@ class _SettingRow extends StatelessWidget {
 /// Sets photo day, poses and own values. The photo day can only be chosen
 /// the first time; after that it stays fixed.
 class EinrichtenPage extends StatefulWidget {
-  const EinrichtenPage({super.key, required this.current});
+  const EinrichtenPage({super.key, required this.current, this.kit = false});
 
   final FotoEinstellungen? current;
+
+  /// With the Frame Kit, front, side and back are preselected.
+  final bool kit;
 
   @override
   State<EinrichtenPage> createState() => _EinrichtenPageState();
@@ -500,7 +540,8 @@ class EinrichtenPage extends StatefulWidget {
 class _EinrichtenPageState extends State<EinrichtenPage> {
   late int _tag = widget.current?.fototag ?? DateTime.sunday;
   late final List<TextEditingController> _posen = [
-    for (final p in widget.current?.posen ?? const ['Vorne'])
+    for (final p
+        in widget.current?.posen ?? (widget.kit ? kitPosen : const ['Vorne']))
       TextEditingController(text: p),
   ];
   late final List<TextEditingController> _werte = [
@@ -589,8 +630,11 @@ class _EinrichtenPageState extends State<EinrichtenPage> {
           onPressed: () => setState(() => _posen.add(TextEditingController())),
         ),
         const SizedBox(height: 6),
-        const HintText(
-          'Tipp: Nimm jede Woche dieselben Posen, am besten nur eine.',
+        HintText(
+          widget.kit
+              ? 'Mit dem Frame Kit: vorne, Seite und hinten, passend zu den '
+                    'Fußmarken. Eine Pose entfernst du, indem du das Feld leerst.'
+              : 'Tipp: Nimm jede Woche dieselben Posen, am besten nur eine.',
         ),
         const SizedBox(height: 22),
         const Text('DEINE WERTE (FREIWILLIG)', style: CoachStyle.label),
@@ -621,6 +665,7 @@ class AufnahmePage extends StatefulWidget {
     required this.erstes,
     required this.letztes,
     required this.now,
+    this.kit = false,
   });
 
   final FotoEinstellungen einstellungen;
@@ -628,6 +673,9 @@ class AufnahmePage extends StatefulWidget {
   final WochenFoto? erstes;
   final WochenFoto? letztes;
   final DateTime now;
+
+  /// True once the Frame Kit code is entered.
+  final bool kit;
 
   @override
   State<AufnahmePage> createState() => _AufnahmePageState();
@@ -662,8 +710,8 @@ class _AufnahmePageState extends State<AufnahmePage> {
       intro: widget.erstes == null
           ? 'Dein erstes Foto. Merk dir Pose, Ort und Licht, damit du jede '
                 'Woche genauso stehst.'
-          : 'Stell dich so wie beim ersten Foto hin: gleiche Pose, gleiches '
-                'Licht.',
+          : 'Stell dich so wie letzte Woche hin. Die App löst aus, wenn du '
+                'genau so stehst.',
       onSave: () {
         if (!fertig) return;
         Navigator.of(context).pop(
@@ -680,6 +728,22 @@ class _AufnahmePageState extends State<AufnahmePage> {
         );
       },
       children: [
+        if (widget.kit)
+          const FeedCard(
+            title: 'Frame Kit',
+            icon: Icons.crop_free,
+            trailing: Tag('aktiv'),
+            children: [
+              HintText(
+                'Füße auf die Marken, Band gespannt, Licht an. Die Kamera '
+                'erkennt die Matte und richtet das Foto aus (Handy-Version).',
+              ),
+            ],
+          )
+        else ...[
+          const KitZeile(),
+          const SizedBox(height: 12),
+        ],
         for (final p in e.posen)
           FeedCard(
             title: p,
@@ -688,18 +752,18 @@ class _AufnahmePageState extends State<AufnahmePage> {
             children: [
               Row(
                 children: [
-                  if (widget.erstes?.bilder[p] != null) ...[
+                  if (widget.letztes?.bilder[p] != null) ...[
                     Column(
                       children: [
                         FotoBild(
-                          foto: widget.erstes,
+                          foto: widget.letztes,
                           pose: p,
                           width: 60,
                           height: 80,
                         ),
                         const SizedBox(height: 4),
                         const Text(
-                          'Start',
+                          'Letzte Woche',
                           style: TextStyle(
                             fontSize: 11,
                             color: CoachStyle.inkSoft,
