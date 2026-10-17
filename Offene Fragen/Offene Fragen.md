@@ -37,3 +37,7 @@ Aus dem Entwurf [[Onboarding-Fragebogen]] (2026-10-10):
 - Welcher LLM-Anbieter bzw. welches Modell? (siehe [[Technischer Ansatz]])
 - Wie die „einfache Regellogik“ der KI-Antwort im MVP konkret aussieht
 - Wie die Bewertungs-Kennzahl (1–10) genau berechnet wird (siehe [[Fortschritts-Verlauf]])
+
+## Merken für später
+
+- **Foto-Kit verbinden** (Phillip, 2026-10-17): Die App braucht noch die Verbindung zum Foto-Kit seines Start-ups für [[Dein zukünftiges Ich]]. Wie das Kit aussieht und wie es sich verbindet, arbeiten wir zusammen aus.
