@@ -33,12 +33,47 @@ class TrainingPlan {
       TrainingPlan([for (final t in json) t as String]);
 }
 
-/// Short label for the week overview, e.g. "Oberkörper" from
-/// "Oberkörper: Bankdrücken 3x8". Empty days are "frei".
+/// What the user puts first when the AI swaps or progresses sessions.
+enum Schwerpunkt {
+  kraft('Kraft'),
+  calisthenics('Calisthenics'),
+  ausdauer('Ausdauer'),
+  ausgeglichen('Ausgeglichen');
+
+  const Schwerpunkt(this.label);
+
+  final String label;
+}
+
+/// A plan day is stored as "Name" on the first line and the exercises
+/// below, e.g. "Push + Laufen\nBankdrücken 5x5\nLaufen 5 km".
+/// Older plans are a single line like "Oberkörper: Bankdrücken 3x8".
+String joinDay(String name, String uebungen) {
+  final n = name.trim();
+  final u = uebungen.trim();
+  if (n.isEmpty) return u;
+  if (u.isEmpty) return n;
+  return '$n\n$u';
+}
+
+/// Short label for the week overview, e.g. "Push + Laufen", or
+/// "Oberkörper" from "Oberkörper: Bankdrücken 3x8". Empty days are "frei".
 String shortDay(String text) {
   final t = text.trim();
   if (t.isEmpty) return 'frei';
-  return t.split(RegExp(r'[:,.\n]')).first.trim();
+  if (t.contains('\n')) return t.split('\n').first.trim();
+  return t.split(RegExp(r'[:,.]')).first.trim();
+}
+
+/// The exercises of a plan day without its name; empty if there are none.
+String dayDetails(String text) {
+  final t = text.trim();
+  if (t.contains('\n')) return t.substring(t.indexOf('\n') + 1).trim();
+  final name = shortDay(t);
+  if (name == t || name == 'frei') return '';
+  return t
+      .substring(t.indexOf(name) + name.length)
+      .replaceFirst(RegExp(r'^[:,.\s]+'), '');
 }
 
 /// One step of the evening routine, e.g. 22:15 "Handy weg".

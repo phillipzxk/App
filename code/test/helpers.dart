@@ -93,6 +93,13 @@ class MemoryFeedStore implements FeedStore {
 
   final termine = <Termin>[];
   int? mahlzeiten;
+  Schwerpunkt? schwerpunkt;
+
+  @override
+  Future<Schwerpunkt?> loadSchwerpunkt() async => schwerpunkt;
+
+  @override
+  Future<void> saveSchwerpunkt(Schwerpunkt s) async => schwerpunkt = s;
 
   @override
   Future<List<Termin>> loadTermine() async => List.of(termine);

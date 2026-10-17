@@ -621,7 +621,7 @@ class EditorField extends StatelessWidget {
       style: CoachStyle.body,
       cursorColor: CoachStyle.gold,
       minLines: 1,
-      maxLines: multiline ? 4 : 1,
+      maxLines: multiline ? 10 : 1,
       keyboardType: number
           ? const TextInputType.numberWithOptions(decimal: true)
           : null,

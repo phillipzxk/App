@@ -140,6 +140,7 @@ class TodayTab extends StatelessWidget {
           onAddTermin: onAddTermin,
           onRemoveTermin: onRemoveTermin,
           onSetMahlzeiten: onSetMahlzeiten,
+          onOpenTraining: () => onOpenArea(Bereich.training),
         ),
         const GroupLabel('Deine Woche'),
         FeedCard(

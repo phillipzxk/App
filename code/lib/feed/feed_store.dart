@@ -19,6 +19,10 @@ abstract class FeedStore {
   Future<TrainingPlan> loadPlan();
   Future<void> savePlan(TrainingPlan plan);
 
+  /// The training focus for the hybrid engine; null until chosen.
+  Future<Schwerpunkt?> loadSchwerpunkt();
+  Future<void> saveSchwerpunkt(Schwerpunkt s);
+
   Future<List<RoutineStep>> loadRoutine();
   Future<void> saveRoutine(List<RoutineStep> steps);
 
@@ -65,6 +69,7 @@ class LocalFeedStore implements FeedStore {
   static const _fragenKey = 'coach_fragen';
   static const _termineKey = 'termine';
   static const _mahlzeitenKey = 'mahlzeiten_pro_tag';
+  static const _schwerpunktKey = 'schwerpunkt';
   static const _fotoEinstellungenKey = 'foto_einstellungen';
   static const _wochenFotosKey = 'wochen_fotos';
   static const _supplementsKey = 'supplements';
@@ -151,6 +156,19 @@ class LocalFeedStore implements FeedStore {
       ..removeWhere((t) => t.erstellt == termin.erstellt);
     await _write(_termineKey, [for (final t in all) t.toJson()]);
   }
+
+  @override
+  Future<Schwerpunkt?> loadSchwerpunkt() async {
+    final name = await _read(_schwerpunktKey) as String?;
+    for (final s in Schwerpunkt.values) {
+      if (s.name == name) return s;
+    }
+    return null;
+  }
+
+  @override
+  Future<void> saveSchwerpunkt(Schwerpunkt s) =>
+      _write(_schwerpunktKey, s.name);
 
   @override
   Future<int?> loadMahlzeiten() async => await _read(_mahlzeitenKey) as int?;
