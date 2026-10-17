@@ -55,12 +55,15 @@ class NutritionTab extends StatelessWidget {
     final kg = weights.isEmpty ? null : weights.last.kg;
     return ListView(
       children: [
-        const PageHeader(label: 'Bereich', title: 'Ernährung'),
+        const PageHeader(label: 'Bereich', title: 'Ernährung', icon: Icons.eco),
+        const GroupLabel('Dein Verlauf'),
         const AreaChart(),
+        const GroupLabel('Deine Basis'),
         if (p == null || kg == null)
           FeedCard(
             title: 'Dein kcal-Ziel',
             icon: Icons.restaurant_outlined,
+            gold: true,
             children: [
               const HintText(
                 'Gib einmal Größe, Alter, Geschlecht und deine Aktivität im '
@@ -78,6 +81,7 @@ class NutritionTab extends StatelessWidget {
           FeedCard(
             title: 'Dein kcal-Ziel heute',
             icon: Icons.restaurant_outlined,
+            gold: true,
             trailing: const Tag('passt sich an'),
             children: [
               Text.rich(
@@ -113,6 +117,7 @@ class NutritionTab extends StatelessWidget {
           onSave: onSaveSupplements,
           onToggle: onToggleSupplement,
         ),
+        const GroupLabel('Frag deinen Coach'),
         AskCoachCard(
           title: 'Wie sieht deine Ernährung heute aus?',
           hint:
@@ -121,6 +126,7 @@ class NutritionTab extends StatelessWidget {
           today: fragen,
           onSend: onAsk,
         ),
+        const GroupLabel('Deine Werte'),
         WeightCard(weights: weights, onAdd: onAddWeight),
       ],
     );

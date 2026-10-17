@@ -23,7 +23,8 @@ class MindsetTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       children: [
-        const PageHeader(label: 'Bereich', title: 'Mindset'),
+        const PageHeader(label: 'Bereich', title: 'Mindset', icon: Icons.spa),
+        const GroupLabel('Dein Verlauf'),
         const AreaChart(),
         const FeedCard(
           title: 'Durchgezogen · diese Woche',
@@ -35,10 +36,12 @@ class MindsetTab extends StatelessWidget {
             ),
           ],
         ),
-        if (profile.motivation.isNotEmpty)
+        if (profile.motivation.isNotEmpty) ...[
+          const GroupLabel('Deine Basis'),
           FeedCard(
             title: 'Dein Warum',
             icon: Icons.favorite_border,
+            gold: true,
             trailing: const Tag('in schwachen Phasen'),
             children: [
               Text(
@@ -53,6 +56,8 @@ class MindsetTab extends StatelessWidget {
               ),
             ],
           ),
+        ],
+        const GroupLabel('Frag deinen Coach'),
         AskCoachCard(
           title: 'Wovor drückst du dich gerade?',
           hint: 'Schreib es auf, und wir finden den ersten kleinen Schritt.',

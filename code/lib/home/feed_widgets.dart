@@ -17,11 +17,15 @@ class PageHeader extends StatelessWidget {
     required this.label,
     required this.title,
     this.brand = false,
+    this.icon,
   });
 
   final String label;
   final String title;
   final bool brand;
+
+  /// Symbol of the area, shown next to the title like on the cards.
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +53,15 @@ class PageHeader extends StatelessWidget {
               ],
               Text(label.toUpperCase(), style: CoachStyle.label),
               const SizedBox(height: 4),
-              Text(title, style: CoachStyle.title),
+              Row(
+                children: [
+                  if (icon case final i?) ...[
+                    SymbolBadge(i, size: 36),
+                    const SizedBox(width: 12),
+                  ],
+                  Expanded(child: Text(title, style: CoachStyle.title)),
+                ],
+              ),
             ],
           ),
         ),
@@ -209,6 +221,7 @@ class FeedCard extends StatelessWidget {
     this.trailing,
     this.highlight = false,
     this.darkHead = false,
+    this.gold = false,
   });
 
   final String title;
@@ -217,6 +230,10 @@ class FeedCard extends StatelessWidget {
   final Widget? trailing;
   final bool highlight;
   final bool darkHead;
+
+  /// The key card of a page: gold gradient and gold edge like the fields
+  /// on "Heute".
+  final bool gold;
 
   @override
   Widget build(BuildContext context) {
@@ -238,46 +255,66 @@ class FeedCard extends StatelessWidget {
         ?trailing,
       ],
     );
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (darkHead)
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            decoration: const BoxDecoration(
+              gradient: CoachStyle.coachGradient,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(17)),
+            ),
+            child: head,
+          )
+        else
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+            padding: const EdgeInsets.only(bottom: 10),
+            decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(color: CoachStyle.line)),
+            ),
+            child: head,
+          ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: children,
+          ),
+        ),
+      ],
+    );
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: CoachStyle.cardBright,
+        color: gold ? null : CoachStyle.cardBright,
+        gradient: gold ? CoachStyle.goldCardGradient : null,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: highlight ? CoachStyle.goldEdge : CoachStyle.edgeStrong,
+          color: highlight || gold
+              ? CoachStyle.goldEdge
+              : CoachStyle.edgeStrong,
         ),
-        boxShadow: CoachStyle.cardShadowStrong,
+        boxShadow: gold ? CoachStyle.goldShadow : CoachStyle.cardShadowStrong,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (darkHead)
-            Container(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-              decoration: const BoxDecoration(
-                gradient: CoachStyle.coachGradient,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(17)),
+      child: gold
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(17),
+              child: Stack(
+                children: [
+                  content,
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: 4,
+                    child: Container(color: CoachStyle.gold),
+                  ),
+                ],
               ),
-              child: head,
             )
-          else
-            Container(
-              margin: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-              padding: const EdgeInsets.only(bottom: 10),
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: CoachStyle.line)),
-              ),
-              child: head,
-            ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: children,
-            ),
-          ),
-        ],
-      ),
+          : content,
     );
   }
 }
@@ -464,6 +501,7 @@ class _AskCoachCardState extends State<AskCoachCard> {
     return FeedCard(
       title: widget.title,
       icon: Icons.chat_bubble_outline,
+      darkHead: true,
       children: [
         for (final f in widget.today) ...[
           Text(f.text, style: CoachStyle.body),

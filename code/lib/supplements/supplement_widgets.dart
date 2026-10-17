@@ -73,6 +73,7 @@ class SupplementCard extends StatelessWidget {
       return FeedCard(
         title: 'Deine Supplement-Routine',
         icon: Icons.medication_outlined,
+        gold: true,
         children: [
           const HintText(
             'Trag ein, was du wann nimmst. Die App erinnert dich daran, und '
@@ -94,6 +95,7 @@ class SupplementCard extends StatelessWidget {
     return FeedCard(
       title: 'Deine Supplement-Routine',
       icon: Icons.medication_outlined,
+      gold: true,
       trailing: Tag('heute $done von ${list.length}'),
       children: [
         for (var i = 0; i < list.length; i++)

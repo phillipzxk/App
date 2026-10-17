@@ -130,6 +130,7 @@ class _FutureMePageState extends State<FutureMePage> {
         PageHeader(
           label: 'Woche $aktuelleWoche · Fototag ${wochentage[e.fototag - 1]}',
           title: 'Dein zukünftiges Ich',
+          icon: Icons.photo_camera_outlined,
         ),
         if (lage.status != FotoStatus.spaeter) ...[
           MainButton(
@@ -262,7 +263,11 @@ class _Leer extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       children: [
-        const PageHeader(label: 'Fortschritt', title: 'Dein zukünftiges Ich'),
+        const PageHeader(
+          label: 'Fortschritt',
+          title: 'Dein zukünftiges Ich',
+          icon: Icons.photo_camera_outlined,
+        ),
         FeedCard(
           title: 'Fototag und Posen',
           icon: Icons.photo_camera_outlined,

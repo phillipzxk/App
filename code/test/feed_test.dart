@@ -182,6 +182,7 @@ void main() {
     );
     await tester.pump();
     await tester.ensureVisible(find.text('Senden'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Senden'));
     await tester.pumpAndSettle();
 

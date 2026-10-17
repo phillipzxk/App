@@ -43,12 +43,19 @@ class TrainingTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       children: [
-        const PageHeader(label: 'Bereich', title: 'Training'),
+        const PageHeader(
+          label: 'Bereich',
+          title: 'Training',
+          icon: Icons.fitness_center,
+        ),
+        const GroupLabel('Dein Verlauf'),
         const AreaChart(),
+        const GroupLabel('Deine Basis'),
         if (plan.isEmpty)
           FeedCard(
             title: 'Dein Plan',
             icon: Icons.event_note_outlined,
+            gold: true,
             children: [
               const HintText(
                 'Leg einmal fest, was du an welchem Tag trainierst, egal ob '
@@ -67,6 +74,7 @@ class TrainingTab extends StatelessWidget {
           FeedCard(
             title: 'Dein Plan · diese Woche',
             icon: Icons.event_note_outlined,
+            gold: true,
             children: [
               _WeekRow(plan: plan, today: today),
               const SizedBox(height: 12),
@@ -93,6 +101,7 @@ class TrainingTab extends StatelessWidget {
               ),
             ],
           ),
+        const GroupLabel('Frag deinen Coach'),
         AskCoachCard(
           title: 'Wie war dein Training?',
           hint: 'Was hast du geschafft, was nicht, und warum?',
