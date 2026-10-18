@@ -13,7 +13,7 @@ Zweiter Baustein im [[MVP-Fortschritt]]. Grundidee aus [[Kernmechanik#1. Onboard
 
 Alles hier haben Phillip und Claude am 2026-10-11 gemeinsam festgelegt, Frage für Frage. Abgenommenes Mockup: [Onboarding-Entwurf](https://claude.ai/artifact/JdmD7NVMayHub5fh3MN9Xn).
 
-## Überarbeitung 2026-10-18 (in Arbeit)
+## Überarbeitung 2026-10-18
 
 Phillip hat das Onboarding mit dem echten Coach getestet: Bis zum Feed hat er rund 6 Minuten geschrieben. Die Fragen sind zu lang und zu komplex. Beschluss (Phillip, 2026-10-18): **Variante B ausprobieren.** Pro Frage 3–4 Antworten zum Antippen (Mehrfachauswahl möglich) plus ein freiwilliges Feld für eigene Worte. Die neuen Fragen werden gerade gemeinsam Frage für Frage festgelegt. Danach kommt der [[Täglicher Check-in]] dran, der für den täglichen Gebrauch ebenfalls zu lang ist.
 
@@ -44,7 +44,7 @@ Alle 6 Fragen stehen (2026-10-18). Final geglättet (auf Phillips Wunsch):
 - Weiter geht es bei Frage 1 nur mit dem Ziel-Satz; bei 2–6 reicht ein Antippen oder ein Satz.
 - Gespeichert wird je Frage ein Text: angetippte Antworten, dann Feldname und eigener Satz. So liest ihn auch der Coach.
 
-Stand: in der Test-App (groundset-vorschau.pzschernack4.workers.dev), noch nicht fest in der App.
+Stand: fest in der App seit 18.10.2026 (PR #39).
 
 ## Prinzip
 
