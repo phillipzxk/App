@@ -3,7 +3,7 @@ title: Onboarding-Fragebogen
 tags: [umsetzung, onboarding, mvp]
 aliases: [Onboarding, Einstiegs-Fragebogen]
 erstellt: 2026-10-10
-aktualisiert: 2026-10-13
+aktualisiert: 2026-10-18
 status: programmiert, KI-Auswertung fehlt noch
 ---
 
@@ -12,6 +12,10 @@ status: programmiert, KI-Auswertung fehlt noch
 Zweiter Baustein im [[MVP-Fortschritt]]. Grundidee aus [[Kernmechanik#1. Onboarding]] und [[App-Gesamtübersicht (Original)]]: Ein Einstiegs-Fragebogen, der die App direkt personalisiert (Ziel, aktuelles Level, Ausgangssituation). Die Antworten landen beim [[Nutzer]].
 
 Alles hier haben Phillip und Claude am 2026-10-11 gemeinsam festgelegt, Frage für Frage. Abgenommenes Mockup: [Onboarding-Entwurf](https://claude.ai/artifact/JdmD7NVMayHub5fh3MN9Xn).
+
+## Überarbeitung 2026-10-18 (in Arbeit)
+
+Phillip hat das Onboarding mit dem echten Coach getestet: Bis zum Feed hat er rund 6 Minuten geschrieben. Die Fragen sind zu lang und zu komplex. Beschluss (Phillip, 2026-10-18): **Variante B ausprobieren.** Pro Frage 3–4 Antworten zum Antippen (Mehrfachauswahl möglich) plus ein freiwilliges Feld für eigene Worte. Die neuen Fragen werden gerade gemeinsam Frage für Frage festgelegt. Danach kommt der [[Täglicher Check-in]] dran, der für den täglichen Gebrauch ebenfalls zu lang ist.
 
 ## Prinzip
 
