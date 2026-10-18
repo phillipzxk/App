@@ -28,6 +28,9 @@ Phillip hat das Onboarding mit dem echten Coach getestet: Bis zum Feed hat er ru
 3. **Stand** (Phillip, 2026-10-18): „Wie würde dich jemand beschreiben, der dich gut kennt?“
    - Antippen (mehrere möglich): Trainiert regelmäßig, kommt aber nicht weiter · Fängt oft an, bleibt aber nicht dran · Macht gerade kaum Sport · Hat in letzter Zeit schon einiges verändert
    - Freiwilliges Feld „Und was würde er als deine Stärke nennen?“ (Phillips Idee: Stärken, mit denen der Coach arbeiten kann)
+4. **Training** (Phillip, 2026-10-18): „Welche Probleme hast du gerade bei Training und Sport?“
+   - Antippen (mehrere möglich): Mein Plan passt nicht richtig zu mir · Ich mache keine Fortschritte mehr · Ich weiß nicht, wie viel Pause ich brauche · Ich bleibe nicht dran
+   - Freiwilliges Feld „Und was fällt dir dabei leicht?“ (Muster von Phillip: Problem + was leicht fällt)
 
 ## Prinzip
 
