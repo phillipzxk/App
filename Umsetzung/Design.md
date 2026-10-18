@@ -57,7 +57,8 @@ Phillip wollte es „mehr mit Schwarz, Braun und goldenen Verläufen“, aber ni
 
 - **Dunkel (Schwarz-Braun, oben ein goldener Schimmer):** [[Täglicher Check-in]] und „Heute“. Große Überschriften im Gold-Verlauf. Die Coach-Karte hat einen goldenen Verlaufsrand.
 - **Hell als Kontrast:** Die Bereichs-Seiten (Training, Ernährung, Schlaf, Mindset) bleiben sandweiß. Oben sitzt ein dunkler Kopf mit Gold-Titel. Die Karte „Deine Basis“ hat einen metallisch goldenen Rand und einen goldenen Kopf.
-- Auf „Heute“ bleiben die Hinweis-Felder und Karten hell, die Bereichs-Kacheln sind dunkel.
+- Auf „Heute“ sind alle Karten und Hinweis-Felder dunkel mit goldenen Symbolen. Nur „Dein Tag“ bleibt als heller Kontrast (nachgebessert 18.10.2026, weil der Feed sonst nicht mehr passte).
+- „Frag deinen Coach“ ist auf allen Bereichs-Seiten eine ganz dunkle Karte mit goldenem Senden-Knopf.
 - Die Tab-Leiste unten ist überall schwarz, der aktive Tab ist golden.
 - Entwurf: https://claude.ai/artifact/NWJnSZaEC6HZjMTyWD89RU
 - Phillip hat am 18.10.2026 Ja gesagt. Der Stil ist in der Test-Vorschau, aber noch nicht fest in der App.
