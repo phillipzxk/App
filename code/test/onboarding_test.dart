@@ -79,7 +79,7 @@ void main() {
 
     await tester.tap(find.text("Los geht's"));
     await tester.pumpAndSettle();
-    expect(find.textContaining('FRAGE 1 VON 4 · TRAINING'), findsOneWidget);
+    expect(find.text('Wie war dein Tag?'), findsOneWidget);
   });
 
   testWidgets('summary from the evaluator is shown and saved', (tester) async {
@@ -213,6 +213,6 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.textContaining('FRAGE 1 VON 4'), findsOneWidget);
+    expect(find.text('Wie war dein Tag?'), findsOneWidget);
   });
 }

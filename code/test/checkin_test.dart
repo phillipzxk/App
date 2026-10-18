@@ -1,5 +1,6 @@
 import 'package:coach_app/checkin/checkin.dart';
 import 'package:coach_app/checkin/checkin_evaluator.dart';
+import 'package:coach_app/checkin/checkin_questions.dart';
 import 'package:coach_app/data/user_profile.dart';
 import 'package:coach_app/main.dart';
 import 'package:flutter/material.dart';
@@ -34,34 +35,48 @@ Future<void> openApp(
   await tester.pumpAndSettle();
 }
 
-Future<void> answerAll(WidgetTester tester) async {
-  for (var i = 1; i <= 4; i++) {
-    await tester.enterText(find.byType(TextField), 'Antwort $i');
-    await tester.pump();
-    await tester.tap(find.text(i < 4 ? 'Weiter' : 'Absenden'));
-    await tester.pumpAndSettle();
+Future<void> tapText(WidgetTester tester, String text) async {
+  await tester.ensureVisible(find.text(text));
+  await tester.pump();
+  await tester.tap(find.text(text));
+  await tester.pump();
+}
+
+/// Taps the first answer in every row and sends.
+Future<void> answerAll(WidgetTester tester, {String note = ''}) async {
+  for (final row in checkInRows) {
+    await tapText(tester, row.options.first);
   }
+  if (note.isNotEmpty) {
+    await tester.ensureVisible(find.byType(TextField));
+    await tester.enterText(find.byType(TextField), note);
+    await tester.pump();
+  }
+  await tester.tap(find.text('Absenden'));
+  await tester.pumpAndSettle();
 }
 
 void main() {
-  testWidgets('check-in opens by itself and saves four answers', (
+  testWidgets('check-in opens by itself and saves one tap per area', (
     tester,
   ) async {
     final diary = MemoryDiaryStore();
     await openApp(tester, diary);
-    expect(find.textContaining('FRAGE 1 VON 4 · TRAINING'), findsOneWidget);
-    expect(
-      find.textContaining('falls du heute nicht trainiert'),
-      findsOneWidget,
-    );
-    expect(find.byTooltip('Zurück'), findsNothing);
+    expect(find.text('Wie war dein Tag?'), findsOneWidget);
 
-    await answerAll(tester);
+    await answerAll(tester, note: 'Chef war krank');
     final c = diary.checkIns.single;
     expect(dayKey(c.datum), '2026-10-12');
     expect(
-      [c.training, c.ernaehrung, c.schlaf, c.mindset],
-      ['Antwort 1', 'Antwort 2', 'Antwort 3', 'Antwort 4'],
+      [c.training, c.ernaehrung, c.schlaf, c.energie, c.mindset, c.notiz],
+      [
+        'Gut trainiert',
+        'Strukturiert gegessen',
+        'Gut geschlafen',
+        'Hoch',
+        'Alles durchgezogen',
+        'Chef war krank',
+      ],
     );
     expect(
       find.textContaining('Sobald dein Coach freigeschaltet'),
@@ -101,17 +116,23 @@ void main() {
     final diary = MemoryDiaryStore()
       ..checkIns.add(checkInOn(DateTime(2026, 10, 11)));
     await openApp(tester, diary);
-    expect(find.textContaining('FRAGE 1 VON 4'), findsOneWidget);
+    expect(find.text('Wie war dein Tag?'), findsOneWidget);
   });
 
-  testWidgets('back keeps earlier answers', (tester) async {
-    await openApp(tester, MemoryDiaryStore());
-    await tester.enterText(find.byType(TextField), 'Gut trainiert');
-    await tester.pump();
-    await tester.tap(find.text('Weiter'));
+  testWidgets('send only works once every row is tapped', (tester) async {
+    final diary = MemoryDiaryStore();
+    await openApp(tester, diary);
+    for (final row in checkInRows.take(4)) {
+      await tapText(tester, row.options.last);
+    }
+    await tester.tap(find.text('Absenden'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Zurück'));
+    expect(diary.checkIns, isEmpty);
+
+    await tapText(tester, 'Kaum Motivation');
+    await tester.tap(find.text('Absenden'));
     await tester.pumpAndSettle();
-    expect(find.text('Gut trainiert'), findsOneWidget);
+    expect(diary.checkIns.single.mindset, 'Kaum Motivation');
+    expect(diary.checkIns.single.energie, 'Niedrig');
   });
 }

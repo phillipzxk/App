@@ -10,7 +10,16 @@ status: programmiert, KI fehlt noch
 
 ## Überarbeitung 2026-10-18 (in Arbeit)
 
-Phillip hat den Check-in mit dem echten Coach getestet: Für den täglichen Gebrauch ist er zu lang und zu komplex. Beschluss (Phillip, 2026-10-18): **Variante B**, alles auf einem Bildschirm. Pro Bereich eine schnelle Antwort zum Antippen, darunter ein freiwilliges Feld „Was war heute besonders?“ (ca. 30 Sekunden). Die genauen Antworten pro Zeile werden gerade gemeinsam festgelegt.
+Phillip hat den Check-in mit dem echten Coach getestet: Für den täglichen Gebrauch ist er zu lang und zu komplex. Beschluss (Phillip, 2026-10-18): **Variante B**, alles auf einem Bildschirm. Pro Bereich eine schnelle Antwort zum Antippen, darunter ein freiwilliges Feld „Was war heute besonders?“ (ca. 30 Sekunden). Antworten pro Zeile (Phillip „ja programmier erstmal so“, 2026-10-18), je Zeile eine antippen, alle Zeilen nötig:
+
+- **Training:** Gut trainiert · Lief zäh · Pause, gut erholt · Pause, eher unproduktiv
+- **Ernährung:** Strukturiert gegessen · Heißhunger gehabt · Unregelmäßig gegessen · Viel Fast Food
+- **Schlaf:** Gut geschlafen · Schlecht eingeschlafen · Nachts wach gewesen · Zu kurz geschlafen
+- **Energie:** Hoch · Mittel · Niedrig (eigene Zeile statt bei Schlaf/Mindset mitzulaufen)
+- **Mindset:** Alles durchgezogen · Vor etwas gedrückt · Kaum Motivation
+- Darunter freiwillig: „Was war heute besonders?“
+
+Die tägliche KI-Umformulierung der Fragen entfällt; persönlich wird es über die Coach-Antwort. Gespeichert werden zusätzlich `energie` und `notiz`. Stand: in der Test-App, noch nicht fest in der App.
 
 
 Dritter Baustein im [[MVP-Fortschritt]] (Grundidee: [[Kernmechanik#2. Täglicher Feed (Kernbildschirm)]]). Alles hier haben Phillip und Claude am 2026-10-12 gemeinsam festgelegt. Abgenommenes Mockup: [Feed-Entwurf](https://claude.ai/artifact/FuJV2yDGQ8JPzLb5TtFakt).

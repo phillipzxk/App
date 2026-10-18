@@ -19,6 +19,8 @@ export type CheckIn = {
   ernaehrung: string;
   schlaf: string;
   mindset: string;
+  energie?: string;
+  notiz?: string;
   kiAntwort?: string;
 };
 
@@ -47,12 +49,12 @@ const clip = (s: unknown, max = 2000): string =>
 export function profileBlock(p: Profile): string {
   return `<nutzer>
 Vorname: ${clip(p.name, 60)}
-Ziel (wie stellt sich die Person ihr Leben vor, wenn sie glücklich ist): ${clip(p.ziel)}
-Warum sie sich verändern will: ${clip(p.motivation)}
-Wie jemand, der sie gut kennt, sie beschreiben würde: ${clip(p.level)}
-Unsicherheiten beim Training: ${clip(p.training)}
-Gefühl mit der Ernährung: ${clip(p.ernaehrung)}
-Schlaf und Energie: ${clip(p.schlafEnergie)}
+Ziel und was sie dafür verändern will: ${clip(p.ziel)}
+Warum sie es gerade jetzt angeht: ${clip(p.motivation)}
+Wie jemand, der sie gut kennt, sie beschreiben würde (und ihre Stärke): ${clip(p.level)}
+Probleme beim Training (und was ihr leicht fällt): ${clip(p.training)}
+Probleme mit der Ernährung (und was sie schon weiß oder angepasst hat): ${clip(p.ernaehrung)}
+Probleme mit Schlaf und Energie (und wann sie sich fit fühlt): ${clip(p.schlafEnergie)}
 </nutzer>`;
 }
 
@@ -60,8 +62,8 @@ function checkInBlock(c: CheckIn): string {
   return `Tag ${clip(c.datum, 10)}:
 - Training: ${clip(c.training)}
 - Ernährung: ${clip(c.ernaehrung)}
-- Schlaf: ${clip(c.schlaf)}
-- Mindset: ${clip(c.mindset)}`;
+- Schlaf: ${clip(c.schlaf)}${c.energie ? `\n- Energie: ${clip(c.energie)}` : ""}
+- Mindset: ${clip(c.mindset)}${c.notiz ? `\n- Was heute besonders war: ${clip(c.notiz)}` : ""}`;
 }
 
 export function onboardingPrompt(p: Profile): string {
