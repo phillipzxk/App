@@ -25,6 +25,9 @@ Phillip hat das Onboarding mit dem echten Coach getestet: Bis zum Feed hat er ru
 2. **Motivation** (Phillip, 2026-10-18): „Warum hast du dich gerade jetzt entschieden, das anzugehen?“
    - Antippen (mehrere möglich): Ich bin unzufrieden damit, wie es gerade ist · Ich will lange gesund und fit bleiben · Ich will ein Vorbild sein (z. B. für Familie oder Freunde) · Ich will endlich mein Potenzial ausschöpfen
    - Freiwilliges Feld „Was ist dein wahrer Grund? Ein Satz reicht.“
+3. **Stand** (Phillip, 2026-10-18): „Wie würde dich jemand beschreiben, der dich gut kennt?“
+   - Antippen (mehrere möglich): Trainiert regelmäßig, kommt aber nicht weiter · Fängt oft an, bleibt aber nicht dran · Macht gerade kaum Sport · Hat in letzter Zeit schon einiges verändert
+   - Freiwilliges Feld „Und was würde er als deine Stärke nennen?“ (Phillips Idee: Stärken, mit denen der Coach arbeiten kann)
 
 ## Prinzip
 
