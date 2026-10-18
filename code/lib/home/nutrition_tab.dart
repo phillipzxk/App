@@ -314,7 +314,7 @@ class _KcalEditorState extends State<KcalEditor> {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: on ? const Color(0xFFF1E6D2) : CoachStyle.card,
+            color: on ? CoachStyle.selectedFill : CoachStyle.card,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: on ? CoachStyle.gold : CoachStyle.line),
           ),

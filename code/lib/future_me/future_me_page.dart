@@ -180,7 +180,7 @@ class _FutureMePageState extends State<FutureMePage> {
                 ChoiceChip(
                   label: Text(p),
                   selected: p == pose,
-                  selectedColor: CoachStyle.goldSoft,
+                  selectedColor: CoachStyle.selectedFill,
                   onSelected: (_) => setState(() => _pose = p),
                 ),
             ],
@@ -603,7 +603,7 @@ class _EinrichtenPageState extends State<EinrichtenPage> {
                   key: ValueKey('fototag-$d'),
                   label: Text(wochentage[d - 1].substring(0, 2)),
                   selected: _tag == d,
-                  selectedColor: CoachStyle.goldSoft,
+                  selectedColor: CoachStyle.selectedFill,
                   onSelected: (_) => setState(() => _tag = d),
                 ),
             ],

@@ -147,7 +147,7 @@ class _Row extends StatelessWidget {
         ? const TextStyle(
             color: CoachStyle.inkSoft,
             decoration: TextDecoration.lineThrough,
-            decorationColor: Color(0xFFBFB29A),
+            decorationColor: CoachStyle.inkSoft,
           )
         : const TextStyle();
     return InkWell(

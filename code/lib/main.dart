@@ -66,8 +66,11 @@ class CoachApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: CoachStyle.gold,
+          brightness: Brightness.dark,
           primary: CoachStyle.gold,
+          onPrimary: CoachStyle.goldInk,
           surface: CoachStyle.card,
+          onSurface: CoachStyle.ink,
         ),
         scaffoldBackgroundColor: CoachStyle.page,
         useMaterial3: true,

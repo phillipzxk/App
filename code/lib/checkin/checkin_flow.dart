@@ -337,7 +337,7 @@ class _AreaCard extends StatelessWidget {
       padding: const EdgeInsets.all(1.2),
       decoration: BoxDecoration(
         gradient: open ? CoachStyle.goldEdgeGradient : null,
-        color: open ? null : CoachStyle.nightLine,
+        color: open ? null : CoachStyle.hairline,
         borderRadius: BorderRadius.circular(22),
         boxShadow: open ? CoachStyle.nightShadow : null,
       ),

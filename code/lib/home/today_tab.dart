@@ -294,7 +294,7 @@ class _AreaTile extends StatelessWidget {
         type: MaterialType.transparency,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
-          side: const BorderSide(color: CoachStyle.nightLine),
+          side: const BorderSide(color: CoachStyle.hairline),
         ),
         child: InkWell(
           key: ValueKey('bereich-${bereich.name}'),

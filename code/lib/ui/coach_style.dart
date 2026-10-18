@@ -4,50 +4,58 @@ import 'package:flutter/material.dart';
 /// Umsetzung/Design.md): warm sand white, champagne gold, dark buttons with
 /// gold text, Sora for headings and Figtree for text.
 abstract final class CoachStyle {
-  static const page = Color(0xFFEFE9DE);
-  static const card = Color(0xFFF9F6F0);
-  static const line = Color(0xFFE0D6C4);
-  static const bar = Color(0xFFDED2BC);
-  static const gold = Color(0xFFB08A4F);
-  static const goldLight = Color(0xFFC9A86D);
-  static const goldSoft = Color(0xFFF3E3C2);
-  static const dark = Color(0xFF2A2620);
-  static const ink = dark;
-  static const inkSoft = Color(0xFF7D7466);
-  static const onDark = Color(0xFFF1EBE0);
+  // Whole app dark with beige and gold (Phillip 2026-10-18): black-brown
+  // page, slightly lighter cards with fine beige lines, beige text, gold
+  // for what matters most.
+  static const page = Color(0xFF110E0B);
+  static const card = Color(0xFF1E1914);
+  static const line = Color(0xFF3A3127);
+  static const bar = Color(0xFF2F271E);
+  static const gold = Color(0xFFC9A25C);
+  static const goldLight = Color(0xFFE0BF7E);
 
-  // Depth (variant C "Ebenen", Phillip 2026-10-16): soft shadows, light
-  // gradients, and a gold edge for reminder fields. Colours stay the same.
-  static const edge = Color(0xFFE6DCCB);
-  static const goldEdge = Color(0xFFE2CFA9);
+  /// Beige: light accent on dark (pills, small buttons, icons).
+  static const goldSoft = Color(0xFFE6D7BB);
+  static const beige = goldSoft;
+  static const dark = Color(0xFF0D0B08);
+  static const ink = Color(0xFFEFE5D2);
+  static const inkSoft = Color(0xFFA99B84);
+  static const onDark = ink;
 
-  // More contrast between the cards (Phillip 2026-10-16): cards lighter
-  // than the page, stronger edge, deeper shadow.
-  static const cardBright = Color(0xFFFFFDF9);
-  static const edgeStrong = Color(0xFFD9CCB4);
+  /// Background of a picked answer: dark with a touch of gold.
+  static const selectedFill = Color(0xFF33291B);
+
+  /// Fine beige line around cards.
+  static const hairline = Color(0x33D9C7A7);
+
+  /// Muted beige for small headings.
+  static const beigeLabel = Color(0xFFCDBB98);
+
+  static const edge = Color(0xFF2E261C);
+  static const goldEdge = Color(0xFF6B5535);
+  static const cardBright = Color(0xFF1B1611);
+  static const edgeStrong = Color(0xFF3A3127);
 
   static const cardShadowStrong = [
-    BoxShadow(color: Color(0x142A2620), blurRadius: 4, offset: Offset(0, 2)),
-    BoxShadow(color: Color(0x1F2A2620), blurRadius: 26, offset: Offset(0, 12)),
+    BoxShadow(color: Color(0x66000000), blurRadius: 22, offset: Offset(0, 10)),
   ];
 
   static const cardShadow = [
-    BoxShadow(color: Color(0x0F2A2620), blurRadius: 2, offset: Offset(0, 1)),
-    BoxShadow(color: Color(0x142A2620), blurRadius: 20, offset: Offset(0, 8)),
+    BoxShadow(color: Color(0x4D000000), blurRadius: 16, offset: Offset(0, 6)),
   ];
 
   static const darkShadow = [
-    BoxShadow(color: Color(0x4D2A2620), blurRadius: 28, offset: Offset(0, 12)),
+    BoxShadow(color: Color(0x80000000), blurRadius: 28, offset: Offset(0, 12)),
   ];
 
   static const goldShadow = [
-    BoxShadow(color: Color(0x2EB08A4F), blurRadius: 16, offset: Offset(0, 6)),
+    BoxShadow(color: Color(0x26D6AA5E), blurRadius: 18, offset: Offset(0, 6)),
   ];
 
   static const cardGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [Color(0xFFFCFAF6), card],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF221B15), Color(0xFF17130F)],
   );
 
   static const coachGradient = LinearGradient(
@@ -56,24 +64,19 @@ abstract final class CoachStyle {
     colors: [Color(0xFF2A2118), Color(0xFF15110D)],
   );
 
-  static const goldCardGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [Color(0xFFF6ECD9), Color(0xFFFDFAF4)],
-    stops: [0, 0.6],
-  );
+  static const goldCardGradient = cardGradient;
 
   static const reminderGradient = LinearGradient(
-    colors: [Color(0xFFF6ECD9), Color(0xFFFBF8F2)],
+    colors: [Color(0xFF2A2117), Color(0xFF1B1611)],
     stops: [0, 0.7],
   );
 
-  /// Page background: a little lighter at the top, then sand white.
+  /// Page background: black-brown, a little lighter at the top.
   static const pageGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [Color(0xFFF6F1E7), page],
-    stops: [0, 0.3],
+    colors: [Color(0xFF1C1611), Color(0xFF120F0B), Color(0xFF0D0B08)],
+    stops: [0, 0.55, 1],
   );
 
   static const label = TextStyle(

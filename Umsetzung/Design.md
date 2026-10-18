@@ -51,17 +51,21 @@ Dazu ein Startbild mit Logo und dem Satz „Das Fundament für jeden Tag.“ und
 - Bilddatei in der App: `code/assets/images/coach.jpg`; Original im Projektordner `app-docs/coach-nasenaffe.png`.
 - Entwurf: https://claude.ai/artifact/BPEdfiyUJay3VjscnEnDxp
 
-## Dunkler Stil mit Gold (18.10.2026)
+## Dunkler Stil mit Beige und Gold (18.10.2026)
 
-Phillip wollte es „mehr mit Schwarz, Braun und goldenen Verläufen“, aber nicht alles gleich, sondern mit hellen Seiten als Kontrast.
+Phillip wollte es „mehr mit Schwarz, Braun und goldenen Verläufen“. Ein erster Versuch mit dunklen und hellen Seiten passte im Kontrast nicht zusammen. Deshalb ist jetzt die **ganze App dunkel**, mit Beige „clean“ eingearbeitet.
 
-- **Dunkel (Schwarz-Braun, oben ein goldener Schimmer):** [[Täglicher Check-in]] und „Heute“. Große Überschriften im Gold-Verlauf. Die Coach-Karte hat einen goldenen Verlaufsrand.
-- **Hell als Kontrast:** Die Bereichs-Seiten (Training, Ernährung, Schlaf, Mindset) bleiben sandweiß. Oben sitzt ein dunkler Kopf mit Gold-Titel. Die Karte „Deine Basis“ hat einen metallisch goldenen Rand und einen goldenen Kopf.
-- Auf „Heute“ sind alle Karten und Hinweis-Felder dunkel mit goldenen Symbolen. Nur „Dein Tag“ bleibt als heller Kontrast (nachgebessert 18.10.2026, weil der Feed sonst nicht mehr passte).
-- „Frag deinen Coach“ ist auf allen Bereichs-Seiten eine ganz dunkle Karte mit goldenem Senden-Knopf.
-- Die Tab-Leiste unten ist überall schwarz, der aktive Tab ist golden.
+- **Hintergrund:** fast schwarz, oben rechts ein goldener Schimmer.
+- **Karten:** etwas helleres, warmes Dunkelbraun mit feinem beigen Rand.
+- **Beige:** Text, kleine Überschriften, Linien, kleine Knöpfe wie „Eintragen“ und der gewählte Schwerpunkt.
+- **Gold-Verlauf:** große Überschriften, Symbole, die Karte „Deine Basis“ (goldener Kopf und Rand), gewählte Antworten im [[Täglicher Check-in]], alle Haupt-Knöpfe.
+- Coach-Karte und „Frag deinen Coach“ haben einen goldenen Verlaufsrand bzw. goldenen Senden-Knopf.
+- Die Tab-Leiste unten ist schwarz, der aktive Tab ist golden.
+- Auch Onboarding und Unterseiten sind dunkel.
 - Entwurf: https://claude.ai/artifact/NWJnSZaEC6HZjMTyWD89RU
 - Phillip hat am 18.10.2026 Ja gesagt. Der Stil ist in der Test-Vorschau, aber noch nicht fest in der App.
+
+Dieser Stil ersetzt die helle Variante „Neu“ (Sandweiß) von unten.
 
 ## Entwürfe
 

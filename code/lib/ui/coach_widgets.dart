@@ -113,29 +113,13 @@ class MainButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
 
-  /// Metallic gold with dark text, for dark pages.
+  /// Kept for callers; the main button is always metallic gold.
   final bool gold;
 
   @override
   Widget build(BuildContext context) {
-    if (gold) return _GoldButton(label: label, onPressed: onPressed);
-    return FilledButton(
-      style: FilledButton.styleFrom(
-        minimumSize: const Size.fromHeight(52),
-        backgroundColor: CoachStyle.dark,
-        foregroundColor: CoachStyle.goldSoft,
-        disabledBackgroundColor: const Color(0xFFE2DACB),
-        disabledForegroundColor: const Color(0xFFA39A8A),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        textStyle: const TextStyle(
-          fontFamily: 'Sora',
-          fontWeight: FontWeight.w600,
-          fontSize: 15,
-        ),
-      ),
-      onPressed: onPressed,
-      child: Text(label),
-    );
+    // Everything is dark now, so the main button is always gold.
+    return _GoldButton(label: label, onPressed: onPressed);
   }
 }
 
@@ -211,7 +195,7 @@ class ReadingIndicator extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        LogoMark(size: 72, ground: dark ? CoachStyle.cream : CoachStyle.dark),
+        LogoMark(size: 72, ground: CoachStyle.ink),
         const SizedBox(height: 16),
         Text(
           text,

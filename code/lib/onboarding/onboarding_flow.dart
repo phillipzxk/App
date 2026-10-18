@@ -279,7 +279,7 @@ class _OptionTile extends StatelessWidget {
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: selected ? CoachStyle.goldSoft : CoachStyle.card,
+            color: selected ? CoachStyle.selectedFill : CoachStyle.card,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: selected ? CoachStyle.gold : CoachStyle.line,

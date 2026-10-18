@@ -5,7 +5,7 @@ import 'coach_style.dart';
 /// The Groundset symbol "Wurzeln und Trieb": roots below a ground line
 /// that nobody sees, a golden sprout above it.
 class LogoMark extends StatelessWidget {
-  const LogoMark({super.key, this.size = 48, this.ground = CoachStyle.dark});
+  const LogoMark({super.key, this.size = 48, this.ground = CoachStyle.ink});
 
   final double size;
 
@@ -77,11 +77,7 @@ class _LogoPainter extends CustomPainter {
 
 /// "GROUNDSET" in wide-spaced capitals, SET in gold.
 class Wordmark extends StatelessWidget {
-  const Wordmark({
-    super.key,
-    this.fontSize = 11,
-    this.ground = CoachStyle.dark,
-  });
+  const Wordmark({super.key, this.fontSize = 11, this.ground = CoachStyle.ink});
 
   final double fontSize;
 

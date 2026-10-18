@@ -140,10 +140,10 @@ class _SchwerpunktChips extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: s == value ? CoachStyle.dark : CoachStyle.cardBright,
+                color: s == value ? CoachStyle.beige : CoachStyle.card,
                 borderRadius: BorderRadius.circular(999),
                 border: Border.all(
-                  color: s == value ? CoachStyle.dark : CoachStyle.edgeStrong,
+                  color: s == value ? CoachStyle.beige : CoachStyle.edgeStrong,
                 ),
               ),
               child: Text(
@@ -151,7 +151,7 @@ class _SchwerpunktChips extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: s == value ? FontWeight.w600 : FontWeight.w400,
-                  color: s == value ? CoachStyle.goldSoft : CoachStyle.inkSoft,
+                  color: s == value ? CoachStyle.goldInk : CoachStyle.inkSoft,
                 ),
               ),
             ),

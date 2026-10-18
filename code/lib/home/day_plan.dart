@@ -220,8 +220,8 @@ class _TerminFieldState extends State<_TerminField> {
         FilledButton(
           key: const ValueKey('termin-eintragen'),
           style: FilledButton.styleFrom(
-            backgroundColor: CoachStyle.dark,
-            foregroundColor: CoachStyle.goldSoft,
+            backgroundColor: CoachStyle.beige,
+            foregroundColor: CoachStyle.goldInk,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -261,7 +261,7 @@ class _MealsLine extends StatelessWidget {
       if (kcalZiel != null) 'kcal-Ziel ${formatKcal(kcalZiel!)}',
     ];
     return Material(
-      color: const Color(0xFFF1E9DB),
+      color: CoachStyle.card,
       borderRadius: BorderRadius.circular(10),
       child: InkWell(
         key: const ValueKey('mahlzeiten'),
@@ -401,16 +401,16 @@ class _Kind extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
     decoration: BoxDecoration(
-      color: dark ? CoachStyle.dark : null,
+      color: dark ? CoachStyle.beige : null,
       borderRadius: BorderRadius.circular(99),
-      border: Border.all(color: dark ? CoachStyle.dark : CoachStyle.line),
+      border: Border.all(color: dark ? CoachStyle.beige : CoachStyle.line),
     ),
     child: Text(
       text.toUpperCase(),
       style: CoachStyle.label.copyWith(
         fontSize: 10,
         letterSpacing: 0.8,
-        color: dark ? CoachStyle.goldSoft : CoachStyle.inkSoft,
+        color: dark ? CoachStyle.goldInk : CoachStyle.inkSoft,
       ),
     ),
   );
@@ -485,7 +485,7 @@ class _MahlzeitenDialog extends StatelessWidget {
                   key: ValueKey('mahlzeiten-$n'),
                   label: Text('$n'),
                   selected: current == n,
-                  selectedColor: CoachStyle.goldSoft,
+                  selectedColor: CoachStyle.selectedFill,
                   onSelected: (_) => Navigator.pop(context, n),
                 ),
             ],

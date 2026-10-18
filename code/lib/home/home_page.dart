@@ -288,18 +288,13 @@ class _HomePageState extends State<HomePage> {
         onAsk: _ask(Bereich.mindset),
       ),
     ];
-    // "Heute" is dark, the area pages are light (Phillip 2026-10-18).
-    final night = _tab == 0;
+    // The whole app is dark with beige and gold (Phillip 2026-10-18).
     return Scaffold(
-      backgroundColor: night ? CoachStyle.night : CoachStyle.page,
+      backgroundColor: CoachStyle.night,
       body: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: night ? CoachStyle.nightGradient : CoachStyle.pageGradient,
-        ),
+        decoration: const BoxDecoration(gradient: CoachStyle.nightGradient),
         child: DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: night ? CoachStyle.nightGlow : null,
-          ),
+          decoration: const BoxDecoration(gradient: CoachStyle.nightGlow),
           child: SafeArea(
             bottom: false,
             child: Center(
