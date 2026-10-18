@@ -234,6 +234,20 @@ class ReadingIndicator extends StatelessWidget {
   }
 }
 
+/// Marks dark areas (the "Heute" page, dark cards), so text and fields in
+/// them turn light.
+class NightScope extends InheritedWidget {
+  const NightScope({super.key, this.night = true, required super.child});
+
+  final bool night;
+
+  static bool of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<NightScope>()?.night ?? false;
+
+  @override
+  bool updateShouldNotify(NightScope oldWidget) => night != oldWidget.night;
+}
+
 /// Card with a gold edge, used for AI texts.
 class CoachNote extends StatelessWidget {
   const CoachNote({super.key, required this.text});
@@ -242,14 +256,22 @@ class CoachNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final night = NightScope.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: CoachStyle.card,
-        border: Border.all(color: const Color(0xFFE2CFA9)),
+        color: night ? CoachStyle.nightChip : CoachStyle.card,
+        border: Border.all(
+          color: night ? const Color(0xFF6B5535) : const Color(0xFFE2CFA9),
+        ),
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Text(text, style: CoachStyle.body),
+      child: Text(
+        text,
+        style: CoachStyle.body.copyWith(
+          color: night ? CoachStyle.cream : CoachStyle.ink,
+        ),
+      ),
     );
   }
 }

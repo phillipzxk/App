@@ -236,10 +236,10 @@ class _WeekStrokes extends StatelessWidget {
               height: 6,
               margin: const EdgeInsets.symmetric(horizontal: 2),
               decoration: BoxDecoration(
-                color: CoachStyle.bar,
+                color: CoachStyle.nightLineStrong,
                 borderRadius: BorderRadius.circular(3),
                 border: i == today.weekday - 1
-                    ? Border.all(color: CoachStyle.gold, width: 1.5)
+                    ? Border.all(color: CoachStyle.goldBright, width: 1.5)
                     : null,
               ),
             ),
@@ -267,7 +267,7 @@ class _Dots extends StatelessWidget {
             margin: const EdgeInsets.only(left: 4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: on ? CoachStyle.gold : CoachStyle.bar,
+              color: on ? const Color(0xFFD4A85E) : CoachStyle.nightLineStrong,
             ),
           ),
       ],

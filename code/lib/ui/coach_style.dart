@@ -53,7 +53,7 @@ abstract final class CoachStyle {
   static const coachGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF3A342B), Color(0xFF221F1A)],
+    colors: [Color(0xFF2A2118), Color(0xFF15110D)],
   );
 
   static const goldCardGradient = LinearGradient(
