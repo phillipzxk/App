@@ -33,7 +33,7 @@ Phillip hat das Onboarding mit dem echten Coach getestet: Bis zum Feed hat er ru
    - Freiwilliges Feld „Und was fällt dir dabei leicht?“ (Muster von Phillip: Problem + was leicht fällt)
 5. **Ernährung** (Phillip, 2026-10-18): „Welche Probleme hast du gerade mit deiner Ernährung?“
    - Antippen (mehrere möglich): Heißhunger, vor allem abends · Keine Struktur, ich esse unregelmäßig · Ich weiß nicht, was mir wirklich guttut · Oft unterwegs oder Fast Food
-   - Freiwilliges Feld „Was weißt du schon, oder was hast du bereits angepasst?“ (Phillips Formulierung)
+   - Freiwilliges Feld „Was weißt du schon, oder was hast du an deiner Ernährung bereits angepasst?“ (Phillips Formulierung)
 
 ## Prinzip
 
