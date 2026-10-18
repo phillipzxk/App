@@ -34,6 +34,11 @@ Phillip hat das Onboarding mit dem echten Coach getestet: Bis zum Feed hat er ru
 5. **Ernährung** (Phillip, 2026-10-18): „Welche Probleme hast du gerade mit deiner Ernährung?“
    - Antippen (mehrere möglich): Heißhunger, vor allem abends · Keine Struktur, ich esse unregelmäßig · Ich weiß nicht, was mir wirklich guttut · Oft unterwegs oder Fast Food
    - Freiwilliges Feld „Was weißt du schon, oder was hast du an deiner Ernährung bereits angepasst?“ (Phillips Formulierung)
+6. **Schlaf & Energie** (Phillip, 2026-10-18): „Welche Probleme hast du gerade mit Schlaf und Energie?“
+   - Antippen (mehrere möglich): Ich schlafe schlecht ein · Ich wache nachts oft auf · Ich bin morgens nicht erholt · Ich habe tagsüber Energietiefs
+   - Freiwilliges Feld „Und wann fühlst du dich richtig fit?“
+
+Alle 6 Fragen stehen (2026-10-18). Nächster Schritt: zeigen, dann nach Phillips Ja einbauen.
 
 ## Prinzip
 
