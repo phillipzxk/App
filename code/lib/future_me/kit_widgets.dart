@@ -15,7 +15,7 @@ class KitZeile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFFF3E8D3),
+      color: CoachStyle.selectedFill,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         key: const ValueKey('kit-zeile'),

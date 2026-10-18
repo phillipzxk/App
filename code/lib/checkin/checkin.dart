@@ -1,4 +1,5 @@
-/// One daily check-in: the four answers and the AI reply.
+/// One daily check-in: the tapped answers per area, an optional note and
+/// the AI reply.
 ///
 /// Mirrors the table Check-ins in the vault (Datenstruktur/Check-ins.md).
 class CheckIn {
@@ -8,6 +9,8 @@ class CheckIn {
     required this.ernaehrung,
     required this.schlaf,
     required this.mindset,
+    this.energie = '',
+    this.notiz = '',
     this.kiAntwort = '',
   });
 
@@ -17,6 +20,10 @@ class CheckIn {
   final String ernaehrung;
   final String schlaf;
   final String mindset;
+  final String energie;
+
+  /// Optional "Was war heute besonders?".
+  final String notiz;
 
   /// The AI reply to the whole day; empty until the AI is connected.
   final String kiAntwort;
@@ -27,8 +34,21 @@ class CheckIn {
     'ernaehrung': ernaehrung,
     'schlaf': schlaf,
     'mindset': mindset,
+    'energie': energie,
+    'notiz': notiz,
     'ki_antwort': kiAntwort,
   };
+
+  CheckIn withReply(String reply) => CheckIn(
+    datum: datum,
+    training: training,
+    ernaehrung: ernaehrung,
+    schlaf: schlaf,
+    mindset: mindset,
+    energie: energie,
+    notiz: notiz,
+    kiAntwort: reply,
+  );
 
   factory CheckIn.fromJson(Map<String, dynamic> json) => CheckIn(
     datum: DateTime.parse(json['datum'] as String),
@@ -36,6 +56,8 @@ class CheckIn {
     ernaehrung: json['ernaehrung'] as String? ?? '',
     schlaf: json['schlaf'] as String? ?? '',
     mindset: json['mindset'] as String? ?? '',
+    energie: json['energie'] as String? ?? '',
+    notiz: json['notiz'] as String? ?? '',
     kiAntwort: json['ki_antwort'] as String? ?? '',
   );
 }

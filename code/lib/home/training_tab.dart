@@ -47,6 +47,7 @@ class TrainingTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
+      padding: const EdgeInsets.only(bottom: 110),
       children: [
         const PageHeader(
           label: 'Bereich',
@@ -62,12 +63,7 @@ class TrainingTab extends StatelessWidget {
             icon: Icons.event_note_outlined,
             gold: true,
             children: [
-              const HintText(
-                'Leg einmal fest, was du an welchem Tag trainierst, egal ob '
-                'Gym, Laufen, Radfahren oder Kampfsport. Dann siehst du hier '
-                'jeden Tag, was ansteht, und der Coach arbeitet mit deinem '
-                'Plan.',
-              ),
+              const HintText('Was trainierst du an welchem Tag?'),
               const SizedBox(height: 12),
               GhostButton(
                 label: 'Plan festlegen',
@@ -84,12 +80,6 @@ class TrainingTab extends StatelessWidget {
               const Text('Dein Schwerpunkt', style: CoachStyle.label),
               const SizedBox(height: 6),
               _SchwerpunktChips(value: schwerpunkt, onPick: onSchwerpunkt),
-              const SizedBox(height: 6),
-              const HintText(
-                'Bremsen sich Einheiten aus, tauscht dein Coach sie passend '
-                'zu deinem Schwerpunkt, sagt dir warum, und du kannst es mit '
-                'einem Tipp zurücknehmen. $aiPending',
-              ),
               const SizedBox(height: 10),
               for (var i = 0; i < 7; i++)
                 _DayRow(
@@ -140,10 +130,10 @@ class _SchwerpunktChips extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: s == value ? CoachStyle.dark : CoachStyle.cardBright,
+                color: s == value ? CoachStyle.beige : CoachStyle.card,
                 borderRadius: BorderRadius.circular(999),
                 border: Border.all(
-                  color: s == value ? CoachStyle.dark : CoachStyle.edgeStrong,
+                  color: s == value ? CoachStyle.beige : CoachStyle.edgeStrong,
                 ),
               ),
               child: Text(
@@ -151,7 +141,7 @@ class _SchwerpunktChips extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: s == value ? FontWeight.w600 : FontWeight.w400,
-                  color: s == value ? CoachStyle.goldSoft : CoachStyle.inkSoft,
+                  color: s == value ? CoachStyle.goldInk : CoachStyle.inkSoft,
                 ),
               ),
             ),

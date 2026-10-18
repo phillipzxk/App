@@ -8,8 +8,8 @@ import '../ui/logo.dart';
 import 'onboarding_evaluator.dart';
 import 'onboarding_questions.dart';
 
-/// The onboarding: first the user's name, then six questions answered in the
-/// user's own words, then the AI reads all answers at once and shows
+/// The onboarding: first the user's name, then six questions answered by
+/// tapping answers plus a short field in the user's own words, then the AI reads all answers at once and shows
 /// "So sehe ich dich gerade".
 ///
 /// The profile is saved once all six answers are given, so a user who quits
@@ -40,6 +40,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   late final List<TextEditingController> _controllers = [
     for (final _ in onboardingQuestions) TextEditingController(),
   ];
+  late final List<Set<String>> _picked = [
+    for (final _ in onboardingQuestions) <String>{},
+  ];
 
   @override
   void dispose() {
@@ -59,10 +62,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     }
     var profile = UserProfile(name: _nameController.text.trim());
     for (var i = 0; i < onboardingQuestions.length; i++) {
-      profile = onboardingQuestions[i].apply(
-        profile,
-        _controllers[i].text.trim(),
-      );
+      final q = onboardingQuestions[i];
+      profile = q.apply(profile, q.compose(_picked[i], _controllers[i].text));
     }
     setState(() => _phase = _Phase.evaluating);
     final summary = await widget.evaluator.summarize(profile);
@@ -127,6 +128,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   Widget _buildQuestion() {
     final question = onboardingQuestions[_index];
     final controller = _controllers[_index];
+    final picked = _picked[_index];
     return Column(
       key: ValueKey(_index),
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -156,18 +158,67 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           ],
         ),
         const SizedBox(height: 12),
-        Text(question.question, style: CoachStyle.question),
-        const SizedBox(height: 20),
         Expanded(
-          child: AnswerField(
-            controller: controller,
-            onChanged: (_) => setState(() {}),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(question.question, style: CoachStyle.question),
+                const SizedBox(height: 6),
+                Text(
+                  'Tippe an, was passt. Mehreres ist möglich.',
+                  style: CoachStyle.body.copyWith(color: CoachStyle.inkSoft),
+                ),
+                const SizedBox(height: 16),
+                for (final option in question.options)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _OptionTile(
+                      label: option,
+                      selected: picked.contains(option),
+                      onTap: () => setState(() {
+                        if (!picked.remove(option)) picked.add(option);
+                      }),
+                    ),
+                  ),
+                const SizedBox(height: 14),
+                Text(
+                  question.fieldRequired
+                      ? question.fieldLabel
+                      : '${question.fieldLabel} (freiwillig)',
+                  style: CoachStyle.body.copyWith(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: controller,
+                  minLines: 2,
+                  maxLines: 4,
+                  style: CoachStyle.body,
+                  cursorColor: CoachStyle.gold,
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    hintText: question.fieldHint,
+                    hintStyle: CoachStyle.body.copyWith(
+                      color: CoachStyle.inkSoft,
+                    ),
+                    filled: true,
+                    fillColor: CoachStyle.card,
+                    contentPadding: const EdgeInsets.all(14),
+                    enabledBorder: AnswerField.border(CoachStyle.line),
+                    focusedBorder: AnswerField.border(CoachStyle.gold),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         MainButton(
           label: _isLast ? 'Fertig' : 'Weiter',
-          onPressed: controller.text.trim().isEmpty ? null : _next,
+          onPressed: question.canContinue(picked, controller.text)
+              ? _next
+              : null,
         ),
       ],
     );
@@ -200,6 +251,54 @@ class _Summary extends StatelessWidget {
         const Spacer(),
         MainButton(label: "Los geht's", onPressed: onContinue),
       ],
+    );
+  }
+}
+
+/// One answer to tap; gold edge and check mark when picked.
+class _OptionTile extends StatelessWidget {
+  const _OptionTile({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: selected ? CoachStyle.selectedFill : CoachStyle.card,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: selected ? CoachStyle.gold : CoachStyle.line,
+              width: selected ? 1.5 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(child: Text(label, style: CoachStyle.body)),
+              const SizedBox(width: 10),
+              Icon(
+                selected ? Icons.check_circle : Icons.circle_outlined,
+                size: 22,
+                color: selected ? CoachStyle.gold : CoachStyle.line,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

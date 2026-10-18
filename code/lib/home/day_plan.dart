@@ -76,11 +76,6 @@ class DayPlanCard extends StatelessWidget {
       trailing: const Tag('passt sich an'),
       children: [
         _TerminField(onAdd: onAddTermin),
-        const SizedBox(height: 6),
-        const HintText(
-          'Einfach in eigenen Worten, z. B. „Zahnarzt Donnerstag 17 Uhr“. '
-          'Arbeit, Schule, Privates: alles gehört hier rein.',
-        ),
         const SizedBox(height: 12),
         _MealsLine(
           mahlzeiten: meals,
@@ -95,9 +90,7 @@ class DayPlanCard extends StatelessWidget {
             art: 'Foto',
             dark: true,
             titel: foto!,
-            text:
-                'Fester Termin, wird nie verschoben. Mit dem Frame Kit '
-                'dauert es 30 Sekunden.',
+            text: 'Mit dem Frame Kit 30 Sekunden.',
             onTap: onOpenFoto,
           ),
         for (final t in heute)
@@ -113,34 +106,21 @@ class DayPlanCard extends StatelessWidget {
           art: 'Training',
           dark: true,
           titel: training.trim().isEmpty ? 'Heute frei' : shortDay(training),
-          text: training.trim().isEmpty
-              ? 'Laut deinem Trainingsplan ist heute kein Training.'
-              : 'Übungen und nächstes Ziel stehen in deinem Plan. Uhrzeit, '
-                    'Intensität und Umfang passt die KI an deine Termine an. '
-                    '$aiPending',
+          text: training.trim().isEmpty ? null : 'Übungen in deinem Plan',
           onTap: onOpenTraining,
         ),
         _PlanRow(
           zeit: '–',
           art: 'Essen',
           titel: meals == null ? 'Mahlzeiten' : '$meals Mahlzeiten',
-          text:
-              'Zeiten und Größe der Mahlzeiten verteilt die KI um deine '
-              'Termine und dein Training. $aiPending',
         ),
         const _PlanRow(
           zeit: '–',
           art: 'Schlaf',
           titel: 'Bettzeit',
-          text:
-              'Die KI rechnet deine Bettzeit passend zum nächsten Morgen und '
-              'erinnert dich an deine Abendroutine. $aiPending',
+          text: aiPending,
           last: true,
         ),
-        const SizedBox(height: 12),
-        Text('TIPP DES TAGES', style: CoachStyle.goldLabel),
-        const SizedBox(height: 4),
-        const HintText(aiPending),
         if (demnaechst.isNotEmpty) ...[
           const SizedBox(height: 14),
           const Text('NÄCHSTE TERMINE', style: CoachStyle.label),
@@ -197,7 +177,7 @@ class _TerminFieldState extends State<_TerminField> {
             onSubmitted: (_) => _submit(),
             style: CoachStyle.body.copyWith(fontSize: 15),
             decoration: InputDecoration(
-              hintText: 'Termin schreiben',
+              hintText: 'z. B. Zahnarzt Do 17 Uhr',
               isDense: true,
               filled: true,
               fillColor: CoachStyle.page,
@@ -220,8 +200,8 @@ class _TerminFieldState extends State<_TerminField> {
         FilledButton(
           key: const ValueKey('termin-eintragen'),
           style: FilledButton.styleFrom(
-            backgroundColor: CoachStyle.dark,
-            foregroundColor: CoachStyle.goldSoft,
+            backgroundColor: CoachStyle.beige,
+            foregroundColor: CoachStyle.goldInk,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -261,7 +241,7 @@ class _MealsLine extends StatelessWidget {
       if (kcalZiel != null) 'kcal-Ziel ${formatKcal(kcalZiel!)}',
     ];
     return Material(
-      color: const Color(0xFFF1E9DB),
+      color: CoachStyle.card,
       borderRadius: BorderRadius.circular(10),
       child: InkWell(
         key: const ValueKey('mahlzeiten'),
@@ -401,16 +381,16 @@ class _Kind extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
     decoration: BoxDecoration(
-      color: dark ? CoachStyle.dark : null,
+      color: dark ? CoachStyle.beige : null,
       borderRadius: BorderRadius.circular(99),
-      border: Border.all(color: dark ? CoachStyle.dark : CoachStyle.line),
+      border: Border.all(color: dark ? CoachStyle.beige : CoachStyle.line),
     ),
     child: Text(
       text.toUpperCase(),
       style: CoachStyle.label.copyWith(
         fontSize: 10,
         letterSpacing: 0.8,
-        color: dark ? CoachStyle.goldSoft : CoachStyle.inkSoft,
+        color: dark ? CoachStyle.goldInk : CoachStyle.inkSoft,
       ),
     ),
   );
@@ -471,10 +451,7 @@ class _MahlzeitenDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const HintText(
-            'Snacks zählen mit. Die KI verteilt sie passend zu deinem '
-            'Tag und deinem kcal-Ziel.',
-          ),
+          const HintText('Snacks zählen mit.'),
           const SizedBox(height: 14),
           Wrap(
             spacing: 8,
@@ -485,7 +462,7 @@ class _MahlzeitenDialog extends StatelessWidget {
                   key: ValueKey('mahlzeiten-$n'),
                   label: Text('$n'),
                   selected: current == n,
-                  selectedColor: CoachStyle.goldSoft,
+                  selectedColor: CoachStyle.selectedFill,
                   onSelected: (_) => Navigator.pop(context, n),
                 ),
             ],

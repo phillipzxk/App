@@ -4,76 +4,79 @@ import 'package:flutter/material.dart';
 /// Umsetzung/Design.md): warm sand white, champagne gold, dark buttons with
 /// gold text, Sora for headings and Figtree for text.
 abstract final class CoachStyle {
-  static const page = Color(0xFFEFE9DE);
-  static const card = Color(0xFFF9F6F0);
-  static const line = Color(0xFFE0D6C4);
-  static const bar = Color(0xFFDED2BC);
-  static const gold = Color(0xFFB08A4F);
-  static const goldLight = Color(0xFFC9A86D);
-  static const goldSoft = Color(0xFFF3E3C2);
-  static const dark = Color(0xFF2A2620);
-  static const ink = dark;
-  static const inkSoft = Color(0xFF7D7466);
-  static const onDark = Color(0xFFF1EBE0);
+  // Whole app dark with beige and gold (Phillip 2026-10-18): black-brown
+  // page, slightly lighter cards with fine beige lines, beige text, gold
+  // for what matters most.
+  static const page = Color(0xFF110E0B);
+  static const card = Color(0xFF1E1914);
+  static const line = Color(0xFF3A3127);
+  static const bar = Color(0xFF2F271E);
+  static const gold = Color(0xFFC9A25C);
+  static const goldLight = Color(0xFFE0BF7E);
 
-  // Depth (variant C "Ebenen", Phillip 2026-10-16): soft shadows, light
-  // gradients, and a gold edge for reminder fields. Colours stay the same.
-  static const edge = Color(0xFFE6DCCB);
-  static const goldEdge = Color(0xFFE2CFA9);
+  /// Beige: light accent on dark (pills, small buttons, icons).
+  static const goldSoft = Color(0xFFE6D7BB);
+  static const beige = goldSoft;
+  static const dark = Color(0xFF0D0B08);
+  static const ink = Color(0xFFEFE5D2);
+  static const inkSoft = Color(0xFFA99B84);
+  static const onDark = ink;
 
-  // More contrast between the cards (Phillip 2026-10-16): cards lighter
-  // than the page, stronger edge, deeper shadow.
-  static const cardBright = Color(0xFFFFFDF9);
-  static const edgeStrong = Color(0xFFD9CCB4);
+  /// Background of a picked answer: dark with a touch of gold.
+  static const selectedFill = Color(0xFF33291B);
+
+  /// Fine beige line around cards.
+  static const hairline = Color(0x33D9C7A7);
+
+  /// Muted beige for small headings.
+  static const beigeLabel = Color(0xFFCDBB98);
+
+  static const edge = Color(0xFF2E261C);
+  static const goldEdge = Color(0xFF6B5535);
+  static const cardBright = Color(0xFF1B1611);
+  static const edgeStrong = Color(0xFF3A3127);
 
   static const cardShadowStrong = [
-    BoxShadow(color: Color(0x142A2620), blurRadius: 4, offset: Offset(0, 2)),
-    BoxShadow(color: Color(0x1F2A2620), blurRadius: 26, offset: Offset(0, 12)),
+    BoxShadow(color: Color(0x66000000), blurRadius: 22, offset: Offset(0, 10)),
   ];
 
   static const cardShadow = [
-    BoxShadow(color: Color(0x0F2A2620), blurRadius: 2, offset: Offset(0, 1)),
-    BoxShadow(color: Color(0x142A2620), blurRadius: 20, offset: Offset(0, 8)),
+    BoxShadow(color: Color(0x4D000000), blurRadius: 16, offset: Offset(0, 6)),
   ];
 
   static const darkShadow = [
-    BoxShadow(color: Color(0x4D2A2620), blurRadius: 28, offset: Offset(0, 12)),
+    BoxShadow(color: Color(0x80000000), blurRadius: 28, offset: Offset(0, 12)),
   ];
 
   static const goldShadow = [
-    BoxShadow(color: Color(0x2EB08A4F), blurRadius: 16, offset: Offset(0, 6)),
+    BoxShadow(color: Color(0x26D6AA5E), blurRadius: 18, offset: Offset(0, 6)),
   ];
 
   static const cardGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [Color(0xFFFCFAF6), card],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF221B15), Color(0xFF17130F)],
   );
 
   static const coachGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF3A342B), Color(0xFF221F1A)],
+    colors: [Color(0xFF2A2118), Color(0xFF15110D)],
   );
 
-  static const goldCardGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [Color(0xFFF6ECD9), Color(0xFFFDFAF4)],
-    stops: [0, 0.6],
-  );
+  static const goldCardGradient = cardGradient;
 
   static const reminderGradient = LinearGradient(
-    colors: [Color(0xFFF6ECD9), Color(0xFFFBF8F2)],
+    colors: [Color(0xFF2A2117), Color(0xFF1B1611)],
     stops: [0, 0.7],
   );
 
-  /// Page background: a little lighter at the top, then sand white.
+  /// Page background: black-brown, a little lighter at the top.
   static const pageGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [Color(0xFFF6F1E7), page],
-    stops: [0, 0.3],
+    colors: [Color(0xFF1C1611), Color(0xFF120F0B), Color(0xFF0D0B08)],
+    stops: [0, 0.55, 1],
   );
 
   static const label = TextStyle(
@@ -123,4 +126,73 @@ abstract final class CoachStyle {
     height: 1.5,
     color: ink,
   );
+
+  // Dark style with gold gradients (Phillip 2026-10-18): black-brown for
+  // the daily pages (check-in, Heute), light pages stay as contrast.
+  static const night = Color(0xFF120F0B);
+  static const nightCard = Color(0xFF18140F);
+  static const nightCardOpen = Color(0xFF231C15);
+  static const nightLine = Color(0xFF2E261C);
+  static const nightLineStrong = Color(0xFF3A3024);
+  static const nightChip = Color(0xFF221C15);
+  static const cream = Color(0xFFF3E9D6);
+  static const creamSoft = Color(0xFF9A8C77);
+  static const nightMuted = Color(0xFF6F6352);
+  static const goldBright = Color(0xFFE0BF7E);
+  static const goldInk = Color(0xFF1A140E);
+
+  /// Black-brown page, a little lighter at the top.
+  static const nightGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF1C1611), Color(0xFF120F0B), Color(0xFF0D0B08)],
+    stops: [0, 0.55, 1],
+  );
+
+  /// Soft gold shimmer in the top right corner of dark areas.
+  static const nightGlow = RadialGradient(
+    center: Alignment(0.8, -1.1),
+    radius: 1.1,
+    colors: [Color(0x47D6AA5E), Color(0x00D6AA5E)],
+  );
+
+  /// Metallic gold for picked answers, badges and the main button.
+  static const goldGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFF5DFAE), Color(0xFFD4A85E), Color(0xFF9A6D35)],
+    stops: [0, 0.45, 1],
+  );
+
+  /// Gold edge of the open card.
+  static const goldEdgeGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFF0D9A6), Color(0xFF8A6330), Color(0xFF3A2E21)],
+    stops: [0, 0.5, 1],
+  );
+
+  /// Gold for big headings on dark (used as a text shader).
+  static const goldTextGradient = LinearGradient(
+    colors: [Color(0xFFFBF1DC), Color(0xFFE6C789), Color(0xFFB8894A)],
+    stops: [0, 0.6, 1],
+  );
+
+  /// Light cream for fields that should stand out on the dark page.
+  static const creamGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFD8CAB0), Color(0xFFC4B293)],
+  );
+
+  /// Softer dark brown text on cream.
+  static const creamInkSoft = Color(0xFF5A4A36);
+
+  static const goldGlow = [
+    BoxShadow(color: Color(0x59D6AA5E), blurRadius: 24, offset: Offset(0, 8)),
+  ];
+
+  static const nightShadow = [
+    BoxShadow(color: Color(0x80000000), blurRadius: 36, offset: Offset(0, 14)),
+  ];
 }

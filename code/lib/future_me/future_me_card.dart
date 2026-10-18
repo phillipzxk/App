@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../ui/coach_style.dart';
+
 import '../home/feed_widgets.dart';
 import 'future_me_data.dart';
 
@@ -72,7 +74,7 @@ class FotoBild extends StatelessWidget {
       child: Container(
         width: width,
         height: height,
-        color: const Color(0xFFDDD3C1),
+        color: CoachStyle.bar,
         child: data == null
             ? null
             : Image.memory(

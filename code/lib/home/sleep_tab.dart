@@ -39,6 +39,7 @@ class SleepTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
+      padding: const EdgeInsets.only(bottom: 110),
       children: [
         const PageHeader(
           label: 'Bereich',
@@ -54,11 +55,7 @@ class SleepTab extends StatelessWidget {
           gold: true,
           children: [
             if (routine.isEmpty)
-              const HintText(
-                'Leg einmal fest, wie dein Abend aussehen soll. Der Coach '
-                'arbeitet damit und passt sie an, wenn du öfter schlecht '
-                'schläfst.',
-              )
+              const HintText('Leg einmal fest, wie dein Abend aussieht.')
             else
               for (final s in routine)
                 Padding(
@@ -127,8 +124,7 @@ class SleepCard extends StatelessWidget {
         icon: Icons.bedtime_outlined,
         children: [
           const HintText(
-            'Trag jeden Morgen ein, wie lange du geschlafen hast. Dann siehst '
-            'du hier jede Nacht als Balken und deinen Schnitt.',
+            'Trag jeden Morgen ein, wie lange du geschlafen hast.',
           ),
           const SizedBox(height: 16),
           MainButton(label: 'Schlaf eintragen', onPressed: onAdd),
@@ -160,11 +156,6 @@ class SleepCard extends StatelessWidget {
           ),
         const SizedBox(height: 12),
         SleepChart(nights: nights),
-        const SizedBox(height: 8),
-        const HintText(
-          'Jeder Balken ist eine Nacht, ganz rechts heute. Die gestrichelte '
-          'Linie liegt bei 8 Stunden. Der Schnitt zählt die letzten 7 Nächte.',
-        ),
         const SizedBox(height: 16),
         MainButton(label: 'Schlaf eintragen', onPressed: onAdd),
       ],

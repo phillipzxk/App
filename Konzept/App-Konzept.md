@@ -24,6 +24,8 @@ Der Nutzer trackt täglich in einem conversationellen Feed sein Training, seine 
 
 ## Weiter
 
+- Kern der App in einem Satz: [[Kern der App]]
+
 - Ablauf im Detail: [[Kernmechanik]]
 - Umsetzung: [[Technischer Ansatz]]
 - Daten: [[Datenmodell]]

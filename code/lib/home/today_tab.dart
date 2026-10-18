@@ -119,101 +119,148 @@ class TodayTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = _todayCheckIn;
     final streak = checkInStreak(checkIns, today);
-    return ListView(
-      children: [
-        PageHeader(
-          label: date,
-          title: name.isEmpty ? 'Heute' : 'Heute, $name',
-          brand: true,
-        ),
-        if (c != null) ...[
-          CoachCard(
-            label: 'Dein Coach · heute',
-            text: c.kiAntwort.isNotEmpty ? c.kiAntwort : noReplyYet,
+    return NightScope(
+      child: ListView(
+        padding: const EdgeInsets.only(bottom: 110),
+        children: [
+          PageHeader(
+            label: date,
+            title: name.isEmpty ? 'Heute' : 'Heute, $name',
+            brand: true,
+          ),
+          if (c != null) ...[
+            CoachCard(
+              label: 'Dein Coach · heute',
+              text: c.kiAntwort.isNotEmpty ? c.kiAntwort : noReplyYet,
+            ),
+            const SizedBox(height: 14),
+          ],
+          const GroupLabel('Heute dran'),
+          SupplementHinweis(
+            supplements: supplements,
+            genommen: genommen,
+            now: today,
+            onTap: onOpenSupplements,
+          ),
+          FutureMeCard(
+            today: today,
+            einstellungen: fotoEinstellungen,
+            fotos: wochenFotos,
+            onOpen: onOpenZukunft,
+          ),
+          DayPlanCard(
+            today: today,
+            termine: termine,
+            training: training,
+            mahlzeiten: mahlzeiten,
+            kcalZiel: kcalZiel,
+            onAddTermin: onAddTermin,
+            onRemoveTermin: onRemoveTermin,
+            onSetMahlzeiten: onSetMahlzeiten,
+            onOpenTraining: () => onOpenArea(Bereich.training),
+            foto: _fotoHeute,
+            onOpenFoto: onOpenZukunft,
+          ),
+          const GroupLabel('Deine Woche'),
+          _WeekCard(
+            streak: streak,
+            days: lastSevenDays(checkIns, today),
+            today: today,
+          ),
+          const GroupLabel('Deine Bereiche'),
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            childAspectRatio: 1.9,
+            children: [
+              for (final b in Bereich.values)
+                _AreaTile(bereich: b, onTap: () => onOpenArea(b)),
+            ],
           ),
           const SizedBox(height: 14),
+          const FeedCard(
+            title: 'Deine Muster',
+            icon: Icons.insights,
+            children: [
+              HintText('Zusammenhänge zwischen deinen Bereichen. $aiPending'),
+            ],
+          ),
+          TextButton(
+            onPressed: onRestartOnboarding,
+            child: const Text(
+              'Fragebogen neu starten',
+              style: TextStyle(color: CoachStyle.nightMuted),
+            ),
+          ),
         ],
-        const GroupLabel('Heute dran'),
-        SupplementHinweis(
-          supplements: supplements,
-          genommen: genommen,
-          now: today,
-          onTap: onOpenSupplements,
-        ),
-        FutureMeCard(
-          today: today,
-          einstellungen: fotoEinstellungen,
-          fotos: wochenFotos,
-          onOpen: onOpenZukunft,
-        ),
-        DayPlanCard(
-          today: today,
-          termine: termine,
-          training: training,
-          mahlzeiten: mahlzeiten,
-          kcalZiel: kcalZiel,
-          onAddTermin: onAddTermin,
-          onRemoveTermin: onRemoveTermin,
-          onSetMahlzeiten: onSetMahlzeiten,
-          onOpenTraining: () => onOpenArea(Bereich.training),
-          foto: _fotoHeute,
-          onOpenFoto: onOpenZukunft,
-        ),
-        const GroupLabel('Deine Woche'),
-        FeedCard(
-          title: 'Fokus der Woche',
-          icon: Icons.track_changes,
-          children: [
-            const HintText(
-              'Ein Fokus für die ganze Woche, abgeleitet aus deinen '
-              'Check-ins. $aiPending',
-            ),
-            const SizedBox(height: 12),
-            _WeekStrokes(today: today),
-            const SizedBox(height: 6),
-            const HintText(
-              'Jeder Tag, an dem du deinen Fokus schaffst, füllt einen Strich.',
-            ),
-          ],
-        ),
-        FeedCard(
-          title: streak == 1 ? '1 Tag am Stück' : '$streak Tage am Stück',
-          icon: Icons.local_fire_department_outlined,
-          trailing: _Dots(days: lastSevenDays(checkIns, today)),
-          children: const [HintText('jeden Tag eingecheckt')],
-        ),
-        const GroupLabel('Deine Bereiche'),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-          childAspectRatio: 1.9,
-          children: [
-            for (final b in Bereich.values)
-              _AreaTile(bereich: b, onTap: () => onOpenArea(b)),
-          ],
-        ),
-        const SizedBox(height: 14),
-        const FeedCard(
-          title: 'Deine Muster',
-          icon: Icons.insights,
-          children: [
-            HintText(
-              'Zusammenhänge zwischen deinen Bereichen, die der Coach über '
-              'die Wochen erkennt. $aiPending',
-            ),
-          ],
-        ),
-        TextButton(
-          onPressed: onRestartOnboarding,
-          child: const Text(
-            'Fragebogen neu starten',
-            style: TextStyle(color: CoachStyle.inkSoft),
+      ),
+    );
+  }
+}
+
+/// "Deine Woche" in one small card: days in a row with check-in, and the
+/// focus of the week with one stroke per day.
+class _WeekCard extends StatelessWidget {
+  const _WeekCard({
+    required this.streak,
+    required this.days,
+    required this.today,
+  });
+
+  final int streak;
+  final List<bool> days;
+  final DateTime today;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget line(IconData icon, String title, Widget right) => Row(
+      children: [
+        SymbolBadge(icon, size: 26, onDark: true),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            title,
+            style: CoachStyle.cardTitle.copyWith(fontSize: 14),
           ),
         ),
+        right,
       ],
+    );
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+      decoration: BoxDecoration(
+        gradient: CoachStyle.cardGradient,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: CoachStyle.hairline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          line(
+            Icons.local_fire_department_outlined,
+            streak == 1 ? '1 Tag am Stück' : '$streak Tage am Stück',
+            _Dots(days: days),
+          ),
+          const SizedBox(height: 12),
+          line(
+            Icons.track_changes,
+            'Fokus der Woche',
+            Text(
+              aiPending,
+              style: CoachStyle.body.copyWith(
+                fontSize: 13,
+                color: CoachStyle.inkSoft,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          _WeekStrokes(today: today),
+        ],
+      ),
     );
   }
 }
@@ -234,10 +281,10 @@ class _WeekStrokes extends StatelessWidget {
               height: 6,
               margin: const EdgeInsets.symmetric(horizontal: 2),
               decoration: BoxDecoration(
-                color: CoachStyle.bar,
+                color: CoachStyle.nightLineStrong,
                 borderRadius: BorderRadius.circular(3),
                 border: i == today.weekday - 1
-                    ? Border.all(color: CoachStyle.gold, width: 1.5)
+                    ? Border.all(color: CoachStyle.goldBright, width: 1.5)
                     : null,
               ),
             ),
@@ -265,7 +312,7 @@ class _Dots extends StatelessWidget {
             margin: const EdgeInsets.only(left: 4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: on ? CoachStyle.gold : CoachStyle.bar,
+              color: on ? const Color(0xFFD4A85E) : CoachStyle.nightLineStrong,
             ),
           ),
       ],
@@ -286,14 +333,14 @@ class _AreaTile extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        color: CoachStyle.cardBright,
-        boxShadow: CoachStyle.cardShadowStrong,
+        gradient: CoachStyle.creamGradient,
+        boxShadow: CoachStyle.cardShadow,
       ),
       child: Material(
         type: MaterialType.transparency,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
-          side: const BorderSide(color: CoachStyle.edgeStrong),
+          side: BorderSide.none,
         ),
         child: InkWell(
           key: ValueKey('bereich-${bereich.name}'),
@@ -311,7 +358,7 @@ class _AreaTile extends StatelessWidget {
                       width: 24,
                       height: 24,
                       decoration: const BoxDecoration(
-                        color: CoachStyle.dark,
+                        color: CoachStyle.goldInk,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -325,13 +372,16 @@ class _AreaTile extends StatelessWidget {
                       child: Text(
                         bereich.label,
                         overflow: TextOverflow.ellipsis,
-                        style: CoachStyle.cardTitle.copyWith(fontSize: 13),
+                        style: CoachStyle.cardTitle.copyWith(
+                          fontSize: 13,
+                          color: CoachStyle.goldInk,
+                        ),
                       ),
                     ),
                     Text(
                       '–',
                       style: CoachStyle.cardTitle.copyWith(
-                        color: CoachStyle.inkSoft,
+                        color: const Color(0xFF7A5528),
                       ),
                     ),
                   ],
@@ -345,7 +395,7 @@ class _AreaTile extends StatelessWidget {
                           height: h,
                           margin: const EdgeInsets.symmetric(horizontal: 1.5),
                           decoration: BoxDecoration(
-                            color: CoachStyle.bar.withValues(alpha: 0.6),
+                            color: const Color(0x335A4A36),
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -357,6 +407,7 @@ class _AreaTile extends StatelessWidget {
                   style: CoachStyle.label.copyWith(
                     letterSpacing: 0,
                     fontSize: 11,
+                    color: CoachStyle.creamInkSoft,
                   ),
                 ),
               ],

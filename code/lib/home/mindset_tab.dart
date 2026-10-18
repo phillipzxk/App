@@ -22,6 +22,7 @@ class MindsetTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
+      padding: const EdgeInsets.only(bottom: 110),
       children: [
         const PageHeader(label: 'Bereich', title: 'Mindset', icon: Icons.spa),
         const GroupLabel('Dein Verlauf'),
@@ -30,10 +31,7 @@ class MindsetTab extends StatelessWidget {
           title: 'Durchgezogen · diese Woche',
           icon: Icons.check_circle_outline,
           children: [
-            HintText(
-              'Hier sammelt der Coach aus deinen Mindset-Antworten im '
-              'Check-in, was du diese Woche durchgezogen hast. $aiPending',
-            ),
+            HintText('Was du diese Woche durchgezogen hast. $aiPending'),
           ],
         ),
         if (profile.motivation.isNotEmpty) ...[
@@ -47,12 +45,6 @@ class MindsetTab extends StatelessWidget {
               Text(
                 '„${profile.motivation}“',
                 style: CoachStyle.question.copyWith(fontSize: 18),
-              ),
-              const SizedBox(height: 8),
-              const HintText(
-                'Deine eigene Antwort aus dem Onboarding. Sobald die KI '
-                'angeschlossen ist, erscheint sie nur, wenn du gerade eine '
-                'schwache Phase hast.',
               ),
             ],
           ),

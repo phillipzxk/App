@@ -51,6 +51,24 @@ Dazu ein Startbild mit Logo und dem Satz „Das Fundament für jeden Tag.“ und
 - Bilddatei in der App: `code/assets/images/coach.jpg`; Original im Projektordner `app-docs/coach-nasenaffe.png`.
 - Entwurf: https://claude.ai/artifact/BPEdfiyUJay3VjscnEnDxp
 
+## Dunkler Stil mit Beige und Gold (18.10.2026)
+
+Phillip wollte es „mehr mit Schwarz, Braun und goldenen Verläufen“. Ein erster Versuch mit dunklen und hellen Seiten passte im Kontrast nicht zusammen. Deshalb ist jetzt die **ganze App dunkel**, mit Beige „clean“ eingearbeitet.
+
+- **Hintergrund:** fast schwarz, oben rechts ein goldener Schimmer.
+- **Karten:** etwas helleres, warmes Dunkelbraun mit feinem beigen Rand.
+- **Beige:** Text, kleine Überschriften, Linien, kleine Knöpfe wie „Eintragen“ und der gewählte Schwerpunkt.
+- **Gold-Verlauf:** große Überschriften, Symbole, die Karte „Deine Basis“ (goldener Kopf und Rand), gewählte Antworten im [[Täglicher Check-in]], alle Haupt-Knöpfe.
+- Coach-Karte und „Frag deinen Coach“ haben einen goldenen Verlaufsrand bzw. goldenen Senden-Knopf.
+- Auch Onboarding und Unterseiten sind dunkel.
+- Creme als Kontrast (18.10.2026, Phillip: Felder auf „Heute“ hoben sich nicht genug ab): Offene Hinweis-Felder (Supplements, Dein zukünftiges Ich) und die Bereichs-Kacheln sind gedämpft sandfarben (nicht grell) mit dunkler Schrift; Hinweis-Felder haben links einen goldenen Rand und werden erledigt wieder ruhig dunkel. „Dein Tag“ hat einen sandfarbenen Kopf. Phillip: „nicht ganz so hell, soll sich nicht extrem abheben, aber den hellen modernen Kontrast reinbringen“.
+- Aufgeräumt (18.10.2026, Phillip: „alles Überflüssige entfernen, zusammenfassen“): Erklär-Texte auf einen kurzen Satz gekürzt oder gestrichen, Platzhalter heißen nur noch „Folgt bald.“; „Tipp des Tages“ ist ausgeblendet, bis der Coach ihn liefert. Auf „Heute“ stehen „Tage am Stück“ und „Fokus der Woche“ zusammen in einer kleinen Karte.
+- Die Tab-Leiste schwebt abgerundet über dem Inhalt; der offene Tab ist golden mit kleinem Gold-Strich darüber.
+- Entwurf: https://claude.ai/artifact/NWJnSZaEC6HZjMTyWD89RU
+- Phillip hat am 18.10.2026 Ja gesagt. Der Stil ist in der Test-Vorschau, aber noch nicht fest in der App.
+
+Dieser Stil ersetzt die helle Variante „Neu“ (Sandweiß) von unten.
+
 ## Entwürfe
 
 - Farben: https://claude.ai/artifact/QppYJLeDpFeuCEgdJeRM3t

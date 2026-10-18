@@ -6,7 +6,7 @@ import '../ui/coach_widgets.dart';
 import '../ui/logo.dart';
 
 /// Shown wherever the AI will write something once it is connected.
-const aiPending = 'Kommt, sobald die KI angeschlossen ist.';
+const aiPending = 'Folgt bald.';
 
 /// Head of a page in the Main Feed: fine golden rings in the corner, like
 /// tree rings, and a gold ground line as in the logo. On "Heute" it also
@@ -22,6 +22,8 @@ class PageHeader extends StatelessWidget {
 
   final String label;
   final String title;
+
+  /// "Heute": logo above, open on the dark page instead of a dark block.
   final bool brand;
 
   /// Symbol of the area, shown next to the title like on the cards.
@@ -29,63 +31,75 @@ class PageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 18),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: CoachStyle.gold, width: 2)),
-      ),
-      child: CustomPaint(
-        painter: _RingsPainter(),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(2, 16, 2, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    final labelStyle = CoachStyle.goldLabel.copyWith(
+      fontFamily: 'Sora',
+      letterSpacing: 2.2,
+      color: const Color(0xFFC9A25C),
+    );
+    final heading = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (brand) ...[
+          const Row(
             children: [
-              if (brand) ...[
-                const Row(
-                  children: [
-                    LogoMark(size: 26),
-                    SizedBox(width: 6),
-                    Wordmark(fontSize: 11),
-                  ],
-                ),
-                const SizedBox(height: 14),
-              ],
-              Text(label.toUpperCase(), style: CoachStyle.label),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  if (icon case final i?) ...[
-                    SymbolBadge(i, size: 36),
-                    const SizedBox(width: 12),
-                  ],
-                  Expanded(child: Text(title, style: CoachStyle.title)),
-                ],
-              ),
+              LogoMark(size: 26, ground: CoachStyle.cream),
+              SizedBox(width: 6),
+              Wordmark(fontSize: 11, ground: CoachStyle.cream),
             ],
           ),
+          const SizedBox(height: 16),
+        ],
+        Text(label.toUpperCase(), style: labelStyle),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            if (icon case final i?) ...[
+              Container(
+                width: 38,
+                height: 38,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: CoachStyle.goldGradient,
+                ),
+                child: Icon(i, size: 20, color: CoachStyle.goldInk),
+              ),
+              const SizedBox(width: 12),
+            ],
+            Expanded(child: GoldText(title, style: CoachStyle.title)),
+          ],
         ),
-      ),
+      ],
     );
+    {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(2, 16, 2, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            heading,
+            const SizedBox(height: 16),
+            const GoldLine(),
+            const SizedBox(height: 18),
+          ],
+        ),
+      );
+    }
   }
 }
 
-class _RingsPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.clipRect(Offset.zero & size);
-    final paint = Paint()
-      ..color = CoachStyle.gold.withValues(alpha: 0.16)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-    final center = Offset(size.width * 0.88, -size.height * 0.25);
-    for (var r = 14.0; r < size.width * 0.7; r += 14) {
-      canvas.drawCircle(center, r, paint);
-    }
-  }
+/// Fine gold line that fades out to both sides.
+class GoldLine extends StatelessWidget {
+  const GoldLine({super.key});
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  Widget build(BuildContext context) => Container(
+    height: 1,
+    decoration: const BoxDecoration(
+      gradient: LinearGradient(
+        colors: [Color(0x00C9A25C), Color(0xB3C9A25C), Color(0x00C9A25C)],
+      ),
+    ),
+  );
 }
 
 /// Small field on "Heute" that only shows the state of one function and
@@ -110,19 +124,19 @@ class HinweisFeld extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Open fields are cream so they stand out on the dark page (Phillip
+    // 2026-10-18); done fields go back to calm dark.
     final radius = BorderRadius.circular(14);
+    final cream = !done;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.only(bottom: 10),
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: radius,
-          gradient: done
-              ? CoachStyle.cardGradient
-              : CoachStyle.reminderGradient,
-          border: Border.all(
-            color: done ? CoachStyle.edge : CoachStyle.goldEdge,
-          ),
-          boxShadow: done ? CoachStyle.cardShadow : CoachStyle.goldShadow,
+          color: cream ? null : CoachStyle.nightCard,
+          gradient: cream ? CoachStyle.creamGradient : null,
+          border: cream ? null : Border.all(color: CoachStyle.hairline),
+          boxShadow: cream ? CoachStyle.cardShadow : null,
         ),
         child: ClipRRect(
           borderRadius: radius,
@@ -136,14 +150,23 @@ class HinweisFeld extends StatelessWidget {
                   children: [
                     Container(
                       width: 4,
-                      color: done ? CoachStyle.line : CoachStyle.gold,
+                      decoration: BoxDecoration(
+                        color: cream ? null : CoachStyle.nightLine,
+                        gradient: cream
+                            ? const LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [Color(0xFFD4A85E), Color(0xFF9A6D35)],
+                              )
+                            : null,
+                      ),
                     ),
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(10, 10, 12, 10),
+                        padding: const EdgeInsets.fromLTRB(10, 11, 12, 11),
                         child: Row(
                           children: [
-                            SymbolBadge(icon),
+                            SymbolBadge(icon, onDark: true, onGold: cream),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text.rich(
@@ -151,21 +174,31 @@ class HinweisFeld extends StatelessWidget {
                                   children: [
                                     TextSpan(
                                       text: title,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        color: cream
+                                            ? CoachStyle.goldInk
+                                            : const Color(0xFFF6EEDD),
                                       ),
                                     ),
                                     TextSpan(text: ' · $text'),
                                   ],
                                 ),
-                                style: CoachStyle.body.copyWith(fontSize: 13.5),
+                                style: CoachStyle.body.copyWith(
+                                  fontSize: 13.5,
+                                  color: cream
+                                      ? CoachStyle.creamInkSoft
+                                      : CoachStyle.creamSoft,
+                                ),
                               ),
                             ),
-                            const Text(
+                            Text(
                               '›',
                               style: TextStyle(
-                                color: CoachStyle.gold,
-                                fontSize: 20,
+                                color: cream
+                                    ? const Color(0xFF9A6D35)
+                                    : CoachStyle.goldBright,
+                                fontSize: 22,
                               ),
                             ),
                           ],
@@ -191,21 +224,30 @@ class SymbolBadge extends StatelessWidget {
     super.key,
     this.size = 30,
     this.onDark = false,
+    this.onGold = false,
   });
 
   final IconData icon;
   final double size;
   final bool onDark;
 
+  /// On a gold background: dark circle with a gold symbol.
+  final bool onGold;
+
   @override
   Widget build(BuildContext context) => Container(
     width: size,
     height: size,
     decoration: BoxDecoration(
-      color: onDark ? const Color(0xFF3A342B) : CoachStyle.dark,
+      color: onGold ? CoachStyle.goldInk : null,
+      gradient: onGold ? null : CoachStyle.goldGradient,
       shape: BoxShape.circle,
     ),
-    child: Icon(icon, size: size * 0.53, color: CoachStyle.goldSoft),
+    child: Icon(
+      icon,
+      size: size * 0.53,
+      color: onGold ? CoachStyle.goldLight : CoachStyle.goldInk,
+    ),
   );
 }
 
@@ -222,6 +264,7 @@ class FeedCard extends StatelessWidget {
     this.highlight = false,
     this.darkHead = false,
     this.gold = false,
+    this.dark = false,
   });
 
   final String title;
@@ -235,20 +278,29 @@ class FeedCard extends StatelessWidget {
   /// on "Heute".
   final bool gold;
 
+  /// Whole card dark, e.g. "Frag deinen Coach". On the dark "Heute" page
+  /// every card is dark except the ones with a dark head (light contrast).
+  final bool dark;
+
   @override
   Widget build(BuildContext context) {
+    final night = dark || (NightScope.of(context) && !darkHead && !gold);
     final i = icon;
     final head = Row(
       children: [
         if (i != null) ...[
-          SymbolBadge(i, onDark: darkHead),
+          SymbolBadge(i, onDark: darkHead || night, onGold: gold || darkHead),
           const SizedBox(width: 10),
         ],
         Expanded(
           child: Text(
             title,
-            style: darkHead
-                ? CoachStyle.cardTitle.copyWith(color: CoachStyle.goldSoft)
+            style: gold
+                ? CoachStyle.cardTitle.copyWith(color: CoachStyle.goldInk)
+                : darkHead
+                ? CoachStyle.cardTitle.copyWith(color: CoachStyle.goldInk)
+                : night
+                ? CoachStyle.cardTitle.copyWith(color: const Color(0xFFF6EEDD))
                 : CoachStyle.cardTitle,
           ),
         ),
@@ -258,11 +310,17 @@ class FeedCard extends StatelessWidget {
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (darkHead)
+        if (gold)
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            decoration: const BoxDecoration(gradient: CoachStyle.goldGradient),
+            child: head,
+          )
+        else if (darkHead)
           Container(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
             decoration: const BoxDecoration(
-              gradient: CoachStyle.coachGradient,
+              gradient: CoachStyle.creamGradient,
               borderRadius: BorderRadius.vertical(top: Radius.circular(17)),
             ),
             child: head,
@@ -271,50 +329,66 @@ class FeedCard extends StatelessWidget {
           Container(
             margin: const EdgeInsets.fromLTRB(16, 14, 16, 0),
             padding: const EdgeInsets.only(bottom: 10),
-            decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: CoachStyle.line)),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: CoachStyle.hairline)),
             ),
             child: head,
           ),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: children,
+          child: NightScope(
+            night: night,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: children,
+            ),
           ),
         ),
       ],
     );
+    if (gold) {
+      // The key card of an area page: metallic gold edge and gold head.
+      return Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.all(1.5),
+        decoration: BoxDecoration(
+          gradient: CoachStyle.goldGradient,
+          borderRadius: BorderRadius.circular(19.5),
+          boxShadow: CoachStyle.goldGlow,
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: ColoredBox(color: CoachStyle.cardBright, child: content),
+        ),
+      );
+    }
+    if (night) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF221B14), Color(0xFF16120E)],
+          ),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: CoachStyle.hairline),
+          boxShadow: dark ? CoachStyle.darkShadow : null,
+        ),
+        child: content,
+      );
+    }
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: gold ? null : CoachStyle.cardBright,
-        gradient: gold ? CoachStyle.goldCardGradient : null,
+        color: CoachStyle.cardBright,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: highlight || gold
-              ? CoachStyle.goldEdge
-              : CoachStyle.edgeStrong,
+          color: highlight ? CoachStyle.goldEdge : CoachStyle.hairline,
         ),
-        boxShadow: gold ? CoachStyle.goldShadow : CoachStyle.cardShadowStrong,
+        boxShadow: CoachStyle.cardShadowStrong,
       ),
-      child: gold
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(17),
-              child: Stack(
-                children: [
-                  content,
-                  Positioned(
-                    left: 0,
-                    top: 0,
-                    bottom: 0,
-                    width: 4,
-                    child: Container(color: CoachStyle.gold),
-                  ),
-                ],
-              ),
-            )
-          : content,
+      child: content,
     );
   }
 }
@@ -336,6 +410,7 @@ class GroupLabel extends StatelessWidget {
             fontFamily: 'Sora',
             fontSize: 11,
             letterSpacing: 1.6,
+            color: CoachStyle.beigeLabel,
           ),
         ),
         const SizedBox(width: 8),
@@ -344,7 +419,7 @@ class GroupLabel extends StatelessWidget {
             height: 1,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [CoachStyle.goldEdge, Color(0x00E2CFA9)],
+                colors: [Color(0x66D9C7A7), Color(0x00D9C7A7)],
               ),
             ),
           ),
@@ -363,7 +438,10 @@ class HintText extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     text,
-    style: CoachStyle.body.copyWith(color: CoachStyle.inkSoft, fontSize: 13.5),
+    style: CoachStyle.body.copyWith(
+      color: NightScope.of(context) ? CoachStyle.creamSoft : CoachStyle.inkSoft,
+      fontSize: 13.5,
+    ),
   );
 }
 
@@ -377,7 +455,7 @@ class Tag extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
     decoration: BoxDecoration(
-      color: const Color(0xFFF1E6D2),
+      color: CoachStyle.selectedFill,
       borderRadius: BorderRadius.circular(99),
     ),
     child: Text(
@@ -430,10 +508,7 @@ class AreaChart extends StatelessWidget {
           child: CustomPaint(painter: _BaselinePainter(), size: Size.infinite),
         ),
         const SizedBox(height: 8),
-        const HintText(
-          'Dein Verlauf erscheint hier, sobald die KI deine Check-ins '
-          'bewertet.',
-        ),
+        const HintText('Erscheint, sobald der Coach deine Check-ins bewertet.'),
       ],
     );
   }
@@ -501,10 +576,13 @@ class _AskCoachCardState extends State<AskCoachCard> {
     return FeedCard(
       title: widget.title,
       icon: Icons.chat_bubble_outline,
-      darkHead: true,
+      dark: true,
       children: [
         for (final f in widget.today) ...[
-          Text(f.text, style: CoachStyle.body),
+          Text(
+            f.text,
+            style: CoachStyle.body.copyWith(color: CoachStyle.cream),
+          ),
           const SizedBox(height: 8),
           CoachNote(text: f.antwort.isNotEmpty ? f.antwort : aiPending),
           const SizedBox(height: 14),
@@ -513,16 +591,16 @@ class _AskCoachCardState extends State<AskCoachCard> {
           controller: _controller,
           minLines: 2,
           maxLines: 5,
-          style: CoachStyle.body,
-          cursorColor: CoachStyle.gold,
+          style: CoachStyle.body.copyWith(color: CoachStyle.cream),
+          cursorColor: CoachStyle.goldBright,
           decoration: InputDecoration(
             hintText: widget.hint,
-            hintStyle: CoachStyle.body.copyWith(color: CoachStyle.inkSoft),
+            hintStyle: CoachStyle.body.copyWith(color: const Color(0xFF8F8270)),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: const Color(0x0DFFFFFF),
             contentPadding: const EdgeInsets.all(12),
-            enabledBorder: _border(CoachStyle.line),
-            focusedBorder: _border(CoachStyle.gold),
+            enabledBorder: _border(CoachStyle.nightLineStrong),
+            focusedBorder: _border(CoachStyle.goldBright),
           ),
         ),
         const SizedBox(height: 10),
@@ -530,6 +608,7 @@ class _AskCoachCardState extends State<AskCoachCard> {
           listenable: _controller,
           builder: (context, _) => MainButton(
             label: 'Senden',
+            gold: true,
             onPressed: _controller.text.trim().isEmpty || _sending
                 ? null
                 : _send,

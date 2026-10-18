@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'checkin/checkin.dart';
 import 'checkin/checkin_evaluator.dart';
 import 'checkin/checkin_flow.dart';
+import 'coach/remote_coach.dart';
 import 'data/diary_store.dart';
 import 'data/profile_store.dart';
 import 'data/user_profile.dart';
@@ -17,11 +18,17 @@ import 'ui/coach_style.dart';
 import 'ui/logo.dart';
 
 void main() {
+  final coach = coachUrl.isEmpty
+      ? null
+      : RemoteCoach(baseUrl: coachUrl, token: coachToken);
   runApp(
     CoachApp(
       store: LocalProfileStore(),
       diary: LocalDiaryStore(),
       feed: LocalFeedStore(),
+      evaluator: coach ?? const NoEvaluator(),
+      checkInEvaluator: coach ?? const NoCheckInEvaluator(),
+      feedCoach: coach ?? const NoFeedCoach(),
       splash: const Duration(milliseconds: 1500),
     ),
   );
@@ -59,8 +66,11 @@ class CoachApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: CoachStyle.gold,
+          brightness: Brightness.dark,
           primary: CoachStyle.gold,
+          onPrimary: CoachStyle.goldInk,
           surface: CoachStyle.card,
+          onSurface: CoachStyle.ink,
         ),
         scaffoldBackgroundColor: CoachStyle.page,
         useMaterial3: true,

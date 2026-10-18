@@ -3,7 +3,7 @@ title: Onboarding-Fragebogen
 tags: [umsetzung, onboarding, mvp]
 aliases: [Onboarding, Einstiegs-Fragebogen]
 erstellt: 2026-10-10
-aktualisiert: 2026-10-13
+aktualisiert: 2026-10-18
 status: programmiert, KI-Auswertung fehlt noch
 ---
 
@@ -12,6 +12,39 @@ status: programmiert, KI-Auswertung fehlt noch
 Zweiter Baustein im [[MVP-Fortschritt]]. Grundidee aus [[Kernmechanik#1. Onboarding]] und [[App-Gesamtübersicht (Original)]]: Ein Einstiegs-Fragebogen, der die App direkt personalisiert (Ziel, aktuelles Level, Ausgangssituation). Die Antworten landen beim [[Nutzer]].
 
 Alles hier haben Phillip und Claude am 2026-10-11 gemeinsam festgelegt, Frage für Frage. Abgenommenes Mockup: [Onboarding-Entwurf](https://claude.ai/artifact/JdmD7NVMayHub5fh3MN9Xn).
+
+## Überarbeitung 2026-10-18 (in Arbeit)
+
+Phillip hat das Onboarding mit dem echten Coach getestet: Bis zum Feed hat er rund 6 Minuten geschrieben. Die Fragen sind zu lang und zu komplex. Beschluss (Phillip, 2026-10-18): **Variante B ausprobieren.** Pro Frage 3–4 Antworten zum Antippen (Mehrfachauswahl möglich) plus ein freiwilliges Feld für eigene Worte. Die neuen Fragen werden gerade gemeinsam Frage für Frage festgelegt. Danach kommt der [[Täglicher Check-in]] dran, der für den täglichen Gebrauch ebenfalls zu lang ist.
+
+### Neue Fragen (beschlossen)
+
+1. **Ziel** (Phillip, 2026-10-18): „Was ist dein Ziel, und was willst du dafür vor allem verändern?“
+   - Antippen (mehrere möglich): Fitter und stärker werden · Mehr Energie im Alltag · Mental stärker werden und Dinge durchziehen · Mich wohler in meiner Haut fühlen
+   - Feld „Dein Ziel in einem Satz“ (Beispiel im Feld: „Bis zum Sommer 8 kg leichter und wieder Spaß am Sport“). **Pflicht**, weil der Coach das Ziel ständig braucht. Alle anderen Felder sind freiwillig.
+2. **Motivation** (Phillip, 2026-10-18): „Warum hast du dich gerade jetzt entschieden, das anzugehen?“
+   - Antippen (mehrere möglich): Ich bin unzufrieden damit, wie es gerade ist · Ich will lange gesund und fit bleiben · Ich will ein Vorbild sein, z. B. für Familie oder Freunde · Ich will endlich mein Potenzial ausschöpfen
+   - Freiwilliges Feld „Was ist dein wahrer Grund? Ein Satz reicht.“
+3. **Stand** (Phillip, 2026-10-18): „Wie würde dich jemand beschreiben, der dich gut kennt?“
+   - Antippen (mehrere möglich): Trainiert regelmäßig, kommt aber nicht weiter · Fängt oft an, bleibt aber nicht dran · Macht gerade kaum Sport · Hat in letzter Zeit schon einiges verändert
+   - Freiwilliges Feld „Und was würde diese Person als deine Stärke nennen?“ (Phillips Idee: Stärken, mit denen der Coach arbeiten kann)
+4. **Training** (Phillip, 2026-10-18): „Welche Probleme hast du gerade bei Training und Sport?“
+   - Antippen (mehrere möglich): Mein Plan passt nicht richtig zu mir · Ich mache keine Fortschritte mehr · Ich weiß nicht, wie viel Pause ich brauche · Ich bleibe nicht dran
+   - Freiwilliges Feld „Und was fällt dir dabei leicht?“ (Muster von Phillip: Problem + was leicht fällt)
+5. **Ernährung** (Phillip, 2026-10-18): „Welche Probleme hast du gerade mit deiner Ernährung?“
+   - Antippen (mehrere möglich): Heißhunger, vor allem abends · Keine Struktur, ich esse unregelmäßig · Ich weiß nicht, was mir wirklich guttut · Oft unterwegs oder Fast Food
+   - Freiwilliges Feld „Was weißt du schon, oder was hast du an deiner Ernährung bereits angepasst?“ (Phillips Formulierung)
+6. **Schlaf & Energie** (Phillip, 2026-10-18): „Welche Probleme hast du gerade mit Schlaf und Energie?“
+   - Antippen (mehrere möglich): Ich schlafe schlecht ein · Ich wache nachts oft auf · Ich bin morgens nicht erholt · Ich habe tagsüber Energietiefs
+   - Freiwilliges Feld „Und wann fühlst du dich richtig fit?“
+
+Alle 6 Fragen stehen (2026-10-18). Final geglättet (auf Phillips Wunsch):
+- Frage 3: „diese Person“ statt „er“, damit es für alle passt.
+- Fragen 4–6: zusätzliche Antwort „Gerade keine größeren Probleme“, damit niemand etwas Falsches antippen muss.
+- Weiter geht es bei Frage 1 nur mit dem Ziel-Satz; bei 2–6 reicht ein Antippen oder ein Satz.
+- Gespeichert wird je Frage ein Text: angetippte Antworten, dann Feldname und eigener Satz. So liest ihn auch der Coach.
+
+Stand: in der Test-App (groundset-vorschau.pzschernack4.workers.dev), noch nicht fest in der App.
 
 ## Prinzip
 
