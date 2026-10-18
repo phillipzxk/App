@@ -124,31 +124,19 @@ class HinweisFeld extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Open fields are cream so they stand out on the dark page (Phillip
+    // 2026-10-18); done fields go back to calm dark.
     final radius = BorderRadius.circular(14);
-    final night = NightScope.of(context);
+    final cream = !done;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.only(bottom: 10),
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: radius,
-          color: night ? CoachStyle.nightCard : null,
-          gradient: night
-              ? null
-              : done
-              ? CoachStyle.cardGradient
-              : CoachStyle.reminderGradient,
-          border: Border.all(
-            color: night
-                ? CoachStyle.hairline
-                : done
-                ? CoachStyle.edge
-                : CoachStyle.goldEdge,
-          ),
-          boxShadow: night
-              ? null
-              : done
-              ? CoachStyle.cardShadow
-              : CoachStyle.goldShadow,
+          color: cream ? null : CoachStyle.nightCard,
+          gradient: cream ? CoachStyle.creamGradient : null,
+          border: cream ? null : Border.all(color: CoachStyle.hairline),
+          boxShadow: cream ? CoachStyle.cardShadow : null,
         ),
         child: ClipRRect(
           borderRadius: radius,
@@ -163,24 +151,22 @@ class HinweisFeld extends StatelessWidget {
                     Container(
                       width: 4,
                       decoration: BoxDecoration(
-                        color: done
-                            ? (night ? CoachStyle.nightLine : CoachStyle.line)
-                            : (night ? null : CoachStyle.gold),
-                        gradient: !done && night
+                        color: cream ? null : CoachStyle.nightLine,
+                        gradient: cream
                             ? const LinearGradient(
                                 begin: Alignment.topCenter,
                                 end: Alignment.bottomCenter,
-                                colors: [Color(0xFFF5DFAE), Color(0xFF9A6D35)],
+                                colors: [Color(0xFFD4A85E), Color(0xFF9A6D35)],
                               )
                             : null,
                       ),
                     ),
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(10, 10, 12, 10),
+                        padding: const EdgeInsets.fromLTRB(10, 11, 12, 11),
                         child: Row(
                           children: [
-                            SymbolBadge(icon, onDark: night),
+                            SymbolBadge(icon, onDark: true, onGold: cream),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text.rich(
@@ -189,10 +175,10 @@ class HinweisFeld extends StatelessWidget {
                                     TextSpan(
                                       text: title,
                                       style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        color: night
-                                            ? const Color(0xFFF6EEDD)
-                                            : null,
+                                        fontWeight: FontWeight.w700,
+                                        color: cream
+                                            ? CoachStyle.goldInk
+                                            : const Color(0xFFF6EEDD),
                                       ),
                                     ),
                                     TextSpan(text: ' · $text'),
@@ -200,17 +186,19 @@ class HinweisFeld extends StatelessWidget {
                                 ),
                                 style: CoachStyle.body.copyWith(
                                   fontSize: 13.5,
-                                  color: night ? CoachStyle.creamSoft : null,
+                                  color: cream
+                                      ? CoachStyle.creamInkSoft
+                                      : CoachStyle.creamSoft,
                                 ),
                               ),
                             ),
                             Text(
                               '›',
                               style: TextStyle(
-                                color: night
-                                    ? CoachStyle.goldBright
-                                    : CoachStyle.gold,
-                                fontSize: 20,
+                                color: cream
+                                    ? const Color(0xFF9A6D35)
+                                    : CoachStyle.goldBright,
+                                fontSize: 22,
                               ),
                             ),
                           ],
@@ -301,7 +289,7 @@ class FeedCard extends StatelessWidget {
     final head = Row(
       children: [
         if (i != null) ...[
-          SymbolBadge(i, onDark: darkHead || night, onGold: gold),
+          SymbolBadge(i, onDark: darkHead || night, onGold: gold || darkHead),
           const SizedBox(width: 10),
         ],
         Expanded(
@@ -310,7 +298,7 @@ class FeedCard extends StatelessWidget {
             style: gold
                 ? CoachStyle.cardTitle.copyWith(color: CoachStyle.goldInk)
                 : darkHead
-                ? CoachStyle.cardTitle.copyWith(color: CoachStyle.goldBright)
+                ? CoachStyle.cardTitle.copyWith(color: CoachStyle.goldInk)
                 : night
                 ? CoachStyle.cardTitle.copyWith(color: const Color(0xFFF6EEDD))
                 : CoachStyle.cardTitle,
@@ -332,7 +320,7 @@ class FeedCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
             decoration: const BoxDecoration(
-              gradient: CoachStyle.coachGradient,
+              gradient: CoachStyle.creamGradient,
               borderRadius: BorderRadius.vertical(top: Radius.circular(17)),
             ),
             child: head,

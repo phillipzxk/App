@@ -178,6 +178,16 @@ abstract final class CoachStyle {
     stops: [0, 0.6, 1],
   );
 
+  /// Light cream for fields that should stand out on the dark page.
+  static const creamGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFF7F0E3), Color(0xFFE8DAC0)],
+  );
+
+  /// Softer dark brown text on cream.
+  static const creamInkSoft = Color(0xFF6B5A44);
+
   static const goldGlow = [
     BoxShadow(color: Color(0x59D6AA5E), blurRadius: 24, offset: Offset(0, 8)),
   ];
