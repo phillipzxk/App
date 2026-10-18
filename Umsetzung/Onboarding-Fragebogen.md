@@ -22,6 +22,9 @@ Phillip hat das Onboarding mit dem echten Coach getestet: Bis zum Feed hat er ru
 1. **Ziel** (Phillip, 2026-10-18): „Was ist dein Ziel, und was willst du dafür vor allem verändern?“
    - Antippen (mehrere möglich): Fitter und stärker werden · Mehr Energie im Alltag · Mental stärker werden und Dinge durchziehen · Mich wohler in meiner Haut fühlen
    - Feld „Dein Ziel in einem Satz“ (z. B. „Bis Sommer 8 kg weniger und wieder Spaß am Sport“). **Pflicht**, weil der Coach das Ziel ständig braucht. Alle anderen Felder sind freiwillig.
+2. **Motivation** (Phillip, 2026-10-18): „Warum hast du dich gerade jetzt entschieden, das anzugehen?“
+   - Antippen (mehrere möglich): Ich bin unzufrieden damit, wie es gerade ist · Ich will lange gesund und fit bleiben · Ich will ein Vorbild sein (z. B. für Familie oder Freunde) · Ich will endlich mein Potenzial ausschöpfen
+   - Freiwilliges Feld „Was ist dein wahrer Grund? Ein Satz reicht.“
 
 ## Prinzip
 
