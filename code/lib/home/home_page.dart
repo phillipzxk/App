@@ -113,7 +113,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> Function(String) _ask(Bereich b) => (text) async {
-    final antwort = await widget.coach.answer(widget.profile, b, text);
+    final antwort = await widget.coach.answer(
+      widget.profile,
+      b,
+      text,
+      context: _context(b),
+    );
     await widget.feed.addFrage(
       CoachFrage(
         datum: widget.clock(),
@@ -151,6 +156,37 @@ class _HomePageState extends State<HomePage> {
       await widget.store.addWeight(WeightEntry(widget.clock(), kg));
     }
     await _reload();
+  }
+
+  /// What the user set up for [b], so the coach can refer to it.
+  String _context(Bereich b) {
+    switch (b) {
+      case Bereich.training:
+        if (_plan.isEmpty) return '';
+        const days = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+        return [
+          'Trainingsplan:',
+          for (var i = 0; i < 7; i++)
+            '${days[i]}: ${_plan.tage[i].trim().isEmpty ? 'frei' : _plan.tage[i].trim()}',
+          'Heute ist ${days[widget.clock().weekday - 1]}.',
+        ].join('\n');
+      case Bereich.ernaehrung:
+        final ziel = _kcalZiel;
+        if (ziel == null) return '';
+        return 'kcal-Ziel heute: $ziel kcal '
+            '(nur als Orientierung, nicht zum Zählen). '
+            'Gewicht zuletzt: ${_weights.last.kg} kg.';
+      case Bereich.schlaf:
+        final lines = [
+          if (_routine.isNotEmpty) 'Abendroutine:',
+          for (final s in _routine) '${s.zeit} ${s.was}',
+          for (final e in _sleep.reversed.take(7))
+            'Schlaf ${dayKey(e.datum)}: ${e.stunden} Stunden',
+        ];
+        return lines.join('\n');
+      case Bereich.mindset:
+        return '';
+    }
   }
 
   int? get _kcalZiel {
