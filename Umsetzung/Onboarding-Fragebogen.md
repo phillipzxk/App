@@ -21,13 +21,13 @@ Phillip hat das Onboarding mit dem echten Coach getestet: Bis zum Feed hat er ru
 
 1. **Ziel** (Phillip, 2026-10-18): „Was ist dein Ziel, und was willst du dafür vor allem verändern?“
    - Antippen (mehrere möglich): Fitter und stärker werden · Mehr Energie im Alltag · Mental stärker werden und Dinge durchziehen · Mich wohler in meiner Haut fühlen
-   - Feld „Dein Ziel in einem Satz“ (z. B. „Bis Sommer 8 kg weniger und wieder Spaß am Sport“). **Pflicht**, weil der Coach das Ziel ständig braucht. Alle anderen Felder sind freiwillig.
+   - Feld „Dein Ziel in einem Satz“ (Beispiel im Feld: „Bis zum Sommer 8 kg leichter und wieder Spaß am Sport“). **Pflicht**, weil der Coach das Ziel ständig braucht. Alle anderen Felder sind freiwillig.
 2. **Motivation** (Phillip, 2026-10-18): „Warum hast du dich gerade jetzt entschieden, das anzugehen?“
-   - Antippen (mehrere möglich): Ich bin unzufrieden damit, wie es gerade ist · Ich will lange gesund und fit bleiben · Ich will ein Vorbild sein (z. B. für Familie oder Freunde) · Ich will endlich mein Potenzial ausschöpfen
+   - Antippen (mehrere möglich): Ich bin unzufrieden damit, wie es gerade ist · Ich will lange gesund und fit bleiben · Ich will ein Vorbild sein, z. B. für Familie oder Freunde · Ich will endlich mein Potenzial ausschöpfen
    - Freiwilliges Feld „Was ist dein wahrer Grund? Ein Satz reicht.“
 3. **Stand** (Phillip, 2026-10-18): „Wie würde dich jemand beschreiben, der dich gut kennt?“
    - Antippen (mehrere möglich): Trainiert regelmäßig, kommt aber nicht weiter · Fängt oft an, bleibt aber nicht dran · Macht gerade kaum Sport · Hat in letzter Zeit schon einiges verändert
-   - Freiwilliges Feld „Und was würde er als deine Stärke nennen?“ (Phillips Idee: Stärken, mit denen der Coach arbeiten kann)
+   - Freiwilliges Feld „Und was würde diese Person als deine Stärke nennen?“ (Phillips Idee: Stärken, mit denen der Coach arbeiten kann)
 4. **Training** (Phillip, 2026-10-18): „Welche Probleme hast du gerade bei Training und Sport?“
    - Antippen (mehrere möglich): Mein Plan passt nicht richtig zu mir · Ich mache keine Fortschritte mehr · Ich weiß nicht, wie viel Pause ich brauche · Ich bleibe nicht dran
    - Freiwilliges Feld „Und was fällt dir dabei leicht?“ (Muster von Phillip: Problem + was leicht fällt)
@@ -38,7 +38,13 @@ Phillip hat das Onboarding mit dem echten Coach getestet: Bis zum Feed hat er ru
    - Antippen (mehrere möglich): Ich schlafe schlecht ein · Ich wache nachts oft auf · Ich bin morgens nicht erholt · Ich habe tagsüber Energietiefs
    - Freiwilliges Feld „Und wann fühlst du dich richtig fit?“
 
-Alle 6 Fragen stehen (2026-10-18). Nächster Schritt: zeigen, dann nach Phillips Ja einbauen.
+Alle 6 Fragen stehen (2026-10-18). Final geglättet (auf Phillips Wunsch):
+- Frage 3: „diese Person“ statt „er“, damit es für alle passt.
+- Fragen 4–6: zusätzliche Antwort „Gerade keine größeren Probleme“, damit niemand etwas Falsches antippen muss.
+- Weiter geht es bei Frage 1 nur mit dem Ziel-Satz; bei 2–6 reicht ein Antippen oder ein Satz.
+- Gespeichert wird je Frage ein Text: angetippte Antworten, dann Feldname und eigener Satz. So liest ihn auch der Coach.
+
+Stand: in der Test-App (groundset-vorschau.pzschernack4.workers.dev), noch nicht fest in der App.
 
 ## Prinzip
 

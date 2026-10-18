@@ -1,6 +1,7 @@
 import 'package:coach_app/data/user_profile.dart';
 import 'package:coach_app/main.dart';
 import 'package:coach_app/onboarding/onboarding_evaluator.dart';
+import 'package:coach_app/onboarding/onboarding_questions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -22,8 +23,11 @@ Future<void> enterName(WidgetTester tester, [String name = 'Max']) async {
   await tester.pumpAndSettle();
 }
 
+/// Question 1: taps the first answer and writes the goal; questions 2-6:
+/// only write a text (taps alone are tested separately).
 Future<void> answerAll(WidgetTester tester) async {
   await enterName(tester);
+  await tester.tap(find.text('Fitter und stärker werden'));
   for (var i = 1; i <= 6; i++) {
     await tester.enterText(find.byType(TextField), 'Antwort $i');
     await tester.pump();
@@ -60,12 +64,13 @@ void main() {
         p.schlafEnergie,
       ],
       [
-        'Antwort 1',
-        'Antwort 2',
-        'Antwort 3',
-        'Antwort 4',
-        'Antwort 5',
-        'Antwort 6',
+        'Fitter und stärker werden\nDein Ziel in einem Satz: Antwort 1',
+        'Was ist dein wahrer Grund?: Antwort 2',
+        'Und was würde diese Person als deine Stärke nennen?: Antwort 3',
+        'Und was fällt dir dabei leicht?: Antwort 4',
+        'Was weißt du schon, oder was hast du an deiner Ernährung bereits '
+            'angepasst?: Antwort 5',
+        'Und wann fühlst du dich richtig fit?: Antwort 6',
       ],
     );
     expect(p.zusammenfassung, isEmpty);
@@ -109,6 +114,46 @@ void main() {
     await tester.tap(find.text('Weiter'));
     await tester.pumpAndSettle();
     expect(find.text('Wie heißt du?'), findsOneWidget);
+  });
+
+  testWidgets('the goal is required, the other fields are not', (tester) async {
+    final store = MemoryProfileStore();
+    await tester.pumpWidget(
+      CoachApp(
+        store: store,
+        diary: MemoryDiaryStore(),
+        feed: MemoryFeedStore(),
+        clock: fixedClock,
+      ),
+    );
+    await tester.pumpAndSettle();
+    await enterName(tester);
+
+    // Tapping alone is not enough on question 1.
+    await tester.tap(find.text('Mehr Energie im Alltag'));
+    await tester.pump();
+    await tester.tap(find.text('Weiter'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('FRAGE 1 VON 6'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'Fit bleiben');
+    await tester.pump();
+    await tester.tap(find.text('Weiter'));
+    await tester.pumpAndSettle();
+
+    // Questions 2-6: one tap is enough.
+    for (var i = 2; i <= 6; i++) {
+      final q = onboardingQuestions[i - 1];
+      await tester.tap(find.text(q.options.first));
+      await tester.pump();
+      await tester.tap(find.text(i < 6 ? 'Weiter' : 'Fertig'));
+      await tester.pumpAndSettle();
+    }
+    expect(
+      store.profile.ziel,
+      'Mehr Energie im Alltag\nDein Ziel in einem Satz: Fit bleiben',
+    );
+    expect(store.profile.schlafEnergie, 'Ich schlafe schlecht ein');
   });
 
   testWidgets('empty answer cannot continue', (tester) async {
