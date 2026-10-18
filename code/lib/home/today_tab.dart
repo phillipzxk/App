@@ -333,13 +333,14 @@ class _AreaTile extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        color: CoachStyle.nightCard,
+        gradient: CoachStyle.creamGradient,
+        boxShadow: CoachStyle.cardShadow,
       ),
       child: Material(
         type: MaterialType.transparency,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
-          side: const BorderSide(color: CoachStyle.hairline),
+          side: BorderSide.none,
         ),
         child: InkWell(
           key: ValueKey('bereich-${bereich.name}'),
@@ -357,13 +358,13 @@ class _AreaTile extends StatelessWidget {
                       width: 24,
                       height: 24,
                       decoration: const BoxDecoration(
-                        gradient: CoachStyle.goldGradient,
+                        color: CoachStyle.goldInk,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         _icons[bereich],
                         size: 14,
-                        color: CoachStyle.goldInk,
+                        color: CoachStyle.goldLight,
                       ),
                     ),
                     const SizedBox(width: 7),
@@ -373,14 +374,14 @@ class _AreaTile extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: CoachStyle.cardTitle.copyWith(
                           fontSize: 13,
-                          color: const Color(0xFFF6EEDD),
+                          color: CoachStyle.goldInk,
                         ),
                       ),
                     ),
                     Text(
                       '–',
                       style: CoachStyle.cardTitle.copyWith(
-                        color: CoachStyle.goldBright,
+                        color: const Color(0xFF7A5528),
                       ),
                     ),
                   ],
@@ -394,7 +395,7 @@ class _AreaTile extends StatelessWidget {
                           height: h,
                           margin: const EdgeInsets.symmetric(horizontal: 1.5),
                           decoration: BoxDecoration(
-                            color: CoachStyle.nightLineStrong,
+                            color: const Color(0x335A4A36),
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -406,7 +407,7 @@ class _AreaTile extends StatelessWidget {
                   style: CoachStyle.label.copyWith(
                     letterSpacing: 0,
                     fontSize: 11,
-                    color: CoachStyle.creamSoft,
+                    color: CoachStyle.creamInkSoft,
                   ),
                 ),
               ],

@@ -61,7 +61,7 @@ Phillip wollte es „mehr mit Schwarz, Braun und goldenen Verläufen“. Ein ers
 - **Gold-Verlauf:** große Überschriften, Symbole, die Karte „Deine Basis“ (goldener Kopf und Rand), gewählte Antworten im [[Täglicher Check-in]], alle Haupt-Knöpfe.
 - Coach-Karte und „Frag deinen Coach“ haben einen goldenen Verlaufsrand bzw. goldenen Senden-Knopf.
 - Auch Onboarding und Unterseiten sind dunkel.
-- Creme als Kontrast (18.10.2026, Phillip: Felder auf „Heute“ hoben sich nicht genug ab): Offene Hinweis-Felder (Supplements, Dein zukünftiges Ich) sind hell-creme mit dunkler Schrift und goldenem Rand links; erledigte werden wieder ruhig dunkel. „Dein Tag“ hat einen creme Kopf.
+- Creme als Kontrast (18.10.2026, Phillip: Felder auf „Heute“ hoben sich nicht genug ab): Offene Hinweis-Felder (Supplements, Dein zukünftiges Ich) und die Bereichs-Kacheln sind gedämpft sandfarben (nicht grell) mit dunkler Schrift; Hinweis-Felder haben links einen goldenen Rand und werden erledigt wieder ruhig dunkel. „Dein Tag“ hat einen sandfarbenen Kopf. Phillip: „nicht ganz so hell, soll sich nicht extrem abheben, aber den hellen modernen Kontrast reinbringen“.
 - Aufgeräumt (18.10.2026, Phillip: „alles Überflüssige entfernen, zusammenfassen“): Erklär-Texte auf einen kurzen Satz gekürzt oder gestrichen, Platzhalter heißen nur noch „Folgt bald.“; „Tipp des Tages“ ist ausgeblendet, bis der Coach ihn liefert. Auf „Heute“ stehen „Tage am Stück“ und „Fokus der Woche“ zusammen in einer kleinen Karte.
 - Die Tab-Leiste schwebt abgerundet über dem Inhalt; der offene Tab ist golden mit kleinem Gold-Strich darüber.
 - Entwurf: https://claude.ai/artifact/NWJnSZaEC6HZjMTyWD89RU

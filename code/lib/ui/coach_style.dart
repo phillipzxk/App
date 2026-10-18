@@ -182,11 +182,11 @@ abstract final class CoachStyle {
   static const creamGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFFF7F0E3), Color(0xFFE8DAC0)],
+    colors: [Color(0xFFD8CAB0), Color(0xFFC4B293)],
   );
 
   /// Softer dark brown text on cream.
-  static const creamInkSoft = Color(0xFF6B5A44);
+  static const creamInkSoft = Color(0xFF5A4A36);
 
   static const goldGlow = [
     BoxShadow(color: Color(0x59D6AA5E), blurRadius: 24, offset: Offset(0, 8)),
