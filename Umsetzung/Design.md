@@ -65,7 +65,7 @@ Phillip wollte es „mehr mit Schwarz, Braun und goldenen Verläufen“. Ein ers
 - Aufgeräumt (18.10.2026, Phillip: „alles Überflüssige entfernen, zusammenfassen“): Erklär-Texte auf einen kurzen Satz gekürzt oder gestrichen, Platzhalter heißen nur noch „Folgt bald.“; „Tipp des Tages“ ist ausgeblendet, bis der Coach ihn liefert. Auf „Heute“ stehen „Tage am Stück“ und „Fokus der Woche“ zusammen in einer kleinen Karte.
 - Die Tab-Leiste schwebt abgerundet über dem Inhalt; der offene Tab ist golden mit kleinem Gold-Strich darüber.
 - Entwurf: https://claude.ai/artifact/NWJnSZaEC6HZjMTyWD89RU
-- Phillip hat am 18.10.2026 Ja gesagt. Der Stil ist in der Test-Vorschau, aber noch nicht fest in der App.
+- Phillip hat am 18.10.2026 Ja gesagt. Fest in der App seit 18.10.2026 (PR #39).
 
 Dieser Stil ersetzt die helle Variante „Neu“ (Sandweiß) von unten.
 

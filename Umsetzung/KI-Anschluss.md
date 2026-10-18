@@ -56,4 +56,9 @@ Komplett kostenlos geht es nur mit einem freien KI-Modell direkt bei Cloudflare 
 
 Statt Cloudflare ginge auch Firebase von Google. Das braucht aber zusätzlich den Bezahl-Tarif „Blaze“ mit Karte und ist umständlicher einzurichten. Für den Anfang ist Cloudflare einfacher.
 
+## Stand
+
+- Seit 18.10.2026 live: Der Coach antwortet über den Cloudflare-Worker „groundset-coach“ mit Claude Haiku. Der Anthropic-Schlüssel liegt nur als Secret im Worker, nie in der App oder im Chat.
+- Fest in der App seit 18.10.2026 (PR #39). Kosten: unter 0,1 Cent pro Antwort.
+
 Siehe auch [[Coach-Stil]] und [[Design]].
