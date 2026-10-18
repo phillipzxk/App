@@ -17,6 +17,12 @@ Alles hier haben Phillip und Claude am 2026-10-11 gemeinsam festgelegt, Frage f�
 
 Phillip hat das Onboarding mit dem echten Coach getestet: Bis zum Feed hat er rund 6 Minuten geschrieben. Die Fragen sind zu lang und zu komplex. Beschluss (Phillip, 2026-10-18): **Variante B ausprobieren.** Pro Frage 3–4 Antworten zum Antippen (Mehrfachauswahl möglich) plus ein freiwilliges Feld für eigene Worte. Die neuen Fragen werden gerade gemeinsam Frage für Frage festgelegt. Danach kommt der [[Täglicher Check-in]] dran, der für den täglichen Gebrauch ebenfalls zu lang ist.
 
+### Neue Fragen (beschlossen)
+
+1. **Ziel** (Phillip, 2026-10-18): „Was ist dein Ziel, und was willst du dafür vor allem verändern?“
+   - Antippen (mehrere möglich): Fitter und stärker werden · Mehr Energie im Alltag · Mental stärker werden und Dinge durchziehen · Mich wohler in meiner Haut fühlen
+   - Feld „Dein Ziel in einem Satz“ (z. B. „Bis Sommer 8 kg weniger und wieder Spaß am Sport“). **Pflicht**, weil der Coach das Ziel ständig braucht. Alle anderen Felder sind freiwillig.
+
 ## Prinzip
 
 1. **Antworten in eigenen Worten.** Freitext, keine Antwortknöpfe. Damit hebt sich die App direkt ab und passt sich vom ersten Moment an genau an den Nutzer an.
