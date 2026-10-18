@@ -66,8 +66,7 @@ class SupplementCard extends StatelessWidget {
   }
 
   static const _arzt = HintText(
-    'Du legst selbst fest, was du nimmst. Bei Fragen zu Mitteln oder '
-    'Mengen: frag deinen Arzt.',
+    'Fragen zu Mitteln oder Mengen: frag deinen Arzt.',
   );
 
   @override
@@ -78,10 +77,7 @@ class SupplementCard extends StatelessWidget {
         icon: Icons.medication_outlined,
         gold: true,
         children: [
-          const HintText(
-            'Trag ein, was du wann nimmst. Die App erinnert dich daran, und '
-            'du hakst es hier ab.',
-          ),
+          const HintText('Was nimmst du wann?'),
           const SizedBox(height: 12),
           GhostButton(
             key: const ValueKey('supp-festlegen'),

@@ -191,12 +191,7 @@ class _FutureMePageState extends State<FutureMePage> {
           const FeedCard(
             title: 'Dein erstes Foto',
             icon: Icons.photo_camera_outlined,
-            children: [
-              HintText(
-                'An deinem Fototag machst du hier dein erstes Foto. Ab dann '
-                'steht es jede Woche neben dem neuesten.',
-              ),
-            ],
+            children: [HintText('Kommt an deinem ersten Fototag.')],
           )
         else
           VergleichKarte(
@@ -218,11 +213,6 @@ class _FutureMePageState extends State<FutureMePage> {
             ),
             children: [
               _WerteTabelle(namen: e.werte, start: first, heute: last),
-              const SizedBox(height: 8),
-              const HintText(
-                'Trägst du jede Woche mit dem Foto ein. Später füllt die KI '
-                'sie aus deinen Check-ins vor.',
-              ),
             ],
           ),
         if (wochen.isNotEmpty)
@@ -268,10 +258,7 @@ class _FutureMePageState extends State<FutureMePage> {
             const SizedBox(height: 6),
             GhostButton(label: 'Posen und Werte ändern', onPressed: _edit),
             const SizedBox(height: 10),
-            const HintText(
-              'Deine Fotos bleiben nur auf deinem Handy. Gleiche Pose, '
-              'gleiches Licht.',
-            ),
+            const HintText('Fotos bleiben nur auf deinem Handy.'),
           ],
         ),
         _KitKarte(kit: _kit, onCode: _kitCode),
@@ -296,12 +283,7 @@ class _KitKarte extends StatelessWidget {
       trailing: kit ? const Tag('aktiv') : null,
       children: [
         if (kit)
-          const HintText(
-            'Die Kamera erkennt deine Matte von selbst und richtet jedes Foto '
-            'aus. Vorne, Seite und hinten sind vorausgewählt, einzelne kannst '
-            'du unter „Posen und Werte ändern“ entfernen. Erkennen und '
-            'Ausrichten laufen in der Handy-Version.',
-          )
+          const HintText('Erkennt deine Matte und richtet jedes Foto aus.')
         else ...[
           GhostButton(
             key: const ValueKey('kit-code'),
@@ -309,10 +291,7 @@ class _KitKarte extends StatelessWidget {
             onPressed: onCode,
           ),
           const SizedBox(height: 8),
-          const HintText(
-            'Schaltet die Kit-Funktionen dauerhaft frei, dazu einen Monat '
-            'Groundset gratis.',
-          ),
+          const HintText('Plus einen Monat Groundset gratis.'),
         ],
       ],
     );
@@ -343,10 +322,7 @@ class _Leer extends StatelessWidget {
           title: 'Fototag und Posen',
           icon: Icons.photo_camera_outlined,
           children: [
-            const HintText(
-              'Leg einmal deinen Fototag und deine Posen fest. Dann siehst du '
-              'jede Woche, wie du dich veränderst.',
-            ),
+            const HintText('Fototag und Posen einmal festlegen.'),
             const SizedBox(height: 12),
             GhostButton(label: 'Einrichten', onPressed: onSetup),
           ],

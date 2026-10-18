@@ -6,7 +6,7 @@ import '../ui/coach_widgets.dart';
 import '../ui/logo.dart';
 
 /// Shown wherever the AI will write something once it is connected.
-const aiPending = 'Kommt, sobald die KI angeschlossen ist.';
+const aiPending = 'Folgt bald.';
 
 /// Head of a page in the Main Feed: fine golden rings in the corner, like
 /// tree rings, and a gold ground line as in the logo. On "Heute" it also
@@ -520,10 +520,7 @@ class AreaChart extends StatelessWidget {
           child: CustomPaint(painter: _BaselinePainter(), size: Size.infinite),
         ),
         const SizedBox(height: 8),
-        const HintText(
-          'Dein Verlauf erscheint hier, sobald die KI deine Check-ins '
-          'bewertet.',
-        ),
+        const HintText('Erscheint, sobald der Coach deine Check-ins bewertet.'),
       ],
     );
   }

@@ -183,7 +183,10 @@ CheckIn checkInOn(DateTime day, {String reply = ''}) => CheckIn(
 /// Switches the Main Feed to the page of [label] via the bottom bar.
 Future<void> openTab(WidgetTester tester, String label) async {
   await tester.tap(
-    find.descendant(of: find.byType(NavigationBar), matching: find.text(label)),
+    find.descendant(
+      of: find.byKey(const ValueKey('tab-leiste')),
+      matching: find.text(label),
+    ),
   );
   await tester.pumpAndSettle();
 }

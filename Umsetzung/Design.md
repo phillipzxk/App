@@ -60,8 +60,9 @@ Phillip wollte es „mehr mit Schwarz, Braun und goldenen Verläufen“. Ein ers
 - **Beige:** Text, kleine Überschriften, Linien, kleine Knöpfe wie „Eintragen“ und der gewählte Schwerpunkt.
 - **Gold-Verlauf:** große Überschriften, Symbole, die Karte „Deine Basis“ (goldener Kopf und Rand), gewählte Antworten im [[Täglicher Check-in]], alle Haupt-Knöpfe.
 - Coach-Karte und „Frag deinen Coach“ haben einen goldenen Verlaufsrand bzw. goldenen Senden-Knopf.
-- Die Tab-Leiste unten ist schwarz, der aktive Tab ist golden.
 - Auch Onboarding und Unterseiten sind dunkel.
+- Aufgeräumt (18.10.2026, Phillip: „alles Überflüssige entfernen, zusammenfassen“): Erklär-Texte auf einen kurzen Satz gekürzt oder gestrichen, Platzhalter heißen nur noch „Folgt bald.“; „Tipp des Tages“ ist ausgeblendet, bis der Coach ihn liefert. Auf „Heute“ stehen „Tage am Stück“ und „Fokus der Woche“ zusammen in einer kleinen Karte.
+- Die Tab-Leiste schwebt abgerundet über dem Inhalt; der offene Tab ist golden mit kleinem Gold-Strich darüber.
 - Entwurf: https://claude.ai/artifact/NWJnSZaEC6HZjMTyWD89RU
 - Phillip hat am 18.10.2026 Ja gesagt. Der Stil ist in der Test-Vorschau, aber noch nicht fest in der App.
 

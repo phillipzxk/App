@@ -121,6 +121,7 @@ class TodayTab extends StatelessWidget {
     final streak = checkInStreak(checkIns, today);
     return NightScope(
       child: ListView(
+        padding: const EdgeInsets.only(bottom: 110),
         children: [
           PageHeader(
             label: date,
@@ -161,27 +162,10 @@ class TodayTab extends StatelessWidget {
             onOpenFoto: onOpenZukunft,
           ),
           const GroupLabel('Deine Woche'),
-          FeedCard(
-            title: 'Fokus der Woche',
-            icon: Icons.track_changes,
-            children: [
-              const HintText(
-                'Ein Fokus für die ganze Woche, abgeleitet aus deinen '
-                'Check-ins. $aiPending',
-              ),
-              const SizedBox(height: 12),
-              _WeekStrokes(today: today),
-              const SizedBox(height: 6),
-              const HintText(
-                'Jeder Tag, an dem du deinen Fokus schaffst, füllt einen Strich.',
-              ),
-            ],
-          ),
-          FeedCard(
-            title: streak == 1 ? '1 Tag am Stück' : '$streak Tage am Stück',
-            icon: Icons.local_fire_department_outlined,
-            trailing: _Dots(days: lastSevenDays(checkIns, today)),
-            children: const [HintText('jeden Tag eingecheckt')],
+          _WeekCard(
+            streak: streak,
+            days: lastSevenDays(checkIns, today),
+            today: today,
           ),
           const GroupLabel('Deine Bereiche'),
           GridView.count(
@@ -201,10 +185,7 @@ class TodayTab extends StatelessWidget {
             title: 'Deine Muster',
             icon: Icons.insights,
             children: [
-              HintText(
-                'Zusammenhänge zwischen deinen Bereichen, die der Coach über '
-                'die Wochen erkennt. $aiPending',
-              ),
+              HintText('Zusammenhänge zwischen deinen Bereichen. $aiPending'),
             ],
           ),
           TextButton(
@@ -214,6 +195,70 @@ class TodayTab extends StatelessWidget {
               style: TextStyle(color: CoachStyle.nightMuted),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "Deine Woche" in one small card: days in a row with check-in, and the
+/// focus of the week with one stroke per day.
+class _WeekCard extends StatelessWidget {
+  const _WeekCard({
+    required this.streak,
+    required this.days,
+    required this.today,
+  });
+
+  final int streak;
+  final List<bool> days;
+  final DateTime today;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget line(IconData icon, String title, Widget right) => Row(
+      children: [
+        SymbolBadge(icon, size: 26, onDark: true),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            title,
+            style: CoachStyle.cardTitle.copyWith(fontSize: 14),
+          ),
+        ),
+        right,
+      ],
+    );
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+      decoration: BoxDecoration(
+        gradient: CoachStyle.cardGradient,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: CoachStyle.hairline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          line(
+            Icons.local_fire_department_outlined,
+            streak == 1 ? '1 Tag am Stück' : '$streak Tage am Stück',
+            _Dots(days: days),
+          ),
+          const SizedBox(height: 12),
+          line(
+            Icons.track_changes,
+            'Fokus der Woche',
+            Text(
+              aiPending,
+              style: CoachStyle.body.copyWith(
+                fontSize: 13,
+                color: CoachStyle.inkSoft,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          _WeekStrokes(today: today),
         ],
       ),
     );

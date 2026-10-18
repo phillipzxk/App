@@ -315,43 +315,104 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      bottomNavigationBar: NavigationBarTheme(
-        data: NavigationBarThemeData(
-          backgroundColor: const Color(0xFF15110D),
-          surfaceTintColor: Colors.transparent,
-          indicatorColor: const Color(0xFFD4A85E),
-          labelTextStyle: WidgetStateProperty.resolveWith(
-            (states) => TextStyle(
-              fontSize: 12,
-              fontWeight: states.contains(WidgetState.selected)
-                  ? FontWeight.w600
-                  : FontWeight.w400,
-              color: states.contains(WidgetState.selected)
-                  ? const Color(0xFFE6C789)
-                  : CoachStyle.nightMuted,
+      extendBody: true,
+      bottomNavigationBar: TabLeiste(
+        selected: _tab,
+        onSelect: (i) => setState(() => _tab = i),
+      ),
+    );
+  }
+}
+
+/// Floating dark bar at the bottom with the five pages; the open one is
+/// gold with a small gold dot.
+class TabLeiste extends StatelessWidget {
+  const TabLeiste({super.key, required this.selected, required this.onSelect});
+
+  final int selected;
+  final ValueChanged<int> onSelect;
+
+  static const _items = [
+    (Icons.today_outlined, 'Heute'),
+    (Icons.fitness_center, 'Training'),
+    (Icons.eco_outlined, 'Ernährung'),
+    (Icons.bedtime_outlined, 'Schlaf'),
+    (Icons.spa_outlined, 'Mindset'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Center(
+        heightFactor: 1,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: Container(
+            key: const ValueKey('tab-leiste'),
+            margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xF2171310),
+              borderRadius: BorderRadius.circular(26),
+              border: Border.all(color: CoachStyle.hairline),
+              boxShadow: CoachStyle.darkShadow,
+            ),
+            child: Row(
+              children: [
+                for (var i = 0; i < _items.length; i++)
+                  Expanded(
+                    child: Semantics(
+                      button: true,
+                      selected: i == selected,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(18),
+                        onTap: () => onSelect(i),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                width: i == selected ? 18 : 0,
+                                height: 3,
+                                margin: const EdgeInsets.only(bottom: 5),
+                                decoration: BoxDecoration(
+                                  gradient: CoachStyle.goldGradient,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              Icon(
+                                _items[i].$1,
+                                size: 22,
+                                color: i == selected
+                                    ? CoachStyle.goldLight
+                                    : CoachStyle.nightMuted,
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                _items[i].$2,
+                                style: TextStyle(
+                                  fontFamily: 'Figtree',
+                                  fontSize: 11,
+                                  fontWeight: i == selected
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                                  color: i == selected
+                                      ? CoachStyle.goldLight
+                                      : CoachStyle.nightMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
-          iconTheme: WidgetStateProperty.resolveWith(
-            (states) => IconThemeData(
-              color: states.contains(WidgetState.selected)
-                  ? CoachStyle.goldInk
-                  : CoachStyle.nightMuted,
-            ),
-          ),
-        ),
-        child: NavigationBar(
-          selectedIndex: _tab,
-          onDestinationSelected: (i) => setState(() => _tab = i),
-          destinations: const [
-            NavigationDestination(icon: Icon(Icons.today), label: 'Heute'),
-            NavigationDestination(
-              icon: Icon(Icons.fitness_center),
-              label: 'Training',
-            ),
-            NavigationDestination(icon: Icon(Icons.eco), label: 'Ernährung'),
-            NavigationDestination(icon: Icon(Icons.bedtime), label: 'Schlaf'),
-            NavigationDestination(icon: Icon(Icons.spa), label: 'Mindset'),
-          ],
         ),
       ),
     );

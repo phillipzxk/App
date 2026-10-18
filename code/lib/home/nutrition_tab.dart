@@ -54,6 +54,7 @@ class NutritionTab extends StatelessWidget {
     final p = kcal;
     final kg = weights.isEmpty ? null : weights.last.kg;
     return ListView(
+      padding: const EdgeInsets.only(bottom: 110),
       children: [
         const PageHeader(label: 'Bereich', title: 'Ernährung', icon: Icons.eco),
         const GroupLabel('Dein Verlauf'),
@@ -65,11 +66,7 @@ class NutritionTab extends StatelessWidget {
             icon: Icons.restaurant_outlined,
             gold: true,
             children: [
-              const HintText(
-                'Gib einmal Größe, Alter, Geschlecht und deine Aktivität im '
-                'Alltag an. Daraus berechnen wir dein kcal-Ziel, und es passt '
-                'sich mit jedem neuen Gewicht an. Gezählt wird nichts.',
-              ),
+              const HintText('Einmal einrichten. Gezählt wird nichts.'),
               const SizedBox(height: 12),
               GhostButton(
                 label: 'kcal-Ziel einrichten',
@@ -99,11 +96,7 @@ class NutritionTab extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 6),
-              HintText(
-                'Berechnet aus Größe, Alter, Geschlecht, Aktivität und deinem '
-                'aktuellen Gewicht (${formatKg(kg)} kg). Sobald die KI '
-                'angeschlossen ist, passt sie es an dein Ziel an. Kein Zählen.',
-              ),
+              HintText('Bei ${formatKg(kg)} kg. Kein Zählen.'),
               const SizedBox(height: 12),
               GhostButton(
                 label: 'Angaben ändern',
@@ -147,10 +140,7 @@ class WeightCard extends StatelessWidget {
         title: 'Gewicht',
         icon: Icons.monitor_weight_outlined,
         children: [
-          const HintText(
-            'Trag regelmäßig dein Gewicht ein. Dann siehst du hier deinen '
-            'Wochenschnitt, und dein kcal-Ziel bleibt aktuell.',
-          ),
+          const HintText('Trag regelmäßig dein Gewicht ein.'),
           const SizedBox(height: 16),
           MainButton(label: 'Gewicht eintragen', onPressed: onAdd),
         ],
@@ -178,11 +168,6 @@ class WeightCard extends StatelessWidget {
           ),
         const SizedBox(height: 12),
         WeightChart(weeks: shown),
-        const SizedBox(height: 8),
-        const HintText(
-          'Gezeigt wird der Schnitt pro Woche, damit normale Schwankungen '
-          'nicht stören.',
-        ),
         const SizedBox(height: 16),
         MainButton(label: 'Gewicht eintragen', onPressed: onAdd),
       ],

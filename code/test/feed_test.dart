@@ -242,10 +242,7 @@ void main() {
 
     expect(feed.fragen.single.bereich, Bereich.training);
     expect(find.text('Nur die Hälfte, war zu kaputt.'), findsOneWidget);
-    expect(
-      find.text('Kommt, sobald die KI angeschlossen ist.'),
-      findsOneWidget,
-    );
+    expect(find.text('Folgt bald.'), findsOneWidget);
   });
 
   test('sleep hours parse, average and per-night list', () {
