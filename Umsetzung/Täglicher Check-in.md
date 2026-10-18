@@ -8,6 +8,11 @@ status: programmiert, KI fehlt noch
 
 # Täglicher Check-in
 
+## Überarbeitung 2026-10-18 (in Arbeit)
+
+Phillip hat den Check-in mit dem echten Coach getestet: Für den täglichen Gebrauch ist er zu lang und zu komplex. Beschluss (Phillip, 2026-10-18): **Variante B**, alles auf einem Bildschirm. Pro Bereich eine schnelle Antwort zum Antippen, darunter ein freiwilliges Feld „Was war heute besonders?“ (ca. 30 Sekunden). Die genauen Antworten pro Zeile werden gerade gemeinsam festgelegt.
+
+
 Dritter Baustein im [[MVP-Fortschritt]] (Grundidee: [[Kernmechanik#2. Täglicher Feed (Kernbildschirm)]]). Alles hier haben Phillip und Claude am 2026-10-12 gemeinsam festgelegt. Abgenommenes Mockup: [Feed-Entwurf](https://claude.ai/artifact/FuJV2yDGQ8JPzLb5TtFakt).
 
 ## Prinzip
