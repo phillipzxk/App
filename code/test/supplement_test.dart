@@ -124,6 +124,7 @@ void main() {
     expect(feed.genommen[dayKey(fixedNow)], {_magnesium.id});
     expect(find.text('heute 1 von 2'), findsOneWidget);
 
+    await scrollTo(tester, find.byKey(const ValueKey('supp-check-0')));
     await tester.tap(find.byKey(const ValueKey('supp-check-0')));
     await tester.pumpAndSettle();
     await openTab(tester, 'Heute');

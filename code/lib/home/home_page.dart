@@ -288,24 +288,33 @@ class _HomePageState extends State<HomePage> {
         onAsk: _ask(Bereich.mindset),
       ),
     ];
+    // "Heute" is dark, the area pages are light (Phillip 2026-10-18).
+    final night = _tab == 0;
     return Scaffold(
-      backgroundColor: CoachStyle.page,
+      backgroundColor: night ? CoachStyle.night : CoachStyle.page,
       body: DecoratedBox(
-        decoration: const BoxDecoration(gradient: CoachStyle.pageGradient),
-        child: SafeArea(
-          bottom: false,
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: _loaded
-                    ? IndexedStack(index: _tab, children: pages)
-                    : const Center(
-                        child: CircularProgressIndicator(
-                          color: CoachStyle.gold,
+        decoration: BoxDecoration(
+          gradient: night ? CoachStyle.nightGradient : CoachStyle.pageGradient,
+        ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: night ? CoachStyle.nightGlow : null,
+          ),
+          child: SafeArea(
+            bottom: false,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: _loaded
+                      ? IndexedStack(index: _tab, children: pages)
+                      : const Center(
+                          child: CircularProgressIndicator(
+                            color: CoachStyle.gold,
+                          ),
                         ),
-                      ),
+                ),
               ),
             ),
           ),
@@ -313,9 +322,9 @@ class _HomePageState extends State<HomePage> {
       ),
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
-          backgroundColor: const Color(0xFFF6F2EA),
+          backgroundColor: const Color(0xFF15110D),
           surfaceTintColor: Colors.transparent,
-          indicatorColor: CoachStyle.gold,
+          indicatorColor: const Color(0xFFD4A85E),
           labelTextStyle: WidgetStateProperty.resolveWith(
             (states) => TextStyle(
               fontSize: 12,
@@ -323,15 +332,15 @@ class _HomePageState extends State<HomePage> {
                   ? FontWeight.w600
                   : FontWeight.w400,
               color: states.contains(WidgetState.selected)
-                  ? CoachStyle.ink
-                  : CoachStyle.inkSoft,
+                  ? const Color(0xFFE6C789)
+                  : CoachStyle.nightMuted,
             ),
           ),
           iconTheme: WidgetStateProperty.resolveWith(
             (states) => IconThemeData(
               color: states.contains(WidgetState.selected)
-                  ? Colors.white
-                  : CoachStyle.inkSoft,
+                  ? CoachStyle.goldInk
+                  : CoachStyle.nightMuted,
             ),
           ),
         ),

@@ -123,4 +123,63 @@ abstract final class CoachStyle {
     height: 1.5,
     color: ink,
   );
+
+  // Dark style with gold gradients (Phillip 2026-10-18): black-brown for
+  // the daily pages (check-in, Heute), light pages stay as contrast.
+  static const night = Color(0xFF120F0B);
+  static const nightCard = Color(0xFF18140F);
+  static const nightCardOpen = Color(0xFF231C15);
+  static const nightLine = Color(0xFF2E261C);
+  static const nightLineStrong = Color(0xFF3A3024);
+  static const nightChip = Color(0xFF221C15);
+  static const cream = Color(0xFFF3E9D6);
+  static const creamSoft = Color(0xFF9A8C77);
+  static const nightMuted = Color(0xFF6F6352);
+  static const goldBright = Color(0xFFE0BF7E);
+  static const goldInk = Color(0xFF1A140E);
+
+  /// Black-brown page, a little lighter at the top.
+  static const nightGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF1C1611), Color(0xFF120F0B), Color(0xFF0D0B08)],
+    stops: [0, 0.55, 1],
+  );
+
+  /// Soft gold shimmer in the top right corner of dark areas.
+  static const nightGlow = RadialGradient(
+    center: Alignment(0.8, -1.1),
+    radius: 1.1,
+    colors: [Color(0x47D6AA5E), Color(0x00D6AA5E)],
+  );
+
+  /// Metallic gold for picked answers, badges and the main button.
+  static const goldGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFF5DFAE), Color(0xFFD4A85E), Color(0xFF9A6D35)],
+    stops: [0, 0.45, 1],
+  );
+
+  /// Gold edge of the open card.
+  static const goldEdgeGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFF0D9A6), Color(0xFF8A6330), Color(0xFF3A2E21)],
+    stops: [0, 0.5, 1],
+  );
+
+  /// Gold for big headings on dark (used as a text shader).
+  static const goldTextGradient = LinearGradient(
+    colors: [Color(0xFFFBF1DC), Color(0xFFE6C789), Color(0xFFB8894A)],
+    stops: [0, 0.6, 1],
+  );
+
+  static const goldGlow = [
+    BoxShadow(color: Color(0x59D6AA5E), blurRadius: 24, offset: Offset(0, 8)),
+  ];
+
+  static const nightShadow = [
+    BoxShadow(color: Color(0x80000000), blurRadius: 36, offset: Offset(0, 14)),
+  ];
 }

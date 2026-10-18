@@ -77,9 +77,16 @@ class _LogoPainter extends CustomPainter {
 
 /// "GROUNDSET" in wide-spaced capitals, SET in gold.
 class Wordmark extends StatelessWidget {
-  const Wordmark({super.key, this.fontSize = 11});
+  const Wordmark({
+    super.key,
+    this.fontSize = 11,
+    this.ground = CoachStyle.dark,
+  });
 
   final double fontSize;
+
+  /// Colour of GROUND (light on dark backgrounds).
+  final Color ground;
 
   @override
   Widget build(BuildContext context) => Text.rich(
@@ -96,7 +103,7 @@ class Wordmark extends StatelessWidget {
         fontWeight: FontWeight.w600,
         fontSize: fontSize,
         letterSpacing: fontSize * 0.4,
-        color: CoachStyle.dark,
+        color: ground,
       ),
     ),
   );

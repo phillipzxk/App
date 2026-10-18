@@ -39,7 +39,7 @@ Future<void> tapText(WidgetTester tester, String text) async {
   await tester.ensureVisible(find.text(text));
   await tester.pump();
   await tester.tap(find.text(text));
-  await tester.pump();
+  await tester.pumpAndSettle();
 }
 
 /// Taps the first answer in every row and sends.

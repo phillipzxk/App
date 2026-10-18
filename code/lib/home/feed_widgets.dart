@@ -22,6 +22,8 @@ class PageHeader extends StatelessWidget {
 
   final String label;
   final String title;
+
+  /// "Heute": logo above, open on the dark page instead of a dark block.
   final bool brand;
 
   /// Symbol of the area, shown next to the title like on the cards.
@@ -29,40 +31,77 @@ class PageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 18),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: CoachStyle.gold, width: 2)),
-      ),
-      child: CustomPaint(
-        painter: _RingsPainter(),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(2, 16, 2, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    final labelStyle = CoachStyle.goldLabel.copyWith(
+      fontFamily: 'Sora',
+      letterSpacing: 2.2,
+      color: const Color(0xFFC9A25C),
+    );
+    final heading = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (brand) ...[
+          const Row(
             children: [
-              if (brand) ...[
-                const Row(
-                  children: [
-                    LogoMark(size: 26),
-                    SizedBox(width: 6),
-                    Wordmark(fontSize: 11),
-                  ],
-                ),
-                const SizedBox(height: 14),
-              ],
-              Text(label.toUpperCase(), style: CoachStyle.label),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  if (icon case final i?) ...[
-                    SymbolBadge(i, size: 36),
-                    const SizedBox(width: 12),
-                  ],
-                  Expanded(child: Text(title, style: CoachStyle.title)),
-                ],
-              ),
+              LogoMark(size: 26, ground: CoachStyle.cream),
+              SizedBox(width: 6),
+              Wordmark(fontSize: 11, ground: CoachStyle.cream),
             ],
+          ),
+          const SizedBox(height: 16),
+        ],
+        Text(label.toUpperCase(), style: labelStyle),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            if (icon case final i?) ...[
+              Container(
+                width: 38,
+                height: 38,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: CoachStyle.goldGradient,
+                ),
+                child: Icon(i, size: 20, color: CoachStyle.goldInk),
+              ),
+              const SizedBox(width: 12),
+            ],
+            Expanded(child: GoldText(title, style: CoachStyle.title)),
+          ],
+        ),
+      ],
+    );
+    if (brand) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(2, 16, 2, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            heading,
+            const SizedBox(height: 16),
+            const GoldLine(),
+            const SizedBox(height: 18),
+          ],
+        ),
+      );
+    }
+    // Light pages: the title sits in a dark block with a gold shimmer.
+    return Container(
+      margin: const EdgeInsets.only(top: 10, bottom: 18),
+      decoration: BoxDecoration(
+        gradient: CoachStyle.nightGradient,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: CoachStyle.darkShadow,
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: CoachStyle.nightGlow,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: CustomPaint(
+          painter: _RingsPainter(),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+            child: heading,
           ),
         ),
       ),
@@ -70,12 +109,38 @@ class PageHeader extends StatelessWidget {
   }
 }
 
+/// Fine gold line that fades out to both sides.
+class GoldLine extends StatelessWidget {
+  const GoldLine({super.key});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    height: 1,
+    decoration: const BoxDecoration(
+      gradient: LinearGradient(
+        colors: [Color(0x00C9A25C), Color(0xB3C9A25C), Color(0x00C9A25C)],
+      ),
+    ),
+  );
+}
+
+/// Marks the dark "Heute" page, so labels on it turn lighter.
+class NightScope extends InheritedWidget {
+  const NightScope({super.key, required super.child});
+
+  static bool of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<NightScope>() != null;
+
+  @override
+  bool updateShouldNotify(NightScope oldWidget) => false;
+}
+
 class _RingsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     canvas.clipRect(Offset.zero & size);
     final paint = Paint()
-      ..color = CoachStyle.gold.withValues(alpha: 0.16)
+      ..color = CoachStyle.goldLight.withValues(alpha: 0.12)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
     final center = Offset(size.width * 0.88, -size.height * 0.25);
@@ -247,7 +312,9 @@ class FeedCard extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: darkHead
+            style: gold
+                ? CoachStyle.cardTitle.copyWith(color: CoachStyle.goldInk)
+                : darkHead
                 ? CoachStyle.cardTitle.copyWith(color: CoachStyle.goldSoft)
                 : CoachStyle.cardTitle,
           ),
@@ -258,7 +325,13 @@ class FeedCard extends StatelessWidget {
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (darkHead)
+        if (gold)
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            decoration: const BoxDecoration(gradient: CoachStyle.goldGradient),
+            child: head,
+          )
+        else if (darkHead)
           Container(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
             decoration: const BoxDecoration(
@@ -285,36 +358,33 @@ class FeedCard extends StatelessWidget {
         ),
       ],
     );
+    if (gold) {
+      // The key card of an area page: metallic gold edge and gold head.
+      return Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.all(1.5),
+        decoration: BoxDecoration(
+          gradient: CoachStyle.goldGradient,
+          borderRadius: BorderRadius.circular(19.5),
+          boxShadow: CoachStyle.goldGlow,
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: ColoredBox(color: CoachStyle.cardBright, child: content),
+        ),
+      );
+    }
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: gold ? null : CoachStyle.cardBright,
-        gradient: gold ? CoachStyle.goldCardGradient : null,
+        color: CoachStyle.cardBright,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: highlight || gold
-              ? CoachStyle.goldEdge
-              : CoachStyle.edgeStrong,
+          color: highlight ? CoachStyle.goldEdge : CoachStyle.edgeStrong,
         ),
-        boxShadow: gold ? CoachStyle.goldShadow : CoachStyle.cardShadowStrong,
+        boxShadow: CoachStyle.cardShadowStrong,
       ),
-      child: gold
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(17),
-              child: Stack(
-                children: [
-                  content,
-                  Positioned(
-                    left: 0,
-                    top: 0,
-                    bottom: 0,
-                    width: 4,
-                    child: Container(color: CoachStyle.gold),
-                  ),
-                ],
-              ),
-            )
-          : content,
+      child: content,
     );
   }
 }
@@ -336,6 +406,7 @@ class GroupLabel extends StatelessWidget {
             fontFamily: 'Sora',
             fontSize: 11,
             letterSpacing: 1.6,
+            color: NightScope.of(context) ? const Color(0xFFC9A25C) : null,
           ),
         ),
         const SizedBox(width: 8),
@@ -344,7 +415,7 @@ class GroupLabel extends StatelessWidget {
             height: 1,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [CoachStyle.goldEdge, Color(0x00E2CFA9)],
+                colors: [Color(0xFFC9A25C), Color(0x00C9A25C)],
               ),
             ),
           ),

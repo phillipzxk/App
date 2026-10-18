@@ -24,6 +24,14 @@ Die tägliche KI-Umformulierung der Fragen entfällt; persönlich wird es über 
 
 Dritter Baustein im [[MVP-Fortschritt]] (Grundidee: [[Kernmechanik#2. Täglicher Feed (Kernbildschirm)]]). Alles hier haben Phillip und Claude am 2026-10-12 gemeinsam festgelegt. Abgenommenes Mockup: [Feed-Entwurf](https://claude.ai/artifact/FuJV2yDGQ8JPzLb5TtFakt).
 
+### Aufbau und Design (18.10.2026)
+
+Phillip fand den ersten Bildschirm unsortiert. Gewählt wurde Variante B, „Karten-Liste“, im dunklen Stil (siehe [[Design]]):
+- Jeder Bereich ist eine eigene Karte mit Symbol. Es ist immer nur eine Karte offen und zeigt ihre Frage, z. B. „Wie lief dein Training?“, mit den Antworten zum Antippen.
+- Nach dem Tippen klappt die Karte zu, zeigt die Antwort mit goldenem Haken, und die nächste offene Karte geht auf. Eine Karte lässt sich zum Ändern wieder antippen.
+- Oben rechts zeigt ein goldener Ring „x von 5“. „Absenden“ wird golden, sobald alles beantwortet ist.
+- Entwurf mit allen Varianten: https://claude.ai/artifact/NWJnSZaEC6HZjMTyWD89RU
+
 ## Prinzip
 
 1. **Ziel der Fragen:** speziell und individuell, mit wenig Aufwand. Sie sprechen echte Probleme an, damit der Nutzer merkt, dass er schreibt, was ihm wichtig ist und wo er Hilfe braucht.

@@ -51,6 +51,17 @@ Dazu ein Startbild mit Logo und dem Satz „Das Fundament für jeden Tag.“ und
 - Bilddatei in der App: `code/assets/images/coach.jpg`; Original im Projektordner `app-docs/coach-nasenaffe.png`.
 - Entwurf: https://claude.ai/artifact/BPEdfiyUJay3VjscnEnDxp
 
+## Dunkler Stil mit Gold (18.10.2026)
+
+Phillip wollte es „mehr mit Schwarz, Braun und goldenen Verläufen“, aber nicht alles gleich, sondern mit hellen Seiten als Kontrast.
+
+- **Dunkel (Schwarz-Braun, oben ein goldener Schimmer):** [[Täglicher Check-in]] und „Heute“. Große Überschriften im Gold-Verlauf. Die Coach-Karte hat einen goldenen Verlaufsrand.
+- **Hell als Kontrast:** Die Bereichs-Seiten (Training, Ernährung, Schlaf, Mindset) bleiben sandweiß. Oben sitzt ein dunkler Kopf mit Gold-Titel. Die Karte „Deine Basis“ hat einen metallisch goldenen Rand und einen goldenen Kopf.
+- Auf „Heute“ bleiben die Hinweis-Felder und Karten hell, die Bereichs-Kacheln sind dunkel.
+- Die Tab-Leiste unten ist überall schwarz, der aktive Tab ist golden.
+- Entwurf: https://claude.ai/artifact/NWJnSZaEC6HZjMTyWD89RU
+- Phillip hat am 18.10.2026 Ja gesagt. Der Stil ist in der Test-Vorschau, aber noch nicht fest in der App.
+
 ## Entwürfe
 
 - Farben: https://claude.ai/artifact/QppYJLeDpFeuCEgdJeRM3t

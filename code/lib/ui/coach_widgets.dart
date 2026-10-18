@@ -103,13 +103,22 @@ class AnswerField extends StatelessWidget {
 
 /// Dark full-width button with gold text; disabled when [onPressed] is null.
 class MainButton extends StatelessWidget {
-  const MainButton({super.key, required this.label, required this.onPressed});
+  const MainButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.gold = false,
+  });
 
   final String label;
   final VoidCallback? onPressed;
 
+  /// Metallic gold with dark text, for dark pages.
+  final bool gold;
+
   @override
   Widget build(BuildContext context) {
+    if (gold) return _GoldButton(label: label, onPressed: onPressed);
     return FilledButton(
       style: FilledButton.styleFrom(
         minimumSize: const Size.fromHeight(52),
@@ -130,22 +139,86 @@ class MainButton extends StatelessWidget {
   }
 }
 
-/// Logo, a short text and a gold spinner while the AI reads the answers.
-class ReadingIndicator extends StatelessWidget {
-  const ReadingIndicator({super.key, required this.text});
+class _GoldButton extends StatelessWidget {
+  const _GoldButton({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final on = onPressed != null;
+    return Semantics(
+      button: true,
+      enabled: on,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        height: 56,
+        decoration: BoxDecoration(
+          gradient: on ? CoachStyle.goldGradient : null,
+          color: on ? null : const Color(0xFF241E17),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: on ? CoachStyle.goldGlow : null,
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: onPressed,
+            child: Center(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontFamily: 'Sora',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15.5,
+                  letterSpacing: 0.4,
+                  color: on ? CoachStyle.goldInk : CoachStyle.nightMuted,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Text painted with the gold gradient, for big headings on dark.
+class GoldText extends StatelessWidget {
+  const GoldText(this.text, {super.key, required this.style});
 
   final String text;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) => ShaderMask(
+    blendMode: BlendMode.srcIn,
+    shaderCallback: (r) => CoachStyle.goldTextGradient.createShader(r),
+    child: Text(text, style: style.copyWith(color: Colors.white)),
+  );
+}
+
+/// Logo, a short text and a gold spinner while the AI reads the answers.
+class ReadingIndicator extends StatelessWidget {
+  const ReadingIndicator({super.key, required this.text, this.dark = false});
+
+  final String text;
+  final bool dark;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const LogoMark(size: 72),
+        LogoMark(size: 72, ground: dark ? CoachStyle.cream : CoachStyle.dark),
         const SizedBox(height: 16),
         Text(
           text,
-          style: CoachStyle.question.copyWith(fontSize: 19),
+          style: CoachStyle.question.copyWith(
+            fontSize: 19,
+            color: dark ? CoachStyle.cream : CoachStyle.ink,
+          ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 18),
@@ -183,30 +256,42 @@ class CoachNote extends StatelessWidget {
 
 /// Sand-coloured page with the centred 480 px column used on every screen.
 class CoachPage extends StatelessWidget {
-  const CoachPage({super.key, required this.child});
+  const CoachPage({super.key, required this.child, this.dark = false});
 
   final Widget child;
+
+  /// Black-brown with a gold shimmer instead of sand white.
+  final bool dark;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CoachStyle.page,
+      backgroundColor: dark ? CoachStyle.night : CoachStyle.page,
       body: DecoratedBox(
-        decoration: const BoxDecoration(gradient: CoachStyle.pageGradient),
-        child: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-                child: child,
-              ),
-            ),
-          ),
+        decoration: BoxDecoration(
+          gradient: dark ? CoachStyle.nightGradient : CoachStyle.pageGradient,
         ),
+        child: dark
+            ? DecoratedBox(
+                decoration: const BoxDecoration(gradient: CoachStyle.nightGlow),
+                child: _column(),
+              )
+            : _column(),
       ),
     );
   }
+
+  Widget _column() => SafeArea(
+    child: Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 480),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+          child: child,
+        ),
+      ),
+    ),
+  );
 }
 
 /// The coach's own words on a dark card with a gold label, so the most
@@ -220,33 +305,46 @@ class CoachCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+      padding: const EdgeInsets.all(1.2),
       decoration: BoxDecoration(
-        gradient: CoachStyle.coachGradient,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFF4A4134)),
-        boxShadow: CoachStyle.darkShadow,
+        gradient: CoachStyle.goldEdgeGradient,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: CoachStyle.nightShadow,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              const CoachAvatar(),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label.toUpperCase(),
-                  style: CoachStyle.goldLabel.copyWith(
-                    color: CoachStyle.goldLight,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF2A2118), Color(0xFF1B1611)],
+          ),
+          borderRadius: BorderRadius.circular(19),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                const CoachAvatar(),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    label.toUpperCase(),
+                    style: CoachStyle.goldLabel.copyWith(
+                      color: CoachStyle.goldLight,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(text, style: CoachStyle.body.copyWith(color: CoachStyle.onDark)),
-        ],
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              text,
+              style: CoachStyle.body.copyWith(color: CoachStyle.onDark),
+            ),
+          ],
+        ),
       ),
     );
   }
