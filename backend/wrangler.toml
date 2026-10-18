@@ -1,0 +1,6 @@
+# Cloudflare Worker between the Groundset app and the Claude API.
+# Secrets (never in this file): ANTHROPIC_API_KEY, APP_TOKEN.
+name = "groundset-coach"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
