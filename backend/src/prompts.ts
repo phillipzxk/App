@@ -137,3 +137,44 @@ Schreib zu jedem Bereich genau einen kurzen Satz (höchstens 20 Wörter), warum 
 Antworte nur mit diesem JSON, ohne weiteren Text:
 {"training":{"wert":7,"grund":"..."},"ernaehrung":{"wert":5,"grund":"..."},"schlaf":{"wert":4,"grund":"..."},"mindset":{"wert":8,"grund":"..."}}`;
 }
+
+export type BisherMuster = { text?: string; abgelehnt?: boolean };
+
+/// Asks for at most one clear new pattern across the check-ins (see vault
+/// Umsetzung/Deine Muster.md). Answers {"muster": null} when nothing is clear.
+export function musterPrompt(p: Profile, checkins: CheckIn[], bisher: BisherMuster[]): string {
+  const tage = checkins
+    .slice(-30)
+    .map((c) => {
+      const w = (c as { werte?: Record<string, number> }).werte ?? {};
+      const werte = Object.entries(w)
+        .map(([k, v]) => `${AREA[k] ?? k} ${v}`)
+        .join(", ");
+      return checkInBlock(c) + (werte ? `\n- Werte vom Coach (10 = läuft super): ${clip(werte, 200)}` : "");
+    })
+    .join("\n\n");
+  const alt = bisher
+    .slice(-20)
+    .map((m) => `- ${clip(m.text, 300)}${m.abgelehnt ? " (die Person sagt: stimmt nicht)" : ""}`)
+    .join("\n");
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Ihre Check-ins, ältester zuerst:
+<nutzer>
+${tage}
+</nutzer>
+${alt ? `\nMuster, die du ihr schon gezeigt hast:\n<nutzer>\n${alt}\n</nutzer>\n` : ""}
+Suche EIN klares Muster: einen Zusammenhang zwischen zwei Bereichen (Training, Ernährung, Schlaf, Mindset; Energie zählt zu Schlaf), der sich in den Check-ins mehrmals wiederholt, mindestens dreimal. Ein einzelner Tag ist nie ein Muster. Wenn du nichts wirklich Klares siehst, gib kein Muster zurück. Wiederhole kein Muster, das sie schon kennt oder das sie abgelehnt hat.
+
+Wenn es ein Muster gibt:
+- "text": ein Satz, konkret, mit Zahlen aus ihren Tagen (z. B. "4 von 5 Mal"), in Du-Form, höchstens 25 Wörter.
+- "schritt": ein konkreter Gegenschritt in einem Satz, kein Standard-Tipp, höchstens 20 Wörter.
+- "von" und "nach": die beiden Bereiche, z. B. "Schlaf" und "Ernährung".
+
+Antworte nur mit JSON, ohne weiteren Text, entweder
+{"muster": null}
+oder
+{"muster": {"text": "...", "schritt": "...", "von": "...", "nach": "..."}}`;
+}

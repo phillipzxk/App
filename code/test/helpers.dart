@@ -7,6 +7,7 @@ import 'package:coach_app/data/user_profile.dart';
 import 'package:coach_app/feed/feed_data.dart';
 import 'package:coach_app/feed/feed_store.dart';
 import 'package:coach_app/feed/kcal.dart';
+import 'package:coach_app/feed/muster.dart';
 import 'package:coach_app/future_me/future_me_data.dart';
 import 'package:coach_app/planner/planner_data.dart';
 import 'package:coach_app/supplements/supplement_data.dart';
@@ -165,6 +166,24 @@ class MemoryFeedStore implements FeedStore {
     final ids = genommen.putIfAbsent(dayKey(day), () => {});
     g ? ids.add(id) : ids.remove(id);
   }
+
+  final muster = <Muster>[];
+  String? musterGeprueft;
+
+  @override
+  Future<List<Muster>> loadMuster() async => List.of(muster);
+
+  @override
+  Future<void> saveMuster(List<Muster> list) async => muster
+    ..clear()
+    ..addAll(list);
+
+  @override
+  Future<String?> loadMusterGeprueft() async => musterGeprueft;
+
+  @override
+  Future<void> saveMusterGeprueft(DateTime day) async =>
+      musterGeprueft = dayKey(day);
 }
 
 /// Monday, 12 October 2026, 18:00.

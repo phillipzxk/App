@@ -11,7 +11,9 @@ import '../supplements/supplement_widgets.dart';
 import 'day_plan.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
+import '../feed/muster.dart';
 import 'bereichs_werte.dart';
+import 'muster_widgets.dart';
 import 'feed_widgets.dart';
 
 /// Days in a row with a check-in, counted back from [today]. A day without
@@ -69,6 +71,9 @@ class TodayTab extends StatelessWidget {
     required this.supplements,
     required this.genommen,
     required this.onOpenSupplements,
+    this.muster = const [],
+    required this.onMusterAblehnen,
+    required this.onOpenMuster,
     required this.onOpenArea,
     required this.onRestartOnboarding,
   });
@@ -90,6 +95,11 @@ class TodayTab extends StatelessWidget {
   final List<Supplement> supplements;
   final Set<String> genommen;
   final VoidCallback onOpenSupplements;
+
+  /// Visible patterns, newest first (see Umsetzung/Deine Muster.md).
+  final List<Muster> muster;
+  final void Function(Muster m) onMusterAblehnen;
+  final VoidCallback onOpenMuster;
   final ValueChanged<Bereich> onOpenArea;
   final VoidCallback onRestartOnboarding;
 
@@ -188,13 +198,15 @@ class TodayTab extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          const FeedCard(
-            title: 'Deine Muster',
-            icon: Icons.insights,
-            children: [
-              HintText('Zusammenhänge zwischen deinen Bereichen. $aiPending'),
-            ],
-          ),
+          // Only shown once the coach saw a clear pattern.
+          if (muster.isNotEmpty) ...[
+            const GroupLabel('Deine Muster'),
+            MusterKarte(
+              muster: muster.first,
+              onAblehnen: () => onMusterAblehnen(muster.first),
+              onAlle: onOpenMuster,
+            ),
+          ],
           TextButton(
             onPressed: onRestartOnboarding,
             child: const Text(

@@ -7,6 +7,7 @@ import '../checkin/checkin_evaluator.dart';
 import '../data/user_profile.dart';
 import '../feed/feed_coach.dart';
 import '../feed/feed_data.dart';
+import '../feed/muster.dart';
 import '../onboarding/onboarding_evaluator.dart';
 
 /// Address of the coach backend (backend/ in the repo, a Cloudflare Worker)
@@ -98,6 +99,39 @@ class RemoteCoach implements OnboardingEvaluator, CheckInEvaluator, FeedCoach {
       out[e.key as String] = BereichsWert(wert, v['grund'] as String? ?? '');
     }
     return out.isEmpty ? null : out;
+  }
+
+  @override
+  Future<Muster?> findeMuster(
+    UserProfile profile,
+    List<CheckIn> checkIns,
+    List<Muster> bisher,
+  ) async {
+    final data = await _postJson('/muster', {
+      'profile': profileJson(profile),
+      'checkins': [
+        for (final c in checkIns.skip(
+          checkIns.length > 30 ? checkIns.length - 30 : 0,
+        ))
+          c.toJson(),
+      ],
+      'bisher': [
+        for (final m in bisher) {'text': m.text, 'abgelehnt': m.abgelehnt},
+      ],
+    });
+    final m = data?['muster'];
+    if (m is! Map) return null;
+    final text = (m['text'] as String? ?? '').trim();
+    final schritt = (m['schritt'] as String? ?? '').trim();
+    if (text.isEmpty || schritt.isEmpty) return null;
+    final last = checkIns.isEmpty ? DateTime.now() : checkIns.last.datum;
+    return Muster(
+      datum: last,
+      text: text,
+      schritt: schritt,
+      von: (m['von'] as String? ?? '').trim(),
+      nach: (m['nach'] as String? ?? '').trim(),
+    );
   }
 
   @override

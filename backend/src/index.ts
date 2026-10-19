@@ -8,6 +8,8 @@ import {
   feedPrompt,
   onboardingPrompt,
   wertePrompt,
+  musterPrompt,
+  type BisherMuster,
   type CheckIn,
   type Profile,
 } from "./prompts";
@@ -71,6 +73,31 @@ export function parseWerte(raw: string): Record<string, { wert: number; grund: s
   return out;
 }
 
+const LABELS = ["Training", "Ernährung", "Schlaf", "Mindset"];
+
+/// One pattern with text and step, or null when the model saw nothing clear.
+export function parseMuster(
+  raw: string,
+): { text: string; schritt: string; von: string; nach: string } | null {
+  const start = raw.indexOf("{");
+  const end = raw.lastIndexOf("}");
+  if (start < 0 || end <= start) return null;
+  try {
+    const m = (JSON.parse(raw.slice(start, end + 1)) as { muster?: unknown }).muster as
+      | Record<string, unknown>
+      | null
+      | undefined;
+    if (!m) return null;
+    const text = typeof m.text === "string" ? m.text.trim().slice(0, 300) : "";
+    const schritt = typeof m.schritt === "string" ? m.schritt.trim().slice(0, 300) : "";
+    if (!text || !schritt) return null;
+    const area = (v: unknown) => (typeof v === "string" && LABELS.includes(v.trim()) ? v.trim() : "");
+    return { text, schritt, von: area(m.von), nach: area(m.nach) };
+  } catch {
+    return null;
+  }
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
@@ -104,6 +131,17 @@ export default {
         const recent = Array.isArray(body.recent) ? (body.recent as CheckIn[]) : [];
         try {
           return json({ werte: parseWerte(await ask(env, wertePrompt(profile, today, recent))) });
+        } catch (e) {
+          console.error(e);
+          return json({ error: "coach unavailable" }, 502);
+        }
+      }
+      case "/muster": {
+        const checkins = Array.isArray(body.checkins) ? (body.checkins as CheckIn[]) : [];
+        const bisher = Array.isArray(body.bisher) ? (body.bisher as BisherMuster[]) : [];
+        if (checkins.length < 5) return json({ muster: null });
+        try {
+          return json({ muster: parseMuster(await ask(env, musterPrompt(profile, checkins, bisher))) });
         } catch (e) {
           console.error(e);
           return json({ error: "coach unavailable" }, 502);
