@@ -1,7 +1,7 @@
 ---
 title: Deine Muster
 tags: [umsetzung, feed, ki]
-status: in-vorschau
+status: fest
 ---
 
 # Deine Muster
@@ -19,3 +19,5 @@ Der Coach erkennt Zusammenhänge zwischen den Bereichen über mehrere Tage, zum 
 ## Entwurf
 
 Bild im Projektordner: `ki-coach/muster-entwurf.png`. Phillip: „Ja, Prinzip so einbauen“ (19.10.2026). In der Testvorschau gebaut: Der Coach sucht höchstens einmal am Tag nach dem Check-in, ab 5 Check-ins, über die letzten 30 Tage (Worker-Route `/muster`).
+
+Fest in der App seit 19.10.2026 (Phillip: „ja“).
