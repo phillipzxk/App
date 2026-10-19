@@ -119,7 +119,7 @@ void main() {
 
     await tester.tap(find.byTooltip('Zurück'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('nächstes Foto'), findsOneWidget);
+    expect(find.textContaining('Nächstes Foto'), findsOneWidget);
   });
 
   test('kit code check and kit poses', () {
