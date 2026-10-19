@@ -7,6 +7,7 @@ import '../feed/feed_coach.dart';
 import '../feed/feed_data.dart';
 import '../feed/feed_store.dart';
 import '../feed/kcal.dart';
+import '../feed/muster.dart';
 import '../future_me/future_me_data.dart';
 import '../future_me/future_me_page.dart';
 import '../planner/planner_data.dart';
@@ -15,6 +16,7 @@ import '../supplements/supplement_data.dart';
 import '../ui/coach_style.dart';
 import '../weight/weight.dart';
 import 'mindset_tab.dart';
+import 'muster_widgets.dart';
 import 'nutrition_tab.dart';
 import 'sleep_tab.dart';
 import 'bereichs_werte.dart';
@@ -63,6 +65,7 @@ class _HomePageState extends State<HomePage> {
   List<WochenFoto> _wochenFotos = const [];
   List<Supplement> _supplements = const [];
   Set<String> _genommen = const {};
+  List<Muster> _muster = const [];
 
   @override
   void initState() {
@@ -85,6 +88,7 @@ class _HomePageState extends State<HomePage> {
     final wochenFotos = await widget.feed.loadWochenFotos();
     final supplements = await widget.feed.loadSupplements();
     final genommen = await widget.feed.loadGenommen(widget.clock());
+    final muster = await widget.feed.loadMuster();
     if (!mounted) return;
     setState(() {
       _loaded = true;
@@ -102,7 +106,34 @@ class _HomePageState extends State<HomePage> {
       _wochenFotos = wochenFotos;
       _supplements = supplements;
       _genommen = genommen;
+      _muster = muster;
     });
+    _pruefeMuster(checkIns, muster);
+  }
+
+  bool _prueft = false;
+
+  /// Once a day, after today's check-in and from 5 check-ins on, the coach
+  /// looks for one clear new pattern. Nothing found: nothing shows.
+  Future<void> _pruefeMuster(
+    List<CheckIn> checkIns,
+    List<Muster> bisher,
+  ) async {
+    final today = widget.clock();
+    if (_prueft || checkIns.length < musterAbCheckIns) return;
+    if (!checkIns.any((c) => dayKey(c.datum) == dayKey(today))) return;
+    if (await widget.feed.loadMusterGeprueft() == dayKey(today)) return;
+    _prueft = true;
+    await widget.feed.saveMusterGeprueft(today);
+    final neu = await widget.coach.findeMuster(
+      widget.profile,
+      checkIns,
+      bisher,
+    );
+    _prueft = false;
+    if (neu == null) return;
+    await widget.feed.saveMuster([...bisher, neu]);
+    await _reload();
   }
 
   List<CoachFrage> _todayFragen(Bereich b) {
@@ -236,6 +267,21 @@ class _HomePageState extends State<HomePage> {
         onOpenSupplements: () =>
             setState(() => _tab = Bereich.ernaehrung.index + 1),
         onOpenArea: (b) => setState(() => _tab = b.index + 1),
+        muster: sichtbareMuster(_muster),
+        onMusterAblehnen: (m) async {
+          await widget.feed.saveMuster([
+            for (final x in _muster) identical(x, m) ? x.ablehnen() : x,
+          ]);
+          await _reload();
+        },
+        onOpenMuster: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => MusterSeite(
+              muster: sichtbareMuster(_muster),
+              heute: widget.clock(),
+            ),
+          ),
+        ),
         onRestartOnboarding: widget.onRestartOnboarding,
       ),
       TrainingTab(

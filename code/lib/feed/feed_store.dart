@@ -1,3 +1,5 @@
+import 'muster.dart';
+
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -65,6 +67,14 @@ abstract class FeedStore {
   /// Ids of the intakes ticked off on [day].
   Future<Set<String>> loadGenommen(DateTime day);
   Future<void> setGenommen(DateTime day, String id, bool genommen);
+
+  /// "Deine Muster": all patterns the coach found, rejected ones included.
+  Future<List<Muster>> loadMuster();
+  Future<void> saveMuster(List<Muster> list);
+
+  /// Day the coach last looked for a pattern (once per day at most).
+  Future<String?> loadMusterGeprueft();
+  Future<void> saveMusterGeprueft(DateTime day);
 }
 
 class LocalFeedStore implements FeedStore {
@@ -80,6 +90,8 @@ class LocalFeedStore implements FeedStore {
   static const _kitKey = 'frame_kit';
   static const _supplementsKey = 'supplements';
   static const _genommenKey = 'supplements_genommen';
+  static const _musterKey = 'muster';
+  static const _musterGeprueftKey = 'muster_geprueft';
 
   Future<Object?> _read(String key) async {
     final raw = (await SharedPreferences.getInstance()).getString(key);
@@ -244,4 +256,25 @@ class LocalFeedStore implements FeedStore {
     genommen ? ids.add(id) : ids.remove(id);
     await _write(_genommenKey, {dayKey(day): ids.toList()});
   }
+
+  @override
+  Future<List<Muster>> loadMuster() async {
+    final json = await _read(_musterKey) as List?;
+    return [
+      for (final e in json ?? const [])
+        Muster.fromJson(e as Map<String, dynamic>),
+    ];
+  }
+
+  @override
+  Future<void> saveMuster(List<Muster> list) =>
+      _write(_musterKey, [for (final m in list) m.toJson()]);
+
+  @override
+  Future<String?> loadMusterGeprueft() async =>
+      await _read(_musterGeprueftKey) as String?;
+
+  @override
+  Future<void> saveMusterGeprueft(DateTime day) =>
+      _write(_musterGeprueftKey, dayKey(day));
 }
