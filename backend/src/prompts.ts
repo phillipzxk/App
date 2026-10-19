@@ -112,3 +112,28 @@ ${clip(text)}
 
 Antworte ihr als Coach zu genau diesem Bereich.`;
 }
+
+/// Asks for the area scores of one day as JSON (see vault
+/// Umsetzung/Bereichs-Werte.md): 10 = läuft super, energy counts to sleep.
+export function wertePrompt(p: Profile, today: CheckIn, recent: CheckIn[]): string {
+  const earlier = recent
+    .filter((c) => c.datum !== today.datum)
+    .slice(-6)
+    .map(checkInBlock)
+    .join("\n\n");
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+${earlier ? `Ihre letzten Tage:\n<nutzer>\n${earlier}\n</nutzer>\n\n` : ""}Ihr Check-in von heute:
+<nutzer>
+${checkInBlock(today)}
+</nutzer>
+
+Bewerte heute jeden Bereich mit einer ganzen Zahl von 1 bis 10. 10 heißt: läuft super, du musst kaum etwas sagen. 1 heißt: hier hängt es gerade stark. Energie zählt zum Bereich Schlaf. Beziehe die letzten Tage mit ein, aber der heutige Tag zählt am meisten.
+
+Schreib zu jedem Bereich genau einen kurzen Satz (höchstens 20 Wörter), warum der Wert gerade da steht. Nenne einen konkreten Zusammenhang, wenn es einen gibt, zum Beispiel mit den letzten Tagen oder einem anderen Bereich. Keine Tipps, keine Floskeln, nicht den Wert wiederholen.
+
+Antworte nur mit diesem JSON, ohne weiteren Text:
+{"training":{"wert":7,"grund":"..."},"ernaehrung":{"wert":5,"grund":"..."},"schlaf":{"wert":4,"grund":"..."},"mindset":{"wert":8,"grund":"..."}}`;
+}

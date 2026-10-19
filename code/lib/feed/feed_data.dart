@@ -2,7 +2,7 @@
 enum Bereich {
   training('Training'),
   ernaehrung('Ernährung'),
-  schlaf('Schlaf'),
+  schlaf('Schlaf & Energie'),
   mindset('Mindset');
 
   const Bereich(this.label);

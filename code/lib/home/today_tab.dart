@@ -11,6 +11,7 @@ import '../supplements/supplement_widgets.dart';
 import 'day_plan.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
+import 'bereichs_werte.dart';
 import 'feed_widgets.dart';
 
 /// Days in a row with a check-in, counted back from [today]. A day without
@@ -171,13 +172,19 @@ class TodayTab extends StatelessWidget {
           GridView.count(
             crossAxisCount: 2,
             shrinkWrap: true,
+            padding: EdgeInsets.zero,
             physics: const NeverScrollableScrollPhysics(),
             mainAxisSpacing: 8,
             crossAxisSpacing: 8,
-            childAspectRatio: 1.9,
+            childAspectRatio: 1.45,
             children: [
               for (final b in Bereich.values)
-                _AreaTile(bereich: b, onTap: () => onOpenArea(b)),
+                _AreaTile(
+                  bereich: b,
+                  checkIns: checkIns,
+                  today: today,
+                  onTap: () => onOpenArea(b),
+                ),
             ],
           ),
           const SizedBox(height: 14),
@@ -323,9 +330,16 @@ class _Dots extends StatelessWidget {
 /// Area at a glance: own symbol, today's AI rating (a dash until the AI is
 /// connected) and the small progress bars.
 class _AreaTile extends StatelessWidget {
-  const _AreaTile({required this.bereich, required this.onTap});
+  const _AreaTile({
+    required this.bereich,
+    required this.checkIns,
+    required this.today,
+    required this.onTap,
+  });
 
   final Bereich bereich;
+  final List<CheckIn> checkIns;
+  final DateTime today;
   final VoidCallback onTap;
 
   @override
@@ -333,7 +347,7 @@ class _AreaTile extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        gradient: CoachStyle.creamGradient,
+        gradient: CoachStyle.tileGradient,
         boxShadow: CoachStyle.cardShadow,
       ),
       child: Material(
@@ -378,38 +392,9 @@ class _AreaTile extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Text(
-                      '–',
-                      style: CoachStyle.cardTitle.copyWith(
-                        color: const Color(0xFF7A5528),
-                      ),
-                    ),
                   ],
                 ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    for (final h in const [10.0, 14.0, 8.0, 12.0])
-                      Expanded(
-                        child: Container(
-                          height: h,
-                          margin: const EdgeInsets.symmetric(horizontal: 1.5),
-                          decoration: BoxDecoration(
-                            color: const Color(0x335A4A36),
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                Text(
-                  'Verlauf folgt',
-                  style: CoachStyle.label.copyWith(
-                    letterSpacing: 0,
-                    fontSize: 11,
-                    color: CoachStyle.creamInkSoft,
-                  ),
-                ),
+                TileWerte(bereich: bereich, checkIns: checkIns, today: today),
               ],
             ),
           ),

@@ -17,6 +17,7 @@ import '../weight/weight.dart';
 import 'mindset_tab.dart';
 import 'nutrition_tab.dart';
 import 'sleep_tab.dart';
+import 'bereichs_werte.dart';
 import 'today_tab.dart';
 import 'training_tab.dart';
 
@@ -303,7 +304,11 @@ class _HomePageState extends State<HomePage> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: _loaded
-                      ? IndexedStack(index: _tab, children: pages)
+                      ? WerteScope(
+                          checkIns: _checkIns,
+                          today: widget.clock(),
+                          child: IndexedStack(index: _tab, children: pages),
+                        )
                       : const Center(
                           child: CircularProgressIndicator(
                             color: CoachStyle.gold,

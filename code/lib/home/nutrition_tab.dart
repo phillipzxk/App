@@ -8,6 +8,7 @@ import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import '../weight/weight.dart';
 import '../weight/weight_chart.dart';
+import 'bereichs_werte.dart';
 import 'feed_widgets.dart';
 
 /// Ernährung page: progress, kcal target, the supplement routine, the field
@@ -57,8 +58,7 @@ class NutritionTab extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 110),
       children: [
         const PageHeader(label: 'Bereich', title: 'Ernährung', icon: Icons.eco),
-        const GroupLabel('Dein Verlauf'),
-        const AreaChart(),
+        const AreaChart(bereich: Bereich.ernaehrung),
         const GroupLabel('Deine Basis'),
         if (p == null || kg == null)
           FeedCard(

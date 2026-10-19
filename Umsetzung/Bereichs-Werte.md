@@ -1,7 +1,7 @@
 ---
 title: Bereichs-Werte
 tags: [umsetzung, feed, ki]
-status: entwurf
+status: in-vorschau
 ---
 
 # Bereichs-Werte
@@ -19,4 +19,4 @@ Der Coach bewertet nach jedem täglichen Check-in jeden Bereich mit einem Wert v
 
 ## Entwurf
 
-Bild im Projektordner: `ki-coach/bereichs-werte-entwurf.png`. Gebaut wird erst nach Phillips Ja.
+Bild im Projektordner: `ki-coach/bereichs-werte-entwurf.png`. Phillip: „sonst perfekt“, Kacheln „ganz leicht heller creme“ (19.10.2026). In der Testvorschau gebaut; Werte kommen vom Coach über `/werte` im Worker.

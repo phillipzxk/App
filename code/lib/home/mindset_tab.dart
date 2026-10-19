@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/user_profile.dart';
 import '../feed/feed_data.dart';
 import '../ui/coach_style.dart';
+import 'bereichs_werte.dart';
 import 'feed_widgets.dart';
 
 /// Mindset page: progress, Durchgezogen, Dein Warum and the field
@@ -25,8 +26,7 @@ class MindsetTab extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 110),
       children: [
         const PageHeader(label: 'Bereich', title: 'Mindset', icon: Icons.spa),
-        const GroupLabel('Dein Verlauf'),
-        const AreaChart(),
+        const AreaChart(bereich: Bereich.mindset),
         const FeedCard(
           title: 'Durchgezogen · diese Woche',
           icon: Icons.check_circle_outline,

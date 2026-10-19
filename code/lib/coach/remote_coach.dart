@@ -27,6 +27,23 @@ class RemoteCoach implements OnboardingEvaluator, CheckInEvaluator, FeedCoach {
   final String token;
   final http.Client _client;
 
+  Future<Map?> _postJson(String path, Map<String, Object> body) async {
+    try {
+      final response = await _client
+          .post(
+            Uri.parse('$baseUrl$path'),
+            headers: {'content-type': 'application/json', 'x-app-token': token},
+            body: jsonEncode(body),
+          )
+          .timeout(const Duration(seconds: 60));
+      if (response.statusCode != 200) return null;
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      return data is Map ? data : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<String?> _post(String path, Map<String, Object> body) async {
     try {
       final response = await _client
@@ -58,6 +75,30 @@ class RemoteCoach implements OnboardingEvaluator, CheckInEvaluator, FeedCoach {
     'today': today.toJson(),
     'recent': [for (final c in recent) c.toJson()],
   });
+
+  @override
+  Future<Map<String, BereichsWert>?> rate(
+    UserProfile profile,
+    CheckIn today,
+    List<CheckIn> recent,
+  ) async {
+    final data = await _postJson('/werte', {
+      'profile': profileJson(profile),
+      'today': today.toJson(),
+      'recent': [for (final c in recent) c.toJson()],
+    });
+    final werte = data?['werte'];
+    if (werte is! Map) return null;
+    final out = <String, BereichsWert>{};
+    for (final e in werte.entries) {
+      final v = e.value;
+      if (v is! Map || v['wert'] is! num) continue;
+      final wert = (v['wert'] as num).round();
+      if (wert < 1 || wert > 10) continue;
+      out[e.key as String] = BereichsWert(wert, v['grund'] as String? ?? '');
+    }
+    return out.isEmpty ? null : out;
+  }
 
   @override
   Future<String?> answer(

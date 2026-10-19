@@ -68,8 +68,13 @@ class _CheckInFlowState extends State<CheckInFlow> {
     );
     setState(() => _phase = _Phase.reading);
     final recent = await widget.store.loadCheckIns();
-    final reply = await widget.evaluator.reply(widget.profile, checkIn, recent);
+    // Reply and area scores are asked at the same time.
+    final replyFuture = widget.evaluator.reply(widget.profile, checkIn, recent);
+    final werteFuture = widget.evaluator.rate(widget.profile, checkIn, recent);
+    final reply = await replyFuture;
+    final werte = await werteFuture;
     checkIn = checkIn.withReply(reply ?? '');
+    if (werte != null) checkIn = checkIn.withWerte(werte);
     await widget.store.saveCheckIn(checkIn);
     if (!mounted) return;
     setState(() {

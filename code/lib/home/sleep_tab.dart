@@ -5,6 +5,7 @@ import '../sleep/sleep.dart';
 import '../sleep/sleep_chart.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
+import 'bereichs_werte.dart';
 import 'feed_widgets.dart';
 
 /// Schlaf page: progress, the evening routine (set once), a field for
@@ -43,11 +44,10 @@ class SleepTab extends StatelessWidget {
       children: [
         const PageHeader(
           label: 'Bereich',
-          title: 'Schlaf',
+          title: 'Schlaf & Energie',
           icon: Icons.bedtime,
         ),
-        const GroupLabel('Dein Verlauf'),
-        const AreaChart(),
+        const AreaChart(bereich: Bereich.schlaf),
         const GroupLabel('Deine Basis'),
         FeedCard(
           title: 'Deine Abendroutine',

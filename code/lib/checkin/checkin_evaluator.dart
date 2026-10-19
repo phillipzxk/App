@@ -10,6 +10,13 @@ abstract class CheckInEvaluator {
     CheckIn today,
     List<CheckIn> recent,
   );
+
+  /// The scores per area (keys = Bereich.name), or null if not possible.
+  Future<Map<String, BereichsWert>?> rate(
+    UserProfile profile,
+    CheckIn today,
+    List<CheckIn> recent,
+  );
 }
 
 /// Used until the AI backend exists: there is no reply yet.
@@ -18,6 +25,13 @@ class NoCheckInEvaluator implements CheckInEvaluator {
 
   @override
   Future<String?> reply(
+    UserProfile profile,
+    CheckIn today,
+    List<CheckIn> recent,
+  ) async => null;
+
+  @override
+  Future<Map<String, BereichsWert>?> rate(
     UserProfile profile,
     CheckIn today,
     List<CheckIn> recent,

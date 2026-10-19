@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../feed/feed_data.dart';
 import '../ui/coach_style.dart';
+import 'bereichs_werte.dart';
 import 'feed_widgets.dart';
 
 const _weekdays = [
@@ -54,8 +55,7 @@ class TrainingTab extends StatelessWidget {
           title: 'Training',
           icon: Icons.fitness_center,
         ),
-        const GroupLabel('Dein Verlauf'),
-        const AreaChart(),
+        const AreaChart(bereich: Bereich.training),
         const GroupLabel('Deine Basis'),
         if (plan.isEmpty)
           FeedCard(
