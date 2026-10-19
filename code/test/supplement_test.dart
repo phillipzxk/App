@@ -50,24 +50,9 @@ void main() {
     return feed;
   }
 
-  testWidgets('empty routine: field on Heute invites to set it up', (
-    tester,
-  ) async {
+  testWidgets('empty routine: no field on Heute', (tester) async {
     await start(tester);
-    final feld = find.byKey(const ValueKey('supp-hinweis'));
-    expect(feld, findsOneWidget);
-    expect(
-      find.descendant(
-        of: feld,
-        matching: find.textContaining('Routine festlegen', findRichText: true),
-      ),
-      findsOneWidget,
-    );
-    await tester.ensureVisible(feld);
-    await tester.pumpAndSettle();
-    await tester.tap(feld);
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('supp-festlegen')), findsOneWidget);
+    expect(find.byKey(const ValueKey('supp-hinweis')), findsNothing);
   });
 
   testWidgets('set up the routine on Ernährung', (tester) async {
@@ -128,7 +113,8 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('supp-check-0')));
     await tester.pumpAndSettle();
     await openTab(tester, 'Heute');
-    expect(find.textContaining('heute alles genommen'), findsOneWidget);
+    // All taken: the field disappears from Heute.
+    expect(find.byKey(const ValueKey('supp-hinweis')), findsNothing);
 
     // Untick again.
     await openTab(tester, 'Ernährung');

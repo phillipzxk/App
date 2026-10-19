@@ -43,7 +43,7 @@ class FutureMeCard extends StatelessWidget {
   Widget build(BuildContext context) => HinweisFeld(
     key: const ValueKey('zukunft-karte'),
     icon: Icons.photo_camera_outlined,
-    title: 'Dein zukünftiges Ich',
+    title: 'Fortschrittsfoto',
     text: _text(),
     onTap: onOpen,
   );
