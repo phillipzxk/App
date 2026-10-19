@@ -7,6 +7,7 @@ import {
   checkInPrompt,
   feedPrompt,
   onboardingPrompt,
+  wertePrompt,
   type CheckIn,
   type Profile,
 } from "./prompts";
@@ -47,6 +48,29 @@ async function ask(env: Env, prompt: string): Promise<string> {
     .trim();
 }
 
+const AREAS = ["training", "ernaehrung", "schlaf", "mindset"] as const;
+
+/// Keeps only well-formed scores 1-10 and short reasons from the model's JSON.
+export function parseWerte(raw: string): Record<string, { wert: number; grund: string }> {
+  const start = raw.indexOf("{");
+  const end = raw.lastIndexOf("}");
+  if (start < 0 || end <= start) return {};
+  let data: Record<string, unknown>;
+  try {
+    data = JSON.parse(raw.slice(start, end + 1));
+  } catch {
+    return {};
+  }
+  const out: Record<string, { wert: number; grund: string }> = {};
+  for (const a of AREAS) {
+    const v = data[a] as { wert?: unknown; grund?: unknown } | undefined;
+    const wert = Math.round(Number(v?.wert));
+    if (!Number.isFinite(wert) || wert < 1 || wert > 10) continue;
+    out[a] = { wert, grund: typeof v?.grund === "string" ? v.grund.trim().slice(0, 300) : "" };
+  }
+  return out;
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
@@ -75,6 +99,16 @@ export default {
           Array.isArray(body.recent) ? (body.recent as CheckIn[]) : [],
         );
         break;
+      case "/werte": {
+        const today = (body.today ?? {}) as CheckIn;
+        const recent = Array.isArray(body.recent) ? (body.recent as CheckIn[]) : [];
+        try {
+          return json({ werte: parseWerte(await ask(env, wertePrompt(profile, today, recent))) });
+        } catch (e) {
+          console.error(e);
+          return json({ error: "coach unavailable" }, 502);
+        }
+      }
       case "/feed":
         prompt = feedPrompt(
           profile,

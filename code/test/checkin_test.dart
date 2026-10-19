@@ -16,6 +16,13 @@ class FixedReply implements CheckInEvaluator {
   @override
   Future<String?> reply(UserProfile p, CheckIn t, List<CheckIn> r) async =>
       text;
+
+  @override
+  Future<Map<String, BereichsWert>?> rate(
+    UserProfile p,
+    CheckIn t,
+    List<CheckIn> r,
+  ) async => const {'schlaf': BereichsWert(4, 'Zu kurz geschlafen.')};
 }
 
 Future<void> openApp(
@@ -96,6 +103,8 @@ void main() {
     await answerAll(tester);
     expect(find.text('Guter Tag.'), findsOneWidget);
     expect(diary.checkIns.single.kiAntwort, 'Guter Tag.');
+    expect(diary.checkIns.single.werte, {'schlaf': 4});
+    expect(diary.checkIns.single.gruende['schlaf'], 'Zu kurz geschlafen.');
 
     await tester.tap(find.text('Fertig'));
     await tester.pumpAndSettle();
@@ -134,5 +143,48 @@ void main() {
     await tester.pumpAndSettle();
     expect(diary.checkIns.single.mindset, 'Kaum Motivation');
     expect(diary.checkIns.single.energie, 'Niedrig');
+  });
+
+  testWidgets('area scores show on the tiles and the area page', (
+    tester,
+  ) async {
+    final yesterday = DateTime(2026, 10, 11);
+    final diary = MemoryDiaryStore()
+      ..checkIns.add(
+        CheckIn(
+          datum: yesterday,
+          training: 'a',
+          ernaehrung: 'b',
+          schlaf: 'c',
+          mindset: 'd',
+          werte: const {'schlaf': 6},
+        ),
+      )
+      ..checkIns.add(
+        CheckIn(
+          datum: fixedNow,
+          training: 'a',
+          ernaehrung: 'b',
+          schlaf: 'c',
+          mindset: 'd',
+          kiAntwort: 'Ok.',
+          werte: const {'schlaf': 4},
+          gruende: const {'schlaf': 'Zwei kurze Nächte.'},
+        ),
+      );
+    await openApp(tester, diary);
+    final wert = find.byKey(const ValueKey('wert-schlaf'));
+    await scrollTo(tester, wert);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('bereich-schlaf')),
+        matching: find.textContaining('▼ 2'),
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const ValueKey('bereich-schlaf')));
+    await tester.pumpAndSettle();
+    expect(find.text('Zwei kurze Nächte.'), findsOneWidget);
+    expect(find.text('Schlaf & Energie'), findsWidgets);
   });
 }

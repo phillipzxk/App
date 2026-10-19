@@ -90,4 +90,38 @@ void main() {
       expect(await offline.summarize(_max), isNull);
     },
   );
+
+  test('area scores come from /werte, bad values are dropped', () async {
+    late http.Request sent;
+    final coach = RemoteCoach(
+      baseUrl: 'https://coach.test',
+      token: 'abc',
+      client: MockClient((r) async {
+        sent = r;
+        return http.Response.bytes(
+          utf8.encode(
+            jsonEncode({
+              'werte': {
+                'schlaf': {'wert': 4, 'grund': 'Zu kurz.'},
+                'training': {'wert': 12, 'grund': 'x'},
+              },
+            }),
+          ),
+          200,
+        );
+      }),
+    );
+    final today = CheckIn(
+      datum: DateTime(2026, 10, 14),
+      training: 'Beine',
+      ernaehrung: 'ok',
+      schlaf: 'gut',
+      mindset: 'nichts',
+    );
+    final werte = await coach.rate(_max, today, const []);
+    expect(sent.url.toString(), 'https://coach.test/werte');
+    expect(werte!.keys, ['schlaf']);
+    expect(werte['schlaf']!.wert, 4);
+    expect(werte['schlaf']!.grund, 'Zu kurz.');
+  });
 }

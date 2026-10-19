@@ -185,6 +185,14 @@ abstract final class CoachStyle {
     colors: [Color(0xFFD8CAB0), Color(0xFFC4B293)],
   );
 
+  /// A touch lighter cream for the area tiles on "Heute" (Phillip
+  /// 2026-10-19: "ganz leicht heller creme").
+  static const tileGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFE2D6BF), Color(0xFFCFBFA3)],
+  );
+
   /// Softer dark brown text on cream.
   static const creamInkSoft = Color(0xFF5A4A36);
 

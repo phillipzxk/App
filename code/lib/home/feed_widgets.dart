@@ -492,44 +492,6 @@ class GhostButton extends StatelessWidget {
   );
 }
 
-/// Progress of one area over the last 14 days. The AI rates each area
-/// from the daily check-in; until it is connected there are no values.
-class AreaChart extends StatelessWidget {
-  const AreaChart({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return FeedCard(
-      title: 'Verlauf · letzte 14 Tage',
-      icon: Icons.show_chart,
-      children: [
-        SizedBox(
-          height: 48,
-          child: CustomPaint(painter: _BaselinePainter(), size: Size.infinite),
-        ),
-        const SizedBox(height: 8),
-        const HintText('Erscheint, sobald der Coach deine Check-ins bewertet.'),
-      ],
-    );
-  }
-}
-
-class _BaselinePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = CoachStyle.bar
-      ..strokeWidth = 1.5;
-    final y = size.height / 2;
-    for (var x = 0.0; x < size.width; x += 10) {
-      canvas.drawLine(Offset(x, y), Offset(x + 5, y), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
 /// Field to write to the coach about one area, with today's answers.
 class AskCoachCard extends StatefulWidget {
   const AskCoachCard({
