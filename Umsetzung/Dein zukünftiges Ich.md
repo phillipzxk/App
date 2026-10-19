@@ -7,6 +7,8 @@ aktualisiert: 2026-10-16
 
 # Dein zukünftiges Ich
 
+> **Name in der App seit 19.10.2026: „Fortschrittsfoto“** (Phillip: konkreter, damit man weiß, was gemeint ist). Auf „Heute“ ist es eine eigene, hervorgehobene Karte mit Goldrand, Fotorahmen (letztes Foto oder Kamera), Wochenzähler und am Fototag einem Knopf „Foto“.
+
 Herzstück aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Abschrift in [[App-Fortschritt]]). Am 2026-10-16 mit Phillip Schritt für Schritt ausgearbeitet und nach seinem „Ja“ teilweise gebaut (siehe „Stand im Code“).
 
 **Ziel (Phillip):** Leute sehen ihren Fortschritt. Das ist der Hauptgrund, warum sie aufgeben (Buch: Kapitel 9, Testfrage 7).
