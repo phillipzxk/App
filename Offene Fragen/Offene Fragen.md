@@ -36,7 +36,7 @@ Aus dem Entwurf [[Onboarding-Fragebogen]] (2026-10-10):
 
 - Welcher LLM-Anbieter bzw. welches Modell? (siehe [[Technischer Ansatz]])
 - Wie die „einfache Regellogik“ der KI-Antwort im MVP konkret aussieht
-- Wie die Bewertungs-Kennzahl (1–10) genau berechnet wird (siehe [[Fortschritts-Verlauf]])
+- ~~Wie die Bewertungs-Kennzahl (1–10) genau berechnet wird~~ Geklärt am 19.10.2026: 10 = läuft super, siehe [[Bereichs-Werte]]
 
 ## Merken für später
 
