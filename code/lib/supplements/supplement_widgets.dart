@@ -24,18 +24,15 @@ class SupplementHinweis extends StatelessWidget {
   Widget build(BuildContext context) {
     final offen = supplements.where((s) => !genommen.contains(s.id)).length;
     final next = naechsteOffene(supplements, genommen, now);
-    final leer = supplements.isEmpty;
-    final text = leer
-        ? 'Routine festlegen'
-        : next == null
-        ? 'heute alles genommen'
-        : '$offen offen, nächste ${next.zeit} ${next.name}';
+    // Only shown while something is left to tick off today. Setting up the
+    // routine happens on the Ernährung page.
+    if (offen == 0 || next == null) return const SizedBox.shrink();
+    final text = '$offen offen, nächste ${next.zeit} ${next.name}';
     return HinweisFeld(
       key: const ValueKey('supp-hinweis'),
       icon: Icons.medication_outlined,
       title: 'Supplements',
       text: text,
-      done: !leer && next == null,
       onTap: onTap,
     );
   }

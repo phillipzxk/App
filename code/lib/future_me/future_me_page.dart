@@ -159,7 +159,7 @@ class _FutureMePageState extends State<FutureMePage> {
       children: [
         PageHeader(
           label: 'Woche $aktuelleWoche · Fototag ${wochentage[e.fototag - 1]}',
-          title: 'Dein zukünftiges Ich',
+          title: 'Fortschrittsfoto',
           icon: Icons.photo_camera_outlined,
         ),
         if (lage.status != FotoStatus.spaeter) ...[
@@ -315,7 +315,7 @@ class _Leer extends StatelessWidget {
       children: [
         const PageHeader(
           label: 'Fortschritt',
-          title: 'Dein zukünftiges Ich',
+          title: 'Fortschrittsfoto',
           icon: Icons.photo_camera_outlined,
         ),
         FeedCard(
@@ -559,7 +559,7 @@ class _EinrichtenPageState extends State<EinrichtenPage> {
   Widget build(BuildContext context) {
     final fest = widget.current != null;
     return EditorPage(
-      title: 'Dein zukünftiges Ich',
+      title: 'Fortschrittsfoto',
       intro:
           'Einmal festlegen: an welchem Tag du dein Wochenfoto machst, welche '
           'Posen und welche Werte du verfolgen willst.',

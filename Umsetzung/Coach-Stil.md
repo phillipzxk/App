@@ -14,7 +14,7 @@ So schreibt die KI als Coach in der App, beim [[Täglicher Check-in|Check-in]] u
 | Punkt | Entscheidung |
 |---|---|
 | Ton | Direkt und ehrlich, wie ein Trainer, der dich kennt. |
-| Länge | Normalerweise 3–5 Sätze: ehrliche Einschätzung des Tages, dann 1–2 konkrete Tipps. An auffälligen Tagen (Rückfall, Durchbruch, mehrere Probleme zusammen) darf es länger werden. |
+| Länge | **3–4 kurze Sätze** (Phillip, 19.10.2026: „nicht ein Aufsatz, strikt das Wichtigste“): erst das Wichtigste des Tages, kurz warum, dann 1–2 konkrete Schritte. An auffälligen Tagen (Rückfall, Durchbruch, mehrere Probleme zusammen) höchstens 5 Sätze. Vorher: 3–5 Sätze, an auffälligen Tagen länger. |
 | Emotionen wecken | Der Coach greift die eigenen Worte des Nutzers aus dem [[Onboarding-Fragebogen\|Onboarding]] auf (Ziel, „Warum“) und endet mit einer Frage, die zum Nachdenken bringt. Beides nicht jeden Tag, damit es nicht zur Masche wird. |
 | Emojis | Keine. |
 | Anrede | Mit Namen. Dafür fragt die App vor dem Onboarding „Wie heißt du?“, siehe [[Onboarding-Fragebogen]] und [[Nutzer]]. |
