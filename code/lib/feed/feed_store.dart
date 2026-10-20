@@ -89,6 +89,10 @@ abstract class FeedStore {
   /// Wake-up times and hours of sleep, empty until set.
   Future<Schlafzeiten> loadSchlafzeiten();
   Future<void> saveSchlafzeiten(Schlafzeiten z);
+
+  /// How the coach's reply on "Heute" is shown: 'text', 'punkte' or 'zu'.
+  Future<String> loadCoachAnsicht();
+  Future<void> saveCoachAnsicht(String ansicht);
 }
 
 class LocalFeedStore implements FeedStore {
@@ -109,6 +113,7 @@ class LocalFeedStore implements FeedStore {
   static const _fokusKey = 'fokus';
   static const _fokusAuswahlKey = 'fokus_auswahl';
   static const _schlafzeitenKey = 'schlafzeiten';
+  static const _coachAnsichtKey = 'coach_ansicht';
 
   Future<Object?> _read(String key) async {
     final raw = (await SharedPreferences.getInstance()).getString(key);
@@ -335,4 +340,12 @@ class LocalFeedStore implements FeedStore {
   @override
   Future<void> saveSchlafzeiten(Schlafzeiten z) =>
       _write(_schlafzeitenKey, z.toJson());
+
+  @override
+  Future<String> loadCoachAnsicht() async =>
+      await _read(_coachAnsichtKey) as String? ?? 'text';
+
+  @override
+  Future<void> saveCoachAnsicht(String ansicht) =>
+      _write(_coachAnsichtKey, ansicht);
 }

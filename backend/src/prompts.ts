@@ -220,3 +220,16 @@ ${letzter?.text ? `- Einer der 3 Vorschläge ist ihr alter Fokus zum Behalten: g
 Antworte nur mit JSON, ohne weiteren Text:
 {"rueckblick": ${letzter?.text ? '"..."' : "null"}, "vorschlaege": [{"text": "...", "warum": "...", "behalten": false}, {"text": "...", "warum": "...", "behalten": false}, {"text": "...", "warum": "...", "behalten": false}]}`;
 }
+
+/// Turns the coach's answer into 3 to 4 short bullet points (same content).
+export function stichpunktePrompt(text: string): string {
+  return `Das ist deine Antwort an die Person von heute:
+<antwort>
+${clip(text, 3000)}
+</antwort>
+
+Fasse genau diese Antwort in 3 bis 4 Stichpunkten zusammen, damit sie sie in Sekunden erfassen kann. Jeder Punkt höchstens 8 Wörter, ohne Punkt am Ende. Behalte die konkreten Schritte und Zahlen. Nichts Neues dazu, keine Floskeln, keine Emojis, keine Anrede. Jeder konkrete Schritt bekommt einen eigenen Punkt. Eine Frage am Ende kommt nur dazu, wenn dafür noch Platz ist.
+
+Antworte nur mit JSON, ohne weiteren Text:
+{"punkte": ["...", "...", "..."]}`;
+}

@@ -74,6 +74,7 @@ class _HomePageState extends State<HomePage> {
   bool _fokusLaedt = false;
   bool _fokusVersucht = false;
   Schlafzeiten _schlafzeiten = const Schlafzeiten();
+  String _coachAnsicht = 'text';
 
   @override
   void initState() {
@@ -100,6 +101,7 @@ class _HomePageState extends State<HomePage> {
     final fokus = await widget.feed.loadFokus();
     final fokusAuswahl = await widget.feed.loadFokusAuswahl();
     final schlafzeiten = await widget.feed.loadSchlafzeiten();
+    final coachAnsicht = await widget.feed.loadCoachAnsicht();
     if (!mounted) return;
     setState(() {
       _loaded = true;
@@ -121,6 +123,7 @@ class _HomePageState extends State<HomePage> {
       _fokus = fokus;
       _fokusAuswahl = fokusAuswahl;
       _schlafzeiten = schlafzeiten;
+      _coachAnsicht = coachAnsicht;
     });
     _pruefeMuster(checkIns, muster);
     if (!_fokusVersucht) _holeFokusVorschlaege();
@@ -370,6 +373,17 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         fokus: _fokusWidget(),
+        coachAnsicht: _coachAnsicht,
+        onCoachAnsicht: (a) {
+          setState(() => _coachAnsicht = a);
+          widget.feed.saveCoachAnsicht(a);
+        },
+        onStichpunkte: (c) async {
+          final p = await widget.coach.stichpunkte(c.kiAntwort);
+          if (p == null) return;
+          await widget.store.saveCheckIn(c.withStichpunkte(p));
+          await _reload();
+        },
         bettzeit: _bettzeit,
         schlafStunden: _schlafzeiten.stunden,
         routineAb: _routine.isEmpty ? null : _routine.first.zeit,

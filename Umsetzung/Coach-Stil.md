@@ -27,6 +27,15 @@ So schreibt die KI als Coach in der App, beim [[Täglicher Check-in|Check-in]] u
 4. Langweilige 0815-Tipps. Immer bezogen auf das, was der Nutzer geschrieben hat und was der Coach schon von ihm kennt.
 5. Moralisieren oder ein schlechtes Gewissen machen. Ehrlich, aber nicht von oben herab.
 
+## Anzeige auf Heute (2026-10-20)
+
+Mit Phillip festgelegt und gebaut:
+
+- **Text | Stichpunkte:** Oben in der Coach-Karte gibt es einen Umschalter. „Stichpunkte“ zeigt dieselbe Antwort in 3 bis 4 kurzen Punkten. Der Coach macht sie beim ersten Antippen aus seiner Antwort (Route `/stichpunkte`), höchstens 8 Wörter pro Punkt, die Schritte haben Vorrang. Gespeichert beim Check-in, also nur einmal pro Tag.
+- **Wegklappen:** Der Pfeil oben rechts klappt die Karte zu. Dann bleibt nur der Anfang mit „Aufklappen“ sichtbar.
+- Die App merkt sich die letzte Wahl (Text oder Stichpunkte, offen oder zu).
+- Bild: `ki-coach/coach-karte-app.png`.
+
 ## Beispiele
 
 Von Phillip abgenommen am 2026-10-13. Erfundener Nutzer **Max**, 34.
