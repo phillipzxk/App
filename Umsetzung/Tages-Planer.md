@@ -2,7 +2,7 @@
 title: Tages-Planer
 tags: [umsetzung, ki, training, kalender, teilweise-gebaut]
 erstellt: 2026-10-15
-aktualisiert: 2026-10-15
+aktualisiert: 2026-10-20
 ---
 
 # Tages-Planer: Kalender + Training
@@ -29,6 +29,8 @@ Kernfeature aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Absch
 | Wer legt die Mahlzeiten fest? | **Nutzer gibt die Zahl vor, die KI plant.** Der Nutzer gibt einmal an, wie viele Mahlzeiten er am Tag essen möchte. Zusammen mit seinem kcal-Ziel (beides wird in der App angezeigt, siehe [[Main Feed]]) stellt die KI daraus die Mahlzeiten im Tagesplan dar, angepasst an Termine und Arbeit. | 2026-10-15 |
 | Kalorien pro Mahlzeit anzeigen? | **Nein, nur Zeit + Größe.** Jede Mahlzeit zeigt Uhrzeit und Größe in Worten (z. B. „Hauptmahlzeit“, „kleiner Snack“). Das kcal-Ziel steuert im Hintergrund, wie groß die Mahlzeiten sind. Kein Zählen. | 2026-10-15 |
 | Wie taucht der Schlaf im Plan auf? | **KI rechnet die Bettzeit.** Die KI setzt die Bettzeit passend zum nächsten Morgen (Weckzeit, frühe Termine, spätes Training) und erinnert an die [[Abendroutine]]. | 2026-10-15 |
+| Woher kommt die Weckzeit? | **Einmal festlegen.** Auf der Seite Schlaf eine Weckzeit für Mo bis Fr und eine für Sa und So. Ein früher Termin am nächsten Morgen zieht die Weckzeit automatisch vor (Vorschlag: 1 Stunde vor dem Termin). | 2026-10-20 |
+| Wie viel Schlaf wird eingeplant? | **Selbst festlegen.** Man trägt einmal ein, wie viele Stunden Schlaf man braucht; das bleibt so. Bettzeit = Weckzeit morgen minus Schlafdauer. | 2026-10-20 |
 
 ## Stand im Code (2026-10-15)
 
@@ -42,6 +44,8 @@ Gebaut als Karte „Dein Tag“ auf der Seite „Heute“, unter Fokus der Woche
 - **Noch nicht gebaut:** Erinnerungen per Benachrichtigung. Sie brauchen die Handy-Version der App und lassen sich in der Browser-Vorschau nicht zeigen.
 
 ## Entwurf
+
+- Bettzeit (2026-10-20): `ki-coach/bettzeit-entwurf.png`. Links die Zeile im Tagesplan („Morgen um 6:30 raus, 8 Std. Schlaf. Abendroutine ab 22:00.“), rechts die Karte „Deine Schlafzeiten“ auf der Seite Schlaf.
 
 - Seite „Heute“ mit Tagesplan (Beispieltag, 2026-10-15): https://claude.ai/artifact/919CYY84MWcJ2HX2gAWgHG. Phillip: „top“.
 
