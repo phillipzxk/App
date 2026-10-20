@@ -50,7 +50,8 @@ const _icons = {
 };
 
 /// Start page after the check-in: the coach's reply, the supplement
-/// reminder, "Dein zukünftiges Ich", the focus of the week, the day plan, days in a row, all four areas at a glance and the patterns.
+/// reminder, the progress photo, the day plan, the focus of the week, days
+/// in a row, all four areas at a glance and the patterns.
 class TodayTab extends StatelessWidget {
   const TodayTab({
     super.key,
@@ -74,6 +75,7 @@ class TodayTab extends StatelessWidget {
     this.muster = const [],
     required this.onMusterAblehnen,
     required this.onOpenMuster,
+    this.fokus,
     required this.onOpenArea,
     required this.onRestartOnboarding,
   });
@@ -100,6 +102,10 @@ class TodayTab extends StatelessWidget {
   final List<Muster> muster;
   final void Function(Muster m) onMusterAblehnen;
   final VoidCallback onOpenMuster;
+
+  /// "Fokus der Woche": the running week or the choice (built by the home
+  /// page, which holds the state).
+  final Widget? fokus;
   final ValueChanged<Bereich> onOpenArea;
   final VoidCallback onRestartOnboarding;
 
@@ -173,11 +179,8 @@ class TodayTab extends StatelessWidget {
             onOpenFoto: onOpenZukunft,
           ),
           const GroupLabel('Deine Woche'),
-          _WeekCard(
-            streak: streak,
-            days: lastSevenDays(checkIns, today),
-            today: today,
-          ),
+          ?fokus,
+          _StreakCard(streak: streak, days: lastSevenDays(checkIns, today)),
           const GroupLabel('Deine Bereiche'),
           GridView.count(
             crossAxisCount: 2,
@@ -220,95 +223,41 @@ class TodayTab extends StatelessWidget {
   }
 }
 
-/// "Deine Woche" in one small card: days in a row with check-in, and the
-/// focus of the week with one stroke per day.
-class _WeekCard extends StatelessWidget {
-  const _WeekCard({
-    required this.streak,
-    required this.days,
-    required this.today,
-  });
+/// Small card: days in a row with a check-in, one dot per day.
+class _StreakCard extends StatelessWidget {
+  const _StreakCard({required this.streak, required this.days});
 
   final int streak;
   final List<bool> days;
-  final DateTime today;
 
   @override
   Widget build(BuildContext context) {
-    Widget line(IconData icon, String title, Widget right) => Row(
-      children: [
-        SymbolBadge(icon, size: 26, onDark: true),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            title,
-            style: CoachStyle.cardTitle.copyWith(fontSize: 14),
-          ),
-        ),
-        right,
-      ],
-    );
     return Container(
+      key: const ValueKey('streak-karte'),
       margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       decoration: BoxDecoration(
         gradient: CoachStyle.cardGradient,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: CoachStyle.hairline),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Row(
         children: [
-          line(
+          const SymbolBadge(
             Icons.local_fire_department_outlined,
-            streak == 1 ? '1 Tag am Stück' : '$streak Tage am Stück',
-            _Dots(days: days),
+            size: 26,
+            onDark: true,
           ),
-          const SizedBox(height: 12),
-          line(
-            Icons.track_changes,
-            'Fokus der Woche',
-            Text(
-              aiPending,
-              style: CoachStyle.body.copyWith(
-                fontSize: 13,
-                color: CoachStyle.inkSoft,
-              ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              streak == 1 ? '1 Tag am Stück' : '$streak Tage am Stück',
+              style: CoachStyle.cardTitle.copyWith(fontSize: 14),
             ),
           ),
-          const SizedBox(height: 10),
-          _WeekStrokes(today: today),
+          _Dots(days: days),
         ],
       ),
-    );
-  }
-}
-
-/// Seven strokes for Monday to Sunday; today's is outlined in gold.
-class _WeekStrokes extends StatelessWidget {
-  const _WeekStrokes({required this.today});
-
-  final DateTime today;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        for (var i = 0; i < 7; i++)
-          Expanded(
-            child: Container(
-              height: 6,
-              margin: const EdgeInsets.symmetric(horizontal: 2),
-              decoration: BoxDecoration(
-                color: CoachStyle.nightLineStrong,
-                borderRadius: BorderRadius.circular(3),
-                border: i == today.weekday - 1
-                    ? Border.all(color: CoachStyle.goldBright, width: 1.5)
-                    : null,
-              ),
-            ),
-          ),
-      ],
     );
   }
 }

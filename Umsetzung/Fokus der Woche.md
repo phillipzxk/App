@@ -1,7 +1,7 @@
 ---
 title: Fokus der Woche
 tags: [umsetzung, feed, ki]
-status: entwurf
+status: gebaut
 ---
 
 # Fokus der Woche
@@ -19,4 +19,12 @@ Ein einziger Schwerpunkt für 7 Tage auf „Heute“ in der Karte „Deine Woche
 
 ## Entwurf
 
-Bild im Projektordner: `ki-coach/fokus-entwurf.png`. Gebaut wird erst nach Phillips Ja.
+Bild im Projektordner: `ki-coach/fokus-entwurf.png`. Phillip hat am 20.10. Ja gesagt.
+
+## So ist es gebaut
+
+- Der Coach-Server hat die Route `/fokus`: 3 Vorschläge mit je einem kurzen „warum“. Nach einer Woche ist einer davon der alte Fokus („Behalten“), dazu ein Satz Rückblick.
+- Die Vorschläge werden gespeichert, bis die Person einen wählt, damit der Coach nicht bei jedem Öffnen neu gefragt wird.
+- „Behalten“ startet eine neue Woche mit demselben Text, die Striche beginnen wieder bei Tag 1.
+- „Tage am Stück“ ist jetzt eine eigene kleine Karte unter dem Fokus.
+- Bild aus der App: `ki-coach/fokus-app.png`.

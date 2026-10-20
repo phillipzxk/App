@@ -178,3 +178,45 @@ Antworte nur mit JSON, ohne weiteren Text, entweder
 oder
 {"muster": {"text": "...", "schritt": "...", "von": "...", "nach": "..."}}`;
 }
+
+export type LetzterFokus = { text?: string; geschafft?: number };
+
+/// Three suggestions for the focus of the week, plus a one-sentence look
+/// back when a week just ended (see vault Umsetzung/Fokus der Woche.md).
+export function fokusPrompt(
+  p: Profile,
+  checkins: CheckIn[],
+  muster: string[],
+  letzter: LetzterFokus | null,
+): string {
+  const tage = checkins
+    .slice(-14)
+    .map((c) => {
+      const w = (c as { werte?: Record<string, number> }).werte ?? {};
+      const werte = Object.entries(w)
+        .map(([k, v]) => `${AREA[k] ?? k} ${v}`)
+        .join(", ");
+      return checkInBlock(c) + (werte ? `\n- Werte vom Coach (10 = läuft super): ${clip(werte, 200)}` : "");
+    })
+    .join("\n\n");
+  const must = muster
+    .slice(0, 5)
+    .map((m) => `- ${clip(m, 300)}`)
+    .join("\n");
+  const alt = letzter?.text
+    ? `\nIhr Fokus der letzten 7 Tage:\n<nutzer>\n${clip(letzter.text, 200)}\n</nutzer>\nGeschafft an ${Math.max(0, Math.min(7, Math.round(Number(letzter.geschafft) || 0)))} von 7 Tagen.\n`
+    : "";
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+${tage ? `\nIhre letzten Check-ins, ältester zuerst:\n<nutzer>\n${tage}\n</nutzer>\n` : "\nSie hat noch keine Check-ins, nimm ihre Antworten vom Start.\n"}${must ? `\nMuster, die du bei ihr gesehen hast:\n<nutzer>\n${must}\n</nutzer>\n` : ""}${alt}
+Schlag ihr genau 3 mögliche Fokusse für die nächsten 7 Tage vor. Sie wählt selbst einen davon. Ein Fokus ist EINE konkrete Sache, die sie jeden Tag tun kann und am Abend klar abhaken kann. Er setzt da an, wo es bei ihr gerade wirklich hängt (Werte, Muster, ihre Probleme vom Start), nicht bei Standard-Tipps. Die 3 sollen sich unterscheiden, gern aus verschiedenen Bereichen.
+
+- "text": der Fokus in höchstens 9 Wörtern, ohne Punkt am Ende, z. B. "Handy ab 23 Uhr raus aus dem Schlafzimmer".
+- "warum": ein kurzer Satz (höchstens 12 Wörter), warum gerade das zu ihr passt.
+${letzter?.text ? `- Einer der 3 Vorschläge ist ihr alter Fokus zum Behalten: genau ihr alter Text, "behalten": true, und im "warum" ein Satz, ob sich das Dranbleiben lohnt. Die anderen beiden sind neu.
+- "rueckblick": ein Satz (höchstens 20 Wörter), wie die letzte Woche mit dem Fokus lief, ehrlich und konkret, ohne die Zahl zu wiederholen, ohne Floskeln.` : `- "rueckblick": null.`}
+
+Antworte nur mit JSON, ohne weiteren Text:
+{"rueckblick": ${letzter?.text ? '"..."' : "null"}, "vorschlaege": [{"text": "...", "warum": "...", "behalten": false}, {"text": "...", "warum": "...", "behalten": false}, {"text": "...", "warum": "...", "behalten": false}]}`;
+}

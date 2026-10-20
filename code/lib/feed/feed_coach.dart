@@ -1,6 +1,7 @@
 import '../checkin/checkin.dart';
 import '../data/user_profile.dart';
 import 'feed_data.dart';
+import 'fokus.dart';
 import 'muster.dart';
 
 /// Answers what the user writes into a field of the Main Feed, e.g. how
@@ -24,6 +25,16 @@ abstract class FeedCoach {
     List<CheckIn> checkIns,
     List<Muster> bisher,
   );
+
+  /// Three suggestions for the focus of the week. With [letzter] (the week
+  /// that just ended) one of them keeps it and a look back comes along.
+  /// Null when the coach cannot be reached.
+  Future<FokusAuswahl?> fokusVorschlaege(
+    UserProfile profile,
+    List<CheckIn> checkIns,
+    List<Muster> muster, {
+    Wochenfokus? letzter,
+  });
 }
 
 /// Used until the AI backend exists: there is no answer yet.
@@ -44,4 +55,12 @@ class NoFeedCoach implements FeedCoach {
     List<CheckIn> checkIns,
     List<Muster> bisher,
   ) async => null;
+
+  @override
+  Future<FokusAuswahl?> fokusVorschlaege(
+    UserProfile profile,
+    List<CheckIn> checkIns,
+    List<Muster> muster, {
+    Wochenfokus? letzter,
+  }) async => null;
 }

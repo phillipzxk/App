@@ -2,6 +2,7 @@ import 'package:coach_app/checkin/checkin.dart';
 import 'package:coach_app/data/user_profile.dart';
 import 'package:coach_app/feed/feed_coach.dart';
 import 'package:coach_app/feed/feed_data.dart';
+import 'package:coach_app/feed/fokus.dart';
 import 'package:coach_app/feed/muster.dart';
 import 'package:coach_app/main.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +36,14 @@ class _MusterCoach implements FeedCoach {
       nach: 'Ernährung',
     );
   }
+
+  @override
+  Future<FokusAuswahl?> fokusVorschlaege(
+    UserProfile profile,
+    List<CheckIn> checkIns,
+    List<Muster> muster, {
+    Wochenfokus? letzter,
+  }) async => null;
 }
 
 Future<(MemoryFeedStore, _MusterCoach)> _open(

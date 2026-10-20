@@ -7,6 +7,7 @@ import 'package:coach_app/data/user_profile.dart';
 import 'package:coach_app/feed/feed_data.dart';
 import 'package:coach_app/feed/feed_store.dart';
 import 'package:coach_app/feed/kcal.dart';
+import 'package:coach_app/feed/fokus.dart';
 import 'package:coach_app/feed/muster.dart';
 import 'package:coach_app/future_me/future_me_data.dart';
 import 'package:coach_app/planner/planner_data.dart';
@@ -184,6 +185,21 @@ class MemoryFeedStore implements FeedStore {
   @override
   Future<void> saveMusterGeprueft(DateTime day) async =>
       musterGeprueft = dayKey(day);
+
+  Wochenfokus? fokus;
+  FokusAuswahl? fokusAuswahl;
+
+  @override
+  Future<Wochenfokus?> loadFokus() async => fokus;
+
+  @override
+  Future<void> saveFokus(Wochenfokus f) async => fokus = f;
+
+  @override
+  Future<FokusAuswahl?> loadFokusAuswahl() async => fokusAuswahl;
+
+  @override
+  Future<void> saveFokusAuswahl(FokusAuswahl? a) async => fokusAuswahl = a;
 }
 
 /// Monday, 12 October 2026, 18:00.
