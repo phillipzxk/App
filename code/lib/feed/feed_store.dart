@@ -1,3 +1,4 @@
+import 'fokus.dart';
 import 'muster.dart';
 
 import 'dart:convert';
@@ -75,6 +76,14 @@ abstract class FeedStore {
   /// Day the coach last looked for a pattern (once per day at most).
   Future<String?> loadMusterGeprueft();
   Future<void> saveMusterGeprueft(DateTime day);
+
+  /// The current focus of the week (or the one that just ended).
+  Future<Wochenfokus?> loadFokus();
+  Future<void> saveFokus(Wochenfokus fokus);
+
+  /// Suggestions waiting for a choice; null clears them.
+  Future<FokusAuswahl?> loadFokusAuswahl();
+  Future<void> saveFokusAuswahl(FokusAuswahl? auswahl);
 }
 
 class LocalFeedStore implements FeedStore {
@@ -92,6 +101,8 @@ class LocalFeedStore implements FeedStore {
   static const _genommenKey = 'supplements_genommen';
   static const _musterKey = 'muster';
   static const _musterGeprueftKey = 'muster_geprueft';
+  static const _fokusKey = 'fokus';
+  static const _fokusAuswahlKey = 'fokus_auswahl';
 
   Future<Object?> _read(String key) async {
     final raw = (await SharedPreferences.getInstance()).getString(key);
@@ -277,4 +288,33 @@ class LocalFeedStore implements FeedStore {
   @override
   Future<void> saveMusterGeprueft(DateTime day) =>
       _write(_musterGeprueftKey, dayKey(day));
+
+  @override
+  Future<Wochenfokus?> loadFokus() async {
+    final json = await _read(_fokusKey);
+    return json == null
+        ? null
+        : Wochenfokus.fromJson(json as Map<String, dynamic>);
+  }
+
+  @override
+  Future<void> saveFokus(Wochenfokus fokus) =>
+      _write(_fokusKey, fokus.toJson());
+
+  @override
+  Future<FokusAuswahl?> loadFokusAuswahl() async {
+    final json = await _read(_fokusAuswahlKey);
+    return json == null
+        ? null
+        : FokusAuswahl.fromJson(json as Map<String, dynamic>);
+  }
+
+  @override
+  Future<void> saveFokusAuswahl(FokusAuswahl? auswahl) async {
+    if (auswahl == null) {
+      await (await SharedPreferences.getInstance()).remove(_fokusAuswahlKey);
+    } else {
+      await _write(_fokusAuswahlKey, auswahl.toJson());
+    }
+  }
 }

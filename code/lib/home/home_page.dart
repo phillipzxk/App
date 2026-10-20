@@ -6,6 +6,7 @@ import '../data/user_profile.dart';
 import '../feed/feed_coach.dart';
 import '../feed/feed_data.dart';
 import '../feed/feed_store.dart';
+import '../feed/fokus.dart';
 import '../feed/kcal.dart';
 import '../feed/muster.dart';
 import '../future_me/future_me_data.dart';
@@ -15,6 +16,7 @@ import '../sleep/sleep.dart';
 import '../supplements/supplement_data.dart';
 import '../ui/coach_style.dart';
 import '../weight/weight.dart';
+import 'fokus_widgets.dart';
 import 'mindset_tab.dart';
 import 'muster_widgets.dart';
 import 'nutrition_tab.dart';
@@ -66,6 +68,10 @@ class _HomePageState extends State<HomePage> {
   List<Supplement> _supplements = const [];
   Set<String> _genommen = const {};
   List<Muster> _muster = const [];
+  Wochenfokus? _fokus;
+  FokusAuswahl? _fokusAuswahl;
+  bool _fokusLaedt = false;
+  bool _fokusVersucht = false;
 
   @override
   void initState() {
@@ -89,6 +95,8 @@ class _HomePageState extends State<HomePage> {
     final supplements = await widget.feed.loadSupplements();
     final genommen = await widget.feed.loadGenommen(widget.clock());
     final muster = await widget.feed.loadMuster();
+    final fokus = await widget.feed.loadFokus();
+    final fokusAuswahl = await widget.feed.loadFokusAuswahl();
     if (!mounted) return;
     setState(() {
       _loaded = true;
@@ -107,8 +115,70 @@ class _HomePageState extends State<HomePage> {
       _supplements = supplements;
       _genommen = genommen;
       _muster = muster;
+      _fokus = fokus;
+      _fokusAuswahl = fokusAuswahl;
     });
     _pruefeMuster(checkIns, muster);
+    if (!_fokusVersucht) _holeFokusVorschlaege();
+  }
+
+  bool get _fokusLaeuft {
+    final f = _fokus;
+    return f != null && !f.vorbei(widget.clock());
+  }
+
+  /// Without a running focus, the coach suggests three (the first time from
+  /// the onboarding, later with a look back). Kept until one is chosen.
+  Future<void> _holeFokusVorschlaege() async {
+    if (_fokusLaeuft || _fokusAuswahl != null || _fokusLaedt) return;
+    _fokusVersucht = true;
+    setState(() => _fokusLaedt = true);
+    final letzter = _fokus;
+    final auswahl = await widget.coach.fokusVorschlaege(
+      widget.profile,
+      _checkIns,
+      sichtbareMuster(_muster),
+      letzter: letzter,
+    );
+    if (auswahl != null) await widget.feed.saveFokusAuswahl(auswahl);
+    if (!mounted) return;
+    setState(() {
+      _fokusLaedt = false;
+      _fokusAuswahl = auswahl;
+    });
+  }
+
+  Future<void> _starteFokus(FokusVorschlag v) async {
+    final today = widget.clock();
+    // Keeping the old focus starts a fresh week with the same text.
+    await widget.feed.saveFokus(
+      Wochenfokus(
+        start: DateTime(today.year, today.month, today.day),
+        text: v.text,
+      ),
+    );
+    await widget.feed.saveFokusAuswahl(null);
+    await _reload();
+  }
+
+  Widget _fokusWidget() {
+    final f = _fokus;
+    if (f != null && !f.vorbei(widget.clock())) {
+      return FokusKarte(
+        fokus: f,
+        today: widget.clock(),
+        onUmschalten: () async {
+          await widget.feed.saveFokus(f.umschalten(widget.clock()));
+          await _reload();
+        },
+      );
+    }
+    return FokusWahl(
+      auswahl: _fokusAuswahl,
+      laedt: _fokusLaedt || !_fokusVersucht,
+      onStart: _starteFokus,
+      onNochmal: _holeFokusVorschlaege,
+    );
   }
 
   bool _prueft = false;
@@ -282,6 +352,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
+        fokus: _fokusWidget(),
         onRestartOnboarding: widget.onRestartOnboarding,
       ),
       TrainingTab(

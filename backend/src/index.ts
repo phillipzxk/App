@@ -10,6 +10,8 @@ import {
   wertePrompt,
   musterPrompt,
   type BisherMuster,
+  fokusPrompt,
+  type LetzterFokus,
   type CheckIn,
   type Profile,
 } from "./prompts";
@@ -98,6 +100,45 @@ export function parseMuster(
   }
 }
 
+type FokusVorschlag = { text: string; warum: string; behalten: boolean };
+
+/// Up to 3 suggestions; with an old focus exactly one keeps its text.
+export function parseFokus(
+  raw: string,
+  letzter: string,
+): { rueckblick: string | null; vorschlaege: FokusVorschlag[] } {
+  const start = raw.indexOf("{");
+  const end = raw.lastIndexOf("}");
+  let data: Record<string, unknown> = {};
+  if (start >= 0 && end > start) {
+    try {
+      data = JSON.parse(raw.slice(start, end + 1));
+    } catch {
+      data = {};
+    }
+  }
+  const str = (v: unknown, max: number) =>
+    typeof v === "string" ? v.trim().slice(0, max) : "";
+  const satz = (s: string) => (s && !/[.!?]$/.test(s) ? `${s}.` : s);
+  const list = Array.isArray(data.vorschlaege) ? data.vorschlaege : [];
+  let out: FokusVorschlag[] = [];
+  for (const v of list) {
+    const o = (v ?? {}) as Record<string, unknown>;
+    const text = str(o.text, 120).replace(/\.$/, "");
+    if (!text) continue;
+    out.push({ text, warum: satz(str(o.warum, 200)), behalten: o.behalten === true });
+  }
+  if (letzter) {
+    const keep = out.find((v) => v.behalten) ?? out.find((v) => v.text === letzter);
+    out = out.filter((v) => v !== keep).map((v) => ({ ...v, behalten: false }));
+    out = [{ text: letzter, warum: keep?.warum ?? "", behalten: true }, ...out];
+  } else {
+    out = out.map((v) => ({ ...v, behalten: false }));
+  }
+  const rueckblick = letzter ? satz(str(data.rueckblick, 300)) : "";
+  return { rueckblick: rueckblick || null, vorschlaege: out.slice(0, 3) };
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
@@ -142,6 +183,23 @@ export default {
         if (checkins.length < 5) return json({ muster: null });
         try {
           return json({ muster: parseMuster(await ask(env, musterPrompt(profile, checkins, bisher))) });
+        } catch (e) {
+          console.error(e);
+          return json({ error: "coach unavailable" }, 502);
+        }
+      }
+      case "/fokus": {
+        const checkins = Array.isArray(body.checkins) ? (body.checkins as CheckIn[]) : [];
+        const muster = Array.isArray(body.muster)
+          ? (body.muster as unknown[]).filter((m): m is string => typeof m === "string")
+          : [];
+        const l = (body.letzter ?? null) as LetzterFokus | null;
+        const letzter = l && typeof l.text === "string" && l.text.trim() ? l : null;
+        try {
+          const raw = await ask(env, fokusPrompt(profile, checkins, muster, letzter));
+          const res = parseFokus(raw, letzter ? String(letzter.text).trim().slice(0, 120) : "");
+          if (res.vorschlaege.length < 2) return json({ error: "coach unavailable" }, 502);
+          return json(res);
         } catch (e) {
           console.error(e);
           return json({ error: "coach unavailable" }, 502);

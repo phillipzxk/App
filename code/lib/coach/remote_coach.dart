@@ -7,6 +7,7 @@ import '../checkin/checkin_evaluator.dart';
 import '../data/user_profile.dart';
 import '../feed/feed_coach.dart';
 import '../feed/feed_data.dart';
+import '../feed/fokus.dart';
 import '../feed/muster.dart';
 import '../onboarding/onboarding_evaluator.dart';
 
@@ -131,6 +132,45 @@ class RemoteCoach implements OnboardingEvaluator, CheckInEvaluator, FeedCoach {
       schritt: schritt,
       von: (m['von'] as String? ?? '').trim(),
       nach: (m['nach'] as String? ?? '').trim(),
+    );
+  }
+
+  @override
+  Future<FokusAuswahl?> fokusVorschlaege(
+    UserProfile profile,
+    List<CheckIn> checkIns,
+    List<Muster> muster, {
+    Wochenfokus? letzter,
+  }) async {
+    final data = await _postJson('/fokus', {
+      'profile': profileJson(profile),
+      'checkins': [
+        for (final c in checkIns.skip(
+          checkIns.length > 14 ? checkIns.length - 14 : 0,
+        ))
+          c.toJson(),
+      ],
+      'muster': [for (final m in muster.take(5)) m.text],
+      if (letzter != null)
+        'letzter': {'text': letzter.text, 'geschafft': letzter.anzahlGeschafft},
+    });
+    final list = data?['vorschlaege'];
+    if (list is! List) return null;
+    final vorschlaege = [
+      for (final v in list)
+        if (v is Map && (v['text'] as String? ?? '').trim().isNotEmpty)
+          FokusVorschlag(
+            text: (v['text'] as String).trim(),
+            warum: (v['warum'] as String? ?? '').trim(),
+            behalten: v['behalten'] == true,
+          ),
+    ];
+    if (vorschlaege.isEmpty) return null;
+    final r = (data?['rueckblick'] as String? ?? '').trim();
+    return FokusAuswahl(
+      vorschlaege: vorschlaege.take(3).toList(),
+      rueckblick: letzter == null || r.isEmpty ? null : r,
+      geschafft: letzter?.anzahlGeschafft,
     );
   }
 
