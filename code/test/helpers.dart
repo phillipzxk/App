@@ -209,6 +209,14 @@ class MemoryFeedStore implements FeedStore {
 
   @override
   Future<void> saveSchlafzeiten(Schlafzeiten z) async => schlafzeiten = z;
+
+  String coachAnsicht = 'text';
+
+  @override
+  Future<String> loadCoachAnsicht() async => coachAnsicht;
+
+  @override
+  Future<void> saveCoachAnsicht(String a) async => coachAnsicht = a;
 }
 
 /// Monday, 12 October 2026, 18:00.

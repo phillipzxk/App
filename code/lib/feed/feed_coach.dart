@@ -35,6 +35,9 @@ abstract class FeedCoach {
     List<Muster> muster, {
     Wochenfokus? letzter,
   });
+
+  /// The coach's [text] as 3 to 4 short points, or null.
+  Future<List<String>?> stichpunkte(String text);
 }
 
 /// Used until the AI backend exists: there is no answer yet.
@@ -63,4 +66,7 @@ class NoFeedCoach implements FeedCoach {
     List<Muster> muster, {
     Wochenfokus? letzter,
   }) async => null;
+
+  @override
+  Future<List<String>?> stichpunkte(String text) async => null;
 }

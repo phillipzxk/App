@@ -11,6 +11,7 @@ import {
   musterPrompt,
   type BisherMuster,
   fokusPrompt,
+  stichpunktePrompt,
   type LetzterFokus,
   type CheckIn,
   type Profile,
@@ -139,6 +140,23 @@ export function parseFokus(
   return { rueckblick: rueckblick || null, vorschlaege: out.slice(0, 3) };
 }
 
+/// 2 to 4 short points, or an empty list.
+export function parsePunkte(raw: string): string[] {
+  const start = raw.indexOf("{");
+  const end = raw.lastIndexOf("}");
+  if (start < 0 || end <= start) return [];
+  try {
+    const list = (JSON.parse(raw.slice(start, end + 1)) as { punkte?: unknown }).punkte;
+    if (!Array.isArray(list)) return [];
+    return list
+      .filter((p): p is string => typeof p === "string" && p.trim() !== "")
+      .map((p) => p.trim().replace(/^[-•*]\s*/, "").slice(0, 160))
+      .slice(0, 4);
+  } catch {
+    return [];
+  }
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
@@ -200,6 +218,18 @@ export default {
           const res = parseFokus(raw, letzter ? String(letzter.text).trim().slice(0, 120) : "");
           if (res.vorschlaege.length < 2) return json({ error: "coach unavailable" }, 502);
           return json(res);
+        } catch (e) {
+          console.error(e);
+          return json({ error: "coach unavailable" }, 502);
+        }
+      }
+      case "/stichpunkte": {
+        const text = typeof body.text === "string" ? body.text.trim() : "";
+        if (!text) return json({ punkte: [] });
+        try {
+          const punkte = parsePunkte(await ask(env, stichpunktePrompt(text)));
+          if (punkte.length < 2) return json({ error: "coach unavailable" }, 502);
+          return json({ punkte });
         } catch (e) {
           console.error(e);
           return json({ error: "coach unavailable" }, 502);

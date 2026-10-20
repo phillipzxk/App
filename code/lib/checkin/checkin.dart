@@ -14,6 +14,7 @@ class CheckIn {
     this.kiAntwort = '',
     this.werte = const {},
     this.gruende = const {},
+    this.stichpunkte = const [],
   });
 
   /// Day of the check-in, without time.
@@ -37,6 +38,9 @@ class CheckIn {
   /// One short sentence per area: why the score is where it is.
   final Map<String, String> gruende;
 
+  /// The coach's reply as 3 to 4 short points, made on first request.
+  final List<String> stichpunkte;
+
   Map<String, Object> toJson() => {
     'datum': dayKey(datum),
     'training': training,
@@ -48,16 +52,21 @@ class CheckIn {
     'ki_antwort': kiAntwort,
     'werte': werte,
     'gruende': gruende,
+    'stichpunkte': stichpunkte,
   };
 
-  CheckIn withReply(String reply) => _copy(kiAntwort: reply);
+  CheckIn withReply(String reply) =>
+      _copy(kiAntwort: reply, stichpunkte: const []);
 
   CheckIn withWerte(Map<String, BereichsWert> w) => _copy(
     werte: {for (final e in w.entries) e.key: e.value.wert},
     gruende: {for (final e in w.entries) e.key: e.value.grund},
   );
 
+  CheckIn withStichpunkte(List<String> p) => _copy(stichpunkte: p);
+
   CheckIn _copy({
+    List<String>? stichpunkte,
     String? kiAntwort,
     Map<String, int>? werte,
     Map<String, String>? gruende,
@@ -72,6 +81,7 @@ class CheckIn {
     kiAntwort: kiAntwort ?? this.kiAntwort,
     werte: werte ?? this.werte,
     gruende: gruende ?? this.gruende,
+    stichpunkte: stichpunkte ?? this.stichpunkte,
   );
 
   factory CheckIn.fromJson(Map<String, dynamic> json) => CheckIn(
@@ -91,6 +101,10 @@ class CheckIn {
       for (final e in ((json['gruende'] as Map?) ?? const {}).entries)
         if (e.value is String) e.key as String: e.value as String,
     },
+    stichpunkte: [
+      for (final p in (json['stichpunkte'] as List?) ?? const [])
+        if (p is String) p,
+    ],
   );
 }
 

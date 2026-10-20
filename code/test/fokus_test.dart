@@ -61,6 +61,9 @@ class _FokusCoach implements FeedCoach {
       geschafft: letzter?.anzahlGeschafft,
     );
   }
+
+  @override
+  Future<List<String>?> stichpunkte(String text) async => null;
 }
 
 Future<(MemoryFeedStore, _FokusCoach)> _open(

@@ -175,6 +175,18 @@ class RemoteCoach implements OnboardingEvaluator, CheckInEvaluator, FeedCoach {
   }
 
   @override
+  Future<List<String>?> stichpunkte(String text) async {
+    final data = await _postJson('/stichpunkte', {'text': text});
+    final list = data?['punkte'];
+    if (list is! List) return null;
+    final punkte = [
+      for (final p in list)
+        if (p is String && p.trim().isNotEmpty) p.trim(),
+    ];
+    return punkte.length < 2 ? null : punkte;
+  }
+
+  @override
   Future<String?> answer(
     UserProfile profile,
     Bereich bereich,

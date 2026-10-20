@@ -14,6 +14,7 @@ import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import '../feed/muster.dart';
 import 'bereichs_werte.dart';
+import 'coach_karte.dart';
 import 'muster_widgets.dart';
 import 'feed_widgets.dart';
 
@@ -77,6 +78,9 @@ class TodayTab extends StatelessWidget {
     required this.onMusterAblehnen,
     required this.onOpenMuster,
     this.fokus,
+    this.coachAnsicht = 'text',
+    required this.onCoachAnsicht,
+    required this.onStichpunkte,
     this.bettzeit,
     this.schlafStunden = 8,
     this.routineAb,
@@ -111,6 +115,11 @@ class TodayTab extends StatelessWidget {
   /// "Fokus der Woche": the running week or the choice (built by the home
   /// page, which holds the state).
   final Widget? fokus;
+
+  /// How the coach's reply is shown, see [CoachKarte.ansicht].
+  final String coachAnsicht;
+  final ValueChanged<String> onCoachAnsicht;
+  final Future<void> Function(CheckIn c) onStichpunkte;
   final Bettzeit? bettzeit;
   final double schlafStunden;
   final String? routineAb;
@@ -155,9 +164,13 @@ class TodayTab extends StatelessWidget {
             brand: true,
           ),
           if (c != null) ...[
-            CoachCard(
-              label: 'Dein Coach · heute',
+            CoachKarte(
               text: c.kiAntwort.isNotEmpty ? c.kiAntwort : noReplyYet,
+              umschaltbar: c.kiAntwort.isNotEmpty,
+              stichpunkte: c.stichpunkte,
+              ansicht: coachAnsicht,
+              onAnsicht: onCoachAnsicht,
+              onStichpunkte: () => onStichpunkte(c),
             ),
             const SizedBox(height: 14),
           ],

@@ -44,6 +44,9 @@ class _MusterCoach implements FeedCoach {
     List<Muster> muster, {
     Wochenfokus? letzter,
   }) async => null;
+
+  @override
+  Future<List<String>?> stichpunkte(String text) async => null;
 }
 
 Future<(MemoryFeedStore, _MusterCoach)> _open(
