@@ -206,6 +206,7 @@ void main() {
   testWidgets('evening routine is saved', (tester) async {
     final (_, feed) = await _openFeed(tester);
     await openTab(tester, 'Schlaf');
+    await scrollTo(tester, find.text('Abendroutine festlegen'));
     await tester.tap(find.text('Abendroutine festlegen'));
     await tester.pumpAndSettle();
     await tester.enterText(find.widgetWithText(TextField, '22:15'), '22:15');

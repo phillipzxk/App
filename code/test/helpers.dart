@@ -9,6 +9,7 @@ import 'package:coach_app/feed/feed_store.dart';
 import 'package:coach_app/feed/kcal.dart';
 import 'package:coach_app/feed/fokus.dart';
 import 'package:coach_app/feed/muster.dart';
+import 'package:coach_app/sleep/schlafzeiten.dart';
 import 'package:coach_app/future_me/future_me_data.dart';
 import 'package:coach_app/planner/planner_data.dart';
 import 'package:coach_app/supplements/supplement_data.dart';
@@ -200,6 +201,14 @@ class MemoryFeedStore implements FeedStore {
 
   @override
   Future<void> saveFokusAuswahl(FokusAuswahl? a) async => fokusAuswahl = a;
+
+  Schlafzeiten schlafzeiten = const Schlafzeiten();
+
+  @override
+  Future<Schlafzeiten> loadSchlafzeiten() async => schlafzeiten;
+
+  @override
+  Future<void> saveSchlafzeiten(Schlafzeiten z) async => schlafzeiten = z;
 }
 
 /// Monday, 12 October 2026, 18:00.

@@ -1,3 +1,4 @@
+import '../sleep/schlafzeiten.dart';
 import 'fokus.dart';
 import 'muster.dart';
 
@@ -84,6 +85,10 @@ abstract class FeedStore {
   /// Suggestions waiting for a choice; null clears them.
   Future<FokusAuswahl?> loadFokusAuswahl();
   Future<void> saveFokusAuswahl(FokusAuswahl? auswahl);
+
+  /// Wake-up times and hours of sleep, empty until set.
+  Future<Schlafzeiten> loadSchlafzeiten();
+  Future<void> saveSchlafzeiten(Schlafzeiten z);
 }
 
 class LocalFeedStore implements FeedStore {
@@ -103,6 +108,7 @@ class LocalFeedStore implements FeedStore {
   static const _musterGeprueftKey = 'muster_geprueft';
   static const _fokusKey = 'fokus';
   static const _fokusAuswahlKey = 'fokus_auswahl';
+  static const _schlafzeitenKey = 'schlafzeiten';
 
   Future<Object?> _read(String key) async {
     final raw = (await SharedPreferences.getInstance()).getString(key);
@@ -317,4 +323,16 @@ class LocalFeedStore implements FeedStore {
       await _write(_fokusAuswahlKey, auswahl.toJson());
     }
   }
+
+  @override
+  Future<Schlafzeiten> loadSchlafzeiten() async {
+    final json = await _read(_schlafzeitenKey);
+    return json == null
+        ? const Schlafzeiten()
+        : Schlafzeiten.fromJson(json as Map<String, dynamic>);
+  }
+
+  @override
+  Future<void> saveSchlafzeiten(Schlafzeiten z) =>
+      _write(_schlafzeitenKey, z.toJson());
 }

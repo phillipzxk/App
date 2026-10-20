@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../feed/feed_data.dart';
 import '../feed/kcal.dart';
 import '../planner/planner_data.dart';
+import '../sleep/schlafzeiten.dart';
 import '../ui/coach_style.dart';
 import 'feed_widgets.dart';
 
@@ -24,7 +25,21 @@ class DayPlanCard extends StatelessWidget {
     this.onOpenTraining,
     this.foto,
     this.onOpenFoto,
+    this.bettzeit,
+    this.schlafStunden = 8,
+    this.routineAb,
+    this.onOpenSchlaf,
   });
+
+  /// Tonight's bedtime, null until a wake-up time is set.
+  final Bettzeit? bettzeit;
+  final double schlafStunden;
+
+  /// Time of the first step of the evening routine, e.g. "22:00".
+  final String? routineAb;
+
+  /// Opens the Schlaf page, where the wake-up times are set.
+  final VoidCallback? onOpenSchlaf;
 
   final DateTime today;
 
@@ -102,6 +117,7 @@ class DayPlanCard extends StatelessWidget {
             onRemove: () => onRemoveTermin(t),
           ),
         _PlanRow(
+          key: const ValueKey('tag-training'),
           zeit: '–',
           art: 'Training',
           dark: true,
@@ -114,13 +130,7 @@ class DayPlanCard extends StatelessWidget {
           art: 'Essen',
           titel: meals == null ? 'Mahlzeiten' : '$meals Mahlzeiten',
         ),
-        const _PlanRow(
-          zeit: '–',
-          art: 'Schlaf',
-          titel: 'Bettzeit',
-          text: aiPending,
-          last: true,
-        ),
+        _bettRow(),
         if (demnaechst.isNotEmpty) ...[
           const SizedBox(height: 14),
           const Text('NÄCHSTE TERMINE', style: CoachStyle.label),
@@ -133,6 +143,42 @@ class DayPlanCard extends StatelessWidget {
             ),
         ],
       ],
+    );
+  }
+}
+
+extension on DayPlanCard {
+  Widget _bettRow() {
+    final b = bettzeit;
+    if (b == null) {
+      return _PlanRow(
+        key: const ValueKey('tag-bettzeit'),
+        zeit: '–',
+        art: 'Schlaf',
+        titel: 'Bettzeit',
+        text: 'Trag ein, wann du aufstehst ›',
+        last: true,
+        onTap: onOpenSchlaf,
+      );
+    }
+    final t = b.termin;
+    final grund = t != null
+        ? 'Morgen früh: ${t.text}. Darum schon um ${formatUhrzeit(b.aufstehen)} raus.'
+        : 'Morgen um ${formatUhrzeit(b.aufstehen)} raus, '
+              '${formatStunden(schlafStunden)} Std. Schlaf.';
+    // Only when the routine starts before bedtime (same evening).
+    final ab = parseUhrzeit(routineAb ?? '');
+    final routine = ab != null && ab < b.bett && b.bett - ab <= 180
+        ? '\nAbendroutine ab ${formatUhrzeit(ab)}.'
+        : '';
+    return _PlanRow(
+      key: const ValueKey('tag-bettzeit'),
+      zeit: formatUhrzeit(b.bett),
+      art: 'Schlaf',
+      titel: 'Bettzeit',
+      text: '$grund$routine',
+      last: true,
+      onTap: onOpenSchlaf,
     );
   }
 }
@@ -363,11 +409,7 @@ class _PlanRow extends StatelessWidget {
       ),
     );
     if (onTap == null) return row;
-    return InkWell(
-      key: const ValueKey('tag-training'),
-      onTap: onTap,
-      child: row,
-    );
+    return InkWell(onTap: onTap, child: row);
   }
 }
 

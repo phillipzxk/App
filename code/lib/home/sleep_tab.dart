@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../feed/feed_data.dart';
+import '../sleep/schlafzeiten.dart';
 import '../sleep/sleep.dart';
 import '../sleep/sleep_chart.dart';
 import '../ui/coach_style.dart';
@@ -20,7 +21,16 @@ class SleepTab extends StatelessWidget {
     required this.onSaveRoutine,
     required this.onAddSleep,
     required this.onAsk,
+    this.schlafzeiten = const Schlafzeiten(),
+    this.bettzeit,
+    this.onSaveSchlafzeiten,
   });
+
+  final Schlafzeiten schlafzeiten;
+
+  /// Tonight's bedtime, null until a wake-up time is set.
+  final Bettzeit? bettzeit;
+  final Future<void> Function(Schlafzeiten z)? onSaveSchlafzeiten;
 
   final List<RoutineStep> routine;
   final List<SleepEntry> sleep;
@@ -49,6 +59,11 @@ class SleepTab extends StatelessWidget {
         ),
         const AreaChart(bereich: Bereich.schlaf),
         const GroupLabel('Deine Basis'),
+        SchlafzeitenKarte(
+          zeiten: schlafzeiten,
+          bettzeit: bettzeit,
+          onSave: onSaveSchlafzeiten,
+        ),
         FeedCard(
           title: 'Deine Abendroutine',
           icon: Icons.nightlight_outlined,
@@ -94,6 +109,225 @@ class SleepTab extends StatelessWidget {
         ),
         const GroupLabel('Deine Werte'),
         SleepCard(entries: sleep, today: today, onAdd: onAddSleep),
+      ],
+    );
+  }
+}
+
+/// "Deine Schlafzeiten": wake-up time Mon-Fri and Sat/Sun and hours of
+/// sleep, each set once; below it tonight's bedtime.
+class SchlafzeitenKarte extends StatelessWidget {
+  const SchlafzeitenKarte({
+    super.key,
+    required this.zeiten,
+    required this.bettzeit,
+    required this.onSave,
+  });
+
+  final Schlafzeiten zeiten;
+  final Bettzeit? bettzeit;
+  final Future<void> Function(Schlafzeiten z)? onSave;
+
+  Future<void> _zeit(
+    BuildContext context,
+    String titel,
+    int? jetzt,
+    Schlafzeiten Function(int m) neu,
+  ) async {
+    final m = await showDialog<int>(
+      context: context,
+      builder: (_) => _UhrzeitDialog(titel: titel, jetzt: jetzt),
+    );
+    if (m != null) await onSave?.call(neu(m));
+  }
+
+  Future<void> _stunden(BuildContext context) async {
+    final h = await showDialog<double>(
+      context: context,
+      builder: (_) => const SleepDialog(
+        titel: 'Wie viele Stunden Schlaf brauchst du pro Nacht?',
+      ),
+    );
+    if (h != null) await onSave?.call(zeiten.copyWith(stunden: h));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget zeile(
+      String key,
+      String label,
+      String wert,
+      VoidCallback onTap, {
+      bool last = false,
+    }) => InkWell(
+      key: ValueKey(key),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 11),
+        decoration: BoxDecoration(
+          border: last
+              ? null
+              : const Border(bottom: BorderSide(color: CoachStyle.line)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: CoachStyle.body.copyWith(color: CoachStyle.inkSoft),
+              ),
+            ),
+            Text(
+              wert,
+              style: CoachStyle.cardTitle.copyWith(
+                fontSize: 16,
+                color: const Color(0xFFF5DFAE),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              wert == '–' ? 'Festlegen' : 'Ändern',
+              style: CoachStyle.body.copyWith(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                color: CoachStyle.goldLight,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    String uhr(int? m) => m == null ? '–' : formatUhrzeit(m);
+    final b = bettzeit;
+    return FeedCard(
+      key: const ValueKey('schlafzeiten'),
+      title: 'Deine Schlafzeiten',
+      icon: Icons.alarm,
+      dark: true,
+      children: [
+        zeile(
+          'aufstehen-werktag',
+          'Aufstehen Mo bis Fr',
+          uhr(zeiten.werktag),
+          () => _zeit(
+            context,
+            'Wann stehst du Mo bis Fr auf?',
+            zeiten.werktag,
+            (m) => zeiten.copyWith(werktag: m),
+          ),
+        ),
+        zeile(
+          'aufstehen-wochenende',
+          'Aufstehen Sa und So',
+          uhr(zeiten.wochenende),
+          () => _zeit(
+            context,
+            'Wann stehst du am Wochenende auf?',
+            zeiten.wochenende ?? zeiten.werktag,
+            (m) => zeiten.copyWith(wochenende: m),
+          ),
+        ),
+        zeile(
+          'schlaf-stunden',
+          'Schlaf pro Nacht',
+          '${formatStunden(zeiten.stunden)} Std.',
+          () => _stunden(context),
+          last: true,
+        ),
+        const SizedBox(height: 8),
+        Container(
+          key: const ValueKey('heute-ins-bett'),
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+          decoration: BoxDecoration(
+            gradient: CoachStyle.tileGradient,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text.rich(
+            b == null
+                ? const TextSpan(
+                    text:
+                        'Trag ein, wann du aufstehst. Daraus rechnet '
+                        'die App jeden Abend deine Bettzeit.',
+                  )
+                : TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Heute ins Bett: ${formatUhrzeit(b.bett)}.',
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      TextSpan(
+                        text: b.termin != null
+                            ? ' Wegen deines Termins morgen früh stehst du '
+                                  'schon um ${formatUhrzeit(b.aufstehen)} auf.'
+                            : ' Ein früher Termin morgen schiebt das '
+                                  'automatisch vor.',
+                      ),
+                    ],
+                  ),
+            style: CoachStyle.body.copyWith(
+              fontSize: 13.5,
+              color: CoachStyle.goldInk,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _UhrzeitDialog extends StatefulWidget {
+  const _UhrzeitDialog({required this.titel, this.jetzt});
+
+  final String titel;
+  final int? jetzt;
+
+  @override
+  State<_UhrzeitDialog> createState() => _UhrzeitDialogState();
+}
+
+class _UhrzeitDialogState extends State<_UhrzeitDialog> {
+  late final _controller = TextEditingController(
+    text: widget.jetzt == null ? '' : formatUhrzeit(widget.jetzt!),
+  );
+  String? _error;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final m = parseUhrzeit(_controller.text);
+    if (m == null) {
+      setState(() => _error = 'Bitte als Uhrzeit, z. B. 6:30.');
+      return;
+    }
+    Navigator.of(context).pop(m);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.titel),
+      content: TextField(
+        key: const ValueKey('uhrzeit-feld'),
+        controller: _controller,
+        autofocus: true,
+        keyboardType: TextInputType.datetime,
+        decoration: InputDecoration(
+          suffixText: 'Uhr',
+          hintText: 'z. B. 6:30',
+          errorText: _error,
+        ),
+        onSubmitted: (_) => _save(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Abbrechen'),
+        ),
+        FilledButton(onPressed: _save, child: const Text('Speichern')),
       ],
     );
   }
@@ -164,7 +398,12 @@ class SleepCard extends StatelessWidget {
 }
 
 class SleepDialog extends StatefulWidget {
-  const SleepDialog({super.key});
+  const SleepDialog({
+    super.key,
+    this.titel = 'Wie lange hast du letzte Nacht geschlafen?',
+  });
+
+  final String titel;
 
   @override
   State<SleepDialog> createState() => _SleepDialogState();
@@ -192,7 +431,7 @@ class _SleepDialogState extends State<SleepDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Wie lange hast du letzte Nacht geschlafen?'),
+      title: Text(widget.titel),
       content: TextField(
         controller: _controller,
         autofocus: true,
