@@ -6,6 +6,7 @@ import '../feed/feed_data.dart';
 import '../future_me/future_me_card.dart';
 import '../future_me/future_me_data.dart';
 import '../planner/planner_data.dart';
+import '../sleep/schlafzeiten.dart';
 import '../supplements/supplement_data.dart';
 import '../supplements/supplement_widgets.dart';
 import 'day_plan.dart';
@@ -76,6 +77,10 @@ class TodayTab extends StatelessWidget {
     required this.onMusterAblehnen,
     required this.onOpenMuster,
     this.fokus,
+    this.bettzeit,
+    this.schlafStunden = 8,
+    this.routineAb,
+    this.onOpenSchlaf,
     required this.onOpenArea,
     required this.onRestartOnboarding,
   });
@@ -106,6 +111,10 @@ class TodayTab extends StatelessWidget {
   /// "Fokus der Woche": the running week or the choice (built by the home
   /// page, which holds the state).
   final Widget? fokus;
+  final Bettzeit? bettzeit;
+  final double schlafStunden;
+  final String? routineAb;
+  final VoidCallback? onOpenSchlaf;
   final ValueChanged<Bereich> onOpenArea;
   final VoidCallback onRestartOnboarding;
 
@@ -177,6 +186,10 @@ class TodayTab extends StatelessWidget {
             onOpenTraining: () => onOpenArea(Bereich.training),
             foto: _fotoHeute,
             onOpenFoto: onOpenZukunft,
+            bettzeit: bettzeit,
+            schlafStunden: schlafStunden,
+            routineAb: routineAb,
+            onOpenSchlaf: onOpenSchlaf,
           ),
           const GroupLabel('Deine Woche'),
           ?fokus,

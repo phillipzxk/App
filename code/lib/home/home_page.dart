@@ -12,6 +12,7 @@ import '../feed/muster.dart';
 import '../future_me/future_me_data.dart';
 import '../future_me/future_me_page.dart';
 import '../planner/planner_data.dart';
+import '../sleep/schlafzeiten.dart';
 import '../sleep/sleep.dart';
 import '../supplements/supplement_data.dart';
 import '../ui/coach_style.dart';
@@ -72,6 +73,7 @@ class _HomePageState extends State<HomePage> {
   FokusAuswahl? _fokusAuswahl;
   bool _fokusLaedt = false;
   bool _fokusVersucht = false;
+  Schlafzeiten _schlafzeiten = const Schlafzeiten();
 
   @override
   void initState() {
@@ -97,6 +99,7 @@ class _HomePageState extends State<HomePage> {
     final muster = await widget.feed.loadMuster();
     final fokus = await widget.feed.loadFokus();
     final fokusAuswahl = await widget.feed.loadFokusAuswahl();
+    final schlafzeiten = await widget.feed.loadSchlafzeiten();
     if (!mounted) return;
     setState(() {
       _loaded = true;
@@ -117,6 +120,7 @@ class _HomePageState extends State<HomePage> {
       _muster = muster;
       _fokus = fokus;
       _fokusAuswahl = fokusAuswahl;
+      _schlafzeiten = schlafzeiten;
     });
     _pruefeMuster(checkIns, muster);
     if (!_fokusVersucht) _holeFokusVorschlaege();
@@ -279,7 +283,17 @@ class _HomePageState extends State<HomePage> {
             '(nur als Orientierung, nicht zum Zählen). '
             'Gewicht zuletzt: ${_weights.last.kg} kg.';
       case Bereich.schlaf:
+        final b = _bettzeit;
+        final z = _schlafzeiten;
         final lines = [
+          if (z.werktag != null)
+            'Aufstehen Mo bis Fr: ${formatUhrzeit(z.werktag!)}',
+          if (z.wochenende != null)
+            'Aufstehen Sa und So: ${formatUhrzeit(z.wochenende!)}',
+          if (z.gesetzt)
+            'Schlaf, den sie braucht: ${formatStunden(z.stunden)} Stunden',
+          if (b != null)
+            'Bettzeit heute: ${formatUhrzeit(b.bett)}, morgen raus um ${formatUhrzeit(b.aufstehen)}',
           if (_routine.isNotEmpty) 'Abendroutine:',
           for (final s in _routine) '${s.zeit} ${s.was}',
           for (final e in _sleep.reversed.take(7))
@@ -290,6 +304,9 @@ class _HomePageState extends State<HomePage> {
         return '';
     }
   }
+
+  Bettzeit? get _bettzeit =>
+      bettzeitFuer(_schlafzeiten, widget.clock(), _termine);
 
   int? get _kcalZiel {
     final p = _kcal;
@@ -353,6 +370,10 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         fokus: _fokusWidget(),
+        bettzeit: _bettzeit,
+        schlafStunden: _schlafzeiten.stunden,
+        routineAb: _routine.isEmpty ? null : _routine.first.zeit,
+        onOpenSchlaf: () => setState(() => _tab = Bereich.schlaf.index + 1),
         onRestartOnboarding: widget.onRestartOnboarding,
       ),
       TrainingTab(
@@ -399,6 +420,12 @@ class _HomePageState extends State<HomePage> {
           await _reload();
         },
         onAsk: _ask(Bereich.schlaf),
+        schlafzeiten: _schlafzeiten,
+        bettzeit: _bettzeit,
+        onSaveSchlafzeiten: (z) async {
+          await widget.feed.saveSchlafzeiten(z);
+          await _reload();
+        },
       ),
       MindsetTab(
         profile: widget.profile,
