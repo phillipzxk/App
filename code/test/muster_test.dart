@@ -1,5 +1,6 @@
 import 'package:coach_app/checkin/checkin.dart';
 import 'package:coach_app/data/user_profile.dart';
+import 'package:coach_app/feed/durchgezogen.dart';
 import 'package:coach_app/feed/feed_coach.dart';
 import 'package:coach_app/feed/feed_data.dart';
 import 'package:coach_app/feed/fokus.dart';
@@ -47,6 +48,15 @@ class _MusterCoach implements FeedCoach {
 
   @override
   Future<List<String>?> stichpunkte(String text) async => null;
+
+  @override
+  Future<String?> durchgezogen(
+    UserProfile profile,
+    CheckIn today, {
+    String? fokus,
+    bool fokusGeschafft = false,
+    List<Durchgezogen> bisher = const [],
+  }) async => null;
 }
 
 Future<(MemoryFeedStore, _MusterCoach)> _open(

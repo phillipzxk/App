@@ -7,6 +7,7 @@ import 'package:coach_app/data/user_profile.dart';
 import 'package:coach_app/feed/feed_data.dart';
 import 'package:coach_app/feed/feed_store.dart';
 import 'package:coach_app/feed/kcal.dart';
+import 'package:coach_app/feed/durchgezogen.dart';
 import 'package:coach_app/feed/fokus.dart';
 import 'package:coach_app/feed/muster.dart';
 import 'package:coach_app/sleep/schlafzeiten.dart';
@@ -217,6 +218,24 @@ class MemoryFeedStore implements FeedStore {
 
   @override
   Future<void> saveCoachAnsicht(String a) async => coachAnsicht = a;
+
+  final durchgezogen = <Durchgezogen>[];
+  String? durchGeprueft;
+
+  @override
+  Future<List<Durchgezogen>> loadDurchgezogen() async => List.of(durchgezogen);
+
+  @override
+  Future<void> saveDurchgezogen(List<Durchgezogen> list) async => durchgezogen
+    ..clear()
+    ..addAll(list);
+
+  @override
+  Future<String?> loadDurchGeprueft() async => durchGeprueft;
+
+  @override
+  Future<void> saveDurchGeprueft(DateTime day) async =>
+      durchGeprueft = dayKey(day);
 }
 
 /// Monday, 12 October 2026, 18:00.

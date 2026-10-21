@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../checkin/checkin.dart';
 import '../data/diary_store.dart';
 import '../data/user_profile.dart';
+import '../feed/durchgezogen.dart';
 import '../feed/feed_coach.dart';
 import '../feed/feed_data.dart';
 import '../feed/feed_store.dart';
@@ -17,6 +18,7 @@ import '../sleep/sleep.dart';
 import '../supplements/supplement_data.dart';
 import '../ui/coach_style.dart';
 import '../weight/weight.dart';
+import 'durchgezogen_widgets.dart';
 import 'fokus_widgets.dart';
 import 'mindset_tab.dart';
 import 'muster_widgets.dart';
@@ -75,6 +77,7 @@ class _HomePageState extends State<HomePage> {
   bool _fokusVersucht = false;
   Schlafzeiten _schlafzeiten = const Schlafzeiten();
   String _coachAnsicht = 'text';
+  List<Durchgezogen> _durchgezogen = const [];
 
   @override
   void initState() {
@@ -102,6 +105,7 @@ class _HomePageState extends State<HomePage> {
     final fokusAuswahl = await widget.feed.loadFokusAuswahl();
     final schlafzeiten = await widget.feed.loadSchlafzeiten();
     final coachAnsicht = await widget.feed.loadCoachAnsicht();
+    final durchgezogen = await widget.feed.loadDurchgezogen();
     if (!mounted) return;
     setState(() {
       _loaded = true;
@@ -124,8 +128,10 @@ class _HomePageState extends State<HomePage> {
       _fokusAuswahl = fokusAuswahl;
       _schlafzeiten = schlafzeiten;
       _coachAnsicht = coachAnsicht;
+      _durchgezogen = durchgezogen;
     });
     _pruefeMuster(checkIns, muster);
+    _pruefeDurchgezogen(checkIns, durchgezogen);
     if (!_fokusVersucht) _holeFokusVorschlaege();
   }
 
@@ -210,6 +216,81 @@ class _HomePageState extends State<HomePage> {
     _prueft = false;
     if (neu == null) return;
     await widget.feed.saveMuster([...bisher, neu]);
+    await _reload();
+  }
+
+  bool _durchPrueft = false;
+
+  /// Once a day after today's check-in the coach may add one entry to
+  /// "Durchgezogen", only when something was clearly done despite
+  /// reluctance (decided with Phillip 2026-10-20).
+  Future<void> _pruefeDurchgezogen(
+    List<CheckIn> checkIns,
+    List<Durchgezogen> bisher,
+  ) async {
+    final today = widget.clock();
+    final key = dayKey(today);
+    if (_durchPrueft) return;
+    final heute = checkIns.where((c) => dayKey(c.datum) == key).toList();
+    if (heute.isEmpty) return;
+    if (bisher.any((e) => e.vonCoach && dayKey(e.datum) == key)) return;
+    if (await widget.feed.loadDurchGeprueft() == key) return;
+    _durchPrueft = true;
+    await widget.feed.saveDurchGeprueft(today);
+    final f = _fokusLaeuft ? _fokus : null;
+    final text = await widget.coach.durchgezogen(
+      widget.profile,
+      heute.last,
+      fokus: f?.text,
+      fokusGeschafft: f?.heuteGeschafft(today) ?? false,
+      bisher: bisher,
+    );
+    _durchPrueft = false;
+    if (text == null || text.trim().isEmpty) return;
+    final aktuell = await widget.feed.loadDurchgezogen();
+    await widget.feed.saveDurchgezogen([
+      ...aktuell,
+      Durchgezogen(
+        datum: DateTime(today.year, today.month, today.day),
+        text: text.trim(),
+        vonCoach: true,
+        erstellt: widget.clock(),
+      ),
+    ]);
+    await _reload();
+  }
+
+  Future<void> _durchAdd(String text) async {
+    final today = widget.clock();
+    final aktuell = await widget.feed.loadDurchgezogen();
+    await widget.feed.saveDurchgezogen([
+      ...aktuell,
+      Durchgezogen(
+        datum: DateTime(today.year, today.month, today.day),
+        text: text,
+        vonCoach: false,
+        erstellt: today,
+      ),
+    ]);
+    await _reload();
+  }
+
+  Future<void> _durchAlle() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => DurchgezogenSeite(
+          alle: _durchgezogen,
+          today: widget.clock(),
+          onDelete: (e) async {
+            final aktuell = await widget.feed.loadDurchgezogen();
+            await widget.feed.saveDurchgezogen([
+              for (final x in aktuell)
+                if (x.erstellt != e.erstellt || x.text != e.text) x,
+            ]);
+          },
+        ),
+      ),
+    );
     await _reload();
   }
 
@@ -445,6 +526,10 @@ class _HomePageState extends State<HomePage> {
         profile: widget.profile,
         fragen: _todayFragen(Bereich.mindset),
         onAsk: _ask(Bereich.mindset),
+        durchgezogen: _durchgezogen,
+        today: widget.clock(),
+        onDurchAdd: _durchAdd,
+        onDurchAlle: _durchAlle,
       ),
     ];
     // The whole app is dark with beige and gold (Phillip 2026-10-18).

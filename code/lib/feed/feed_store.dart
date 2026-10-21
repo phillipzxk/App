@@ -1,4 +1,5 @@
 import '../sleep/schlafzeiten.dart';
+import 'durchgezogen.dart';
 import 'fokus.dart';
 import 'muster.dart';
 
@@ -93,6 +94,14 @@ abstract class FeedStore {
   /// How the coach's reply on "Heute" is shown: 'text', 'punkte' or 'zu'.
   Future<String> loadCoachAnsicht();
   Future<void> saveCoachAnsicht(String ansicht);
+
+  /// "Durchgezogen": all entries, from the coach and the user.
+  Future<List<Durchgezogen>> loadDurchgezogen();
+  Future<void> saveDurchgezogen(List<Durchgezogen> list);
+
+  /// Day the coach last looked for an entry (once per day at most).
+  Future<String?> loadDurchGeprueft();
+  Future<void> saveDurchGeprueft(DateTime day);
 }
 
 class LocalFeedStore implements FeedStore {
@@ -114,6 +123,8 @@ class LocalFeedStore implements FeedStore {
   static const _fokusAuswahlKey = 'fokus_auswahl';
   static const _schlafzeitenKey = 'schlafzeiten';
   static const _coachAnsichtKey = 'coach_ansicht';
+  static const _durchKey = 'durchgezogen';
+  static const _durchGeprueftKey = 'durchgezogen_geprueft';
 
   Future<Object?> _read(String key) async {
     final raw = (await SharedPreferences.getInstance()).getString(key);
@@ -348,4 +359,25 @@ class LocalFeedStore implements FeedStore {
   @override
   Future<void> saveCoachAnsicht(String ansicht) =>
       _write(_coachAnsichtKey, ansicht);
+
+  @override
+  Future<List<Durchgezogen>> loadDurchgezogen() async {
+    final json = await _read(_durchKey) as List?;
+    return [
+      for (final e in json ?? const [])
+        Durchgezogen.fromJson(e as Map<String, dynamic>),
+    ];
+  }
+
+  @override
+  Future<void> saveDurchgezogen(List<Durchgezogen> list) =>
+      _write(_durchKey, [for (final e in list) e.toJson()]);
+
+  @override
+  Future<String?> loadDurchGeprueft() async =>
+      await _read(_durchGeprueftKey) as String?;
+
+  @override
+  Future<void> saveDurchGeprueft(DateTime day) =>
+      _write(_durchGeprueftKey, dayKey(day));
 }
