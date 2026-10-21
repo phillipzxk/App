@@ -7,6 +7,7 @@ import '../checkin/checkin_evaluator.dart';
 import '../data/user_profile.dart';
 import '../feed/feed_coach.dart';
 import '../feed/feed_data.dart';
+import '../feed/durchgezogen.dart';
 import '../feed/fokus.dart';
 import '../feed/muster.dart';
 import '../onboarding/onboarding_evaluator.dart';
@@ -184,6 +185,24 @@ class RemoteCoach implements OnboardingEvaluator, CheckInEvaluator, FeedCoach {
         if (p is String && p.trim().isNotEmpty) p.trim(),
     ];
     return punkte.length < 2 ? null : punkte;
+  }
+
+  @override
+  Future<String?> durchgezogen(
+    UserProfile profile,
+    CheckIn today, {
+    String? fokus,
+    bool fokusGeschafft = false,
+    List<Durchgezogen> bisher = const [],
+  }) async {
+    final data = await _postJson('/durchgezogen', {
+      'profile': profileJson(profile),
+      'today': today.toJson(),
+      if (fokus != null) 'fokus': {'text': fokus, 'geschafft': fokusGeschafft},
+      'bisher': [for (final e in bisher.reversed.take(6)) e.text],
+    });
+    final e = data?['eintrag'];
+    return e is String && e.trim().isNotEmpty ? e.trim() : null;
   }
 
   @override

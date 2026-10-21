@@ -12,6 +12,7 @@ import {
   type BisherMuster,
   fokusPrompt,
   stichpunktePrompt,
+  durchgezogenPrompt,
   type LetzterFokus,
   type CheckIn,
   type Profile,
@@ -157,6 +158,19 @@ export function parsePunkte(raw: string): string[] {
   }
 }
 
+/// One short entry, or null.
+export function parseEintrag(raw: string): string | null {
+  const start = raw.indexOf("{");
+  const end = raw.lastIndexOf("}");
+  if (start < 0 || end <= start) return null;
+  try {
+    const e = (JSON.parse(raw.slice(start, end + 1)) as { eintrag?: unknown }).eintrag;
+    return typeof e === "string" && e.trim() ? e.trim().slice(0, 200) : null;
+  } catch {
+    return null;
+  }
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
@@ -230,6 +244,19 @@ export default {
           const punkte = parsePunkte(await ask(env, stichpunktePrompt(text)));
           if (punkte.length < 2) return json({ error: "coach unavailable" }, 502);
           return json({ punkte });
+        } catch (e) {
+          console.error(e);
+          return json({ error: "coach unavailable" }, 502);
+        }
+      }
+      case "/durchgezogen": {
+        const today = (body.today ?? {}) as CheckIn;
+        const f = (body.fokus ?? null) as { text?: string; geschafft?: boolean } | null;
+        const bisher = Array.isArray(body.bisher)
+          ? (body.bisher as unknown[]).filter((t): t is string => typeof t === "string")
+          : [];
+        try {
+          return json({ eintrag: parseEintrag(await ask(env, durchgezogenPrompt(profile, today, f, bisher))) });
         } catch (e) {
           console.error(e);
           return json({ error: "coach unavailable" }, 502);

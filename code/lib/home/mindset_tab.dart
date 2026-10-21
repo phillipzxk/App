@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../data/user_profile.dart';
+import '../feed/durchgezogen.dart';
 import '../feed/feed_data.dart';
 import '../ui/coach_style.dart';
 import 'bereichs_werte.dart';
+import 'durchgezogen_widgets.dart';
 import 'feed_widgets.dart';
 
 /// Mindset page: progress, Durchgezogen, Dein Warum and the field
@@ -14,11 +16,19 @@ class MindsetTab extends StatelessWidget {
     required this.profile,
     required this.fragen,
     required this.onAsk,
+    required this.durchgezogen,
+    required this.today,
+    required this.onDurchAdd,
+    required this.onDurchAlle,
   });
 
   final UserProfile profile;
   final List<CoachFrage> fragen;
   final Future<void> Function(String text) onAsk;
+  final List<Durchgezogen> durchgezogen;
+  final DateTime today;
+  final Future<void> Function(String text) onDurchAdd;
+  final VoidCallback onDurchAlle;
 
   @override
   Widget build(BuildContext context) {
@@ -27,12 +37,11 @@ class MindsetTab extends StatelessWidget {
       children: [
         const PageHeader(label: 'Bereich', title: 'Mindset', icon: Icons.spa),
         const AreaChart(bereich: Bereich.mindset),
-        const FeedCard(
-          title: 'Durchgezogen · diese Woche',
-          icon: Icons.check_circle_outline,
-          children: [
-            HintText('Was du diese Woche durchgezogen hast. $aiPending'),
-          ],
+        DurchgezogenKarte(
+          alle: durchgezogen,
+          today: today,
+          onAdd: onDurchAdd,
+          onAlle: onDurchAlle,
         ),
         if (profile.motivation.isNotEmpty) ...[
           const GroupLabel('Deine Basis'),

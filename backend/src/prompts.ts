@@ -233,3 +233,34 @@ Fasse genau diese Antwort in 3 bis 4 Stichpunkten zusammen, damit sie sie in Sek
 Antworte nur mit JSON, ohne weiteren Text:
 {"punkte": ["...", "...", "..."]}`;
 }
+
+/// One "Durchgezogen" entry for today, or null (see vault
+/// Umsetzung/Durchgezogen.md): something done despite reluctance.
+export function durchgezogenPrompt(
+  p: Profile,
+  today: CheckIn,
+  fokus: { text?: string; geschafft?: boolean } | null,
+  bisher: string[],
+): string {
+  const f = fokus?.text
+    ? `\nIhr Fokus der Woche:\n<nutzer>\n${clip(fokus.text, 200)}\n</nutzer>\nHeute als geschafft abgehakt: ${fokus.geschafft ? "ja" : "nein"}.\n`
+    : "";
+  const alt = bisher.slice(-6).map((t) => `- ${clip(t, 200)}`).join("\n");
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Ihr Check-in von heute:
+<nutzer>
+${checkInBlock(today)}
+</nutzer>
+${f}${alt ? `\nWas schon in ihrer Liste „Durchgezogen“ steht:\n<nutzer>\n${alt}\n</nutzer>\n` : ""}
+Die Liste „Durchgezogen“ sammelt, was sie trotz Unlust oder Widerstand gemacht hat. Hat sie heute so etwas klar geschafft (zum Beispiel trotz kurzer Nacht trainiert, etwas erledigt, wovor sie sich gedrückt hat, ihren Fokus durchgezogen)? Nur wenn es aus ihren Antworten klar hervorgeht. Ein ganz normaler Tag ohne Widerstand zählt nicht. Wiederhole keinen Eintrag, der schon in der Liste steht.
+
+Wenn ja: "eintrag" ist ein Satz in Du-Form, Vergangenheit, konkret, höchstens 14 Wörter, ohne Lob und ohne Anrede, z. B. "Trotz kurzer Nacht trainiert." oder "Das Telefonat erledigt, vor dem du dich gedrückt hast."
+
+Antworte nur mit JSON, ohne weiteren Text, entweder
+{"eintrag": null}
+oder
+{"eintrag": "..."}`;
+}

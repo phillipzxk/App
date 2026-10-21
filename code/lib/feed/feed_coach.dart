@@ -1,5 +1,6 @@
 import '../checkin/checkin.dart';
 import '../data/user_profile.dart';
+import 'durchgezogen.dart';
 import 'feed_data.dart';
 import 'fokus.dart';
 import 'muster.dart';
@@ -38,6 +39,16 @@ abstract class FeedCoach {
 
   /// The coach's [text] as 3 to 4 short points, or null.
   Future<List<String>?> stichpunkte(String text);
+
+  /// One "Durchgezogen" entry for [today], or null when nothing was
+  /// clearly done despite reluctance. [bisher] avoids repeats.
+  Future<String?> durchgezogen(
+    UserProfile profile,
+    CheckIn today, {
+    String? fokus,
+    bool fokusGeschafft = false,
+    List<Durchgezogen> bisher = const [],
+  });
 }
 
 /// Used until the AI backend exists: there is no answer yet.
@@ -69,4 +80,13 @@ class NoFeedCoach implements FeedCoach {
 
   @override
   Future<List<String>?> stichpunkte(String text) async => null;
+
+  @override
+  Future<String?> durchgezogen(
+    UserProfile profile,
+    CheckIn today, {
+    String? fokus,
+    bool fokusGeschafft = false,
+    List<Durchgezogen> bisher = const [],
+  }) async => null;
 }
