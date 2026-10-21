@@ -13,10 +13,10 @@ import 'day_plan.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import '../feed/muster.dart';
-import 'bereichs_werte.dart';
 import 'coach_karte.dart';
 import 'muster_widgets.dart';
 import 'feed_widgets.dart';
+import 'heute_animationen.dart';
 
 /// Days in a row with a check-in, counted back from [today]. A day without
 /// a check-in yet today does not break the row until it is over.
@@ -43,13 +43,6 @@ List<bool> lastSevenDays(List<CheckIn> checkIns, DateTime today) {
       days.contains(dayKey(d.subtract(Duration(days: i)))),
   ];
 }
-
-const _icons = {
-  Bereich.training: Icons.fitness_center,
-  Bereich.ernaehrung: Icons.eco,
-  Bereich.schlaf: Icons.bedtime,
-  Bereich.mindset: Icons.spa,
-};
 
 /// Start page after the check-in: the coach's reply, the supplement
 /// reminder, the progress photo, the day plan, the focus of the week, days
@@ -86,6 +79,11 @@ class TodayTab extends StatelessWidget {
     this.routineAb,
     this.onOpenSchlaf,
     required this.onOpenArea,
+    this.onOpenAreaVon,
+    this.wurzeln = 0,
+    this.jubel,
+    this.jubelTick = 0,
+    this.scroll,
     required this.onRestartOnboarding,
   });
 
@@ -125,6 +123,19 @@ class TodayTab extends StatelessWidget {
   final String? routineAb;
   final VoidCallback? onOpenSchlaf;
   final ValueChanged<Bereich> onOpenArea;
+
+  /// Opens an area page growing out of the big field at [von].
+  final void Function(Bereich b, Rect von)? onOpenAreaVon;
+
+  /// How far the sprout's roots reach (each "Heute geschafft" this week).
+  final int wurzeln;
+
+  /// Cheer from the coach and its trigger, see [CoachKarte.jubel].
+  final String? jubel;
+  final int jubelTick;
+
+  /// Lets the home page scroll up to the cheer.
+  final ScrollController? scroll;
   final VoidCallback onRestartOnboarding;
 
   CheckIn? get _todayCheckIn {
@@ -156,12 +167,28 @@ class TodayTab extends StatelessWidget {
     final streak = checkInStreak(checkIns, today);
     return NightScope(
       child: ListView(
+        controller: scroll,
         padding: const EdgeInsets.only(bottom: 110),
         children: [
-          PageHeader(
-            label: date,
-            title: name.isEmpty ? 'Heute' : 'Heute, $name',
-            brand: true,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: PageHeader(
+                  label: date,
+                  title: name.isEmpty ? 'Heute' : 'Heute, $name',
+                  brand: true,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 16, left: 8),
+                child: SprossBox(
+                  streak: streak,
+                  wurzeln: wurzeln,
+                  jubelTick: jubelTick,
+                ),
+              ),
+            ],
           ),
           if (c != null) ...[
             CoachKarte(
@@ -171,9 +198,19 @@ class TodayTab extends StatelessWidget {
               ansicht: coachAnsicht,
               onAnsicht: onCoachAnsicht,
               onStichpunkte: () => onStichpunkte(c),
+              jubel: jubel,
+              jubelTick: jubelTick,
             ),
             const SizedBox(height: 14),
           ],
+          BereichsFeld(
+            checkIns: checkIns,
+            today: today,
+            onOpen: (b, von) =>
+                onOpenAreaVon != null ? onOpenAreaVon!(b, von) : onOpenArea(b),
+          ),
+          const SizedBox(height: 14),
+          ?fokus,
           const GroupLabel('Heute dran'),
           SupplementHinweis(
             supplements: supplements,
@@ -204,28 +241,6 @@ class TodayTab extends StatelessWidget {
             routineAb: routineAb,
             onOpenSchlaf: onOpenSchlaf,
           ),
-          const GroupLabel('Deine Woche'),
-          ?fokus,
-          _StreakCard(streak: streak, days: lastSevenDays(checkIns, today)),
-          const GroupLabel('Deine Bereiche'),
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            padding: EdgeInsets.zero,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            childAspectRatio: 1.45,
-            children: [
-              for (final b in Bereich.values)
-                _AreaTile(
-                  bereich: b,
-                  checkIns: checkIns,
-                  today: today,
-                  onTap: () => onOpenArea(b),
-                ),
-            ],
-          ),
           const SizedBox(height: 14),
           // Only shown once the coach saw a clear pattern.
           if (muster.isNotEmpty) ...[
@@ -244,148 +259,6 @@ class TodayTab extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Small card: days in a row with a check-in, one dot per day.
-class _StreakCard extends StatelessWidget {
-  const _StreakCard({required this.streak, required this.days});
-
-  final int streak;
-  final List<bool> days;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      key: const ValueKey('streak-karte'),
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-      decoration: BoxDecoration(
-        gradient: CoachStyle.cardGradient,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: CoachStyle.hairline),
-      ),
-      child: Row(
-        children: [
-          const SymbolBadge(
-            Icons.local_fire_department_outlined,
-            size: 26,
-            onDark: true,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              streak == 1 ? '1 Tag am Stück' : '$streak Tage am Stück',
-              style: CoachStyle.cardTitle.copyWith(fontSize: 14),
-            ),
-          ),
-          _Dots(days: days),
-        ],
-      ),
-    );
-  }
-}
-
-/// One dot per day of the last week, gold when checked in.
-class _Dots extends StatelessWidget {
-  const _Dots({required this.days});
-
-  final List<bool> days;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (final on in days)
-          Container(
-            width: 9,
-            height: 9,
-            margin: const EdgeInsets.only(left: 4),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: on ? const Color(0xFFD4A85E) : CoachStyle.nightLineStrong,
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-/// Area at a glance: own symbol, today's AI rating (a dash until the AI is
-/// connected) and the small progress bars.
-class _AreaTile extends StatelessWidget {
-  const _AreaTile({
-    required this.bereich,
-    required this.checkIns,
-    required this.today,
-    required this.onTap,
-  });
-
-  final Bereich bereich;
-  final List<CheckIn> checkIns;
-  final DateTime today;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        gradient: CoachStyle.tileGradient,
-        boxShadow: CoachStyle.cardShadow,
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-          side: BorderSide.none,
-        ),
-        child: InkWell(
-          key: ValueKey('bereich-${bereich.name}'),
-          borderRadius: BorderRadius.circular(14),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(11),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 24,
-                      height: 24,
-                      decoration: const BoxDecoration(
-                        color: CoachStyle.goldInk,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        _icons[bereich],
-                        size: 14,
-                        color: CoachStyle.goldLight,
-                      ),
-                    ),
-                    const SizedBox(width: 7),
-                    Expanded(
-                      child: Text(
-                        bereich.label,
-                        overflow: TextOverflow.ellipsis,
-                        style: CoachStyle.cardTitle.copyWith(
-                          fontSize: 13,
-                          color: CoachStyle.goldInk,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                TileWerte(bereich: bereich, checkIns: checkIns, today: today),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

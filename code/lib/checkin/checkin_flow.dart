@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../data/diary_store.dart';
@@ -95,6 +97,13 @@ class _CheckInFlowState extends State<CheckInFlow> {
         ),
         _Phase.reply => CheckInReply(
           reply: _saved!.kiAntwort,
+          antworten: [
+            _saved!.training,
+            _saved!.ernaehrung,
+            _saved!.schlaf,
+            _saved!.energie,
+            _saved!.mindset,
+          ],
           onDone: () => widget.onFinished(_saved!),
         ),
       },
@@ -552,12 +561,52 @@ class _Chip extends StatelessWidget {
   }
 }
 
-/// The coach's reply to the day, shown right after the check-in.
-class CheckInReply extends StatelessWidget {
-  const CheckInReply({super.key, required this.reply, required this.onDone});
+/// The coach's reply to the day, shown right after the check-in. The five
+/// answers fly into the coach card, then the reply writes itself word by
+/// word (decided with Phillip 2026-10-21).
+class CheckInReply extends StatefulWidget {
+  const CheckInReply({
+    super.key,
+    required this.reply,
+    required this.onDone,
+    this.antworten = const [],
+  });
 
   final String reply;
   final VoidCallback onDone;
+  final List<String> antworten;
+
+  @override
+  State<CheckInReply> createState() => _CheckInReplyState();
+}
+
+class _CheckInReplyState extends State<CheckInReply>
+    with TickerProviderStateMixin {
+  late final _flug = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1100),
+  );
+  late final String _text = widget.reply.isNotEmpty ? widget.reply : noReplyYet;
+  late final List<String> _woerter = _text.split(' ');
+  late final _tipp = AnimationController(
+    vsync: this,
+    duration: Duration(milliseconds: (_woerter.length * 55).clamp(300, 4000)),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _flug.forward().whenComplete(() {
+      if (mounted) _tipp.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _flug.dispose();
+    _tipp.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -575,13 +624,82 @@ class CheckInReply extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         GoldText('Dein Tag', style: CoachStyle.question.copyWith(fontSize: 26)),
-        const SizedBox(height: 20),
-        CoachCard(
-          label: 'Dein Coach',
-          text: reply.isNotEmpty ? reply : noReplyYet,
+        const SizedBox(height: 16),
+        AnimatedBuilder(
+          animation: _flug,
+          builder: (context, _) => SizedBox(
+            height: 64,
+            child: Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (var k = 0; k < widget.antworten.length; k++)
+                  Builder(
+                    builder: (context) {
+                      final e = Curves.easeInCubic.transform(
+                        ((_flug.value - k * 0.07) / 0.6).clamp(0.0, 1.0),
+                      );
+                      return Opacity(
+                        opacity: 1 - e,
+                        child: Transform.translate(
+                          offset: Offset(0, 90 * e),
+                          child: Transform.scale(
+                            scale: 1 - 0.6 * e,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: CoachStyle.tileGradient,
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                widget.antworten[k],
+                                style: CoachStyle.body.copyWith(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: CoachStyle.goldInk,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+              ],
+            ),
+          ),
+        ),
+        AnimatedBuilder(
+          animation: Listenable.merge([_flug, _tipp]),
+          builder: (context, _) {
+            final puls = _flug.value < 0.6
+                ? 0.0
+                : math.sin(((_flug.value - 0.6) / 0.4) * math.pi);
+            final n = (_woerter.length * _tipp.value).ceil();
+            return Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFE0BF7E)
+                        .withValues(alpha: 0.5 * puls),
+                    blurRadius: 30 * puls,
+                    spreadRadius: 2 * puls,
+                  ),
+                ],
+              ),
+              child: CoachCard(
+                label: 'Dein Coach',
+                text: _tipp.isCompleted ? _text : _woerter.take(n).join(' '),
+              ),
+            );
+          },
         ),
         const Spacer(),
-        MainButton(label: 'Fertig', gold: true, onPressed: onDone),
+        MainButton(label: 'Fertig', gold: true, onPressed: widget.onDone),
       ],
     );
   }

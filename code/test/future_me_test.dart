@@ -87,6 +87,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await scrollTo(tester, find.byKey(const ValueKey('zukunft-karte')));
     await tester.tap(find.byKey(const ValueKey('zukunft-karte')));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(OutlinedButton, 'Einrichten'));
@@ -152,6 +153,7 @@ void main() {
 
   testWidgets('photo day: fixed photo slot in Dein Tag', (tester) async {
     await openApp(tester);
+    await scrollTo(tester, find.byKey(const ValueKey('tag-foto')));
     expect(find.byKey(const ValueKey('tag-foto')), findsOneWidget);
     expect(find.text('Foto · Woche 1'), findsOneWidget);
   });
@@ -160,6 +162,7 @@ void main() {
     tester,
   ) async {
     await openApp(tester);
+    await scrollTo(tester, find.byKey(const ValueKey('zukunft-karte')));
     await tester.tap(find.byKey(const ValueKey('zukunft-karte')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('seite-foto')));
@@ -171,6 +174,7 @@ void main() {
     tester,
   ) async {
     final feed = await openApp(tester);
+    await scrollTo(tester, find.byKey(const ValueKey('zukunft-karte')));
     await tester.tap(find.byKey(const ValueKey('zukunft-karte')));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
