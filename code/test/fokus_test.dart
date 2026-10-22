@@ -154,6 +154,12 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('fokus-heute')));
     await tester.pumpAndSettle();
     expect(feed.fokus!.heuteGeschafft(fixedNow), isTrue);
+    // The page scrolls up and the coach cheers on the card at the top.
+    expect(
+      find.textContaining('Fokus heute geschafft', findRichText: true),
+      findsOneWidget,
+    );
+    await scrollTo(tester, find.byKey(const ValueKey('fokus-heute')));
     expect(find.text('✓ Heute geschafft'), findsOneWidget);
     expect(find.text('1 von 1 Tag geschafft'), findsOneWidget);
 
@@ -161,6 +167,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('fokus-heute')));
     await tester.pumpAndSettle();
     expect(feed.fokus!.heuteGeschafft(fixedNow), isFalse);
+    expect(find.byKey(const ValueKey('coach-jubel')), findsNothing);
     expect(coach.calls, 1);
   });
 
@@ -179,7 +186,8 @@ void main() {
     await scrollTo(tester, find.byKey(const ValueKey('fokus-karte')));
     expect(find.text('Tag 4 von 7'), findsOneWidget);
     expect(find.text('2 von 4 Tagen geschafft'), findsOneWidget);
-    expect(find.byKey(const ValueKey('streak-karte')), findsOneWidget);
+    await scrollTo(tester, find.byKey(const ValueKey('spross')));
+    expect(find.byKey(const ValueKey('spross-tage')), findsOneWidget);
   });
 
   testWidgets('after 7 days: look back, keep the old focus as a new week', (

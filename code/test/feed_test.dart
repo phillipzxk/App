@@ -68,11 +68,9 @@ void main() {
     expect(find.text('MONTAG, 12. OKTOBER'), findsOneWidget);
     expect(find.text('DEIN COACH · HEUTE'), findsOneWidget);
 
-    await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('bereich-schlaf')).hitTestable(),
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await scrollTo(tester, find.byKey(const ValueKey('schalter-schlaf')));
+    await tester.tap(find.byKey(const ValueKey('schalter-schlaf')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('bereich-schlaf')));
     await tester.pumpAndSettle();
     expect(find.text('Deine Abendroutine'), findsOneWidget);
