@@ -108,7 +108,7 @@ class _CoachKarteState extends State<CoachKarte>
         ],
       );
     },
-    child: const CoachAvatar(),
+    child: CoachAvatar(lacht: widget.jubel != null),
   );
 
   bool get _zu => widget.ansicht.startsWith('zu:');

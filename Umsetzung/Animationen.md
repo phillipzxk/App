@@ -27,5 +27,5 @@ Entwurf: https://claude.ai/artifact/QsD3g16x9KfWspC7QzXP25
 - **Check-in:** Antwort-Chips fliegen in die Karte, die Karte leuchtet kurz, dann schreibt sich die Antwort.
 - **Spross:** Stiel und Blätter wachsen mit den Check-in-Tagen am Stück (bis 14 Tage), die Wurzeln mit jedem geschafften Fokus-Tag der Woche (bis 7).
 - **Jubel:** bei „Heute geschafft“ scrollt Heute nach oben, der Spross leuchtet mit Funken, der Coach-Affe hüpft mit goldenem Ring, und oben in der Coach-Karte steht: „Ja, Name! Fokus heute geschafft. Oben siehst du den Trieb, aber das Wichtigste wächst darunter: Deine Wurzeln sind heute wieder tiefer geworden.“ Nimmt man das Häkchen zurück, verschwindet der Jubel.
-- **Offen:** Der Affe soll beim Jubeln lachen. Dafür braucht es ein zweites KI-Bild vom gleichen Affen, lachend. Sobald Phillip es hochlädt, wird es beim Jubel kurz eingeblendet.
+- **Lachender Affe:** Phillip hat am 22.10.2026 ein zweites KI-Bild geliefert (`app-docs/coach-nasenaffe-lacht.png`, in der App `assets/images/coach_lacht.jpg`). Solange der Jubel in der Coach-Karte steht, zeigt der Avatar den lachenden Affen.
 - Bild der App: `ki-coach/animationen-app.png`.
