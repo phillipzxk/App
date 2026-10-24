@@ -30,7 +30,7 @@ Was sich für mich über die Zeit verändert hat, ist also nicht, dass all diese
 
 Der Fragebogen
 
-1. Fühlst du manchmal diese leise Ungerechtigkeit – dass du dir alles hart erarbeiten musstest, während es für andere einfach so lief – auch wenn du eigentlich weißt, dass genau das dein Vorteil vor den anderen ist?
+1. Fühlst du manchmal diese leise Ungerechtigkeit – dass du dir alles hart erarbeiten musstest, während es für andere eine Art Selbstläufer war?
 
 2. Hast du manchmal das Gefühl, dass sich Disziplin für dich eher wie ein Käfig anfühlt als wie Freiheit – als müsstest du dich ständig zwischen einem kontrollierten Leben und einem Leben, das du wirklich lebst, entscheiden?
 

@@ -27,7 +27,7 @@ Die Fragen
 
 **Frage 1**
 
-Fühlst du manchmal diese leise Ungerechtigkeit – dass du dir alles hart erarbeiten musstest, während es für andere einfach so lief – auch wenn du eigentlich weißt, dass genau das dein Vorteil vor den anderen ist?
+Fühlst du manchmal diese leise Ungerechtigkeit – dass du dir alles hart erarbeiten musstest, während es für andere eine Art Selbstläufer war?
 
 Kapitel 4 – Wenn Optimierung zur Falle wird
 
