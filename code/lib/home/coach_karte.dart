@@ -1,7 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
+import 'heute_animationen.dart';
 
 /// The coach's reply on "Heute" (decided with Phillip 2026-10-20): as text
 /// or as 3 to 4 points, and foldable with the arrow at the top right.
@@ -17,6 +20,8 @@ class CoachKarte extends StatefulWidget {
     required this.onAnsicht,
     required this.onStichpunkte,
     this.umschaltbar = true,
+    this.jubel,
+    this.jubelTick = 0,
   });
 
   final String text;
@@ -30,12 +35,81 @@ class CoachKarte extends StatefulWidget {
   /// False while there is no real reply yet (only the placeholder text).
   final bool umschaltbar;
 
+  /// Short cheer shown above the reply (e.g. after "Heute geschafft").
+  final String? jubel;
+
+  /// Goes up each time the coach should cheer: the avatar hops and sparks.
+  final int jubelTick;
+
   @override
   State<CoachKarte> createState() => _CoachKarteState();
 }
 
-class _CoachKarteState extends State<CoachKarte> {
+class _CoachKarteState extends State<CoachKarte>
+    with SingleTickerProviderStateMixin {
   bool _laedt = false;
+  late final _hop = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1300),
+  );
+
+  @override
+  void didUpdateWidget(CoachKarte old) {
+    super.didUpdateWidget(old);
+    if (widget.jubelTick > old.jubelTick) {
+      if (_zu) widget.onAnsicht(_sicht);
+      _hop.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _hop.dispose();
+    super.dispose();
+  }
+
+  /// The avatar hops three times, wobbling, with a gold ring and sparks.
+  Widget _avatar() => AnimatedBuilder(
+    animation: _hop,
+    builder: (context, child) {
+      final v = _hop.value;
+      final hop = v == 0 ? 0.0 : (math.sin(v * math.pi * 3)).abs() * (1 - v);
+      final dreh = v == 0 ? 0.0 : math.sin(v * math.pi * 6) * 0.22 * (1 - v);
+      return Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          if (v > 0 && v < 1)
+            Container(
+              width: 52 * (1 + v * 0.9),
+              height: 52 * (1 + v * 0.9),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFFF5DFAE).withValues(alpha: 1 - v),
+                  width: 2,
+                ),
+              ),
+            ),
+          Transform.translate(
+            offset: Offset(0, -16 * hop),
+            child: Transform.rotate(
+              angle: dreh,
+              child: Transform.scale(scale: 1 + 0.15 * hop, child: child),
+            ),
+          ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: FunkenPainter(v, anzahl: 26, weite: 120),
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+    child: CoachAvatar(lacht: widget.jubel != null),
+  );
 
   bool get _zu => widget.ansicht.startsWith('zu:');
   String get _sicht => widget.ansicht.replaceFirst('zu:', '');
@@ -76,7 +150,7 @@ class _CoachKarteState extends State<CoachKarte> {
           children: [
             Row(
               children: [
-                const CoachAvatar(),
+                _avatar(),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -135,6 +209,31 @@ class _CoachKarteState extends State<CoachKarte> {
                 ),
               )
             else ...[
+              if (widget.jubel case final j?) ...[
+                const SizedBox(height: 12),
+                Text.rich(
+                  key: const ValueKey('coach-jubel'),
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: j.split('\n').first,
+                        style: CoachStyle.title.copyWith(
+                          fontSize: 17,
+                          height: 1.4,
+                          color: const Color(0xFFF5DFAE),
+                        ),
+                      ),
+                      if (j.contains('\n'))
+                        TextSpan(
+                          text: '\n${j.split('\n').skip(1).join(' ')}',
+                          style: CoachStyle.body.copyWith(
+                            color: CoachStyle.beigeLabel,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
               if (widget.umschaltbar) ...[
                 const SizedBox(height: 12),
                 Align(

@@ -271,6 +271,14 @@ void tallView(WidgetTester tester) {
 
 /// Scrolls the visible page until [finder] is built and on screen.
 Future<void> scrollTo(WidgetTester tester, Finder finder) async {
+  if (finder.evaluate().isEmpty) {
+    // It may sit above the visible part: start again from the top.
+    final s = tester.state<ScrollableState>(
+      find.byType(Scrollable).hitTestable().first,
+    );
+    s.position.jumpTo(0);
+    await tester.pumpAndSettle();
+  }
   await tester.scrollUntilVisible(
     finder,
     200,

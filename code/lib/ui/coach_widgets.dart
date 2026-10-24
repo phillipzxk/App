@@ -358,9 +358,12 @@ class CoachCard extends StatelessWidget {
 
 /// The coach's face: the proboscis monkey, round with a gold edge.
 class CoachAvatar extends StatelessWidget {
-  const CoachAvatar({super.key, this.size = 52});
+  const CoachAvatar({super.key, this.size = 52, this.lacht = false});
 
   final double size;
+
+  /// Laughing picture, shown while the coach cheers.
+  final bool lacht;
 
   @override
   Widget build(BuildContext context) {
@@ -382,10 +385,16 @@ class CoachAvatar extends StatelessWidget {
         ],
       ),
       child: ClipOval(
-        child: Image.asset(
-          'assets/images/coach.jpg',
-          fit: BoxFit.cover,
-          semanticLabel: 'Dein Coach',
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: Image.asset(
+            lacht ? 'assets/images/coach_lacht.jpg' : 'assets/images/coach.jpg',
+            key: ValueKey(lacht),
+            fit: BoxFit.cover,
+            width: size,
+            height: size,
+            semanticLabel: lacht ? 'Dein Coach lacht' : 'Dein Coach',
+          ),
         ),
       ),
     );

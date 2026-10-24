@@ -20,6 +20,7 @@ import '../ui/coach_style.dart';
 import '../weight/weight.dart';
 import 'durchgezogen_widgets.dart';
 import 'fokus_widgets.dart';
+import 'heute_animationen.dart';
 import 'mindset_tab.dart';
 import 'muster_widgets.dart';
 import 'nutrition_tab.dart';
@@ -78,6 +79,15 @@ class _HomePageState extends State<HomePage> {
   Schlafzeiten _schlafzeiten = const Schlafzeiten();
   String _coachAnsicht = 'text';
   List<Durchgezogen> _durchgezogen = const [];
+  String? _jubel;
+  int _jubelTick = 0;
+  final _heuteScroll = ScrollController();
+
+  @override
+  void dispose() {
+    _heuteScroll.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -181,7 +191,30 @@ class _HomePageState extends State<HomePage> {
         fokus: f,
         today: widget.clock(),
         onUmschalten: () async {
-          await widget.feed.saveFokus(f.umschalten(widget.clock()));
+          final neu = f.umschalten(widget.clock());
+          await widget.feed.saveFokus(neu);
+          final geschafft = neu.heuteGeschafft(widget.clock());
+          // Scroll up first so the sprout and the coach can be seen.
+          if (geschafft && _heuteScroll.hasClients) {
+            await _heuteScroll.animateTo(
+              0,
+              duration: const Duration(milliseconds: 550),
+              curve: Curves.easeInOutCubic,
+            );
+          }
+          if (!mounted) return;
+          setState(() {
+            if (geschafft) {
+              _jubelTick++;
+              final n = widget.profile.name.trim();
+              _jubel =
+                  'Ja${n.isEmpty ? '' : ', $n'}! Fokus heute geschafft.\n'
+                  'Oben siehst du den Trieb, aber das Wichtigste wächst '
+                  'darunter: Deine Wurzeln sind heute wieder tiefer geworden.';
+            } else {
+              _jubel = null;
+            }
+          });
           await _reload();
         },
       );
@@ -438,6 +471,18 @@ class _HomePageState extends State<HomePage> {
         onOpenSupplements: () =>
             setState(() => _tab = Bereich.ernaehrung.index + 1),
         onOpenArea: (b) => setState(() => _tab = b.index + 1),
+        onOpenAreaVon: (b, von) => wachseZuSeite(
+          context,
+          von: von,
+          titel: b.label,
+          onGross: () {
+            if (mounted) setState(() => _tab = b.index + 1);
+          },
+        ),
+        wurzeln: _fokusLaeuft ? _fokus!.anzahlGeschafft : 0,
+        jubel: _jubel,
+        jubelTick: _jubelTick,
+        scroll: _heuteScroll,
         muster: sichtbareMuster(_muster),
         onMusterAblehnen: (m) async {
           await widget.feed.saveMuster([
