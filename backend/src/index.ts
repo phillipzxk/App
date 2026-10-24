@@ -108,7 +108,7 @@ type FokusVorschlag = { text: string; warum: string; behalten: boolean };
 export function parseFokus(
   raw: string,
   letzter: string,
-): { rueckblick: string | null; vorschlaege: FokusVorschlag[] } {
+): { rueckblick: string | null; bremse: string | null; vorschlaege: FokusVorschlag[] } {
   const start = raw.indexOf("{");
   const end = raw.lastIndexOf("}");
   let data: Record<string, unknown> = {};
@@ -132,13 +132,17 @@ export function parseFokus(
   }
   if (letzter) {
     const keep = out.find((v) => v.behalten) ?? out.find((v) => v.text === letzter);
-    out = out.filter((v) => v !== keep).map((v) => ({ ...v, behalten: false }));
-    out = [{ text: letzter, warum: keep?.warum ?? "", behalten: true }, ...out];
+    out = out
+      .filter((v) => v !== keep && v.text !== letzter)
+      .map((v) => ({ ...v, behalten: false }));
+    // Reality Check: the one change first, then keeping the old focus.
+    out = [...out.slice(0, 1), { text: letzter, warum: keep?.warum ?? "", behalten: true }, ...out.slice(1)];
   } else {
     out = out.map((v) => ({ ...v, behalten: false }));
   }
   const rueckblick = letzter ? satz(str(data.rueckblick, 300)) : "";
-  return { rueckblick: rueckblick || null, vorschlaege: out.slice(0, 3) };
+  const bremse = letzter ? satz(str(data.bremse, 400)) : "";
+  return { rueckblick: rueckblick || null, bremse: bremse || null, vorschlaege: out.slice(0, 3) };
 }
 
 /// 2 to 4 short points, or an empty list.

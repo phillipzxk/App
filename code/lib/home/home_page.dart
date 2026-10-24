@@ -20,6 +20,7 @@ import '../ui/coach_style.dart';
 import '../weight/weight.dart';
 import 'durchgezogen_widgets.dart';
 import 'fokus_widgets.dart';
+import 'reality_check.dart';
 import 'heute_animationen.dart';
 import 'mindset_tab.dart';
 import 'muster_widgets.dart';
@@ -162,6 +163,9 @@ class _HomePageState extends State<HomePage> {
       _checkIns,
       sichtbareMuster(_muster),
       letzter: letzter,
+      training: letzter == null
+          ? null
+          : TrainingWoche.aus(letzter, _plan, _checkIns),
     );
     if (auswahl != null) await widget.feed.saveFokusAuswahl(auswahl);
     if (!mounted) return;
@@ -219,13 +223,30 @@ class _HomePageState extends State<HomePage> {
         },
       );
     }
+    final laedt = _fokusLaedt || !_fokusVersucht;
+    // A week just ended: only the small Reality Check field on Heute.
+    if (f != null) {
+      final a = _fokusAuswahl;
+      return RealityFeld(
+        auswahl: a,
+        laedt: laedt,
+        onNochmal: _holeFokusVorschlaege,
+        onOpen: () => _oeffneReality(a!),
+      );
+    }
     return FokusWahl(
       auswahl: _fokusAuswahl,
-      laedt: _fokusLaedt || !_fokusVersucht,
+      laedt: laedt,
       onStart: _starteFokus,
       onNochmal: _holeFokusVorschlaege,
     );
   }
+
+  Future<void> _oeffneReality(FokusAuswahl a) => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => RealityCheckSeite(auswahl: a, onStart: _starteFokus),
+    ),
+  );
 
   bool _prueft = false;
 

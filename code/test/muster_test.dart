@@ -44,6 +44,7 @@ class _MusterCoach implements FeedCoach {
     List<CheckIn> checkIns,
     List<Muster> muster, {
     Wochenfokus? letzter,
+    TrainingWoche? training,
   }) async => null;
 
   @override
