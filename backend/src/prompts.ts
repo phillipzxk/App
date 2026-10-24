@@ -58,8 +58,12 @@ Probleme mit Schlaf und Energie (und wann sie sich fit fühlt): ${clip(p.schlafE
 </nutzer>`;
 }
 
+const WOCHENTAG = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+
 function checkInBlock(c: CheckIn): string {
-  return `Tag ${clip(c.datum, 10)}:
+  const d = new Date(`${String(c.datum ?? "").slice(0, 10)}T12:00:00Z`);
+  const tag = isNaN(d.getTime()) ? "" : ` (${WOCHENTAG[d.getUTCDay()]})`;
+  return `Tag ${clip(c.datum, 10)}${tag}:
 - Training: ${clip(c.training)}
 - Ernährung: ${clip(c.ernaehrung)}
 - Schlaf: ${clip(c.schlaf)}${c.energie ? `\n- Energie: ${clip(c.energie)}` : ""}
@@ -179,7 +183,12 @@ oder
 {"muster": {"text": "...", "schritt": "...", "von": "...", "nach": "..."}}`;
 }
 
-export type LetzterFokus = { text?: string; geschafft?: number };
+export type LetzterFokus = {
+  text?: string;
+  geschafft?: number;
+  trainingGeplant?: number;
+  trainingGemacht?: number;
+};
 
 /// Three suggestions for the focus of the week, plus a one-sentence look
 /// back when a week just ended (see vault Umsetzung/Fokus der Woche.md).
@@ -203,8 +212,16 @@ export function fokusPrompt(
     .slice(0, 5)
     .map((m) => `- ${clip(m, 300)}`)
     .join("\n");
+  const zahl = (v: unknown) => Math.max(0, Math.min(7, Math.round(Number(v) || 0)));
+  const geplant = zahl(letzter?.trainingGeplant);
+  const training =
+    letzter?.trainingGemacht === undefined
+      ? ""
+      : geplant > 0
+        ? `Training: ${geplant} Tage laut Plan vorgenommen, an ${zahl(letzter.trainingGemacht)} Tagen laut Check-in trainiert.\n`
+        : `Training: kein Plan eingetragen, an ${zahl(letzter.trainingGemacht)} Tagen laut Check-in trainiert.\n`;
   const alt = letzter?.text
-    ? `\nIhr Fokus der letzten 7 Tage:\n<nutzer>\n${clip(letzter.text, 200)}\n</nutzer>\nGeschafft an ${Math.max(0, Math.min(7, Math.round(Number(letzter.geschafft) || 0)))} von 7 Tagen.\n`
+    ? `\nIhr Fokus der letzten 7 Tage:\n<nutzer>\n${clip(letzter.text, 200)}\n</nutzer>\nGeschafft an ${zahl(letzter.geschafft)} von 7 Tagen.\n${training}`
     : "";
   return `Das weißt du von der Person:
 
@@ -214,11 +231,14 @@ Schlag ihr genau 3 mögliche Fokusse für die nächsten 7 Tage vor. Sie wählt s
 
 - "text": der Fokus in höchstens 9 Wörtern, ohne Punkt am Ende, z. B. "Handy ab 23 Uhr raus aus dem Schlafzimmer".
 - "warum": ein kurzer Satz (höchstens 12 Wörter), warum gerade das zu ihr passt.
-${letzter?.text ? `- Einer der 3 Vorschläge ist ihr alter Fokus zum Behalten: genau ihr alter Text, "behalten": true, und im "warum" ein Satz, ob sich das Dranbleiben lohnt. Die anderen beiden sind neu.
-- "rueckblick": ein Satz (höchstens 20 Wörter), wie die letzte Woche mit dem Fokus lief, ehrlich und konkret, ohne die Zahl zu wiederholen, ohne Floskeln.` : `- "rueckblick": null.`}
+${letzter?.text ? `Das ist ihr wöchentlicher Reality Check: vorgenommen gegen wirklich umgesetzt.
+- "bremse": was sie diese Woche ausgebremst hat, 1 bis 2 Sätze (höchstens 30 Wörter). Ehrlich und konkret aus ihren Check-ins (welche Tage als Wochentag wie „Dienstag“, nie als Datum; was passiert ist, was daraus folgte), ohne Vorwürfe, ohne Moralpredigt, ohne Floskeln. Wiederhole die Zahlen nicht stumpf.
+- Der ERSTE Vorschlag ist die eine Veränderung, die nächste Woche am meisten bringt: neu, setzt genau an der Bremse an. Sein "warum" darf hier bis 18 Wörter haben und sagt, was sich dadurch mitlöst.
+- Einer der anderen beiden ist ihr alter Fokus zum Behalten: genau ihr alter Text, "behalten": true, und im "warum" ein Satz, ob sich das Dranbleiben lohnt. Der dritte ist neu.
+- "rueckblick": null.` : `- "rueckblick": null.`}
 
 Antworte nur mit JSON, ohne weiteren Text:
-{"rueckblick": ${letzter?.text ? '"..."' : "null"}, "vorschlaege": [{"text": "...", "warum": "...", "behalten": false}, {"text": "...", "warum": "...", "behalten": false}, {"text": "...", "warum": "...", "behalten": false}]}`;
+{"rueckblick": null,${letzter?.text ? ' "bremse": "...",' : ""} "vorschlaege": [{"text": "...", "warum": "...", "behalten": false}, {"text": "...", "warum": "...", "behalten": ${letzter?.text ? "true" : "false"}}, {"text": "...", "warum": "...", "behalten": false}]}`;
 }
 
 /// Turns the coach's answer into 3 to 4 short bullet points (same content).

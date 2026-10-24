@@ -142,6 +142,7 @@ class RemoteCoach implements OnboardingEvaluator, CheckInEvaluator, FeedCoach {
     List<CheckIn> checkIns,
     List<Muster> muster, {
     Wochenfokus? letzter,
+    TrainingWoche? training,
   }) async {
     final data = await _postJson('/fokus', {
       'profile': profileJson(profile),
@@ -153,7 +154,12 @@ class RemoteCoach implements OnboardingEvaluator, CheckInEvaluator, FeedCoach {
       ],
       'muster': [for (final m in muster.take(5)) m.text],
       if (letzter != null)
-        'letzter': {'text': letzter.text, 'geschafft': letzter.anzahlGeschafft},
+        'letzter': {
+          'text': letzter.text,
+          'geschafft': letzter.anzahlGeschafft,
+          if (training != null) 'trainingGeplant': training.geplant,
+          if (training != null) 'trainingGemacht': training.gemacht,
+        },
     });
     final list = data?['vorschlaege'];
     if (list is! List) return null;
@@ -168,10 +174,15 @@ class RemoteCoach implements OnboardingEvaluator, CheckInEvaluator, FeedCoach {
     ];
     if (vorschlaege.isEmpty) return null;
     final r = (data?['rueckblick'] as String? ?? '').trim();
+    final b = (data?['bremse'] as String? ?? '').trim();
     return FokusAuswahl(
       vorschlaege: vorschlaege.take(3).toList(),
       rueckblick: letzter == null || r.isEmpty ? null : r,
       geschafft: letzter?.anzahlGeschafft,
+      fokusText: letzter?.text,
+      start: letzter?.start,
+      bremse: letzter == null || b.isEmpty ? null : b,
+      training: letzter == null ? null : training,
     );
   }
 

@@ -242,14 +242,15 @@ class MemoryFeedStore implements FeedStore {
 final fixedNow = DateTime(2026, 10, 12, 18);
 DateTime fixedClock() => fixedNow;
 
-CheckIn checkInOn(DateTime day, {String reply = ''}) => CheckIn(
-  datum: DateTime(day.year, day.month, day.day),
-  training: 't',
-  ernaehrung: 'e',
-  schlaf: 's',
-  mindset: 'm',
-  kiAntwort: reply,
-);
+CheckIn checkInOn(DateTime day, {String reply = '', String training = 't'}) =>
+    CheckIn(
+      datum: DateTime(day.year, day.month, day.day),
+      training: training,
+      ernaehrung: 'e',
+      schlaf: 's',
+      mindset: 'm',
+      kiAntwort: reply,
+    );
 
 /// Switches the Main Feed to the page of [label] via the bottom bar.
 Future<void> openTab(WidgetTester tester, String label) async {

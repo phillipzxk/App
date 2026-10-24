@@ -6,8 +6,8 @@ import '../ui/coach_widgets.dart';
 import 'feed_widgets.dart';
 
 /// Gold-edged dark frame shared by both focus cards.
-class _GoldRahmen extends StatelessWidget {
-  const _GoldRahmen({super.key, required this.child});
+class GoldRahmen extends StatelessWidget {
+  const GoldRahmen({super.key, required this.child});
 
   final Widget child;
 
@@ -78,7 +78,7 @@ class FokusKarte extends StatelessWidget {
     final striche = fokus.striche;
     final bisher = striche.take(tag).where((x) => x).length;
     final heute = fokus.heuteGeschafft(today);
-    return _GoldRahmen(
+    return GoldRahmen(
       key: const ValueKey('fokus-karte'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -203,10 +203,19 @@ class FokusWahl extends StatefulWidget {
     required this.laedt,
     required this.onStart,
     required this.onNochmal,
+    this.titel,
+    this.mitRueckblick = true,
   });
 
   /// Null while loading or when the coach could not be reached.
   final FokusAuswahl? auswahl;
+
+  /// Replaces the heading, e.g. on the Reality Check page.
+  final String? titel;
+
+  /// "Letzte Woche X von 7." above the options (not on the Reality Check
+  /// page, which shows the week itself).
+  final bool mitRueckblick;
   final bool laedt;
   final ValueChanged<FokusVorschlag> onStart;
   final VoidCallback onNochmal;
@@ -228,15 +237,16 @@ class _FokusWahlState extends State<FokusWahl> {
   Widget build(BuildContext context) {
     final a = widget.auswahl;
     final erstes = a == null || a.geschafft == null;
-    return _GoldRahmen(
+    return GoldRahmen(
       key: const ValueKey('fokus-wahl'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _kopf(
-            erstes
-                ? 'FOKUS DER WOCHE · WÄHL EINEN'
-                : 'NEUER FOKUS · WÄHL EINEN',
+            widget.titel ??
+                (erstes
+                    ? 'FOKUS DER WOCHE · WÄHL EINEN'
+                    : 'NEUER FOKUS · WÄHL EINEN'),
           ),
           const SizedBox(height: 12),
           if (a == null)
@@ -288,7 +298,7 @@ class _FokusWahlState extends State<FokusWahl> {
                     ],
                   )
           else ...[
-            if (a.geschafft != null) ...[
+            if (a.geschafft != null && widget.mitRueckblick) ...[
               Container(
                 padding: const EdgeInsets.only(left: 10),
                 decoration: const BoxDecoration(

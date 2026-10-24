@@ -28,13 +28,15 @@ abstract class FeedCoach {
   );
 
   /// Three suggestions for the focus of the week. With [letzter] (the week
-  /// that just ended) one of them keeps it and a look back comes along.
+  /// that just ended) it is also the Reality Check: the first suggestion is
+  /// the one change, one keeps the old focus, and "bremse" comes along.
   /// Null when the coach cannot be reached.
   Future<FokusAuswahl?> fokusVorschlaege(
     UserProfile profile,
     List<CheckIn> checkIns,
     List<Muster> muster, {
     Wochenfokus? letzter,
+    TrainingWoche? training,
   });
 
   /// The coach's [text] as 3 to 4 short points, or null.
@@ -76,6 +78,7 @@ class NoFeedCoach implements FeedCoach {
     List<CheckIn> checkIns,
     List<Muster> muster, {
     Wochenfokus? letzter,
+    TrainingWoche? training,
   }) async => null;
 
   @override
