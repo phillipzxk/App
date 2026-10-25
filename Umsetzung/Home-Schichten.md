@@ -1,10 +1,10 @@
 ---
-title: Home-Feed als Schichten
+title: Home-Feed als Wurzelwerk
 tags: [umsetzung, feed, design, animation]
 status: entwurf
 ---
 
-# Home-Feed als Schichten
+# Home-Feed als Wurzelwerk (früher: Schichten)
 
 Phillip, 24.10.2026: Der Aufbau mit den Feldern und der Leiste unten ist zu normal, wie bei allen Apps. Der Home-Feed soll animiert in jede Ebene führen, mit Wegweisern und Sprechblasen vom Coach. Hängt mit [[Main Feed]], [[Animationen]] und [[Design]] zusammen.
 
@@ -22,3 +22,12 @@ Phillip, 24.10.2026: Der Aufbau mit den Feldern und der Leiste unten ist zu norm
 | Übrige Felder von Heute (25.10.) | **Oben nur wenn fällig**: Fortschrittsfoto (Fototag), neues Muster, Reality Check, Dein Warum (schwache Phase) tauchen über der Bodenlinie nur an ihrem Tag auf. Supplements stecken in der Ernährungs-Kachel. Immer oben: Coach-Karte, Fokus, Dein Tag, Spross. |
 
 Entwurf 4 zum Durchklicken (Prinzip am 24.10. von Phillip „sehr gut“): https://claude.ai/artifact/5C6s6w1b7kEgkUZRLC25Po. Gebaut wird nach Phillips Ja.
+
+## Entwurf 5: Wurzelwerk (25.10.2026, Phillip: „sehr geil“)
+
+Phillip zu Entwurf 4: noch zu einfach und unrealistisch. Neu entschieden:
+
+- **Oben nur das Wichtigste, ganz kurz:** ein Satz vom Coach, Fokus zum Abhaken, Dein Tag (Bettzeit, Training). Fällige Felder (Fortschrittsfoto, neues Muster, Reality Check, Dein Warum) erscheinen nur an ihrem Tag als goldener Chip daneben.
+- **Darunter ein echtes Wurzelwerk mit kleinem Baum** über der Bodenlinie, daneben „Tage am Stück“. Die Bereiche hängen **nicht in einer Reihe**, sondern verteilt und verschieden tief an eigenen Wurzeln: Training oben rechts, Ernährung links, Schlaf & Energie tiefer rechts, Mindset ganz unten. Durch die Wurzeln läuft ständig Licht; wo der Coach heute etwas sagt, hängt eine kleine Sprechblase am Bereich.
+- **Antippen:** Licht schießt die Wurzel runter, Funken sprühen, der Bereich geht aus seinem Kreis über den ganzen Bildschirm auf. Darin: Wert mit Trend, Coach-Satz (tippt sich), die 4 festen Kacheln (Diagramme zeichnen sich, Zahlen zählen hoch, Listen zum Abhaken), ein Hauptknopf und „Alles zu … ›“. ✕ schließt zurück in den Kreis.
+- Ersetzt die Schichten-Liste aus Entwurf 1 bis 4. Die Entscheidungen oben (feste Kacheln, Alles zu …, Felder nur wenn fällig, ? vom Coach) gelten weiter.
