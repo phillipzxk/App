@@ -28,3 +28,16 @@ Phillips Antworten auf die Erinnerungsfragen, wörtlich:
 
 - Gaming und Corona – „Gab es einen Moment, in dem du nach Stunden vom Bildschirm aufgeschaut hast und dich leer gefühlt hast?“ → „spazieren nach zocken angefühlt wie online“ (25.10.2026)
 - Gaming und Corona – „Hast du später etwas aus dem Gaming mitgenommen…?“ → „tatsächlich das Dinge nur wachsen wenn man sie immer wieder ewig lange wiedeholt, früher jeden Tag gezockt für mehrere Stunden und nie aufgegeben auch wenn ich nicht gewonnen habe... heute sehr lange immer wieder schule, buch, startup, app, social media immer wieder jeden Tag ewig lange wiederholen und auch wenn das nicht klappt einfach weiter machen und es beim nächsten mal schaffen“ (25.10.2026)
+- Fußball – „das ich aufgehört habe aber dieses aufhören hat diesmal genau in die andere Richtung geschossen also nicht fett und nix machen, sondern mehr zeit, mehr Schule, mehr Gym und an mr arbeiten“
+- Neuanfang – „neuanfang begann einfach habe mir kein "Zeitpunkt" gesetzt sondern direkt begonnen das war die bestmögliche Entscheidung in diesem Moment denn ich konnte die Zeit ja nicht zurückdrehen“
+- Erster Lauf – „das Gefühl nach dem Laufen damals war aunbeschreiblich als ich das erste mal dem Schweinehund, meiner Komfortzone entgegenkam und einfach gemacht habe, dass zu schaffen war sehr krass und hat mich für den Rest auch motiviert“
+- Erstes Mal Gym – „zu meinem ersten mal gym möchte ich schreiben wie es warw das man sich krass reinversetzen kann in mich und meine Gedanken“
+- Familie – „Familie hat mich größenteils immer sehr krass unterstütze aber in der Umsetzung und so war ich auf mich allein gestellt, da ich mich halt auch um alles kümmern musste, einkaufen, kochen, routinen usw. ist aber auch ein wichtiger Schritt zur Selbstständigkeit“
+- Ernährung – „ernährung ja ich konnte nix normales mehr essen da ich ja auch nicht wirklich krass viel Ahnung hatte und so auf jeden geschmack verzichtet habe und nur die kleinsten aussetzer haben mir schwer im Magen und Kopf gelegt“
+- Unterschied heute – „zum Unterschied das kann ich im passenden Kapitel erklären nicht nur äußerlich sondern auch mein Verhalten, Bewusstsein, die Dankbarkeit ist natürlich nicht perfekt aber hast sich alles enorm ins positive verändert“
+- Dankbarkeit – „für jeden Tag bin ich dankabr, dankbar für mich en Körper das ich überall dran bleibe und größere Ziele als normal habe, dazu für Familie alle privilegien von Essen bishin zum Haus alles einfach, komisch aber ich weiß es ist richtig!!!“
+
+## Ausgewählte Studien (25.10.2026)
+
+Kap. 3 Dunning-Kruger · Kap. 4 Wenn-dann-Pläne (Gollwitzer & Sheeran) · Kap. 5 Oppezzo & Schwartz 2014 (Spazieren → +60 % Kreativität; Alternative Hillman 2009) · Kap. 6 Routine: Crum & Langer 2007 / Crum 2011 · Kap. 7 Fresh-Start-Effekt · Kap. 8 Christakis & Fowler 2007 · Kap. 9 Zielgradienten-Effekt · Kap. 10 Selbstmitgefühl (Breines & Chen 2012) · Kap. 11 Hochstapler-Syndrom.
+Alles zusammen: [[Auswahl-Studien-und-Erinnerungen.docx]].
