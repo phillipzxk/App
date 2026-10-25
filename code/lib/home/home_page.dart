@@ -22,6 +22,7 @@ import 'durchgezogen_widgets.dart';
 import 'fokus_widgets.dart';
 import 'reality_check.dart';
 import 'bereich_uebersicht.dart';
+import 'sonnenbogen.dart';
 import 'day_plan.dart';
 import 'feed_widgets.dart';
 import 'wurzelwerk.dart';
@@ -697,6 +698,66 @@ class _HomePageState extends State<HomePage> {
     ),
   );
 
+  /// The sun arc on top of "Dein Tag": from getting up to bedtime.
+  Widget _sonnenbogen() {
+    final jetzt = widget.clock();
+    final aufstehen = _schlafzeiten.aufstehenAm(jetzt);
+    final bz = _bettzeit;
+    final start = aufstehen ?? 7 * 60;
+    var ende = bz?.bett ?? 23 * 60;
+    if (ende <= start) ende += 1440;
+    final punkte = <BogenPunkt>[
+      if (aufstehen != null)
+        BogenPunkt(
+          id: 'aufstehen',
+          minute: aufstehen,
+          art: 'Aufstehen',
+          titel: 'Aufstehen',
+        ),
+      if (_fotoTag != null)
+        BogenPunkt(
+          id: 'foto',
+          minute: start + 15,
+          art: 'Foto',
+          titel: 'Foto',
+          text: _fotoTag,
+        ),
+      for (final t in termineAm(_termine, jetzt))
+        if (parseUhrzeit(t.zeit ?? '') case final m?)
+          BogenPunkt(
+            id: 'termin-${t.erstellt.microsecondsSinceEpoch}',
+            minute: m,
+            art: 'Termin',
+            titel: t.text,
+          ),
+      if (bz != null && _routine.isNotEmpty)
+        if (parseUhrzeit(_routine.first.zeit) case final ab?)
+          if (ab < bz.bett && bz.bett - ab <= 180)
+            BogenPunkt(
+              id: 'routine',
+              minute: ab + (ende - bz.bett),
+              art: 'Schlaf',
+              titel: 'Abendroutine',
+            ),
+      if (bz != null)
+        BogenPunkt(
+          id: 'bett',
+          minute: ende,
+          art: 'Schlaf',
+          titel: 'Bettzeit',
+          text: 'Morgen um ${formatUhrzeit(bz.aufstehen)} raus',
+        ),
+    ];
+    final training = _plan.forDay(jetzt).trim();
+    return Sonnenbogen(
+      punkte: punkte,
+      start: start,
+      ende: ende,
+      jetzt: jetzt.hour * 60 + jetzt.minute + jetzt.second / 60,
+      ohneZeit: training.isEmpty ? null : shortDay(training),
+    );
+  }
+
   Future<void> _oeffneTag() => Navigator.of(context).push(
     MaterialPageRoute<void>(
       builder: (_) => _UnterSeite(
@@ -709,6 +770,8 @@ class _HomePageState extends State<HomePage> {
                   label: germanDate(widget.clock()),
                   title: 'Dein Tag',
                 ),
+                _sonnenbogen(),
+                const SizedBox(height: 16),
                 DayPlanCard(
                   today: widget.clock(),
                   termine: _termine,
@@ -736,6 +799,7 @@ class _HomePageState extends State<HomePage> {
                   schlafStunden: _schlafzeiten.stunden,
                   routineAb: _routine.isEmpty ? null : _routine.first.zeit,
                   onOpenSchlaf: () => _oeffneSeite(Bereich.schlaf),
+                  aufstehen: _schlafzeiten.aufstehenAm(widget.clock()),
                 ),
               ],
             ),

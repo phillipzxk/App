@@ -29,7 +29,11 @@ class DayPlanCard extends StatelessWidget {
     this.schlafStunden = 8,
     this.routineAb,
     this.onOpenSchlaf,
+    this.aufstehen,
   });
+
+  /// Today's wake-up time in minutes, null until set.
+  final int? aufstehen;
 
   /// Tonight's bedtime, null until a wake-up time is set.
   final Bettzeit? bettzeit;
@@ -98,39 +102,7 @@ class DayPlanCard extends StatelessWidget {
           onTap: () => _pickMahlzeiten(context),
         ),
         const SizedBox(height: 12),
-        if (foto != null)
-          _PlanRow(
-            key: const ValueKey('tag-foto'),
-            zeit: 'früh',
-            art: 'Foto',
-            dark: true,
-            titel: foto!,
-            text: 'Mit dem Frame Kit 30 Sekunden.',
-            onTap: onOpenFoto,
-          ),
-        for (final t in heute)
-          _PlanRow(
-            key: ObjectKey(t),
-            zeit: t.zeit ?? '–',
-            art: 'Termin',
-            titel: t.text,
-            onRemove: () => onRemoveTermin(t),
-          ),
-        _PlanRow(
-          key: const ValueKey('tag-training'),
-          zeit: '–',
-          art: 'Training',
-          dark: true,
-          titel: training.trim().isEmpty ? 'Heute frei' : shortDay(training),
-          text: training.trim().isEmpty ? null : 'Übungen in deinem Plan',
-          onTap: onOpenTraining,
-        ),
-        _PlanRow(
-          zeit: '–',
-          art: 'Essen',
-          titel: meals == null ? 'Mahlzeiten' : '$meals Mahlzeiten',
-        ),
-        _bettRow(),
+        ..._zeitstrahl(heute, meals),
         if (demnaechst.isNotEmpty) ...[
           const SizedBox(height: 14),
           const Text('NÄCHSTE TERMINE', style: CoachStyle.label),
@@ -181,6 +153,146 @@ extension on DayPlanCard {
       onTap: onOpenSchlaf,
     );
   }
+}
+
+extension on DayPlanCard {
+  /// Rows in time order with a glowing "Jetzt" line between done and next.
+  /// Rows without a time (training and meals until the coach plans them)
+  /// come after the timed ones, bedtime is always last.
+  List<Widget> _zeitstrahl(List<Termin> heute, int? meals) {
+    final jetzt = today.hour * 60 + today.minute;
+    final zeilen = <(int?, Widget Function(bool vorbei))>[
+      if (aufstehen != null)
+        (
+          aufstehen,
+          (v) => _PlanRow(
+            key: const ValueKey('tag-aufstehen'),
+            zeit: formatUhrzeit(aufstehen!),
+            art: 'Morgen',
+            titel: 'Aufstehen',
+            vorbei: v,
+          ),
+        ),
+      if (foto != null)
+        (
+          aufstehen == null ? null : aufstehen! + 15,
+          (v) => _PlanRow(
+            key: const ValueKey('tag-foto'),
+            zeit: 'früh',
+            art: 'Foto',
+            dark: true,
+            titel: foto!,
+            text: 'Mit dem Frame Kit 30 Sekunden.',
+            onTap: onOpenFoto,
+            vorbei: v,
+          ),
+        ),
+      for (final t in heute)
+        (
+          parseUhrzeit(t.zeit ?? ''),
+          (v) => _PlanRow(
+            key: ObjectKey(t),
+            zeit: t.zeit ?? '–',
+            art: 'Termin',
+            titel: t.text,
+            onRemove: () => onRemoveTermin(t),
+            vorbei: v,
+          ),
+        ),
+    ];
+    final mitZeit = [
+      for (final z in zeilen)
+        if (z.$1 != null) z,
+    ]..sort((a, b) => a.$1!.compareTo(b.$1!));
+    final ohneZeit = [
+      for (final z in zeilen)
+        if (z.$1 == null) z,
+    ];
+    final out = <Widget>[];
+    var linie = false;
+    void jetztLinie() {
+      if (linie) return;
+      linie = true;
+      out.add(_JetztLinie(zeit: formatUhrzeit(jetzt)));
+    }
+
+    for (final (m, bau) in mitZeit) {
+      final vorbei = m! <= jetzt;
+      if (!vorbei) jetztLinie();
+      out.add(bau(vorbei));
+    }
+    jetztLinie();
+    for (final (_, bau) in ohneZeit) {
+      out.add(bau(false));
+    }
+    out.add(
+      _PlanRow(
+        key: const ValueKey('tag-training'),
+        zeit: '–',
+        art: 'Training',
+        dark: true,
+        titel: training.trim().isEmpty ? 'Heute frei' : shortDay(training),
+        text: training.trim().isEmpty ? null : 'Übungen in deinem Plan',
+        onTap: onOpenTraining,
+      ),
+    );
+    out.add(
+      _PlanRow(
+        zeit: '–',
+        art: 'Essen',
+        titel: meals == null ? 'Mahlzeiten' : '$meals Mahlzeiten',
+      ),
+    );
+    out.add(_bettRow());
+    return out;
+  }
+}
+
+/// "JETZT 14:10" with a breathing gold dot and a fading line.
+class _JetztLinie extends StatelessWidget {
+  const _JetztLinie({required this.zeit});
+
+  final String zeit;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    key: const ValueKey('tag-jetzt'),
+    padding: const EdgeInsets.symmetric(vertical: 6),
+    child: Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: RadialGradient(
+              colors: [Color(0xFFFFF0C8), Color(0xFFE0BF7E), Color(0x00E0BF7E)],
+              stops: [0, .5, 1],
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          'JETZT $zeit',
+          style: CoachStyle.goldLabel.copyWith(
+            color: const Color(0xFFF0C878),
+            letterSpacing: 2,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Container(
+            height: 1,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFE0BF7E), Color(0x00E0BF7E)],
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _TerminField extends StatefulWidget {
@@ -327,8 +439,11 @@ class _PlanRow extends StatelessWidget {
     this.last = false,
     this.onRemove,
     this.onTap,
+    this.vorbei = false,
   });
 
+  /// Already over: dimmed with a tick.
+  final bool vorbei;
   final String zeit;
   final String art;
   final String titel;
@@ -386,6 +501,11 @@ class _PlanRow extends StatelessWidget {
               ],
             ),
           ),
+          if (vorbei)
+            const Padding(
+              padding: EdgeInsets.only(left: 6, top: 2),
+              child: Text('✓', style: TextStyle(color: CoachStyle.gold)),
+            ),
           if (onRemove != null)
             IconButton(
               tooltip: 'Termin löschen',
@@ -408,8 +528,9 @@ class _PlanRow extends StatelessWidget {
         ],
       ),
     );
-    if (onTap == null) return row;
-    return InkWell(onTap: onTap, child: row);
+    final sichtbar = vorbei ? Opacity(opacity: .5, child: row) : row;
+    if (onTap == null) return sichtbar;
+    return InkWell(onTap: onTap, child: sichtbar);
   }
 }
 
