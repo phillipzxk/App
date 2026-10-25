@@ -62,3 +62,16 @@ Phillip: unter „Heute dran“ nichts mehr, das Feld selbst größer, übersich
 - **Trainingszeit:** steht im Namen des Trainingstags, z. B. „Push 17:30“ oder „Push um 17 Uhr“ (Hinweis im Plan-Editor). Ohne Uhrzeit steht das Training nicht auf dem Bogen, nur „Heute noch: …“.
 - **Mahlzeiten:** bis der Coach sie plant, verteilt die App die eingestellte Anzahl gleichmäßig von 30 Min. nach dem Aufstehen bis 2,5 Std. vor dem Bett.
 - Gebaut 2026-10-25 (`code/lib/home/sonnenbogen.dart`, `HeuteBogen`), PR #59.
+
+## Heute als großer Baum (2026-10-25)
+
+Phillip: der Baum war zu weit unten, die Felder oben zu langweilig. Entschieden: **Heute ist ein großer Baum**, die Krone besteht aus vier runden Feldern; die Blatt-Ovale um die Felder sind weg („diese runden Dinger drumherum weg“). Entwurf: https://claude.ai/artifact/SPEF2ji5feLyUazfWVnJR5
+
+- **Kronenfelder:** Dein Coach (Affe + erster Satz, „mehr ›“), Heute dran (kleiner Sonnenbogen + Countdown bis zum Nächsten), Fokus (Text, 7 Striche, Knopf „Heute geschafft“ direkt im Feld), Tage am Stück (Zahl, unten am Stamm).
+- **Look:** dunkle Glasfelder, ein Goldlicht läuft langsam um jeden Rand, die Felder schweben leicht. Rindenstamm mit Ästen, die in die Felder wachsen; Saftlicht läuft vom Boden hoch in jedes Feld, Lichtpunkte steigen auf.
+- **Öffnen:** beim Start wächst der Stamm, die Äste schieben sich raus, die Felder blühen nacheinander auf.
+- **Antippen** öffnet das Feld als eigene Seite aus seinem Kreis: Coach (ganze Antwort mit Text/Stichpunkte), Heute dran (Dein Tag), Fokus (ganze Fokus-Karte bzw. Fokus-Wahl).
+- **„Heute geschafft“:** der ganze Baum leuchtet vom Boden auf, Funken an Fokus, Tage und Coach, der Coach lacht und jubelt im Feld, die Tage-Zahl hüpft.
+- **Extras als goldene Frucht** an einem Ast (pendelt, pulsiert), nur an ihrem Tag: neues Muster (höchstens 2 Tage alt), Reality Check (Tag des Fokus-Wechsels; das Fokusfeld zeigt dann „Erst dein Reality Check“). Später Dein Warum. Das Foto steht am Fototag auf dem Bogen.
+- Unter der Bodenlinie geht der Stamm in die Wurzeln über, die vier Bereiche bleiben wie im Wurzelwerk.
+- Gebaut 2026-10-25 (`code/lib/home/baum_krone.dart`, `today_tab.dart`), PR #59.
