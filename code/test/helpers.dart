@@ -252,14 +252,29 @@ CheckIn checkInOn(DateTime day, {String reply = '', String training = 't'}) =>
       kiAntwort: reply,
     );
 
-/// Switches the Main Feed to the page of [label] via the bottom bar.
+/// Goes back to "Heute" and, for an area, opens it on its root and then
+/// its full page ("Alles zu …").
 Future<void> openTab(WidgetTester tester, String label) async {
-  await tester.tap(
-    find.descendant(
-      of: find.byKey(const ValueKey('tab-leiste')),
-      matching: find.text(label),
-    ),
-  );
+  tester
+      .state<NavigatorState>(find.byType(Navigator).first)
+      .popUntil((r) => r.isFirst);
+  await tester.pumpAndSettle();
+  if (label == 'Heute') return;
+  final b = switch (label) {
+    'Training' => 'training',
+    'Ernährung' => 'ernaehrung',
+    'Schlaf' => 'schlaf',
+    _ => 'mindset',
+  };
+  await openBereich(tester, b);
+  await tester.tap(find.byKey(ValueKey('alles-$b')));
+  await tester.pumpAndSettle();
+}
+
+/// Taps the area [b] on its root: it opens big over the whole screen.
+Future<void> openBereich(WidgetTester tester, String b) async {
+  await scrollTo(tester, find.byKey(ValueKey('wurzel-$b')));
+  await tester.tap(find.byKey(ValueKey('wurzel-$b')));
   await tester.pumpAndSettle();
 }
 
@@ -268,6 +283,14 @@ void tallView(WidgetTester tester) {
   tester.view.physicalSize = const Size(1080, 2400);
   tester.view.devicePixelRatio = 2.5;
   addTearDown(tester.view.reset);
+}
+
+/// Opens one of the round fields (or a fruit) in the tree crown on Heute.
+Future<void> openKrone(WidgetTester tester, String key) async {
+  final f = find.byKey(ValueKey(key));
+  await scrollTo(tester, f);
+  await tester.tap(f);
+  await tester.pumpAndSettle();
 }
 
 /// Scrolls the visible page until [finder] is built and on screen.

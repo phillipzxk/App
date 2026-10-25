@@ -63,17 +63,26 @@ void main() {
     expect(joinDay('', 'Laufen 5 km'), 'Laufen 5 km');
   });
 
-  testWidgets('bottom bar and area tiles switch pages', (tester) async {
+  testWidgets('areas open big from the roots and lead to their page', (
+    tester,
+  ) async {
     await _openFeed(tester);
     expect(find.text('MONTAG, 12. OKTOBER'), findsOneWidget);
     expect(find.text('DEIN COACH · HEUTE'), findsOneWidget);
 
-    await scrollTo(tester, find.byKey(const ValueKey('schalter-schlaf')));
-    await tester.tap(find.byKey(const ValueKey('schalter-schlaf')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('bereich-schlaf')));
+    await openBereich(tester, 'schlaf');
+    expect(find.text('Schlaf & Energie'), findsWidgets);
+    expect(find.text('ABENDROUTINE'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('alles-schlaf')));
     await tester.pumpAndSettle();
     expect(find.text('Deine Abendroutine'), findsOneWidget);
+
+    // Closing the big view goes back to the roots.
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('uebersicht-zu')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('wurzel-schlaf')), findsOneWidget);
 
     await openTab(tester, 'Mindset');
     expect(find.text('„Ich will stolz auf mich sein.“'), findsOneWidget);
@@ -129,6 +138,9 @@ void main() {
         ]),
     );
     expect(feed.plan.isEmpty, isFalse);
+    await scrollTo(tester, find.byKey(const ValueKey('dein-tag')));
+    await tester.tap(find.byKey(const ValueKey('dein-tag')));
+    await tester.pumpAndSettle();
     final row = find.byKey(const ValueKey('tag-training'));
     await tester.scrollUntilVisible(
       row.hitTestable(),

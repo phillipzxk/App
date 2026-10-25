@@ -13,6 +13,7 @@ import 'feed_widgets.dart';
 class MindsetTab extends StatelessWidget {
   const MindsetTab({
     super.key,
+    this.extra = const [],
     required this.profile,
     required this.fragen,
     required this.onAsk,
@@ -21,6 +22,9 @@ class MindsetTab extends StatelessWidget {
     required this.onDurchAdd,
     required this.onDurchAlle,
   });
+
+  /// Cards that moved here from the old "Heute" page.
+  final List<Widget> extra;
 
   final UserProfile profile;
   final List<CoachFrage> fragen;
@@ -37,6 +41,7 @@ class MindsetTab extends StatelessWidget {
       children: [
         const PageHeader(label: 'Bereich', title: 'Mindset', icon: Icons.spa),
         const AreaChart(bereich: Bereich.mindset),
+        ...extra,
         DurchgezogenKarte(
           alle: durchgezogen,
           today: today,

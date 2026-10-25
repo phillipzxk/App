@@ -61,14 +61,48 @@ String joinDay(String name, String uebungen) {
 String shortDay(String text) {
   final t = text.trim();
   if (t.isEmpty) return 'frei';
+  if (t.contains('\n')) return _ohneZeit(t.split('\n').first);
+  return _ohneZeit(t).split(RegExp(r'[:,.]')).first.trim();
+}
+
+/// A training time written in the day's name, e.g. "Push 17:30",
+/// "Push um 17 Uhr" (see Umsetzung/Tages-Planer.md, 2026-10-25).
+final _zeitImNamen = RegExp(
+  r'\s*(?:um\s+)?\b([01]?\d|2[0-3])(?:[:.]([0-5]\d))(?:\s*Uhr)?\b'
+  r'|\s*(?:um\s+)?\b([01]?\d|2[0-3])\s*Uhr\b',
+);
+
+String _ohneZeit(String name) {
+  final n = name.replaceFirst(_zeitImNamen, '').trim();
+  return n.isEmpty ? name.trim() : n;
+}
+
+/// The day's name as typed, with its time, e.g. "Push 17:30" (for the
+/// plan editor).
+String dayName(String text) {
+  final t = text.trim();
+  if (t.isEmpty) return '';
   if (t.contains('\n')) return t.split('\n').first.trim();
-  return t.split(RegExp(r'[:,.]')).first.trim();
+  final z = _zeitImNamen.firstMatch(t);
+  final name = shortDay(t);
+  return z == null ? name : '$name ${z.group(0)!.trim()}';
+}
+
+/// Minutes after midnight of the training time in the day's name, or null.
+int? trainingZeit(String text) {
+  final t = text.trim();
+  if (t.isEmpty) return null;
+  final m = _zeitImNamen.firstMatch(t.split('\n').first);
+  if (m == null) return null;
+  final h = int.parse(m.group(1) ?? m.group(3)!);
+  return h * 60 + int.parse(m.group(2) ?? '0');
 }
 
 /// The exercises of a plan day without its name; empty if there are none.
 String dayDetails(String text) {
-  final t = text.trim();
-  if (t.contains('\n')) return t.substring(t.indexOf('\n') + 1).trim();
+  final roh = text.trim();
+  if (roh.contains('\n')) return roh.substring(roh.indexOf('\n') + 1).trim();
+  final t = _ohneZeit(roh);
   final name = shortDay(t);
   if (name == t || name == 'frei') return '';
   return t

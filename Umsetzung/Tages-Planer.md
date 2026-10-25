@@ -2,7 +2,7 @@
 title: Tages-Planer
 tags: [umsetzung, ki, training, kalender, teilweise-gebaut]
 erstellt: 2026-10-15
-aktualisiert: 2026-10-20
+aktualisiert: 2026-10-25
 ---
 
 # Tages-Planer: Kalender + Training
@@ -43,6 +43,18 @@ Gebaut als Karte „Dein Tag“ auf der Seite „Heute“, unter Fokus der Woche
 - **Platzhalter bis zur KI:** Uhrzeit/Intensität des Trainings, Lage und Größe der Mahlzeiten und der Tipp des Tages.
 - **Bettzeit (gebaut 2026-10-20):** Auf der Seite Schlaf gibt es die Karte „Deine Schlafzeiten“ (Aufstehen Mo bis Fr, Aufstehen Sa und So, Schlaf pro Nacht, Start 8 Std.). Bettzeit = Aufstehzeit morgen minus Schlafdauer, z. B. 6:30 und 7 Std. ergibt 23:30. Ein Termin morgen, der weniger als 1 Stunde nach der Aufstehzeit liegt, zieht das Aufstehen auf 1 Stunde vor den Termin. Im Tagesplan steht die Uhrzeit mit Grund und „Abendroutine ab …“, solange die Routine vor der Bettzeit beginnt. Ohne Aufstehzeit erinnert die Zeile „Trag ein, wann du aufstehst ›“ daran und öffnet die Seite Schlaf. Der Coach liest Aufstehzeiten, Schlafdauer und Bettzeit mit, wenn man ihm zum Schlaf schreibt. Bild: `ki-coach/bettzeit-app.png`.
 - **Noch nicht gebaut:** Erinnerungen per Benachrichtigung. Sie brauchen die Handy-Version der App und lassen sich in der Browser-Vorschau nicht zeigen.
+
+## Sonnenbogen (2026-10-25)
+
+Phillip wollte den Tagesplaner „krasser“ und als etwas Besonderes. Aus drei Entwürfen (Sonnenbogen, Tageswurzel, Tagesuhr) hat er den **Sonnenbogen** gewählt und „noch bissle geiler“ gewünscht; Entwurf 2: https://claude.ai/artifact/SqcNLu4SazpHXt3RNhCMoL. Phillip: „Ja passt“.
+
+- Oben auf der Seite „Dein Tag“ ein Bogen vom Aufstehen bis zur Bettzeit. Der Himmel färbt sich von Morgenrot bis Nacht, rechts Sterne und Mond, goldene Bodenlinie mit Spiegelung der Sonne.
+- Beim Öffnen geht die Sonne auf und wandert bis „jetzt“; an jedem Punkt, an dem sie vorbeizieht, sprühen Funken.
+- Die Sonne lässt sich ziehen („Vorschau“): Die Karte darunter zeigt, was um diese Uhrzeit dran ist; beim Loslassen springt sie zurück auf „jetzt“. Tippen auf einen Punkt zeigt ihn in der Karte.
+- Karte darunter: sekundengenauer Countdown bis zum nächsten Punkt.
+- Liste in Zeitfolge mit leuchtender „Jetzt“-Linie, Erledigtes blass mit Haken. Neu: Zeile „Aufstehen“.
+- Auf dem Bogen stehen nur Punkte mit Uhrzeit: Aufstehen, Foto, Termine, Abendroutine, Bettzeit. Training und Mahlzeiten haben noch keine Uhrzeit (die plant später der Coach), sie stehen in der Liste; das Training erscheint in der Karte als „Heute noch: …“, wenn nichts mit Uhrzeit mehr kommt.
+- **Gebaut 2026-10-25** (Code `code/lib/home/sonnenbogen.dart`, PR #59). Das Ausweichen des Trainings als Komet aus dem Entwurf kommt, sobald der Coach Trainingszeiten plant.
 
 ## Entwurf
 

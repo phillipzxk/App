@@ -21,6 +21,7 @@ const _weekdays = [
 class TrainingTab extends StatelessWidget {
   const TrainingTab({
     super.key,
+    this.extra = const [],
     required this.plan,
     required this.schwerpunkt,
     required this.today,
@@ -29,6 +30,9 @@ class TrainingTab extends StatelessWidget {
     required this.onSchwerpunkt,
     required this.onAsk,
   });
+
+  /// Cards that moved here from the old "Heute" page.
+  final List<Widget> extra;
 
   final TrainingPlan plan;
   final Schwerpunkt? schwerpunkt;
@@ -56,6 +60,7 @@ class TrainingTab extends StatelessWidget {
           icon: Icons.fitness_center,
         ),
         const AreaChart(bereich: Bereich.training),
+        ...extra,
         const GroupLabel('Deine Basis'),
         if (plan.isEmpty)
           FeedCard(
@@ -256,8 +261,7 @@ class TrainingPlanEditor extends StatefulWidget {
 
 class _TrainingPlanEditorState extends State<TrainingPlanEditor> {
   late final _names = [
-    for (final t in widget.plan.tage)
-      TextEditingController(text: t.trim().isEmpty ? '' : shortDay(t)),
+    for (final t in widget.plan.tage) TextEditingController(text: dayName(t)),
   ];
   late final _uebungen = [
     for (final t in widget.plan.tage)
@@ -277,8 +281,9 @@ class _TrainingPlanEditorState extends State<TrainingPlanEditor> {
     return EditorPage(
       title: 'Dein Trainingsplan',
       intro:
-          'Gib jedem Tag einen kurzen Namen, z. B. „Push + Laufen“, und '
-          'schreib darunter alle Übungen in eigenen Worten, so viele du '
+          'Gib jedem Tag einen kurzen Namen, z. B. „Push + Laufen“, gern mit '
+          'Uhrzeit wie „Push 17:30“, dann steht das Training im Sonnenbogen. '
+          'Schreib darunter alle Übungen in eigenen Worten, so viele du '
           'willst. Jede Sportart geht. Lass einen Tag leer, wenn er frei ist.',
       onSave: () => Navigator.of(context).pop(
         TrainingPlan([
@@ -295,7 +300,7 @@ class _TrainingPlanEditorState extends State<TrainingPlanEditor> {
             controller: _names[i],
             label: 'Name',
             hint: i == 0
-                ? 'z. B. Push + Laufen'
+                ? 'z. B. Push + Laufen 17:30'
                 : i == 1
                 ? 'z. B. Pull'
                 : null,

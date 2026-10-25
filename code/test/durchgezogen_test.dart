@@ -170,6 +170,8 @@ void main() {
       'Steuer abgeschickt',
     );
     await tester.pump();
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -120));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('durch-eintragen')));
     await tester.pumpAndSettle();
     expect(feed.durchgezogen.last.text, 'Steuer abgeschickt');

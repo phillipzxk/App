@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../checkin/checkin.dart';
@@ -21,7 +23,13 @@ import '../weight/weight.dart';
 import 'durchgezogen_widgets.dart';
 import 'fokus_widgets.dart';
 import 'reality_check.dart';
-import 'heute_animationen.dart';
+import 'bereich_uebersicht.dart';
+import 'sonnenbogen.dart';
+import 'day_plan.dart';
+import 'feed_widgets.dart';
+import 'wurzelwerk.dart';
+import '../future_me/future_me_card.dart';
+import '../ui/coach_widgets.dart';
 import 'mindset_tab.dart';
 import 'muster_widgets.dart';
 import 'nutrition_tab.dart';
@@ -30,9 +38,9 @@ import 'bereichs_werte.dart';
 import 'today_tab.dart';
 import 'training_tab.dart';
 
-/// The Main Feed: opens after the daily check-in. A bar at the bottom
-/// switches between "Heute" and one page per area (see
-/// Umsetzung/Main Feed.md).
+/// The Main Feed: opens after the daily check-in. "Heute" on top, the
+/// four areas on the roots below; each opens big and leads to its full page
+/// (vault Umsetzung/Home-Schichten.md, 2026-10-25).
 class HomePage extends StatefulWidget {
   const HomePage({
     super.key,
@@ -57,7 +65,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool _loaded = false;
-  int _tab = 0;
+  final _stand = ValueNotifier<int>(0);
   List<CheckIn> _checkIns = const [];
   List<WeightEntry> _weights = const [];
   List<SleepEntry> _sleep = const [];
@@ -87,6 +95,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     _heuteScroll.dispose();
+    _stand.dispose();
     super.dispose();
   }
 
@@ -94,6 +103,13 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _reload();
+  }
+
+  /// Pages opened from Heute (coach, focus) rebuild with every change too.
+  @override
+  void setState(VoidCallback fn) {
+    super.setState(fn);
+    _stand.value++;
   }
 
   Future<void> _reload() async {
@@ -141,6 +157,7 @@ class _HomePageState extends State<HomePage> {
       _coachAnsicht = coachAnsicht;
       _durchgezogen = durchgezogen;
     });
+    _stand.value++;
     _pruefeMuster(checkIns, muster);
     _pruefeDurchgezogen(checkIns, durchgezogen);
     if (!_fokusVersucht) _holeFokusVorschlaege();
@@ -188,58 +205,230 @@ class _HomePageState extends State<HomePage> {
     await _reload();
   }
 
-  Widget _fokusWidget() {
+  /// Ticks today's focus on or off; ticking on lets the coach cheer.
+  Future<void> _umschalten(Wochenfokus f) async {
+    final neu = f.umschalten(widget.clock());
+    await widget.feed.saveFokus(neu);
+    final geschafft = neu.heuteGeschafft(widget.clock());
+    // Scroll up first so the crown and the coach can be seen.
+    if (geschafft && _heuteScroll.hasClients) {
+      await _heuteScroll.animateTo(
+        0,
+        duration: const Duration(milliseconds: 550),
+        curve: Curves.easeInOutCubic,
+      );
+    }
+    if (!mounted) return;
+    setState(() {
+      if (geschafft) {
+        _jubelTick++;
+        final n = widget.profile.name.trim();
+        _jubel =
+            'Ja${n.isEmpty ? '' : ', $n'}! Fokus heute geschafft.\n'
+            'Das Wichtigste wächst unter der Oberfläche: '
+            'Deine Wurzeln sind heute wieder tiefer geworden.';
+      } else {
+        _jubel = null;
+      }
+    });
+    await _reload();
+  }
+
+  /// The full focus card or choice, on its own page (opened from the crown).
+  Widget _fokusWidget(BuildContext seite) {
     final f = _fokus;
     if (f != null && !f.vorbei(widget.clock())) {
       return FokusKarte(
         fokus: f,
         today: widget.clock(),
         onUmschalten: () async {
-          final neu = f.umschalten(widget.clock());
-          await widget.feed.saveFokus(neu);
-          final geschafft = neu.heuteGeschafft(widget.clock());
-          // Scroll up first so the sprout and the coach can be seen.
-          if (geschafft && _heuteScroll.hasClients) {
-            await _heuteScroll.animateTo(
-              0,
-              duration: const Duration(milliseconds: 550),
-              curve: Curves.easeInOutCubic,
-            );
-          }
-          if (!mounted) return;
-          setState(() {
-            if (geschafft) {
-              _jubelTick++;
-              final n = widget.profile.name.trim();
-              _jubel =
-                  'Ja${n.isEmpty ? '' : ', $n'}! Fokus heute geschafft.\n'
-                  'Oben siehst du den Trieb, aber das Wichtigste wächst '
-                  'darunter: Deine Wurzeln sind heute wieder tiefer geworden.';
-            } else {
-              _jubel = null;
-            }
-          });
-          await _reload();
+          // Ticking on: back to Heute, where the tree cheers.
+          if (!f.heuteGeschafft(widget.clock())) Navigator.of(seite).pop();
+          await _umschalten(f);
         },
       );
     }
     final laedt = _fokusLaedt || !_fokusVersucht;
-    // A week just ended: only the small Reality Check field on Heute.
-    if (f != null) {
-      final a = _fokusAuswahl;
-      return RealityFeld(
-        auswahl: a,
-        laedt: laedt,
-        onNochmal: _holeFokusVorschlaege,
-        onOpen: () => _oeffneReality(a!),
-      );
-    }
     return FokusWahl(
       auswahl: _fokusAuswahl,
       laedt: laedt,
-      onStart: _starteFokus,
+      onStart: (v) async {
+        await _starteFokus(v);
+        if (seite.mounted) Navigator.of(seite).pop();
+      },
       onNochmal: _holeFokusVorschlaege,
     );
+  }
+
+  /// The Reality Check is due: the week ran out (Umsetzung/Reality Check).
+  bool get _realityFaellig => _fokus != null && !_fokusLaeuft;
+
+  /// What the round Fokus field in the crown shows.
+  Widget _fokusFeld() {
+    final f = _fokus;
+    final label = CoachStyle.goldLabel.copyWith(
+      fontFamily: 'Sora',
+      fontSize: 8.5,
+      letterSpacing: 1.4,
+      color: CoachStyle.gold,
+    );
+    final titel = CoachStyle.body.copyWith(
+      fontSize: 12.5,
+      height: 1.25,
+      fontWeight: FontWeight.w700,
+      color: const Color(0xFFF6EEDD),
+    );
+    final klein = CoachStyle.body.copyWith(
+      fontSize: 10.5,
+      color: CoachStyle.beigeLabel,
+    );
+    if (f != null && _fokusLaeuft) {
+      final heute = widget.clock();
+      final tag = f.tag(heute).clamp(1, Wochenfokus.tage);
+      final striche = f.striche;
+      final geschafft = f.heuteGeschafft(heute);
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('FOKUS · TAG $tag/${Wochenfokus.tage}', style: label),
+          const SizedBox(height: 5),
+          Text(
+            f.text,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: titel,
+          ),
+          const SizedBox(height: 7),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < Wochenfokus.tage; i++)
+                Container(
+                  width: 8,
+                  height: 4,
+                  margin: const EdgeInsets.symmetric(horizontal: 1.3),
+                  decoration: BoxDecoration(
+                    gradient: striche[i] ? CoachStyle.goldGradient : null,
+                    color: striche[i]
+                        ? null
+                        : i < tag
+                        ? const Color(0xFF4A3D2E)
+                        : const Color(0xFF2E251B),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          GestureDetector(
+            key: const ValueKey('fokus-heute'),
+            onTap: () => _umschalten(f),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+              decoration: BoxDecoration(
+                gradient: geschafft ? null : CoachStyle.goldGradient,
+                borderRadius: BorderRadius.circular(20),
+                border: geschafft
+                    ? Border.all(color: CoachStyle.goldEdge)
+                    : null,
+              ),
+              child: Text(
+                geschafft ? '✓ Geschafft' : 'Heute geschafft',
+                maxLines: 1,
+                softWrap: false,
+                style: CoachStyle.body.copyWith(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: geschafft
+                      ? CoachStyle.goldLight
+                      : const Color(0xFF1A140E),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    if (_realityFaellig) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('NEUE WOCHE', style: label),
+          const SizedBox(height: 6),
+          Text(
+            'Erst dein\nReality Check',
+            textAlign: TextAlign.center,
+            style: titel,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _fokusAuswahl == null ? 'Coach schaut zurück …' : 'Öffnen ›',
+            style: klein,
+          ),
+        ],
+      );
+    }
+    final laedt = _fokusLaedt || !_fokusVersucht;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text('FOKUS DER WOCHE', style: label),
+        const SizedBox(height: 6),
+        Text(
+          laedt ? 'Dein Coach sucht\nVorschläge …' : 'Wähl deinen\nFokus',
+          textAlign: TextAlign.center,
+          style: titel,
+        ),
+        const SizedBox(height: 6),
+        Text(laedt ? '' : '3 Vorschläge ›', style: klein),
+      ],
+    );
+  }
+
+  void _oeffneFokus(Offset mitte) {
+    if (_realityFaellig) {
+      final a = _fokusAuswahl;
+      if (a == null) {
+        _holeFokusVorschlaege();
+      } else {
+        _oeffneReality(a);
+      }
+      return;
+    }
+    oeffneMitKreis(
+      context,
+      mitte,
+      (seite) => _UnterSeite(
+        child: _lebendig(
+          () => NightScope(
+            child: ListView(
+              padding: const EdgeInsets.only(bottom: 40),
+              children: [
+                PageHeader(
+                  label: germanDate(widget.clock()),
+                  title: 'Fokus der Woche',
+                ),
+                _fokusWidget(seite),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// A pattern found in the last two days counts as new: it shows on Heute.
+  Muster? get _neuesMuster {
+    final sichtbar = sichtbareMuster(_muster);
+    if (sichtbar.isEmpty) return null;
+    final m = sichtbar.first;
+    final t = widget.clock();
+    final d = DateTime(m.datum.year, m.datum.month, m.datum.day);
+    return DateTime(t.year, t.month, t.day).difference(d).inDays <= 2
+        ? m
+        : null;
   }
 
   Future<void> _oeffneReality(FokusAuswahl a) => Navigator.of(context).push(
@@ -452,152 +641,594 @@ class _HomePageState extends State<HomePage> {
     return kcalZiel(p, _weights.last.kg);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final pages = [
-      TodayTab(
-        name: widget.profile.name,
-        date: germanDate(widget.clock()),
-        today: widget.clock(),
-        checkIns: _checkIns,
-        termine: _termine,
-        training: _plan.forDay(widget.clock()),
-        mahlzeiten: _mahlzeiten,
-        kcalZiel: _kcalZiel,
-        onAddTermin: (text) async {
-          await widget.feed.addTermin(parseTermin(text, widget.clock()));
-          await _reload();
-        },
-        onRemoveTermin: (t) async {
-          await widget.feed.removeTermin(t);
-          await _reload();
-        },
-        onSetMahlzeiten: (n) async {
-          await widget.feed.saveMahlzeiten(n);
-          await _reload();
-        },
-        fotoEinstellungen: _fotoEinstellungen,
-        wochenFotos: _wochenFotos,
-        onOpenZukunft: () async {
-          await Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) =>
-                  FutureMePage(store: widget.feed, clock: widget.clock),
-            ),
+  static const _icons = {
+    Bereich.training: Icons.fitness_center,
+    Bereich.ernaehrung: Icons.restaurant,
+    Bereich.schlaf: Icons.bedtime,
+    Bereich.mindset: Icons.landscape,
+  };
+
+  static const _namen = {
+    Bereich.training: 'Training',
+    Bereich.ernaehrung: 'Ernährung',
+    Bereich.schlaf: 'Schlaf & Energie',
+    Bereich.mindset: 'Mindset',
+  };
+
+  CheckIn? get _heute {
+    final key = dayKey(widget.clock());
+    for (final c in _checkIns) {
+      if (dayKey(c.datum) == key) return c;
+    }
+    return null;
+  }
+
+  (int?, int?) _wert(Bereich b) {
+    final w = werteVerlauf(_checkIns, b, widget.clock(), 2);
+    final d = w[1] != null && w[0] != null ? w[1]! - w[0]! : null;
+    return (w[1], d);
+  }
+
+  static String _komma(double v) => v.toStringAsFixed(1).replaceAll('.', ',');
+
+  /// Mo..So of this week: true = trained, false = planned, null = nothing.
+  List<bool?> _trainingsWoche() {
+    final t = widget.clock();
+    final mo = DateTime(t.year, t.month, t.day - (t.weekday - 1));
+    final ruhe = RegExp(r'^(ruhe|pause|frei|off\b)', caseSensitive: false);
+    final byDay = {for (final c in _checkIns) dayKey(c.datum): c};
+    return [
+      for (var i = 0; i < 7; i++)
+        () {
+          final d = DateTime(mo.year, mo.month, mo.day + i);
+          final c = byDay[dayKey(d)];
+          final a = c?.training.trim() ?? '';
+          if (a.isNotEmpty && !a.startsWith('Pause')) return true;
+          final p = _plan.tage[i].trim();
+          return p.isNotEmpty && !ruhe.hasMatch(p) ? false : null;
+        }(),
+    ];
+  }
+
+  /// The big view of one area: its 4 fixed tiles (vault
+  /// Umsetzung/Home-Schichten.md, decided 2026-10-25).
+  BereichDaten _daten(Bereich b) {
+    final today = widget.clock();
+    final (wert, diff) = _wert(b);
+    final verlauf = Kachel(
+      key: ValueKey('kachel-verlauf-${b.name}'),
+      titel: 'Verlauf · 14 Tage',
+      wert: '',
+      breit: true,
+      verlauf: werteVerlauf(_checkIns, b, today, 14),
+    );
+    final List<Kachel> kacheln;
+    switch (b) {
+      case Bereich.training:
+        final tag = _plan.forDay(today);
+        final name = shortDay(tag);
+        final uebungen = [
+          for (final l in dayDetails(tag).split('\n'))
+            if (l.trim().isNotEmpty) l.trim(),
+        ];
+        final woche = _trainingsWoche();
+        final gemacht = woche.where((x) => x == true).length;
+        final ruhe = RegExp(r'^(ruhe|pause|frei|off\b)', caseSensitive: false);
+        final geplant = _plan.tage
+            .where((t) => t.trim().isNotEmpty && !ruhe.hasMatch(t.trim()))
+            .length;
+        final antwort = _heute?.training.trim() ?? '';
+        kacheln = [
+          Kachel(
+            key: const ValueKey('kachel-heute-training'),
+            titel: 'Heute',
+            wert: name != 'frei'
+                ? name
+                : (_plan.isEmpty ? 'Plan festlegen' : 'Frei'),
+            unter: uebungen.take(4).join('\n'),
+            breit: uebungen.isNotEmpty,
+          ),
+          Kachel(
+            titel: 'Woche',
+            wert: geplant == 0 ? '$gemacht' : '$gemacht von $geplant',
+            unter: 'Trainingstage',
+            tage: woche,
+          ),
+          Kachel(
+            titel: 'Wie war es?',
+            wert: antwort.isEmpty ? 'Noch offen' : antwort,
+            unter: 'aus deinem Check-in',
+          ),
+          verlauf,
+        ];
+      case Bereich.ernaehrung:
+        final ids = {for (final s in _supplements) s.id};
+        final gen = _genommen.where(ids.contains).length;
+        final offen = _supplements.length - gen;
+        final next = naechsteOffene(_supplements, _genommen, today);
+        final ziel = _kcalZiel;
+        String gewichtUnter = '';
+        if (_weights.length > 1) {
+          final last = _weights.last;
+          final vor = _weights.firstWhere(
+            (w) => last.datum.difference(w.datum).inDays <= 28,
+            orElse: () => last,
           );
-          await _reload();
-        },
-        supplements: _supplements,
-        genommen: _genommen,
-        onOpenSupplements: () =>
-            setState(() => _tab = Bereich.ernaehrung.index + 1),
-        onOpenArea: (b) => setState(() => _tab = b.index + 1),
-        onOpenAreaVon: (b, von) => wachseZuSeite(
-          context,
-          von: von,
-          titel: b.label,
-          onGross: () {
-            if (mounted) setState(() => _tab = b.index + 1);
-          },
+          final d = last.kg - vor.kg;
+          if (!identical(vor, last)) {
+            final wochen = (last.datum.difference(vor.datum).inDays / 7)
+                .round()
+                .clamp(1, 4);
+            gewichtUnter =
+                '${d > 0 ? '+' : (d < 0 ? '−' : '±')}${_komma(d.abs())} in $wochen ${wochen == 1 ? 'Woche' : 'Wochen'}';
+          }
+        }
+        kacheln = [
+          Kachel(
+            key: const ValueKey('supp-hinweis'),
+            titel: 'Supplements',
+            wert: _supplements.isEmpty
+                ? 'Festlegen'
+                : '$gen von ${_supplements.length}',
+            unter: _supplements.isEmpty
+                ? 'deine Routine'
+                : (offen > 0 && next != null
+                      ? '$offen offen, nächste ${next.zeit} ${next.name}'
+                      : 'alle genommen'),
+          ),
+          Kachel(
+            titel: 'kcal-Ziel',
+            wert: ziel == null ? 'Einrichten' : '$ziel',
+            unter: ziel == null ? 'dein Tagesziel' : 'kcal am Tag',
+          ),
+          Kachel(
+            titel: 'Gewicht',
+            wert: _weights.isEmpty
+                ? 'Eintragen'
+                : '${_komma(_weights.last.kg)} kg',
+            unter: gewichtUnter,
+          ),
+          verlauf,
+        ];
+      case Bereich.schlaf:
+        final bz = _bettzeit;
+        final naechte = [for (final e in _sleep.reversed.take(7)) e.stunden]
+            .reversed
+            .toList();
+        kacheln = [
+          Kachel(
+            titel: 'Heute ins Bett',
+            wert: bz == null ? 'Eintragen' : formatUhrzeit(bz.bett),
+            unter: bz == null
+                ? 'deine Schlafzeiten'
+                : 'Aufstehen ${formatUhrzeit(bz.aufstehen)}',
+          ),
+          Kachel(
+            titel: 'Nächte',
+            wert: naechte.isEmpty
+                ? 'Eintragen'
+                : '${_komma(naechte.reduce((a, b) => a + b) / naechte.length)} h',
+            unter: naechte.isEmpty ? 'wie lange du schläfst' : 'Schnitt',
+            balken: naechte.length > 1 ? naechte : null,
+          ),
+          Kachel(
+            titel: 'Abendroutine',
+            wert: _routine.isEmpty
+                ? 'Festlegen'
+                : '${_routine.length} ${_routine.length == 1 ? 'Schritt' : 'Schritte'}',
+            unter: _routine.isEmpty
+                ? 'vor dem Schlafen'
+                : 'ab ${_routine.first.zeit}',
+          ),
+          verlauf,
+        ];
+      case Bereich.mindset:
+        final mo = DateTime(
+          today.year,
+          today.month,
+          today.day - (today.weekday - 1),
+        );
+        final n = _durchgezogen.where((e) => !e.datum.isBefore(mo)).length;
+        final warum = widget.profile.motivation.trim();
+        kacheln = [
+          Kachel(titel: 'Durchgezogen', wert: '$n Mal', unter: 'seit Montag'),
+          Kachel(
+            titel: 'Wovor drückst du dich?',
+            wert: 'Schreiben',
+            unter: 'mit dem Coach',
+          ),
+          Kachel(
+            titel: 'Dein Warum',
+            wert: warum.isEmpty ? 'Noch offen' : '',
+            unter: warum.isEmpty ? '' : '„$warum“',
+            breit: true,
+          ),
+          verlauf,
+        ];
+    }
+    return BereichDaten(
+      bereich: b,
+      name: _namen[b]!,
+      icon: _icons[b]!,
+      wert: wert,
+      diff: diff,
+      grund: _heute?.gruende[b.name],
+      kacheln: kacheln,
+    );
+  }
+
+  /// A page that rebuilds whenever the data changes.
+  Widget _lebendig(Widget Function() bau) => ValueListenableBuilder<int>(
+    valueListenable: _stand,
+    builder: (context, _, _) =>
+        WerteScope(checkIns: _checkIns, today: widget.clock(), child: bau()),
+  );
+
+  Future<void> _oeffneBereich(Bereich b, Offset mitte) => oeffneMitKreis(
+    context,
+    mitte,
+    (_) => _lebendig(
+      () => BereichUebersicht(daten: _daten(b), onAlles: () => _oeffneSeite(b)),
+    ),
+  );
+
+  /// The full area page with everything the old tab had.
+  Future<void> _oeffneSeite(Bereich b) => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => _UnterSeite(child: _lebendig(() => _seite(b))),
+    ),
+  );
+
+  /// Today from getting up to bedtime: arc start and end (minutes, end may
+  /// pass midnight) and every point with a time, for both sun arcs.
+  ({int start, int ende, List<BogenPunkt> punkte, String? ohneZeit})
+  _tagesPunkte() {
+    final jetzt = widget.clock();
+    final aufstehen = _schlafzeiten.aufstehenAm(jetzt);
+    final bz = _bettzeit;
+    final start = aufstehen ?? 7 * 60;
+    var ende = bz?.bett ?? 23 * 60;
+    if (ende <= start) ende += 1440;
+    final training = _plan.forDay(jetzt).trim();
+    final trZeit = trainingZeit(training);
+    // Until the coach plans meals, they are spread evenly over the day:
+    // from half an hour after getting up to 2.5 hours before bed.
+    final n = _mahlzeiten ?? 0;
+    final von = start + 30, bis = math.max(von, ende - 150);
+    final punkte = <BogenPunkt>[
+      if (aufstehen != null)
+        BogenPunkt(
+          id: 'aufstehen',
+          minute: aufstehen,
+          art: 'Aufstehen',
+          titel: 'Aufstehen',
         ),
-        wurzeln: _fokusLaeuft ? _fokus!.anzahlGeschafft : 0,
-        jubel: _jubel,
-        jubelTick: _jubelTick,
-        scroll: _heuteScroll,
-        muster: sichtbareMuster(_muster),
-        onMusterAblehnen: (m) async {
-          await widget.feed.saveMuster([
-            for (final x in _muster) identical(x, m) ? x.ablehnen() : x,
-          ]);
-          await _reload();
-        },
-        onOpenMuster: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => MusterSeite(
-              muster: sichtbareMuster(_muster),
-              heute: widget.clock(),
+      if (_fotoTag != null)
+        BogenPunkt(
+          id: 'foto',
+          minute: start + 15,
+          art: 'Foto',
+          titel: 'Foto',
+          text: _fotoTag,
+        ),
+      for (final t in termineAm(_termine, jetzt))
+        if (parseUhrzeit(t.zeit ?? '') case final m?)
+          BogenPunkt(
+            id: 'termin-${t.erstellt.microsecondsSinceEpoch}',
+            minute: m,
+            art: 'Termin',
+            titel: t.text,
+          ),
+      if (trZeit != null)
+        BogenPunkt(
+          id: 'training',
+          minute: trZeit < start ? trZeit + 1440 : trZeit,
+          art: 'Training',
+          titel: shortDay(training),
+          text: dayDetails(training).isEmpty ? null : 'Übungen in deinem Plan',
+        ),
+      for (var i = 0; i < n; i++)
+        BogenPunkt(
+          id: 'mahlzeit-$i',
+          minute: n == 1 ? (von + bis) ~/ 2 : von + (bis - von) * i ~/ (n - 1),
+          art: 'Essen',
+          titel: 'Mahlzeit ${i + 1} von $n',
+        ),
+      for (final x in _supplements)
+        if (parseUhrzeit(x.zeit) case final m?)
+          BogenPunkt(
+            id: 'supp-${x.id}',
+            minute: m < start ? m + 1440 : m,
+            art: 'Supplement',
+            titel: x.name,
+            text: [
+              if (x.menge.isNotEmpty) x.menge,
+              if (_genommen.contains(x.id)) 'genommen ✓',
+            ].join(' · '),
+            erledigt: _genommen.contains(x.id),
+          ),
+      if (bz != null && _routine.isNotEmpty)
+        if (parseUhrzeit(_routine.first.zeit) case final ab?)
+          if (ab < bz.bett && bz.bett - ab <= 180)
+            BogenPunkt(
+              id: 'routine',
+              minute: ab + (ende - bz.bett),
+              art: 'Schlaf',
+              titel: 'Abendroutine',
+            ),
+      if (bz != null)
+        BogenPunkt(
+          id: 'bett',
+          minute: ende,
+          art: 'Schlaf',
+          titel: 'Bettzeit',
+          text: 'Morgen um ${formatUhrzeit(bz.aufstehen)} raus',
+        ),
+    ];
+    return (
+      start: start,
+      ende: ende,
+      punkte: punkte,
+      ohneZeit: training.isEmpty || trZeit != null ? null : shortDay(training),
+    );
+  }
+
+  double get _jetztMinute {
+    final j = widget.clock();
+    return j.hour * 60 + j.minute + j.second / 60;
+  }
+
+  /// The sun arc on top of "Dein Tag": from getting up to bedtime.
+  Widget _sonnenbogen() {
+    final t = _tagesPunkte();
+    return Sonnenbogen(
+      punkte: t.punkte,
+      start: t.start,
+      ende: t.ende,
+      jetzt: _jetztMinute,
+      ohneZeit: t.ohneZeit,
+    );
+  }
+
+  /// "Heute dran" on Heute: the small sun arc with everything of today.
+  Widget _heuteBogen() {
+    final t = _tagesPunkte();
+    return HeuteBogen(
+      punkte: t.punkte,
+      start: t.start,
+      ende: t.ende,
+      jetzt: _jetztMinute,
+      ohneZeit: t.ohneZeit,
+      rund: true,
+    );
+  }
+
+  Future<void> _oeffneTag() => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => _UnterSeite(
+        child: _lebendig(
+          () => NightScope(
+            child: ListView(
+              padding: const EdgeInsets.only(bottom: 40),
+              children: [
+                PageHeader(
+                  label: germanDate(widget.clock()),
+                  title: 'Dein Tag',
+                ),
+                _sonnenbogen(),
+                const SizedBox(height: 16),
+                DayPlanCard(
+                  today: widget.clock(),
+                  termine: _termine,
+                  training: _plan.forDay(widget.clock()),
+                  mahlzeiten: _mahlzeiten,
+                  kcalZiel: _kcalZiel,
+                  onAddTermin: (text) async {
+                    await widget.feed.addTermin(
+                      parseTermin(text, widget.clock()),
+                    );
+                    await _reload();
+                  },
+                  onRemoveTermin: (t) async {
+                    await widget.feed.removeTermin(t);
+                    await _reload();
+                  },
+                  onSetMahlzeiten: (n) async {
+                    await widget.feed.saveMahlzeiten(n);
+                    await _reload();
+                  },
+                  onOpenTraining: () => _oeffneSeite(Bereich.training),
+                  foto: _fotoTag,
+                  onOpenFoto: _oeffneZukunft,
+                  bettzeit: _bettzeit,
+                  schlafStunden: _schlafzeiten.stunden,
+                  routineAb: _routine.isEmpty ? null : _routine.first.zeit,
+                  onOpenSchlaf: () => _oeffneSeite(Bereich.schlaf),
+                  aufstehen: _schlafzeiten.aufstehenAm(widget.clock()),
+                ),
+              ],
             ),
           ),
         ),
-        fokus: _fokusWidget(),
-        coachAnsicht: _coachAnsicht,
-        onCoachAnsicht: (a) {
-          setState(() => _coachAnsicht = a);
-          widget.feed.saveCoachAnsicht(a);
-        },
-        onStichpunkte: (c) async {
-          final p = await widget.coach.stichpunkte(c.kiAntwort);
-          if (p == null) return;
-          await widget.store.saveCheckIn(c.withStichpunkte(p));
-          await _reload();
-        },
-        bettzeit: _bettzeit,
-        schlafStunden: _schlafzeiten.stunden,
-        routineAb: _routine.isEmpty ? null : _routine.first.zeit,
-        onOpenSchlaf: () => setState(() => _tab = Bereich.schlaf.index + 1),
-        onRestartOnboarding: widget.onRestartOnboarding,
       ),
-      TrainingTab(
-        plan: _plan,
-        schwerpunkt: _schwerpunkt,
-        today: widget.clock(),
-        fragen: _todayFragen(Bereich.training),
-        onSchwerpunkt: (sp) async {
-          await widget.feed.saveSchwerpunkt(sp);
-          await _reload();
-        },
-        onSavePlan: (p) async {
-          await widget.feed.savePlan(p);
-          await _reload();
-        },
-        onAsk: _ask(Bereich.training),
+    ),
+  );
+
+  /// "Foto · Woche 7" on the photo day, null on other days.
+  String? get _fotoTag {
+    final e = _fotoEinstellungen;
+    if (e == null) return null;
+    final lage = fotoLage(widget.clock(), e, _wochenFotos);
+    return switch (lage.status) {
+      FotoStatus.heute => 'Foto · Woche ${lage.woche}',
+      FotoStatus.nachholen => 'Foto nachholen · Woche ${lage.woche}',
+      FotoStatus.spaeter => null,
+    };
+  }
+
+  Future<void> _oeffneZukunft() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => FutureMePage(store: widget.feed, clock: widget.clock),
       ),
-      NutritionTab(
-        kcal: _kcal,
-        weights: _weights,
-        fragen: _todayFragen(Bereich.ernaehrung),
-        onSaveKcal: _saveKcal,
-        onAddWeight: _addWeight,
-        onAsk: _ask(Bereich.ernaehrung),
-        supplements: _supplements,
-        genommen: _genommen,
-        onSaveSupplements: (list) async {
-          await widget.feed.saveSupplements(list);
-          await _reload();
-        },
-        onToggleSupplement: (s, an) async {
-          await widget.feed.setGenommen(widget.clock(), s.id, an);
-          await _reload();
-        },
-      ),
-      SleepTab(
-        routine: _routine,
-        sleep: _sleep,
-        today: widget.clock(),
-        fragen: _todayFragen(Bereich.schlaf),
-        onAddSleep: _addSleep,
-        onSaveRoutine: (steps) async {
-          await widget.feed.saveRoutine(steps);
-          await _reload();
-        },
-        onAsk: _ask(Bereich.schlaf),
-        schlafzeiten: _schlafzeiten,
-        bettzeit: _bettzeit,
-        onSaveSchlafzeiten: (z) async {
-          await widget.feed.saveSchlafzeiten(z);
-          await _reload();
-        },
-      ),
-      MindsetTab(
-        profile: widget.profile,
-        fragen: _todayFragen(Bereich.mindset),
-        onAsk: _ask(Bereich.mindset),
-        durchgezogen: _durchgezogen,
-        today: widget.clock(),
-        onDurchAdd: _durchAdd,
-        onDurchAlle: _durchAlle,
-      ),
-    ];
+    );
+    await _reload();
+  }
+
+  Future<void> _oeffneMuster() => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) =>
+          MusterSeite(muster: sichtbareMuster(_muster), heute: widget.clock()),
+    ),
+  );
+
+  Future<void> _musterAblehnen(Muster m) async {
+    await widget.feed.saveMuster([
+      for (final x in _muster) identical(x, m) ? x.ablehnen() : x,
+    ]);
+    await _reload();
+  }
+
+  Widget _seite(Bereich b) {
+    switch (b) {
+      case Bereich.training:
+        return TrainingTab(
+          plan: _plan,
+          schwerpunkt: _schwerpunkt,
+          today: widget.clock(),
+          fragen: _todayFragen(Bereich.training),
+          onSchwerpunkt: (sp) async {
+            await widget.feed.saveSchwerpunkt(sp);
+            await _reload();
+          },
+          onSavePlan: (p) async {
+            await widget.feed.savePlan(p);
+            await _reload();
+          },
+          onAsk: _ask(Bereich.training),
+          // The progress photo lives with training (Frame Kit included).
+          extra: [
+            const GroupLabel('Fortschrittsfoto'),
+            FutureMeCard(
+              today: widget.clock(),
+              einstellungen: _fotoEinstellungen,
+              fotos: _wochenFotos,
+              onOpen: _oeffneZukunft,
+            ),
+          ],
+        );
+      case Bereich.ernaehrung:
+        return NutritionTab(
+          kcal: _kcal,
+          weights: _weights,
+          fragen: _todayFragen(Bereich.ernaehrung),
+          onSaveKcal: _saveKcal,
+          onAddWeight: _addWeight,
+          onAsk: _ask(Bereich.ernaehrung),
+          supplements: _supplements,
+          genommen: _genommen,
+          onSaveSupplements: (list) async {
+            await widget.feed.saveSupplements(list);
+            await _reload();
+          },
+          onToggleSupplement: (s, an) async {
+            await widget.feed.setGenommen(widget.clock(), s.id, an);
+            await _reload();
+          },
+        );
+      case Bereich.schlaf:
+        return SleepTab(
+          routine: _routine,
+          sleep: _sleep,
+          today: widget.clock(),
+          fragen: _todayFragen(Bereich.schlaf),
+          onAddSleep: _addSleep,
+          onSaveRoutine: (steps) async {
+            await widget.feed.saveRoutine(steps);
+            await _reload();
+          },
+          onAsk: _ask(Bereich.schlaf),
+          schlafzeiten: _schlafzeiten,
+          bettzeit: _bettzeit,
+          onSaveSchlafzeiten: (z) async {
+            await widget.feed.saveSchlafzeiten(z);
+            await _reload();
+          },
+        );
+      case Bereich.mindset:
+        final muster = sichtbareMuster(_muster);
+        return MindsetTab(
+          profile: widget.profile,
+          fragen: _todayFragen(Bereich.mindset),
+          onAsk: _ask(Bereich.mindset),
+          durchgezogen: _durchgezogen,
+          today: widget.clock(),
+          onDurchAdd: _durchAdd,
+          onDurchAlle: _durchAlle,
+          extra: [
+            if (muster.isNotEmpty) ...[
+              const GroupLabel('Deine Muster'),
+              MusterKarte(
+                muster: muster.first,
+                onAblehnen: () => _musterAblehnen(muster.first),
+                onAlle: _oeffneMuster,
+              ),
+            ],
+          ],
+        );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final today = widget.clock();
+    final heute = TodayTab(
+      name: widget.profile.name,
+      date: germanDate(today),
+      today: today,
+      checkIns: _checkIns,
+      heuteDran: _heuteBogen(),
+      fokusFeld: _fokusFeld(),
+      onOpenTag: (_) => _oeffneTag(),
+      onOpenFokus: _oeffneFokus,
+      fokusKey: _realityFaellig && _fokusAuswahl != null
+          ? const ValueKey('reality-feld')
+          : null,
+      coachAnsicht: _coachAnsicht,
+      onCoachAnsicht: (a) {
+        setState(() => _coachAnsicht = a);
+        widget.feed.saveCoachAnsicht(a);
+      },
+      onStichpunkte: (c) async {
+        final p = await widget.coach.stichpunkte(c.kiAntwort);
+        if (p == null) return;
+        await widget.store.saveCheckIn(c.withStichpunkte(p));
+        await _reload();
+      },
+      neuesMuster: _neuesMuster,
+      onMusterAblehnen: _musterAblehnen,
+      onOpenMuster: _oeffneMuster,
+      bereiche: [
+        for (final b in Bereich.values)
+          () {
+            final (w, d) = _wert(b);
+            return WurzelBereich(
+              bereich: b,
+              name: _namen[b]!,
+              icon: _icons[b]!,
+              wert: w,
+              diff: d,
+              grund: _heute?.gruende[b.name],
+            );
+          }(),
+      ],
+      onOpenBereich: _oeffneBereich,
+      wurzeln: _fokusLaeuft ? _fokus!.anzahlGeschafft : 0,
+      jubel: _jubel,
+      jubelTick: _jubelTick,
+      scroll: _heuteScroll,
+      onRestartOnboarding: widget.onRestartOnboarding,
+    );
     // The whole app is dark with beige and gold (Phillip 2026-10-18).
     return Scaffold(
       backgroundColor: CoachStyle.night,
@@ -610,13 +1241,14 @@ class _HomePageState extends State<HomePage> {
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 480),
+                // Heute pads its own top part; the soil runs edge to edge.
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: EdgeInsets.zero,
                   child: _loaded
                       ? WerteScope(
                           checkIns: _checkIns,
-                          today: widget.clock(),
-                          child: IndexedStack(index: _tab, children: pages),
+                          today: today,
+                          child: heute,
                         )
                       : const Center(
                           child: CircularProgressIndicator(
@@ -629,102 +1261,36 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      extendBody: true,
-      bottomNavigationBar: TabLeiste(
-        selected: _tab,
-        onSelect: (i) => setState(() => _tab = i),
-      ),
     );
   }
 }
 
-/// Floating dark bar at the bottom with the five pages; the open one is
-/// gold with a small gold dot.
-class TabLeiste extends StatelessWidget {
-  const TabLeiste({super.key, required this.selected, required this.onSelect});
-
-  final int selected;
-  final ValueChanged<int> onSelect;
-
-  static const _items = [
-    (Icons.today_outlined, 'Heute'),
-    (Icons.fitness_center, 'Training'),
-    (Icons.eco_outlined, 'Ernährung'),
-    (Icons.bedtime_outlined, 'Schlaf'),
-    (Icons.spa_outlined, 'Mindset'),
-  ];
+/// A pushed page in the app's dark look with a back arrow.
+class _UnterSeite extends StatelessWidget {
+  const _UnterSeite({required this.child});
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Center(
-        heightFactor: 1,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: Container(
-            key: const ValueKey('tab-leiste'),
-            margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xF2171310),
-              borderRadius: BorderRadius.circular(26),
-              border: Border.all(color: CoachStyle.hairline),
-              boxShadow: CoachStyle.darkShadow,
-            ),
-            child: Row(
-              children: [
-                for (var i = 0; i < _items.length; i++)
-                  Expanded(
-                    child: Semantics(
-                      button: true,
-                      selected: i == selected,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(18),
-                        onTap: () => onSelect(i),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                width: i == selected ? 18 : 0,
-                                height: 3,
-                                margin: const EdgeInsets.only(bottom: 5),
-                                decoration: BoxDecoration(
-                                  gradient: CoachStyle.goldGradient,
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                              ),
-                              Icon(
-                                _items[i].$1,
-                                size: 22,
-                                color: i == selected
-                                    ? CoachStyle.goldLight
-                                    : CoachStyle.nightMuted,
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                _items[i].$2,
-                                style: TextStyle(
-                                  fontFamily: 'Figtree',
-                                  fontSize: 11,
-                                  fontWeight: i == selected
-                                      ? FontWeight.w600
-                                      : FontWeight.w400,
-                                  color: i == selected
-                                      ? CoachStyle.goldLight
-                                      : CoachStyle.nightMuted,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
+    return Scaffold(
+      backgroundColor: CoachStyle.night,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        foregroundColor: CoachStyle.goldLight,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+      ),
+      body: DecoratedBox(
+        decoration: const BoxDecoration(gradient: CoachStyle.nightGradient),
+        child: SafeArea(
+          top: false,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: child,
+              ),
             ),
           ),
         ),
