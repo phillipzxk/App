@@ -19,3 +19,5 @@ Phillips Liste vom 2026-10-25, wörtlich übernommen. Übersicht: [[Buch – Üb
 
 Passende Studien und Begriffe pro Kapitel, nur Vorschläge, noch nicht eingebaut: [[Studien-Vorschlaege.docx]].
 Top 5: Wilson 2014 (Kap. 7), Gollwitzer 2009 „Ziele geheim halten“ (eher Kap. 8), hedonische Anpassung (Kap. 4), starre vs. flexible Essenskontrolle (Kap. 6), Lally 2010 – 66 Tage bis zur Gewohnheit (Kap. 10).
+
+Weitere Inspiration (weitere Studien und Erinnerungsfragen zu deinem Weg): [[Inspiration-Studien-und-Erinnerungen.docx]].
