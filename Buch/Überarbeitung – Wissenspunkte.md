@@ -39,5 +39,5 @@ Phillips Antworten auf die Erinnerungsfragen, wörtlich:
 
 ## Ausgewählte Studien (25.10.2026)
 
-Kap. 3 Dunning-Kruger · Kap. 4 Wenn-dann-Pläne (Gollwitzer & Sheeran) · Kap. 5 Oppezzo & Schwartz 2014 (Spazieren → +60 % Kreativität) · Kap. 6 Routine: Crum & Langer 2007 / Crum 2011 · Kap. 7 Fresh-Start-Effekt · Kap. 8 Christakis & Fowler 2007 · Kap. 9 Zielgradienten-Effekt · Kap. 10 Selbstmitgefühl (Breines & Chen 2012) · Kap. 11 Hochstapler-Syndrom.
+Kap. 2 & 3 Blumenthal 1999 (Sport wirkt bei Depression ähnlich wie Medikament) · Kap. 3 Dunning-Kruger · Kap. 4 Wenn-dann-Pläne (Gollwitzer & Sheeran) · Kap. 5 Oppezzo & Schwartz 2014 (Spazieren → +60 % Kreativität) · Kap. 6 Routine: Crum & Langer 2007 / Crum 2011 · Kap. 7 Fresh-Start-Effekt · Kap. 8 Christakis & Fowler 2007 · Kap. 9 Zielgradienten-Effekt · Kap. 10 Selbstmitgefühl (Breines & Chen 2012) · Kap. 11 Hochstapler-Syndrom.
 Alles zusammen: [[Auswahl-Studien-und-Erinnerungen.docx]].
