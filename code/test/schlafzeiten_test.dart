@@ -78,6 +78,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      await scrollTo(tester, find.byKey(const ValueKey('dein-tag')));
       await tester.tap(find.byKey(const ValueKey('dein-tag')));
       await tester.pumpAndSettle();
       final row = find.byKey(const ValueKey('tag-bettzeit'));

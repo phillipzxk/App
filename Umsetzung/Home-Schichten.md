@@ -40,7 +40,7 @@ Phillip: „wenn keine sachen verloren gehen … alles noch da unbedingt so mach
 |---|---|
 | Coach-Karte (Text/Stichpunkte, Jubel, Affe) | oben auf Heute, unverändert |
 | Fokus der Woche, Reality Check, Fokus-Wahl | oben auf Heute, unverändert |
-| Dein Tag (Termine, Mahlzeiten, Bettzeit, Foto-Zeile) | Chip „Dein Tag“ oben → eigene Seite |
+| Dein Tag (Termine, Mahlzeiten, Bettzeit, Foto-Zeile) | Zeile „Heute dran“ unter Fokus (Training, Bettzeit, offene Supplements) → tippen öffnet Dein Tag |
 | Fortschrittsfoto inkl. Frame Kit | am Fototag goldener Chip oben; immer auf der Training-Seite |
 | Neues Muster | oben auf Heute, wenn höchstens 2 Tage alt; immer auf der Mindset-Seite (mit „Alle Muster“) |
 | Supplements | Kachel in Ernährung (Antippen → Ernährung-Seite zum Abhaken) |

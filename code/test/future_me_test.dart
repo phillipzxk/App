@@ -156,6 +156,7 @@ void main() {
     await openApp(tester);
     // On the photo day a gold chip shows on top of Heute.
     expect(find.byKey(const ValueKey('foto-chip')), findsOneWidget);
+    await scrollTo(tester, find.byKey(const ValueKey('dein-tag')));
     await tester.tap(find.byKey(const ValueKey('dein-tag')));
     await tester.pumpAndSettle();
     await scrollTo(tester, find.byKey(const ValueKey('tag-foto')));

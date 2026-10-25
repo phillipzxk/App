@@ -57,6 +57,7 @@ class TodayTab extends StatelessWidget {
     required this.wochenFotos,
     required this.onOpenZukunft,
     required this.onOpenTag,
+    this.offeneSupps = 0,
     this.muster = const [],
     required this.onMusterAblehnen,
     required this.onOpenMuster,
@@ -85,6 +86,9 @@ class TodayTab extends StatelessWidget {
 
   /// Opens "Dein Tag" (appointments, meals, bedtime) as its own page.
   final VoidCallback onOpenTag;
+
+  /// Supplements still to take today (shown in "Heute dran").
+  final int offeneSupps;
 
   /// Visible patterns, newest first (see Umsetzung/Deine Muster.md).
   final List<Muster> muster;
@@ -181,29 +185,37 @@ class TodayTab extends StatelessWidget {
               const SizedBox(height: 12),
             ],
             ?fokus,
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                HeuteChip(
-                  key: const ValueKey('dein-tag'),
-                  icon: Icons.wb_sunny_outlined,
-                  text: tag == 'frei' ? 'Kein Training' : tag,
-                  klein: b == null
-                      ? 'Dein Tag'
+            HeuteDran(
+              key: const ValueKey('dein-tag'),
+              punkte: [
+                (Icons.fitness_center, tag == 'frei' ? 'Kein Training' : tag),
+                (
+                  Icons.bedtime_outlined,
+                  b == null
+                      ? 'Bettzeit eintragen'
                       : 'Bett ${formatUhrzeit(b.bett)}',
-                  onTap: onOpenTag,
                 ),
-                if (foto != null)
-                  HeuteChip(
-                    key: const ValueKey('foto-chip'),
-                    icon: Icons.photo_camera_outlined,
-                    text: foto,
-                    gold: true,
-                    onTap: onOpenZukunft,
+                if (offeneSupps > 0)
+                  (
+                    Icons.medication_outlined,
+                    '$offeneSupps ${offeneSupps == 1 ? 'Supplement' : 'Supplements'} offen',
                   ),
               ],
+              onTap: onOpenTag,
             ),
+            if (foto != null) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: HeuteChip(
+                  key: const ValueKey('foto-chip'),
+                  icon: Icons.photo_camera_outlined,
+                  text: foto,
+                  gold: true,
+                  onTap: onOpenZukunft,
+                ),
+              ),
+            ],
             if (m != null) ...[
               const SizedBox(height: 14),
               const GroupLabel('Neues Muster'),
@@ -235,6 +247,79 @@ class TodayTab extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// "Heute dran": one slim row under the focus with what is still on today
+/// (training, bedtime, open supplements). Tapping it opens "Dein Tag"
+/// (decided with Phillip 2026-10-25).
+class HeuteDran extends StatelessWidget {
+  const HeuteDran({super.key, required this.punkte, required this.onTap});
+
+  final List<(IconData, String)> punkte;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Ink(
+          padding: const EdgeInsets.fromLTRB(14, 11, 10, 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            color: CoachStyle.card,
+            border: Border.all(color: CoachStyle.line),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'HEUTE DRAN',
+                      style: CoachStyle.goldLabel.copyWith(
+                        fontFamily: 'Sora',
+                        fontSize: 10,
+                        letterSpacing: 1.8,
+                        color: CoachStyle.gold,
+                      ),
+                    ),
+                    const SizedBox(height: 7),
+                    Wrap(
+                      spacing: 14,
+                      runSpacing: 6,
+                      children: [
+                        for (final (icon, text) in punkte)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(icon, size: 15, color: CoachStyle.goldLight),
+                              const SizedBox(width: 6),
+                              Text(
+                                text,
+                                style: CoachStyle.body.copyWith(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: CoachStyle.ink,
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: CoachStyle.inkSoft),
+            ],
+          ),
+        ),
       ),
     );
   }

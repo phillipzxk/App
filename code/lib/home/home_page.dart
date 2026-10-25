@@ -883,6 +883,7 @@ class _HomePageState extends State<HomePage> {
       wochenFotos: _wochenFotos,
       onOpenZukunft: _oeffneZukunft,
       onOpenTag: _oeffneTag,
+      offeneSupps: _supplements.where((x) => !_genommen.contains(x.id)).length,
       muster: sichtbareMuster(_muster),
       onMusterAblehnen: _musterAblehnen,
       onOpenMuster: _oeffneMuster,
