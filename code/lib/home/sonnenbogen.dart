@@ -992,6 +992,19 @@ class _HeuteBogenState extends State<HeuteBogen>
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            'HEUTE DRAN ›',
+            style: CoachStyle.goldLabel.copyWith(
+              fontFamily: 'Sora',
+              fontSize: 8.5,
+              letterSpacing: 1.4,
+              color: CoachStyle.gold,
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
         CustomPaint(
           size: const Size(112, 112 * _HeuteMaler.h / 340),
           painter: _HeuteMaler(this),

@@ -75,8 +75,6 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    // The crown field shows the first sentence; tapping opens the full reply.
-    await openKrone(tester, 'krone-coach');
     expect(find.text(_antwort), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('coach-als-punkte')));

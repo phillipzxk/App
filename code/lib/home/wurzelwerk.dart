@@ -20,6 +20,7 @@ class WurzelBereich {
     required this.icon,
     this.wert,
     this.diff,
+    this.grund,
   });
 
   final Bereich bereich;
@@ -31,10 +32,22 @@ class WurzelBereich {
 
   /// Change to the day before, null if unknown.
   final int? diff;
+
+  /// The coach's sentence why the area stands where it does today.
+  final String? grund;
 }
 
 /// Where the four areas hang: x as share of the width, y as share of the
 /// depth below the ground line. Not in one line on purpose.
+/// The big version on Heute: zig-zag so each area and its coach line has
+/// room.
+const _lagenGross = [
+  Offset(.70, .0),
+  Offset(.30, .33),
+  Offset(.70, .66),
+  Offset(.30, 1.0),
+];
+
 const _lagen = [
   Offset(.74, .10),
   Offset(.22, .34),
@@ -75,12 +88,13 @@ class _Geo {
   final List<_Ast> baum;
 }
 
-_Geo _baue(Size size, double boden, int wurzeln, {double stamm = 0}) {
+_Geo _baue(Size size, double boden, int wurzeln, {bool gross = false}) {
   final r = _Rnd(11);
   final w = size.width, h = size.height, cx = w * .5;
-  final unten = h - boden - 96;
+  final unten = h - boden - (gross ? 290 : 96);
   final ziele = [
-    for (final l in _lagen) Offset(l.dx * w, boden + 34 + l.dy * unten),
+    for (final l in gross ? _lagenGross : _lagen)
+      Offset(l.dx * w, boden + (gross ? 70 : 34) + l.dy * unten),
   ];
 
   List<_P> pfad(Offset a, Offset b, double w0, double w1, double wob) {
@@ -145,14 +159,12 @@ _Geo _baue(Size size, double boden, int wurzeln, {double stamm = 0}) {
     for (final z in ziele)
       pfad(
         Offset(
-          cx +
-              (stamm > 0 ? (ziele.indexOf(z) - 1.5) * stamm / 5 : 0) +
-              (r.next() - .5) * 6,
-          stamm > 0 ? boden - 6 : boden,
+          cx + (gross ? (ziele.indexOf(z) - 1.5) * 7 : 0) + (r.next() - .5) * 6,
+          boden,
         ),
-        z.translate(0, -26),
-        stamm > 0 ? 13 : 10,
-        2.6,
+        z.translate(0, gross ? -48 : -26),
+        gross ? 17 : 10,
+        gross ? 5 : 2.6,
         10 + r.next() * 8,
       ),
   ];
@@ -205,7 +217,7 @@ _Geo _baue(Size size, double boden, int wurzeln, {double stamm = 0}) {
   }
 
   // With the big tree above (BaumKrone), only its trunk foot shows here.
-  if (stamm == 0) zweig(Offset(cx, boden), -math.pi / 2, 28, 6.5, 4);
+  if (!gross) zweig(Offset(cx, boden), -math.pi / 2, 28, 6.5, 4);
 
   // Draw soil and roots once.
   final rec = ui.PictureRecorder();
@@ -280,42 +292,32 @@ _Geo _baue(Size size, double boden, int wurzeln, {double stamm = 0}) {
       ).createShader(Rect.fromLTWH(0, boden, w, 2)),
   );
 
-  if (stamm > 0) {
-    // The trunk foot flares out into the roots; outlined only at the sides
-    // so it joins the trunk above without a seam.
-    final rand = stamm / 2 + 1.2;
-    Path seite(double s) => Path()
-      ..moveTo(cx + s * rand, 0)
-      ..quadraticBezierTo(
-        cx + s * rand,
-        boden * .9,
-        cx + s * stamm * 1.5,
-        boden + 14,
+  // The logo's sprout where the roots start.
+  if (gross) {
+    final gold = Paint()
+      ..shader = CoachStyle.goldGradient.createShader(
+        Rect.fromLTWH(cx - 16, boden - 30, 32, 30),
       );
-    final fuss = Path()
-      ..moveTo(cx - rand, 0)
-      ..lineTo(cx + rand, 0)
-      ..quadraticBezierTo(cx + rand, boden * .9, cx + stamm * 1.5, boden + 14)
-      ..quadraticBezierTo(cx, boden + 4, cx - stamm * 1.5, boden + 14)
-      ..quadraticBezierTo(cx - rand, boden * .9, cx - rand, 0)
-      ..close();
-    c.drawPath(fuss, Paint()..color = const Color(0xFF7E5A36));
-    for (final s in [-1.0, 1.0]) {
-      c.drawPath(
-        seite(s),
-        Paint()
-          ..color = const Color(0xFF1A120B)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.4,
-      );
-    }
     c.drawLine(
-      Offset(cx - stamm * .28, 0),
-      Offset(cx - stamm * .32, boden),
+      Offset(cx, boden),
+      Offset(cx, boden - 20),
       Paint()
-        ..color = const Color(0x55EBC994)
-        ..strokeWidth = stamm * .22
-        ..strokeCap = StrokeCap.round,
+        ..color = const Color(0xFFC9A25C)
+        ..strokeWidth = 2.4,
+    );
+    c.drawPath(
+      Path()
+        ..moveTo(cx, boden - 12)
+        ..cubicTo(cx - 11, boden - 12, cx - 16, boden - 21, cx - 16, boden - 27)
+        ..cubicTo(cx - 8, boden - 27, cx, boden - 21, cx, boden - 12),
+      gold,
+    );
+    c.drawPath(
+      Path()
+        ..moveTo(cx, boden - 16)
+        ..cubicTo(cx, boden - 24, cx + 6, boden - 30, cx + 16, boden - 30)
+        ..cubicTo(cx + 16, boden - 22, cx + 10, boden - 16, cx, boden - 16),
+      gold,
     );
   }
   final haar = Paint()
@@ -528,7 +530,7 @@ class Wurzelwerk extends StatefulWidget {
     this.wurzeln = 0,
     this.jubelTick = 0,
     this.hoehe = 600,
-    this.stamm = 0,
+    this.gross = false,
   });
 
   final List<WurzelBereich> bereiche;
@@ -538,9 +540,10 @@ class Wurzelwerk extends StatefulWidget {
   final int jubelTick;
   final double hoehe;
 
-  /// Width of the big tree's trunk above (see BaumKrone). When set, the
-  /// small tree and the days in a row are left out: the crown shows them.
-  final double stamm;
+  /// Big version on Heute (2026-10-25): no tree (a small sprout instead,
+  /// the days in a row have their own field above), thicker roots and big
+  /// areas with the coach's line why each stands where it does.
+  final bool gross;
 
   @override
   State<Wurzelwerk> createState() => _WurzelwerkState();
@@ -574,7 +577,8 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
   _Geo? _geo;
   final _box = GlobalKey();
 
-  double get _boden => widget.stamm > 0 ? 26.0 : 112.0;
+  double get _boden => widget.gross ? 40.0 : 112.0;
+  double get _r => widget.gross ? 52.0 : 33.0;
 
   @override
   void initState() {
@@ -639,9 +643,9 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, c) {
-        final size = Size(c.maxWidth, widget.hoehe);
+        final size = Size(c.maxWidth, widget.gross ? 1060 : widget.hoehe);
         if (_geo == null || _geo!.size != size) {
-          _geo = _baue(size, _boden, widget.wurzeln, stamm: widget.stamm);
+          _geo = _baue(size, _boden, widget.wurzeln, gross: widget.gross);
         }
         final geo = _geo!;
         final s = widget.streak;
@@ -678,7 +682,7 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
                 ),
               ),
               // Days in a row next to the tree.
-              if (widget.stamm == 0) ...[
+              if (!widget.gross) ...[
                 Positioned(
                   left: size.width / 2 - 60,
                   top: 0,
@@ -747,10 +751,10 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
     };
     return [
       Positioned(
-        left: z.dx - 33,
-        top: z.dy - 33,
-        width: 66,
-        height: 66,
+        left: z.dx - _r,
+        top: z.dy - _r,
+        width: _r * 2,
+        height: _r * 2,
         child: TweenAnimationBuilder<double>(
           tween: Tween(begin: 0, end: 1),
           duration: Duration(milliseconds: 600 + i * 180),
@@ -774,7 +778,11 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
                     child: ShaderMask(
                       shaderCallback: (r) =>
                           CoachStyle.goldGradient.createShader(r),
-                      child: Icon(b.icon, size: 28, color: Colors.white),
+                      child: Icon(
+                        b.icon,
+                        size: widget.gross ? 42 : 28,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -784,9 +792,11 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
         ),
       ),
       Positioned(
-        left: z.dx - 90,
-        top: z.dy + 38,
-        width: 180,
+        left: widget.gross
+            ? (z.dx - 100).clamp(6.0, _geo!.size.width - 206)
+            : z.dx - 90,
+        top: z.dy + _r + 6,
+        width: widget.gross ? 200 : 180,
         child: IgnorePointer(
           child: Column(
             children: [
@@ -794,7 +804,7 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
                 b.name,
                 textAlign: TextAlign.center,
                 style: CoachStyle.title.copyWith(
-                  fontSize: 14,
+                  fontSize: widget.gross ? 17 : 14,
                   color: CoachStyle.ink,
                   shadows: const [Shadow(blurRadius: 8)],
                 ),
@@ -818,12 +828,41 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
                   ],
                 ),
                 style: CoachStyle.body.copyWith(
-                  fontSize: 12,
+                  fontSize: widget.gross ? 13.5 : 12,
                   color: CoachStyle.beigeLabel,
                   shadows: const [Shadow(blurRadius: 8)],
                 ),
               ),
-              if (sagt)
+              if (widget.gross && (sagt || b.grund != null))
+                Container(
+                  key: sagt ? ValueKey('knoten-sagt-${b.bereich.name}') : null,
+                  margin: const EdgeInsets.only(top: 7),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 7,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: sagt ? CoachStyle.goldGradient : null,
+                    color: sagt ? null : const Color(0xE61A140E),
+                    border: sagt ? null : Border.all(color: CoachStyle.line),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    [if (sagt) 'Hier hängt es gerade.', ?b.grund].join(' '),
+                    textAlign: TextAlign.center,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                    style: CoachStyle.body.copyWith(
+                      fontSize: 12.5,
+                      height: 1.35,
+                      fontWeight: sagt ? FontWeight.w600 : FontWeight.w400,
+                      color: sagt
+                          ? const Color(0xFF1A140E)
+                          : const Color(0xFFD9CCB1),
+                    ),
+                  ),
+                ),
+              if (sagt && !widget.gross)
                 Container(
                   key: ValueKey('knoten-sagt-${b.bereich.name}'),
                   margin: const EdgeInsets.only(top: 5),

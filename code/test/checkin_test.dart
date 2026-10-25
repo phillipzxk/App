@@ -93,7 +93,7 @@ void main() {
     await tester.tap(find.text('Fertig'));
     await tester.pumpAndSettle();
     expect(find.text('MONTAG, 12. OKTOBER'), findsOneWidget);
-    expect(find.text('DEIN COACH'), findsOneWidget);
+    expect(find.text('DEIN COACH · HEUTE'), findsOneWidget);
     expect(find.text('Check-in starten'), findsNothing);
   });
 

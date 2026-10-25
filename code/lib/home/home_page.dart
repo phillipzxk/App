@@ -23,10 +23,7 @@ import '../weight/weight.dart';
 import 'durchgezogen_widgets.dart';
 import 'fokus_widgets.dart';
 import 'reality_check.dart';
-import 'baum_krone.dart';
 import 'bereich_uebersicht.dart';
-import 'coach_karte.dart';
-import '../checkin/checkin_flow.dart' show noReplyYet;
 import 'sonnenbogen.dart';
 import 'day_plan.dart';
 import 'feed_widgets.dart';
@@ -228,8 +225,8 @@ class _HomePageState extends State<HomePage> {
         final n = widget.profile.name.trim();
         _jubel =
             'Ja${n.isEmpty ? '' : ', $n'}! Fokus heute geschafft.\n'
-            'Oben siehst du den Baum, aber das Wichtigste wächst '
-            'darunter: Deine Wurzeln sind heute wieder tiefer geworden.';
+            'Das Wichtigste wächst unter der Oberfläche: '
+            'Deine Wurzeln sind heute wieder tiefer geworden.';
       } else {
         _jubel = null;
       }
@@ -422,55 +419,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _oeffneCoach(Offset mitte) {
-    oeffneMitKreis(
-      context,
-      mitte,
-      (_) => _UnterSeite(
-        child: _lebendig(() {
-          final c = _heute;
-          return NightScope(
-            child: ListView(
-              padding: const EdgeInsets.only(bottom: 40),
-              children: [
-                PageHeader(
-                  label: germanDate(widget.clock()),
-                  title: 'Dein Coach',
-                ),
-                CoachKarte(
-                  text: c == null
-                      ? 'Mach erst deinen Check-in, dann sag ich dir, '
-                            'wo es heute hängt.'
-                      : c.kiAntwort.isNotEmpty
-                      ? c.kiAntwort
-                      : noReplyYet,
-                  umschaltbar: c != null && c.kiAntwort.isNotEmpty,
-                  stichpunkte: c?.stichpunkte ?? const [],
-                  ansicht: _coachAnsicht,
-                  onAnsicht: (a) {
-                    setState(() => _coachAnsicht = a);
-                    widget.feed.saveCoachAnsicht(a);
-                  },
-                  onStichpunkte: () async {
-                    if (c == null) return;
-                    final p = await widget.coach.stichpunkte(c.kiAntwort);
-                    if (p == null) return;
-                    await widget.store.saveCheckIn(c.withStichpunkte(p));
-                    await _reload();
-                  },
-                  jubel: _jubel,
-                  jubelTick: _jubelTick,
-                ),
-              ],
-            ),
-          );
-        }),
-      ),
-    );
-  }
-
-  /// A pattern found in the last two days counts as new: it hangs on the
-  /// tree as a golden fruit.
+  /// A pattern found in the last two days counts as new: it shows on Heute.
   Muster? get _neuesMuster {
     final sichtbar = sichtbareMuster(_muster);
     if (sichtbar.isEmpty) return null;
@@ -480,53 +429,6 @@ class _HomePageState extends State<HomePage> {
     return DateTime(t.year, t.month, t.day).difference(d).inDays <= 2
         ? m
         : null;
-  }
-
-  List<Frucht> _fruechte() {
-    final m = _neuesMuster;
-    final a = _fokusAuswahl;
-    return [
-      if (m != null)
-        Frucht(
-          id: 'muster',
-          label: 'Neues\nMuster',
-          onTap: (mitte) => oeffneMitKreis(
-            context,
-            mitte,
-            (seite) => _UnterSeite(
-              child: _lebendig(() {
-                final jetzt = _neuesMuster;
-                return NightScope(
-                  child: ListView(
-                    padding: const EdgeInsets.only(bottom: 40),
-                    children: [
-                      PageHeader(
-                        label: germanDate(widget.clock()),
-                        title: 'Neues Muster',
-                      ),
-                      if (jetzt != null)
-                        MusterKarte(
-                          muster: jetzt,
-                          onAblehnen: () async {
-                            await _musterAblehnen(jetzt);
-                            if (seite.mounted) Navigator.of(seite).pop();
-                          },
-                          onAlle: _oeffneMuster,
-                        ),
-                    ],
-                  ),
-                );
-              }),
-            ),
-          ),
-        ),
-      if (_realityFaellig && a != null)
-        Frucht(
-          id: 'reality',
-          label: 'Reality\nCheck',
-          onTap: (_) => _oeffneReality(a),
-        ),
-    ];
   }
 
   Future<void> _oeffneReality(FokusAuswahl a) => Navigator.of(context).push(
@@ -1287,10 +1189,25 @@ class _HomePageState extends State<HomePage> {
       checkIns: _checkIns,
       heuteDran: _heuteBogen(),
       fokusFeld: _fokusFeld(),
-      onOpenCoach: _oeffneCoach,
       onOpenTag: (_) => _oeffneTag(),
       onOpenFokus: _oeffneFokus,
-      fruechte: _fruechte(),
+      fokusKey: _realityFaellig && _fokusAuswahl != null
+          ? const ValueKey('reality-feld')
+          : null,
+      coachAnsicht: _coachAnsicht,
+      onCoachAnsicht: (a) {
+        setState(() => _coachAnsicht = a);
+        widget.feed.saveCoachAnsicht(a);
+      },
+      onStichpunkte: (c) async {
+        final p = await widget.coach.stichpunkte(c.kiAntwort);
+        if (p == null) return;
+        await widget.store.saveCheckIn(c.withStichpunkte(p));
+        await _reload();
+      },
+      neuesMuster: _neuesMuster,
+      onMusterAblehnen: _musterAblehnen,
+      onOpenMuster: _oeffneMuster,
       bereiche: [
         for (final b in Bereich.values)
           () {
@@ -1301,6 +1218,7 @@ class _HomePageState extends State<HomePage> {
               icon: _icons[b]!,
               wert: w,
               diff: d,
+              grund: _heute?.gruende[b.name],
             );
           }(),
       ],

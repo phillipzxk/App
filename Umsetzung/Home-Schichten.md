@@ -75,3 +75,12 @@ Phillip: der Baum war zu weit unten, die Felder oben zu langweilig. Entschieden:
 - **Extras als goldene Frucht** an einem Ast (pendelt, pulsiert), nur an ihrem Tag: neues Muster (höchstens 2 Tage alt), Reality Check (Tag des Fokus-Wechsels; das Fokusfeld zeigt dann „Erst dein Reality Check“). Später Dein Warum. Das Foto steht am Fototag auf dem Bogen.
 - Unter der Bodenlinie geht der Stamm in die Wurzeln über, die vier Bereiche bleiben wie im Wurzelwerk.
 - Gebaut 2026-10-25 (`code/lib/home/baum_krone.dart`, `today_tab.dart`), PR #59.
+
+## Felder oben, große Wurzeln unten (2026-10-25, ersetzt den großen Baum)
+
+Phillip fand den Baum oben zu leer und wollte oben wieder Felder „wie früher“, unten die Wurzeln größer und die Bereiche mehr im Fokus. Entwurf A gewählt („das oben ist perfekt“), dazu Bereiche und Wurzeln noch größer: https://claude.ai/artifact/Whb9k7FwpqqHgbgt7x9Mq2
+
+- **Oben:** Coach-Karte groß (Text/Stichpunkte, Jubel), darunter nebeneinander Fokus (mit „Heute geschafft“) und Heute dran (kleiner Sonnenbogen + Countdown), darunter ein schmales Feld Tage am Stück mit den letzten 7 Tagen. Neues Muster an seinem Tag darunter. Am Tag des Fokus-Wechsels zeigt das Fokus-Feld „Erst dein Reality Check“ und öffnet ihn.
+- **Unten:** großes Wurzelwerk, dicke Wurzeln mit Saftlicht, kleiner Goldtrieb an der Bodenlinie statt Baum. Jeder Bereich hat einen großen Ring mit Wert, Name, Wert/10 und darunter den Satz vom Coach („Warum gerade hier“). Der schwächste bekommt eine goldene Blase „Hier hängt es gerade.“ plus Satz.
+- Abgelehnt: Heute als großer Baum mit Kronenfeldern, Himmel + Goldblätter.
+- Gebaut 2026-10-25 (`today_tab.dart`, `wurzelwerk.dart` mit `gross`), PR #59.
