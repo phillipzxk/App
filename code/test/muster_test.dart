@@ -98,8 +98,9 @@ void main() {
   ) async {
     final (feed, coach) = await _open(tester, tage: 5);
     expect(coach.calls, 1);
-    final karte = find.byKey(const ValueKey('muster-karte'));
-    await scrollTo(tester, karte);
+    // A new pattern hangs on the tree as a golden fruit.
+    await openKrone(tester, 'frucht-muster');
+    expect(find.byKey(const ValueKey('muster-karte')), findsOneWidget);
     expect(find.text('Eiweiß zum Frühstück.'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('muster-alle')));
@@ -113,6 +114,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('muster-ablehnen')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('muster-karte')), findsNothing);
+    expect(find.byKey(const ValueKey('frucht-muster')), findsNothing);
     expect(feed.muster.single.abgelehnt, isTrue);
     // Checked once today already: no second search.
     expect(coach.calls, 1);

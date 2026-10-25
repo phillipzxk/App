@@ -3,13 +3,9 @@ import 'package:flutter/material.dart';
 import '../checkin/checkin.dart';
 import '../checkin/checkin_flow.dart';
 import '../feed/feed_data.dart';
-import '../future_me/future_me_data.dart';
-import '../sleep/schlafzeiten.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
-import '../feed/muster.dart';
-import 'coach_karte.dart';
-import 'muster_widgets.dart';
+import 'baum_krone.dart';
 import 'feed_widgets.dart';
 import 'wurzelwerk.dart';
 
@@ -39,12 +35,11 @@ List<bool> lastSevenDays(List<CheckIn> checkIns, DateTime today) {
   ];
 }
 
-/// Start page after the check-in, "Home-Feed als Wurzelwerk" (vault
-/// Umsetzung/Home-Schichten.md, 2026-10-25). On top only the essentials:
-/// the coach's reply, the focus of the week and a chip for the day; things
-/// that are only due on some days (progress photo, a new pattern) show up
-/// there on their day. Below the ground line the root system with the four
-/// areas.
+/// Start page after the check-in, Heute as one big tree (vault
+/// Umsetzung/Home-Schichten.md, 2026-10-25): the crown is four round
+/// fields (Coach, Heute dran, Fokus, Tage am Stück), extras hang on it as a
+/// golden fruit on their day, and below the ground line the roots carry the
+/// four areas.
 class TodayTab extends StatelessWidget {
   const TodayTab({
     super.key,
@@ -52,20 +47,13 @@ class TodayTab extends StatelessWidget {
     required this.date,
     required this.today,
     required this.checkIns,
-    required this.training,
-    required this.fotoEinstellungen,
-    required this.wochenFotos,
-    required this.onOpenZukunft,
-    required this.onOpenTag,
     required this.heuteDran,
-    this.muster = const [],
-    required this.onMusterAblehnen,
-    required this.onOpenMuster,
-    this.fokus,
-    this.coachAnsicht = 'text',
-    required this.onCoachAnsicht,
-    required this.onStichpunkte,
-    this.bettzeit,
+    required this.fokusFeld,
+    this.fokusKey,
+    required this.onOpenCoach,
+    required this.onOpenTag,
+    required this.onOpenFokus,
+    this.fruechte = const [],
     required this.bereiche,
     required this.onOpenBereich,
     this.wurzeln = 0,
@@ -79,32 +67,21 @@ class TodayTab extends StatelessWidget {
   final String date;
   final DateTime today;
   final List<CheckIn> checkIns;
-  final String training;
-  final FotoEinstellungen? fotoEinstellungen;
-  final List<WochenFoto> wochenFotos;
-  final VoidCallback onOpenZukunft;
 
-  /// Opens "Dein Tag" (appointments, meals, bedtime) as its own page.
-  final VoidCallback onOpenTag;
-
-  /// Supplements still to take today (shown in "Heute dran").
-  /// The small sun arc "Heute dran"; tapping it opens Dein Tag.
+  /// The small round sun arc for the "Heute dran" field.
   final Widget heuteDran;
 
-  /// Visible patterns, newest first (see Umsetzung/Deine Muster.md).
-  final List<Muster> muster;
-  final void Function(Muster m) onMusterAblehnen;
-  final VoidCallback onOpenMuster;
+  /// Content of the Fokus field (the home page holds the focus state).
+  final Widget fokusFeld;
+  final Key? fokusKey;
 
-  /// "Fokus der Woche": the running week or the choice (built by the home
-  /// page, which holds the state).
-  final Widget? fokus;
+  /// Taps on the crown fields, with the field's centre on screen.
+  final void Function(Offset mitte) onOpenCoach;
+  final void Function(Offset mitte) onOpenTag;
+  final void Function(Offset mitte) onOpenFokus;
 
-  /// How the coach's reply is shown, see [CoachKarte.ansicht].
-  final String coachAnsicht;
-  final ValueChanged<String> onCoachAnsicht;
-  final Future<void> Function(CheckIn c) onStichpunkte;
-  final Bettzeit? bettzeit;
+  /// Extras due today (a new pattern, the Reality Check).
+  final List<Frucht> fruechte;
 
   /// The four areas on the roots and what happens on a tap.
   final List<WurzelBereich> bereiche;
@@ -113,7 +90,7 @@ class TodayTab extends StatelessWidget {
   /// How deep the roots reach (each "Heute geschafft" this week).
   final int wurzeln;
 
-  /// Cheer from the coach and its trigger, see [CoachKarte.jubel].
+  /// Cheer from the coach and its trigger.
   final String? jubel;
   final int jubelTick;
 
@@ -129,68 +106,100 @@ class TodayTab extends StatelessWidget {
     return null;
   }
 
-  /// A pattern found in the last two days counts as new and shows on top.
-  Muster? get _neuesMuster {
-    if (muster.isEmpty) return null;
-    final m = muster.first;
-    final t = DateTime(today.year, today.month, today.day);
-    final d = DateTime(m.datum.year, m.datum.month, m.datum.day);
-    return t.difference(d).inDays <= 2 ? m : null;
+  /// The first sentence of the coach's reply, for the small round field.
+  static String ersterSatz(String text) {
+    final t = text.trim().replaceAll('\n', ' ');
+    final m = RegExp(r'^.{12,}?[.!?](\s|$)').firstMatch(t);
+    return (m?.group(0) ?? t).trim();
+  }
+
+  Widget _coachFeld() {
+    final c = _todayCheckIn;
+    final j = jubel;
+    final text = j != null
+        ? j.split('\n').first
+        : c == null
+        ? 'Mach deinen Check-in, dann sag ich dir was.'
+        : ersterSatz(c.kiAntwort.isNotEmpty ? c.kiAntwort : noReplyYet);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CoachAvatar(size: 40, lacht: j != null),
+        const SizedBox(height: 6),
+        Text(
+          'DEIN COACH',
+          style: CoachStyle.goldLabel.copyWith(
+            fontFamily: 'Sora',
+            fontSize: 8.5,
+            letterSpacing: 1.6,
+            color: CoachStyle.gold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          text,
+          key: j != null ? const ValueKey('coach-jubel') : null,
+          textAlign: TextAlign.center,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: CoachStyle.body.copyWith(
+            fontSize: 12,
+            height: 1.3,
+            fontWeight: j != null ? FontWeight.w700 : FontWeight.w500,
+            color: j != null
+                ? const Color(0xFFF5DFAE)
+                : const Color(0xFFF1E7D2),
+          ),
+        ),
+        const SizedBox(height: 3),
+        const Text(
+          'mehr ›',
+          style: TextStyle(fontSize: 10, color: CoachStyle.gold),
+        ),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final c = _todayCheckIn;
     final streak = checkInStreak(checkIns, today);
-    final m = _neuesMuster;
     return NightScope(
       child: ListView(
         controller: scroll,
         padding: const EdgeInsets.only(bottom: 40),
         children: [
-          for (final w in [
-            PageHeader(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: PageHeader(
               label: date,
               title: name.isEmpty ? 'Heute' : 'Heute, $name',
               brand: true,
             ),
-            if (c != null) ...[
-              CoachKarte(
-                text: c.kiAntwort.isNotEmpty ? c.kiAntwort : noReplyYet,
-                umschaltbar: c.kiAntwort.isNotEmpty,
-                stichpunkte: c.stichpunkte,
-                ansicht: coachAnsicht,
-                onAnsicht: onCoachAnsicht,
-                onStichpunkte: () => onStichpunkte(c),
-                jubel: jubel,
-                jubelTick: jubelTick,
-              ),
-              const SizedBox(height: 12),
-            ],
-            ?fokus,
-            heuteDran,
-            if (m != null) ...[
-              const SizedBox(height: 14),
-              const GroupLabel('Neues Muster'),
-              MusterKarte(
-                muster: m,
-                onAblehnen: () => onMusterAblehnen(m),
-                onAlle: onOpenMuster,
-              ),
-            ],
-            const SizedBox(height: 8),
-          ])
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: w,
-            ),
-          // The soil runs edge to edge.
-          Wurzelwerk(
-            bereiche: bereiche,
-            onOpen: onOpenBereich,
+          ),
+          BaumKrone(
+            coach: _coachFeld(),
+            tag: heuteDran,
+            fokus: fokusFeld,
+            fokusKey: fokusKey,
             streak: streak,
-            wurzeln: wurzeln,
+            onCoach: onOpenCoach,
+            onTag: onOpenTag,
+            onFokus: onOpenFokus,
+            fruechte: fruechte,
             jubelTick: jubelTick,
+            jubelt: jubel != null,
+          ),
+          // The soil runs edge to edge, the trunk goes on into it.
+          LayoutBuilder(
+            builder: (context, c) => Wurzelwerk(
+              bereiche: bereiche,
+              onOpen: onOpenBereich,
+              streak: streak,
+              wurzeln: wurzeln,
+              jubelTick: jubelTick,
+              hoehe: 540,
+              stamm: stammBreite * c.maxWidth / 390,
+            ),
           ),
           TextButton(
             onPressed: onRestartOnboarding,

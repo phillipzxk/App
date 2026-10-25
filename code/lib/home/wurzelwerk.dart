@@ -75,7 +75,7 @@ class _Geo {
   final List<_Ast> baum;
 }
 
-_Geo _baue(Size size, double boden, int wurzeln) {
+_Geo _baue(Size size, double boden, int wurzeln, {double stamm = 0}) {
   final r = _Rnd(11);
   final w = size.width, h = size.height, cx = w * .5;
   final unten = h - boden - 96;
@@ -144,9 +144,14 @@ _Geo _baue(Size size, double boden, int wurzeln) {
   final haupt = [
     for (final z in ziele)
       pfad(
-        Offset(cx + (r.next() - .5) * 6, boden),
+        Offset(
+          cx +
+              (stamm > 0 ? (ziele.indexOf(z) - 1.5) * stamm / 5 : 0) +
+              (r.next() - .5) * 6,
+          stamm > 0 ? boden - 6 : boden,
+        ),
         z.translate(0, -26),
-        10,
+        stamm > 0 ? 13 : 10,
         2.6,
         10 + r.next() * 8,
       ),
@@ -199,7 +204,8 @@ _Geo _baue(Size size, double boden, int wurzeln) {
     }
   }
 
-  zweig(Offset(cx, boden), -math.pi / 2, 28, 6.5, 4);
+  // With the big tree above (BaumKrone), only its trunk foot shows here.
+  if (stamm == 0) zweig(Offset(cx, boden), -math.pi / 2, 28, 6.5, 4);
 
   // Draw soil and roots once.
   final rec = ui.PictureRecorder();
@@ -274,6 +280,44 @@ _Geo _baue(Size size, double boden, int wurzeln) {
       ).createShader(Rect.fromLTWH(0, boden, w, 2)),
   );
 
+  if (stamm > 0) {
+    // The trunk foot flares out into the roots; outlined only at the sides
+    // so it joins the trunk above without a seam.
+    final rand = stamm / 2 + 1.2;
+    Path seite(double s) => Path()
+      ..moveTo(cx + s * rand, 0)
+      ..quadraticBezierTo(
+        cx + s * rand,
+        boden * .9,
+        cx + s * stamm * 1.5,
+        boden + 14,
+      );
+    final fuss = Path()
+      ..moveTo(cx - rand, 0)
+      ..lineTo(cx + rand, 0)
+      ..quadraticBezierTo(cx + rand, boden * .9, cx + stamm * 1.5, boden + 14)
+      ..quadraticBezierTo(cx, boden + 4, cx - stamm * 1.5, boden + 14)
+      ..quadraticBezierTo(cx - rand, boden * .9, cx - rand, 0)
+      ..close();
+    c.drawPath(fuss, Paint()..color = const Color(0xFF7E5A36));
+    for (final s in [-1.0, 1.0]) {
+      c.drawPath(
+        seite(s),
+        Paint()
+          ..color = const Color(0xFF1A120B)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.4,
+      );
+    }
+    c.drawLine(
+      Offset(cx - stamm * .28, 0),
+      Offset(cx - stamm * .32, boden),
+      Paint()
+        ..color = const Color(0x55EBC994)
+        ..strokeWidth = stamm * .22
+        ..strokeCap = StrokeCap.round,
+    );
+  }
   final haar = Paint()
     ..color = const Color(0x73967046)
     ..strokeWidth = .6;
@@ -484,6 +528,7 @@ class Wurzelwerk extends StatefulWidget {
     this.wurzeln = 0,
     this.jubelTick = 0,
     this.hoehe = 600,
+    this.stamm = 0,
   });
 
   final List<WurzelBereich> bereiche;
@@ -492,6 +537,10 @@ class Wurzelwerk extends StatefulWidget {
   final int wurzeln;
   final int jubelTick;
   final double hoehe;
+
+  /// Width of the big tree's trunk above (see BaumKrone). When set, the
+  /// small tree and the days in a row are left out: the crown shows them.
+  final double stamm;
 
   @override
   State<Wurzelwerk> createState() => _WurzelwerkState();
@@ -525,7 +574,7 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
   _Geo? _geo;
   final _box = GlobalKey();
 
-  static const _boden = 112.0;
+  double get _boden => widget.stamm > 0 ? 26.0 : 112.0;
 
   @override
   void initState() {
@@ -592,7 +641,7 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
       builder: (context, c) {
         final size = Size(c.maxWidth, widget.hoehe);
         if (_geo == null || _geo!.size != size) {
-          _geo = _baue(size, _boden, widget.wurzeln);
+          _geo = _baue(size, _boden, widget.wurzeln, stamm: widget.stamm);
         }
         final geo = _geo!;
         final s = widget.streak;
@@ -629,42 +678,44 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
                 ),
               ),
               // Days in a row next to the tree.
-              Positioned(
-                left: size.width / 2 - 60,
-                top: 0,
-                width: 120,
-                height: _boden,
-                child: const SizedBox(key: ValueKey('spross')),
-              ),
-              Positioned(
-                left: size.width / 2 + 54,
-                top: _boden - 58,
-                child: IgnorePointer(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        s == 1 ? 'TAG AM STÜCK' : 'TAGE AM STÜCK',
-                        style: CoachStyle.goldLabel.copyWith(
-                          fontFamily: 'Sora',
-                          fontSize: 9.5,
-                          letterSpacing: 1.2,
-                          color: CoachStyle.gold,
+              if (widget.stamm == 0) ...[
+                Positioned(
+                  left: size.width / 2 - 60,
+                  top: 0,
+                  width: 120,
+                  height: _boden,
+                  child: const SizedBox(key: ValueKey('spross')),
+                ),
+                Positioned(
+                  left: size.width / 2 + 54,
+                  top: _boden - 58,
+                  child: IgnorePointer(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          s == 1 ? 'TAG AM STÜCK' : 'TAGE AM STÜCK',
+                          style: CoachStyle.goldLabel.copyWith(
+                            fontFamily: 'Sora',
+                            fontSize: 9.5,
+                            letterSpacing: 1.2,
+                            color: CoachStyle.gold,
+                          ),
                         ),
-                      ),
-                      Text(
-                        '$s',
-                        key: const ValueKey('spross-tage'),
-                        style: CoachStyle.title.copyWith(
-                          fontSize: 18,
-                          height: 1.1,
-                          color: const Color(0xFFF5DFAE),
+                        Text(
+                          '$s',
+                          key: const ValueKey('spross-tage'),
+                          style: CoachStyle.title.copyWith(
+                            fontSize: 18,
+                            height: 1.1,
+                            color: const Color(0xFFF5DFAE),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
+              ],
               for (var i = 0; i < widget.bereiche.length && i < 4; i++)
                 ..._knoten(i, geo.ziele[i], i == schwach),
             ],

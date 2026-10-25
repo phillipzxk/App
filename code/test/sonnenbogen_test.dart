@@ -96,12 +96,13 @@ void main() {
     await tester.pumpAndSettle();
     final zeile = find.byKey(const ValueKey('heute-naechstes'));
     await scrollTo(tester, zeile);
+    // The round field in the crown: countdown and what comes next.
     expect(
-      find.descendant(of: zeile, matching: find.text('bis Kino · 18:30')),
+      find.descendant(of: zeile, matching: find.text('0:30:00')),
       findsOneWidget,
     );
     expect(
-      find.descendant(of: zeile, matching: find.text('Danach Push um 19:00')),
+      find.descendant(of: zeile, matching: find.text('bis Kino')),
       findsOneWidget,
     );
   });

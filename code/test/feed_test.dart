@@ -68,7 +68,7 @@ void main() {
   ) async {
     await _openFeed(tester);
     expect(find.text('MONTAG, 12. OKTOBER'), findsOneWidget);
-    expect(find.text('DEIN COACH · HEUTE'), findsOneWidget);
+    expect(find.text('DEIN COACH'), findsOneWidget);
 
     await openBereich(tester, 'schlaf');
     expect(find.text('Schlaf & Energie'), findsWidgets);

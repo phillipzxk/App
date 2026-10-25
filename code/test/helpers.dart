@@ -285,6 +285,14 @@ void tallView(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
+/// Opens one of the round fields (or a fruit) in the tree crown on Heute.
+Future<void> openKrone(WidgetTester tester, String key) async {
+  final f = find.byKey(ValueKey(key));
+  await scrollTo(tester, f);
+  await tester.tap(f);
+  await tester.pumpAndSettle();
+}
+
 /// Scrolls the visible page until [finder] is built and on screen.
 Future<void> scrollTo(WidgetTester tester, Finder finder) async {
   if (finder.evaluate().isEmpty) {

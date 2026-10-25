@@ -858,16 +858,21 @@ class HeuteBogen extends StatefulWidget {
     required this.start,
     required this.ende,
     required this.jetzt,
-    required this.onTap,
+    this.onTap,
     this.ohneZeit,
+    this.rund = false,
   });
 
   final List<BogenPunkt> punkte;
   final int start;
   final int ende;
   final double jetzt;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final String? ohneZeit;
+
+  /// Compact version for the round crown field on Heute: no frame, no
+  /// labels, only the arc and the countdown below it.
+  final bool rund;
 
   @override
   State<HeuteBogen> createState() => _HeuteBogenState();
@@ -921,6 +926,7 @@ class _HeuteBogenState extends State<HeuteBogen>
 
   @override
   Widget build(BuildContext context) {
+    if (widget.rund) return _rund();
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -979,6 +985,68 @@ class _HeuteBogenState extends State<HeuteBogen>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _rund() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CustomPaint(
+          size: const Size(112, 112 * _HeuteMaler.h / 340),
+          painter: _HeuteMaler(this),
+        ),
+        const SizedBox(height: 4),
+        ValueListenableBuilder<int>(
+          valueListenable: _zeile,
+          builder: (context, _, _) {
+            final liste = _sortiert;
+            final n = liste
+                .where((p) => !p.erledigt && p.minute > _jetzt)
+                .firstOrNull;
+            String gross, text;
+            if (n == null) {
+              gross = formatUhrzeit(_jetzt.floor() % 1440);
+              text = liste.isEmpty ? 'Tag planen ›' : 'Alles geschafft';
+            } else {
+              final sek = ((n.minute - _jetzt) * 60).round().clamp(0, 86400);
+              gross =
+                  '${sek ~/ 3600}:${(sek % 3600 ~/ 60).toString().padLeft(2, '0')}'
+                  ':${(sek % 60).toString().padLeft(2, '0')}';
+              text = 'bis ${n.titel}';
+            }
+            return Column(
+              key: const ValueKey('heute-naechstes'),
+              children: [
+                ShaderMask(
+                  shaderCallback: (r) => _gold.createShader(r),
+                  child: Text(
+                    gross,
+                    style: const TextStyle(
+                      fontFamily: 'Sora',
+                      fontWeight: FontWeight.w700,
+                      fontSize: 17,
+                      height: 1.1,
+                      color: Colors.white,
+                      fontFeatures: [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ),
+                Text(
+                  text,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: CoachStyle.body.copyWith(
+                    fontSize: 10.5,
+                    height: 1.2,
+                    color: CoachStyle.beigeLabel,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -1104,6 +1172,9 @@ class _HeuteMaler extends CustomPainter {
     canvas.scale(size.width / w);
     final t = s._seit.inMilliseconds / 1000;
     final auf = s._auf;
+    // The round field is about a third as big: thicker, simpler signs.
+    final rund = s.widget.rund;
+    final k0 = rund ? 1.55 : 1.0;
     final l = s._sortiert;
     final fJetzt = _frac(l, s._jetzt) * auf;
     final sonne = _pt(fJetzt);
@@ -1151,7 +1222,7 @@ class _HeuteMaler extends CustomPainter {
           Paint()
             ..color = const Color(0xFF4A3B2A)
             ..style = PaintingStyle.stroke
-            ..strokeWidth = 1.5,
+            ..strokeWidth = 1.5 * k0,
         );
       }
       final spur = m.extractPath(0, m.length * fJetzt);
@@ -1160,7 +1231,7 @@ class _HeuteMaler extends CustomPainter {
         Paint()
           ..color = const Color(0x88E0BF7E)
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 6
+          ..strokeWidth = 6 * k0
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
       );
       canvas.drawPath(
@@ -1170,16 +1241,16 @@ class _HeuteMaler extends CustomPainter {
             const Rect.fromLTWH(cx - r, cy - r, r * 2, r),
           )
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 3
+          ..strokeWidth = 3 * k0
           ..strokeCap = StrokeCap.round,
       );
     }
     canvas.drawLine(
-      const Offset(0, cy),
-      const Offset(w, cy),
+      Offset(rund ? 20 : 0, cy),
+      Offset(rund ? w - 20 : w, cy),
       Paint()
         ..color = const Color(0xFFC9A25C)
-        ..strokeWidth = 1,
+        ..strokeWidth = k0,
     );
 
     // The sun with turning rays.
@@ -1187,26 +1258,30 @@ class _HeuteMaler extends CustomPainter {
       final a = k / 10 * math.pi * 2 + t * .5;
       final d = Offset(math.cos(a), math.sin(a));
       canvas.drawLine(
-        sonne + d * 12,
-        sonne + d * (k.isOdd ? 19 : 24),
+        sonne + d * 12 * k0,
+        sonne + d * (k.isOdd ? 19 : 24) * k0,
         Paint()
           ..color = const Color(0x99F6CF83)
-          ..strokeWidth = 1.4
+          ..strokeWidth = 1.4 * k0
           ..strokeCap = StrokeCap.round,
       );
     }
     canvas.drawCircle(
       sonne,
-      22,
+      22 * k0,
       Paint()
         ..shader = ui.Gradient.radial(
           sonne,
-          22,
+          22 * k0,
           const [Color(0xFFFFF6DA), Color(0xCCF6CF83), Color(0x00E0BF7E)],
           const [0, .4, 1],
         ),
     );
-    canvas.drawCircle(sonne, 7.5, Paint()..color = const Color(0xFFFFF0C8));
+    canvas.drawCircle(
+      sonne,
+      7.5 * k0,
+      Paint()..color = const Color(0xFFFFF0C8),
+    );
 
     // Signs of the day.
     final naechster = l
@@ -1221,7 +1296,8 @@ class _HeuteMaler extends CustomPainter {
       final vorbei = p.erledigt || p.minute <= s._jetzt;
       final farbe = _farbe(p.art);
       final gross = p.art == 'Training';
-      final rad = (gross ? 12.5 : 10.5) * Curves.easeOutBack.transform(pop);
+      final rad =
+          (gross ? 12.5 : 10.5) * k0 * Curves.easeOutBack.transform(pop);
       if (p == naechster) {
         final k = (t % 1.6) / 1.6;
         canvas.drawCircle(
@@ -1252,8 +1328,9 @@ class _HeuteMaler extends CustomPainter {
         Paint()
           ..color = farbe
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.5,
+          ..strokeWidth = 1.5 * k0,
       );
+      if (rund) continue;
       final ic = _icon(p.art);
       final tp = TextPainter(
         text: TextSpan(
@@ -1292,6 +1369,10 @@ class _HeuteMaler extends CustomPainter {
       }
     }
 
+    if (rund) {
+      canvas.restore();
+      return;
+    }
     // Now in the middle.
     void mitte(String text, double y, TextStyle st) {
       final tp = TextPainter(

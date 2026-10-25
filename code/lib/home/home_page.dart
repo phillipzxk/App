@@ -23,7 +23,10 @@ import '../weight/weight.dart';
 import 'durchgezogen_widgets.dart';
 import 'fokus_widgets.dart';
 import 'reality_check.dart';
+import 'baum_krone.dart';
 import 'bereich_uebersicht.dart';
+import 'coach_karte.dart';
+import '../checkin/checkin_flow.dart' show noReplyYet;
 import 'sonnenbogen.dart';
 import 'day_plan.dart';
 import 'feed_widgets.dart';
@@ -103,6 +106,13 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _reload();
+  }
+
+  /// Pages opened from Heute (coach, focus) rebuild with every change too.
+  @override
+  void setState(VoidCallback fn) {
+    super.setState(fn);
+    _stand.value++;
   }
 
   Future<void> _reload() async {
@@ -198,58 +208,325 @@ class _HomePageState extends State<HomePage> {
     await _reload();
   }
 
-  Widget _fokusWidget() {
+  /// Ticks today's focus on or off; ticking on lets the coach cheer.
+  Future<void> _umschalten(Wochenfokus f) async {
+    final neu = f.umschalten(widget.clock());
+    await widget.feed.saveFokus(neu);
+    final geschafft = neu.heuteGeschafft(widget.clock());
+    // Scroll up first so the crown and the coach can be seen.
+    if (geschafft && _heuteScroll.hasClients) {
+      await _heuteScroll.animateTo(
+        0,
+        duration: const Duration(milliseconds: 550),
+        curve: Curves.easeInOutCubic,
+      );
+    }
+    if (!mounted) return;
+    setState(() {
+      if (geschafft) {
+        _jubelTick++;
+        final n = widget.profile.name.trim();
+        _jubel =
+            'Ja${n.isEmpty ? '' : ', $n'}! Fokus heute geschafft.\n'
+            'Oben siehst du den Baum, aber das Wichtigste wächst '
+            'darunter: Deine Wurzeln sind heute wieder tiefer geworden.';
+      } else {
+        _jubel = null;
+      }
+    });
+    await _reload();
+  }
+
+  /// The full focus card or choice, on its own page (opened from the crown).
+  Widget _fokusWidget(BuildContext seite) {
     final f = _fokus;
     if (f != null && !f.vorbei(widget.clock())) {
       return FokusKarte(
         fokus: f,
         today: widget.clock(),
         onUmschalten: () async {
-          final neu = f.umschalten(widget.clock());
-          await widget.feed.saveFokus(neu);
-          final geschafft = neu.heuteGeschafft(widget.clock());
-          // Scroll up first so the sprout and the coach can be seen.
-          if (geschafft && _heuteScroll.hasClients) {
-            await _heuteScroll.animateTo(
-              0,
-              duration: const Duration(milliseconds: 550),
-              curve: Curves.easeInOutCubic,
-            );
-          }
-          if (!mounted) return;
-          setState(() {
-            if (geschafft) {
-              _jubelTick++;
-              final n = widget.profile.name.trim();
-              _jubel =
-                  'Ja${n.isEmpty ? '' : ', $n'}! Fokus heute geschafft.\n'
-                  'Oben siehst du den Trieb, aber das Wichtigste wächst '
-                  'darunter: Deine Wurzeln sind heute wieder tiefer geworden.';
-            } else {
-              _jubel = null;
-            }
-          });
-          await _reload();
+          // Ticking on: back to Heute, where the tree cheers.
+          if (!f.heuteGeschafft(widget.clock())) Navigator.of(seite).pop();
+          await _umschalten(f);
         },
       );
     }
     final laedt = _fokusLaedt || !_fokusVersucht;
-    // A week just ended: only the small Reality Check field on Heute.
-    if (f != null) {
-      final a = _fokusAuswahl;
-      return RealityFeld(
-        auswahl: a,
-        laedt: laedt,
-        onNochmal: _holeFokusVorschlaege,
-        onOpen: () => _oeffneReality(a!),
-      );
-    }
     return FokusWahl(
       auswahl: _fokusAuswahl,
       laedt: laedt,
-      onStart: _starteFokus,
+      onStart: (v) async {
+        await _starteFokus(v);
+        if (seite.mounted) Navigator.of(seite).pop();
+      },
       onNochmal: _holeFokusVorschlaege,
     );
+  }
+
+  /// The Reality Check is due: the week ran out (Umsetzung/Reality Check).
+  bool get _realityFaellig => _fokus != null && !_fokusLaeuft;
+
+  /// What the round Fokus field in the crown shows.
+  Widget _fokusFeld() {
+    final f = _fokus;
+    final label = CoachStyle.goldLabel.copyWith(
+      fontFamily: 'Sora',
+      fontSize: 8.5,
+      letterSpacing: 1.4,
+      color: CoachStyle.gold,
+    );
+    final titel = CoachStyle.body.copyWith(
+      fontSize: 12.5,
+      height: 1.25,
+      fontWeight: FontWeight.w700,
+      color: const Color(0xFFF6EEDD),
+    );
+    final klein = CoachStyle.body.copyWith(
+      fontSize: 10.5,
+      color: CoachStyle.beigeLabel,
+    );
+    if (f != null && _fokusLaeuft) {
+      final heute = widget.clock();
+      final tag = f.tag(heute).clamp(1, Wochenfokus.tage);
+      final striche = f.striche;
+      final geschafft = f.heuteGeschafft(heute);
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('FOKUS · TAG $tag/${Wochenfokus.tage}', style: label),
+          const SizedBox(height: 5),
+          Text(
+            f.text,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: titel,
+          ),
+          const SizedBox(height: 7),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < Wochenfokus.tage; i++)
+                Container(
+                  width: 8,
+                  height: 4,
+                  margin: const EdgeInsets.symmetric(horizontal: 1.3),
+                  decoration: BoxDecoration(
+                    gradient: striche[i] ? CoachStyle.goldGradient : null,
+                    color: striche[i]
+                        ? null
+                        : i < tag
+                        ? const Color(0xFF4A3D2E)
+                        : const Color(0xFF2E251B),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          GestureDetector(
+            key: const ValueKey('fokus-heute'),
+            onTap: () => _umschalten(f),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+              decoration: BoxDecoration(
+                gradient: geschafft ? null : CoachStyle.goldGradient,
+                borderRadius: BorderRadius.circular(20),
+                border: geschafft
+                    ? Border.all(color: CoachStyle.goldEdge)
+                    : null,
+              ),
+              child: Text(
+                geschafft ? '✓ Geschafft' : 'Heute geschafft',
+                maxLines: 1,
+                softWrap: false,
+                style: CoachStyle.body.copyWith(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: geschafft
+                      ? CoachStyle.goldLight
+                      : const Color(0xFF1A140E),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    if (_realityFaellig) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('NEUE WOCHE', style: label),
+          const SizedBox(height: 6),
+          Text(
+            'Erst dein\nReality Check',
+            textAlign: TextAlign.center,
+            style: titel,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _fokusAuswahl == null ? 'Coach schaut zurück …' : 'Öffnen ›',
+            style: klein,
+          ),
+        ],
+      );
+    }
+    final laedt = _fokusLaedt || !_fokusVersucht;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text('FOKUS DER WOCHE', style: label),
+        const SizedBox(height: 6),
+        Text(
+          laedt ? 'Dein Coach sucht\nVorschläge …' : 'Wähl deinen\nFokus',
+          textAlign: TextAlign.center,
+          style: titel,
+        ),
+        const SizedBox(height: 6),
+        Text(laedt ? '' : '3 Vorschläge ›', style: klein),
+      ],
+    );
+  }
+
+  void _oeffneFokus(Offset mitte) {
+    if (_realityFaellig) {
+      final a = _fokusAuswahl;
+      if (a == null) {
+        _holeFokusVorschlaege();
+      } else {
+        _oeffneReality(a);
+      }
+      return;
+    }
+    oeffneMitKreis(
+      context,
+      mitte,
+      (seite) => _UnterSeite(
+        child: _lebendig(
+          () => NightScope(
+            child: ListView(
+              padding: const EdgeInsets.only(bottom: 40),
+              children: [
+                PageHeader(
+                  label: germanDate(widget.clock()),
+                  title: 'Fokus der Woche',
+                ),
+                _fokusWidget(seite),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _oeffneCoach(Offset mitte) {
+    oeffneMitKreis(
+      context,
+      mitte,
+      (_) => _UnterSeite(
+        child: _lebendig(() {
+          final c = _heute;
+          return NightScope(
+            child: ListView(
+              padding: const EdgeInsets.only(bottom: 40),
+              children: [
+                PageHeader(
+                  label: germanDate(widget.clock()),
+                  title: 'Dein Coach',
+                ),
+                CoachKarte(
+                  text: c == null
+                      ? 'Mach erst deinen Check-in, dann sag ich dir, '
+                            'wo es heute hängt.'
+                      : c.kiAntwort.isNotEmpty
+                      ? c.kiAntwort
+                      : noReplyYet,
+                  umschaltbar: c != null && c.kiAntwort.isNotEmpty,
+                  stichpunkte: c?.stichpunkte ?? const [],
+                  ansicht: _coachAnsicht,
+                  onAnsicht: (a) {
+                    setState(() => _coachAnsicht = a);
+                    widget.feed.saveCoachAnsicht(a);
+                  },
+                  onStichpunkte: () async {
+                    if (c == null) return;
+                    final p = await widget.coach.stichpunkte(c.kiAntwort);
+                    if (p == null) return;
+                    await widget.store.saveCheckIn(c.withStichpunkte(p));
+                    await _reload();
+                  },
+                  jubel: _jubel,
+                  jubelTick: _jubelTick,
+                ),
+              ],
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  /// A pattern found in the last two days counts as new: it hangs on the
+  /// tree as a golden fruit.
+  Muster? get _neuesMuster {
+    final sichtbar = sichtbareMuster(_muster);
+    if (sichtbar.isEmpty) return null;
+    final m = sichtbar.first;
+    final t = widget.clock();
+    final d = DateTime(m.datum.year, m.datum.month, m.datum.day);
+    return DateTime(t.year, t.month, t.day).difference(d).inDays <= 2
+        ? m
+        : null;
+  }
+
+  List<Frucht> _fruechte() {
+    final m = _neuesMuster;
+    final a = _fokusAuswahl;
+    return [
+      if (m != null)
+        Frucht(
+          id: 'muster',
+          label: 'Neues\nMuster',
+          onTap: (mitte) => oeffneMitKreis(
+            context,
+            mitte,
+            (seite) => _UnterSeite(
+              child: _lebendig(() {
+                final jetzt = _neuesMuster;
+                return NightScope(
+                  child: ListView(
+                    padding: const EdgeInsets.only(bottom: 40),
+                    children: [
+                      PageHeader(
+                        label: germanDate(widget.clock()),
+                        title: 'Neues Muster',
+                      ),
+                      if (jetzt != null)
+                        MusterKarte(
+                          muster: jetzt,
+                          onAblehnen: () async {
+                            await _musterAblehnen(jetzt);
+                            if (seite.mounted) Navigator.of(seite).pop();
+                          },
+                          onAlle: _oeffneMuster,
+                        ),
+                    ],
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      if (_realityFaellig && a != null)
+        Frucht(
+          id: 'reality',
+          label: 'Reality\nCheck',
+          onTap: (_) => _oeffneReality(a),
+        ),
+    ];
   }
 
   Future<void> _oeffneReality(FokusAuswahl a) => Navigator.of(context).push(
@@ -815,13 +1092,12 @@ class _HomePageState extends State<HomePage> {
   Widget _heuteBogen() {
     final t = _tagesPunkte();
     return HeuteBogen(
-      key: const ValueKey('dein-tag'),
       punkte: t.punkte,
       start: t.start,
       ende: t.ende,
       jetzt: _jetztMinute,
       ohneZeit: t.ohneZeit,
-      onTap: _oeffneTag,
+      rund: true,
     );
   }
 
@@ -1009,28 +1285,12 @@ class _HomePageState extends State<HomePage> {
       date: germanDate(today),
       today: today,
       checkIns: _checkIns,
-      training: _plan.forDay(today),
-      fotoEinstellungen: _fotoEinstellungen,
-      wochenFotos: _wochenFotos,
-      onOpenZukunft: _oeffneZukunft,
-      onOpenTag: _oeffneTag,
       heuteDran: _heuteBogen(),
-      muster: sichtbareMuster(_muster),
-      onMusterAblehnen: _musterAblehnen,
-      onOpenMuster: _oeffneMuster,
-      fokus: _fokusWidget(),
-      coachAnsicht: _coachAnsicht,
-      onCoachAnsicht: (a) {
-        setState(() => _coachAnsicht = a);
-        widget.feed.saveCoachAnsicht(a);
-      },
-      onStichpunkte: (c) async {
-        final p = await widget.coach.stichpunkte(c.kiAntwort);
-        if (p == null) return;
-        await widget.store.saveCheckIn(c.withStichpunkte(p));
-        await _reload();
-      },
-      bettzeit: _bettzeit,
+      fokusFeld: _fokusFeld(),
+      onOpenCoach: _oeffneCoach,
+      onOpenTag: (_) => _oeffneTag(),
+      onOpenFokus: _oeffneFokus,
+      fruechte: _fruechte(),
       bereiche: [
         for (final b in Bereich.values)
           () {

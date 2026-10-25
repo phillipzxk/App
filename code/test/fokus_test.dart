@@ -203,8 +203,9 @@ void main() {
     final (feed, coach) = await _open(tester);
     expect(coach.calls, 1);
     expect(coach.letzter, isNull);
-    final wahl = find.byKey(const ValueKey('fokus-wahl'));
-    await scrollTo(tester, wahl);
+    expect(find.text('3 Vorschläge ›'), findsOneWidget);
+    await openKrone(tester, 'krone-fokus');
+    expect(find.byKey(const ValueKey('fokus-wahl')), findsOneWidget);
     expect(find.text('FOKUS DER WOCHE · WÄHL EINEN'), findsOneWidget);
     expect(find.byKey(const ValueKey('fokus-rueckblick')), findsNothing);
 
@@ -216,27 +217,40 @@ void main() {
 
     expect(feed.fokus!.text, 'Eiweiß zum Frühstück');
     expect(feed.fokusAuswahl, isNull);
-    await scrollTo(tester, find.byKey(const ValueKey('fokus-karte')));
+    // Starting closes the page; the crown field shows the running week.
+    expect(find.byKey(const ValueKey('fokus-wahl')), findsNothing);
+    expect(find.text('FOKUS · TAG 1/7'), findsOneWidget);
+
+    await openKrone(tester, 'krone-fokus');
     expect(find.text('Tag 1 von 7'), findsOneWidget);
     expect(find.text('0 von 1 Tag geschafft'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
 
+    // "Heute geschafft" right in the crown field.
     await tester.tap(find.byKey(const ValueKey('fokus-heute')));
     await tester.pumpAndSettle();
     expect(feed.fokus!.heuteGeschafft(fixedNow), isTrue);
-    // The page scrolls up and the coach cheers on the card at the top.
+    // The coach cheers in its crown field.
+    expect(find.byKey(const ValueKey('coach-jubel')), findsOneWidget);
     expect(
       find.textContaining('Fokus heute geschafft', findRichText: true),
       findsOneWidget,
     );
-    await scrollTo(tester, find.byKey(const ValueKey('fokus-heute')));
-    expect(find.text('✓ Heute geschafft'), findsOneWidget);
-    expect(find.text('1 von 1 Tag geschafft'), findsOneWidget);
+    expect(find.text('✓ Geschafft'), findsOneWidget);
 
-    // Tapping again takes it back.
-    await tester.tap(find.byKey(const ValueKey('fokus-heute')));
+    // On the page it counts too; tapping there again takes it back.
+    await openKrone(tester, 'krone-fokus');
+    expect(find.text('1 von 1 Tag geschafft'), findsOneWidget);
+    expect(find.text('✓ Heute geschafft'), findsOneWidget);
+    await tester.tap(find.text('✓ Heute geschafft'));
     await tester.pumpAndSettle();
     expect(feed.fokus!.heuteGeschafft(fixedNow), isFalse);
+    expect(find.text('0 von 1 Tag geschafft'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('coach-jubel')), findsNothing);
+    expect(find.text('Heute geschafft'), findsOneWidget);
     expect(coach.calls, 1);
   });
 
@@ -252,11 +266,11 @@ void main() {
       ),
     );
     expect(coach.calls, 0);
-    await scrollTo(tester, find.byKey(const ValueKey('fokus-karte')));
+    expect(find.text('FOKUS · TAG 4/7'), findsOneWidget);
+    expect(find.byKey(const ValueKey('spross-tage')), findsOneWidget);
+    await openKrone(tester, 'krone-fokus');
     expect(find.text('Tag 4 von 7'), findsOneWidget);
     expect(find.text('2 von 4 Tagen geschafft'), findsOneWidget);
-    await scrollTo(tester, find.byKey(const ValueKey('spross')));
-    expect(find.byKey(const ValueKey('spross-tage')), findsOneWidget);
   });
 
   testWidgets('after 7 days: Reality Check page, keep the old focus', (
@@ -298,11 +312,9 @@ void main() {
 
     // Heute shows only the small field, not the choice.
     expect(find.byKey(const ValueKey('fokus-wahl')), findsNothing);
-    final feld = find.byKey(const ValueKey('reality-feld'));
-    await scrollTo(tester, feld);
-    expect(find.text('DEIN REALITY CHECK'), findsOneWidget);
-    await tester.tap(feld);
-    await tester.pumpAndSettle();
+    // The Reality Check hangs on the tree as a golden fruit.
+    expect(find.text('Erst dein\nReality Check'), findsOneWidget);
+    await openKrone(tester, 'reality-feld');
 
     expect(find.text('Reality Check'), findsOneWidget);
     expect(find.text('Fokus: Handy ab 23 Uhr raus'), findsOneWidget);
@@ -324,16 +336,14 @@ void main() {
     expect(feed.fokus!.start, _tageZurueck(0));
     expect(feed.fokus!.anzahlGeschafft, 0);
     expect(feed.fokusAuswahl, isNull);
-    await scrollTo(tester, find.byKey(const ValueKey('fokus-karte')));
+    expect(find.text('FOKUS · TAG 1/7'), findsOneWidget);
     expect(find.byKey(const ValueKey('reality-feld')), findsNothing);
   });
 
   testWidgets('the one change can be started as the new focus', (tester) async {
     final alt = Wochenfokus(start: _tageZurueck(8), text: 'Alt');
     final (feed, _) = await _open(tester, fokus: alt);
-    await scrollTo(tester, find.byKey(const ValueKey('reality-feld')));
-    await tester.tap(find.byKey(const ValueKey('reality-feld')));
-    await tester.pumpAndSettle();
+    await openKrone(tester, 'reality-feld');
     // No plan: training shows only the days.
     expect(find.text('Training (kein Plan eingetragen)'), findsOneWidget);
     await scrollTo(tester, find.byKey(const ValueKey('fokus-start')));
