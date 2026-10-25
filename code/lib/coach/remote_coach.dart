@@ -217,6 +217,21 @@ class RemoteCoach implements OnboardingEvaluator, CheckInEvaluator, FeedCoach {
   }
 
   @override
+  Future<String?> warumSatz(
+    UserProfile profile,
+    CheckIn today,
+    List<CheckIn> recent,
+  ) async {
+    final data = await _postJson('/warum', {
+      'profile': profileJson(profile),
+      'today': today.toJson(),
+      'recent': [for (final c in recent) c.toJson()],
+    });
+    final s = data?['satz'];
+    return s is String && s.trim().isNotEmpty ? s.trim() : null;
+  }
+
+  @override
   Future<String?> answer(
     UserProfile profile,
     Bereich bereich,

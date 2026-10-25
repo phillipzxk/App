@@ -12,6 +12,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'helpers.dart';
 
 class _MusterCoach implements FeedCoach {
+  @override
+  Future<String?> warumSatz(
+    UserProfile profile,
+    CheckIn today,
+    List<CheckIn> recent,
+  ) async => null;
+
   int calls = 0;
 
   @override

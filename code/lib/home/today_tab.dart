@@ -8,6 +8,7 @@ import '../ui/coach_widgets.dart';
 import '../feed/muster.dart';
 import 'coach_karte.dart';
 import 'muster_widgets.dart';
+import 'warum_karte.dart';
 import 'feed_widgets.dart';
 import 'wurzelwerk.dart';
 
@@ -57,6 +58,8 @@ class TodayTab extends StatelessWidget {
     this.coachAnsicht = 'text',
     required this.onCoachAnsicht,
     required this.onStichpunkte,
+    this.warum = '',
+    this.warumSatz,
     this.neuesMuster,
     required this.onMusterAblehnen,
     required this.onOpenMuster,
@@ -89,6 +92,11 @@ class TodayTab extends StatelessWidget {
   final String coachAnsicht;
   final ValueChanged<String> onCoachAnsicht;
   final Future<void> Function(CheckIn c) onStichpunkte;
+
+  /// The user's own "Warum" and, on a weak day, the coach's sentence that
+  /// shows it under the coach card (see [WarumKarte]).
+  final String warum;
+  final String? warumSatz;
 
   /// A pattern found in the last two days, shown on its day.
   final Muster? neuesMuster;
@@ -150,6 +158,11 @@ class TodayTab extends StatelessWidget {
                     jubelTick: jubelTick,
                   ),
                   const SizedBox(height: 10),
+                  if (warum.trim().isNotEmpty &&
+                      (warumSatz ?? '').trim().isNotEmpty) ...[
+                    WarumKarte(warum: warum.trim(), satz: warumSatz!.trim()),
+                    const SizedBox(height: 10),
+                  ],
                 ],
                 IntrinsicHeight(
                   child: Row(

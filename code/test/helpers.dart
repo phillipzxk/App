@@ -236,6 +236,15 @@ class MemoryFeedStore implements FeedStore {
   @override
   Future<void> saveDurchGeprueft(DateTime day) async =>
       durchGeprueft = dayKey(day);
+
+  ({String tag, String? satz})? warumHeute;
+
+  @override
+  Future<({String tag, String? satz})?> loadWarumHeute() async => warumHeute;
+
+  @override
+  Future<void> saveWarumHeute(DateTime day, String? satz) async =>
+      warumHeute = (tag: dayKey(day), satz: satz);
 }
 
 /// Monday, 12 October 2026, 18:00.

@@ -88,6 +88,9 @@ class _HomePageState extends State<HomePage> {
   Schlafzeiten _schlafzeiten = const Schlafzeiten();
   String _coachAnsicht = 'text';
   List<Durchgezogen> _durchgezogen = const [];
+
+  /// The coach's "Dein Warum" sentence for today, null on a normal day.
+  String? _warumSatz;
   String? _jubel;
   int _jubelTick = 0;
   final _heuteScroll = ScrollController();
@@ -133,6 +136,7 @@ class _HomePageState extends State<HomePage> {
     final schlafzeiten = await widget.feed.loadSchlafzeiten();
     final coachAnsicht = await widget.feed.loadCoachAnsicht();
     final durchgezogen = await widget.feed.loadDurchgezogen();
+    final warumHeute = await widget.feed.loadWarumHeute();
     if (!mounted) return;
     setState(() {
       _loaded = true;
@@ -156,10 +160,14 @@ class _HomePageState extends State<HomePage> {
       _schlafzeiten = schlafzeiten;
       _coachAnsicht = coachAnsicht;
       _durchgezogen = durchgezogen;
+      _warumSatz = warumHeute?.tag == dayKey(widget.clock())
+          ? warumHeute!.satz
+          : null;
     });
     _stand.value++;
     _pruefeMuster(checkIns, muster);
     _pruefeDurchgezogen(checkIns, durchgezogen);
+    _pruefeWarum(checkIns, warumHeute?.tag);
     if (!_fokusVersucht) _holeFokusVorschlaege();
   }
 
@@ -460,6 +468,30 @@ class _HomePageState extends State<HomePage> {
     if (neu == null) return;
     await widget.feed.saveMuster([...bisher, neu]);
     await _reload();
+  }
+
+  bool _warumPrueft = false;
+
+  /// Once per day after the check-in the coach decides whether the user is
+  /// in a weak phase; then "Dein Warum" shows on Heute (vault
+  /// Umsetzung/Dein Warum.md).
+  Future<void> _pruefeWarum(List<CheckIn> checkIns, String? geprueft) async {
+    final today = widget.clock();
+    final key = dayKey(today);
+    if (_warumPrueft || geprueft == key) return;
+    if (widget.profile.motivation.trim().isEmpty) return;
+    final heute = checkIns.where((c) => dayKey(c.datum) == key).toList();
+    if (heute.isEmpty) return;
+    _warumPrueft = true;
+    final satz = await widget.coach.warumSatz(
+      widget.profile,
+      heute.last,
+      checkIns.length > 6 ? checkIns.sublist(checkIns.length - 6) : checkIns,
+    );
+    _warumPrueft = false;
+    await widget.feed.saveWarumHeute(today, satz);
+    if (!mounted) return;
+    setState(() => _warumSatz = satz);
   }
 
   bool _durchPrueft = false;
@@ -1205,6 +1237,8 @@ class _HomePageState extends State<HomePage> {
         await widget.store.saveCheckIn(c.withStichpunkte(p));
         await _reload();
       },
+      warum: widget.profile.motivation,
+      warumSatz: _warumSatz,
       neuesMuster: _neuesMuster,
       onMusterAblehnen: _musterAblehnen,
       onOpenMuster: _oeffneMuster,

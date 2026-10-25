@@ -51,6 +51,15 @@ abstract class FeedCoach {
     bool fokusGeschafft = false,
     List<Durchgezogen> bisher = const [],
   });
+
+  /// "Dein Warum" (vault Umsetzung/Dein Warum.md): one coach sentence that
+  /// ties the user's own "Warum" to [today] when they are in a weak phase,
+  /// or null on a normal day.
+  Future<String?> warumSatz(
+    UserProfile profile,
+    CheckIn today,
+    List<CheckIn> recent,
+  );
 }
 
 /// Used until the AI backend exists: there is no answer yet.
@@ -92,4 +101,11 @@ class NoFeedCoach implements FeedCoach {
     bool fokusGeschafft = false,
     List<Durchgezogen> bisher = const [],
   }) async => null;
+
+  @override
+  Future<String?> warumSatz(
+    UserProfile profile,
+    CheckIn today,
+    List<CheckIn> recent,
+  ) async => null;
 }

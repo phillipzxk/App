@@ -284,3 +284,31 @@ Antworte nur mit JSON, ohne weiteren Text, entweder
 oder
 {"eintrag": "..."}`;
 }
+
+/// "Dein Warum" on a weak day (see vault Umsetzung/Dein Warum.md): the coach
+/// decides after the check-in whether the person is in a weak phase and, if
+/// so, writes one sentence that ties her own "Warum" to today.
+export function warumPrompt(p: Profile, today: CheckIn, recent: CheckIn[]): string {
+  const earlier = recent
+    .filter((c) => c.datum !== today.datum)
+    .slice(-4)
+    .map(checkInBlock)
+    .join("\n\n");
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+${earlier ? `Ihre letzten Tage:\n<nutzer>\n${earlier}\n</nutzer>\n\n` : ""}Ihr Check-in von heute:
+<nutzer>
+${checkInBlock(today)}
+</nutzer>
+
+Hängt sie gerade durch? Gemeint ist eine schwache Phase: kaum Motivation, mehrere zähe oder schlechte Tage hintereinander, sie drückt sich vor Dingen oder schreibt, dass sie keinen Bock mehr hat. Ein einzelner normaler oder mittlerer Tag zählt nicht. Nur wenn es klar aus ihren Antworten hervorgeht.
+
+Wenn ja, bekommt sie heute eine kleine Karte mit ihrem Warum in ihren eigenen Worten. Dazu schreibst du genau einen Satz (höchstens 22 Wörter), der ihr Warum mit dem schwachen Moment heute verbindet. Ehrlich und warm, ohne Floskeln, ohne Anrede, ohne Emojis, ohne Frage, ohne ihr Warum wörtlich zu wiederholen und ohne Tipps, die schon in der Antwort des Tages stehen.
+
+Antworte nur mit JSON, ohne weiteren Text, entweder
+{"satz": null}
+oder
+{"satz": "..."}`;
+}

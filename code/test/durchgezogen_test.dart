@@ -13,6 +13,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'helpers.dart';
 
 class _DurchCoach implements FeedCoach {
+  @override
+  Future<String?> warumSatz(
+    UserProfile profile,
+    CheckIn today,
+    List<CheckIn> recent,
+  ) async => null;
+
   _DurchCoach(this.eintrag);
 
   final String? eintrag;
