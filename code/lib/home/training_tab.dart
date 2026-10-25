@@ -21,6 +21,7 @@ const _weekdays = [
 class TrainingTab extends StatelessWidget {
   const TrainingTab({
     super.key,
+    this.extra = const [],
     required this.plan,
     required this.schwerpunkt,
     required this.today,
@@ -29,6 +30,9 @@ class TrainingTab extends StatelessWidget {
     required this.onSchwerpunkt,
     required this.onAsk,
   });
+
+  /// Cards that moved here from the old "Heute" page.
+  final List<Widget> extra;
 
   final TrainingPlan plan;
   final Schwerpunkt? schwerpunkt;
@@ -56,6 +60,7 @@ class TrainingTab extends StatelessWidget {
           icon: Icons.fitness_center,
         ),
         const AreaChart(bereich: Bereich.training),
+        ...extra,
         const GroupLabel('Deine Basis'),
         if (plan.isEmpty)
           FeedCard(

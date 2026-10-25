@@ -3,20 +3,15 @@ import 'package:flutter/material.dart';
 import '../checkin/checkin.dart';
 import '../checkin/checkin_flow.dart';
 import '../feed/feed_data.dart';
-import '../future_me/future_me_card.dart';
 import '../future_me/future_me_data.dart';
-import '../planner/planner_data.dart';
 import '../sleep/schlafzeiten.dart';
-import '../supplements/supplement_data.dart';
-import '../supplements/supplement_widgets.dart';
-import 'day_plan.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import '../feed/muster.dart';
 import 'coach_karte.dart';
 import 'muster_widgets.dart';
 import 'feed_widgets.dart';
-import 'heute_animationen.dart';
+import 'wurzelwerk.dart';
 
 /// Days in a row with a check-in, counted back from [today]. A day without
 /// a check-in yet today does not break the row until it is over.
@@ -44,9 +39,12 @@ List<bool> lastSevenDays(List<CheckIn> checkIns, DateTime today) {
   ];
 }
 
-/// Start page after the check-in: the coach's reply, the supplement
-/// reminder, the progress photo, the day plan, the focus of the week, days
-/// in a row, all four areas at a glance and the patterns.
+/// Start page after the check-in, "Home-Feed als Wurzelwerk" (vault
+/// Umsetzung/Home-Schichten.md, 2026-10-25). On top only the essentials:
+/// the coach's reply, the focus of the week and a chip for the day; things
+/// that are only due on some days (progress photo, a new pattern) show up
+/// there on their day. Below the ground line the root system with the four
+/// areas.
 class TodayTab extends StatelessWidget {
   const TodayTab({
     super.key,
@@ -54,19 +52,11 @@ class TodayTab extends StatelessWidget {
     required this.date,
     required this.today,
     required this.checkIns,
-    required this.termine,
     required this.training,
-    required this.mahlzeiten,
-    required this.kcalZiel,
-    required this.onAddTermin,
-    required this.onRemoveTermin,
-    required this.onSetMahlzeiten,
     required this.fotoEinstellungen,
     required this.wochenFotos,
     required this.onOpenZukunft,
-    required this.supplements,
-    required this.genommen,
-    required this.onOpenSupplements,
+    required this.onOpenTag,
     this.muster = const [],
     required this.onMusterAblehnen,
     required this.onOpenMuster,
@@ -75,11 +65,8 @@ class TodayTab extends StatelessWidget {
     required this.onCoachAnsicht,
     required this.onStichpunkte,
     this.bettzeit,
-    this.schlafStunden = 8,
-    this.routineAb,
-    this.onOpenSchlaf,
-    required this.onOpenArea,
-    this.onOpenAreaVon,
+    required this.bereiche,
+    required this.onOpenBereich,
     this.wurzeln = 0,
     this.jubel,
     this.jubelTick = 0,
@@ -91,19 +78,13 @@ class TodayTab extends StatelessWidget {
   final String date;
   final DateTime today;
   final List<CheckIn> checkIns;
-  final List<Termin> termine;
   final String training;
-  final int? mahlzeiten;
-  final int? kcalZiel;
-  final Future<void> Function(String text) onAddTermin;
-  final Future<void> Function(Termin termin) onRemoveTermin;
-  final Future<void> Function(int anzahl) onSetMahlzeiten;
   final FotoEinstellungen? fotoEinstellungen;
   final List<WochenFoto> wochenFotos;
   final VoidCallback onOpenZukunft;
-  final List<Supplement> supplements;
-  final Set<String> genommen;
-  final VoidCallback onOpenSupplements;
+
+  /// Opens "Dein Tag" (appointments, meals, bedtime) as its own page.
+  final VoidCallback onOpenTag;
 
   /// Visible patterns, newest first (see Umsetzung/Deine Muster.md).
   final List<Muster> muster;
@@ -119,15 +100,12 @@ class TodayTab extends StatelessWidget {
   final ValueChanged<String> onCoachAnsicht;
   final Future<void> Function(CheckIn c) onStichpunkte;
   final Bettzeit? bettzeit;
-  final double schlafStunden;
-  final String? routineAb;
-  final VoidCallback? onOpenSchlaf;
-  final ValueChanged<Bereich> onOpenArea;
 
-  /// Opens an area page growing out of the big field at [von].
-  final void Function(Bereich b, Rect von)? onOpenAreaVon;
+  /// The four areas on the roots and what happens on a tap.
+  final List<WurzelBereich> bereiche;
+  final Future<void> Function(Bereich b, Offset mitte) onOpenBereich;
 
-  /// How far the sprout's roots reach (each "Heute geschafft" this week).
+  /// How deep the roots reach (each "Heute geschafft" this week).
   final int wurzeln;
 
   /// Cheer from the coach and its trigger, see [CoachKarte.jubel].
@@ -153,7 +131,7 @@ class TodayTab extends StatelessWidget {
     final lage = fotoLage(today, e, wochenFotos);
     switch (lage.status) {
       case FotoStatus.heute:
-        return 'Foto · Woche ${lage.woche}';
+        return 'Fortschrittsfoto · Woche ${lage.woche}';
       case FotoStatus.nachholen:
         return 'Foto nachholen · Woche ${lage.woche}';
       case FotoStatus.spaeter:
@@ -161,96 +139,94 @@ class TodayTab extends StatelessWidget {
     }
   }
 
+  /// A pattern found in the last two days counts as new and shows on top.
+  Muster? get _neuesMuster {
+    if (muster.isEmpty) return null;
+    final m = muster.first;
+    final t = DateTime(today.year, today.month, today.day);
+    final d = DateTime(m.datum.year, m.datum.month, m.datum.day);
+    return t.difference(d).inDays <= 2 ? m : null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = _todayCheckIn;
     final streak = checkInStreak(checkIns, today);
+    final foto = _fotoHeute;
+    final m = _neuesMuster;
+    final tag = shortDay(training);
+    final b = bettzeit;
     return NightScope(
       child: ListView(
         controller: scroll,
-        padding: const EdgeInsets.only(bottom: 110),
+        padding: const EdgeInsets.only(bottom: 40),
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: PageHeader(
-                  label: date,
-                  title: name.isEmpty ? 'Heute' : 'Heute, $name',
-                  brand: true,
-                ),
+          for (final w in [
+            PageHeader(
+              label: date,
+              title: name.isEmpty ? 'Heute' : 'Heute, $name',
+              brand: true,
+            ),
+            if (c != null) ...[
+              CoachKarte(
+                text: c.kiAntwort.isNotEmpty ? c.kiAntwort : noReplyYet,
+                umschaltbar: c.kiAntwort.isNotEmpty,
+                stichpunkte: c.stichpunkte,
+                ansicht: coachAnsicht,
+                onAnsicht: onCoachAnsicht,
+                onStichpunkte: () => onStichpunkte(c),
+                jubel: jubel,
+                jubelTick: jubelTick,
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16, left: 8),
-                child: SprossBox(
-                  streak: streak,
-                  wurzeln: wurzeln,
-                  jubelTick: jubelTick,
+              const SizedBox(height: 12),
+            ],
+            ?fokus,
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                HeuteChip(
+                  key: const ValueKey('dein-tag'),
+                  icon: Icons.wb_sunny_outlined,
+                  text: tag == 'frei' ? 'Kein Training' : tag,
+                  klein: b == null
+                      ? 'Dein Tag'
+                      : 'Bett ${formatUhrzeit(b.bett)}',
+                  onTap: onOpenTag,
                 ),
+                if (foto != null)
+                  HeuteChip(
+                    key: const ValueKey('foto-chip'),
+                    icon: Icons.photo_camera_outlined,
+                    text: foto,
+                    gold: true,
+                    onTap: onOpenZukunft,
+                  ),
+              ],
+            ),
+            if (m != null) ...[
+              const SizedBox(height: 14),
+              const GroupLabel('Neues Muster'),
+              MusterKarte(
+                muster: m,
+                onAblehnen: () => onMusterAblehnen(m),
+                onAlle: onOpenMuster,
               ),
             ],
-          ),
-          if (c != null) ...[
-            CoachKarte(
-              text: c.kiAntwort.isNotEmpty ? c.kiAntwort : noReplyYet,
-              umschaltbar: c.kiAntwort.isNotEmpty,
-              stichpunkte: c.stichpunkte,
-              ansicht: coachAnsicht,
-              onAnsicht: onCoachAnsicht,
-              onStichpunkte: () => onStichpunkte(c),
-              jubel: jubel,
-              jubelTick: jubelTick,
+            const SizedBox(height: 8),
+          ])
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: w,
             ),
-            const SizedBox(height: 14),
-          ],
-          BereichsFeld(
-            checkIns: checkIns,
-            today: today,
-            onOpen: (b, von) =>
-                onOpenAreaVon != null ? onOpenAreaVon!(b, von) : onOpenArea(b),
+          // The soil runs edge to edge.
+          Wurzelwerk(
+            bereiche: bereiche,
+            onOpen: onOpenBereich,
+            streak: streak,
+            wurzeln: wurzeln,
+            jubelTick: jubelTick,
           ),
-          const SizedBox(height: 14),
-          ?fokus,
-          const GroupLabel('Heute dran'),
-          SupplementHinweis(
-            supplements: supplements,
-            genommen: genommen,
-            now: today,
-            onTap: onOpenSupplements,
-          ),
-          FutureMeCard(
-            today: today,
-            einstellungen: fotoEinstellungen,
-            fotos: wochenFotos,
-            onOpen: onOpenZukunft,
-          ),
-          DayPlanCard(
-            today: today,
-            termine: termine,
-            training: training,
-            mahlzeiten: mahlzeiten,
-            kcalZiel: kcalZiel,
-            onAddTermin: onAddTermin,
-            onRemoveTermin: onRemoveTermin,
-            onSetMahlzeiten: onSetMahlzeiten,
-            onOpenTraining: () => onOpenArea(Bereich.training),
-            foto: _fotoHeute,
-            onOpenFoto: onOpenZukunft,
-            bettzeit: bettzeit,
-            schlafStunden: schlafStunden,
-            routineAb: routineAb,
-            onOpenSchlaf: onOpenSchlaf,
-          ),
-          const SizedBox(height: 14),
-          // Only shown once the coach saw a clear pattern.
-          if (muster.isNotEmpty) ...[
-            const GroupLabel('Deine Muster'),
-            MusterKarte(
-              muster: muster.first,
-              onAblehnen: () => onMusterAblehnen(muster.first),
-              onAlle: onOpenMuster,
-            ),
-          ],
           TextButton(
             onPressed: onRestartOnboarding,
             child: const Text(
@@ -259,6 +235,79 @@ class TodayTab extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Small round field on top of "Heute", e.g. the day or the photo day.
+class HeuteChip extends StatelessWidget {
+  const HeuteChip({
+    super.key,
+    required this.icon,
+    required this.text,
+    this.klein,
+    this.gold = false,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String text;
+  final String? klein;
+  final bool gold;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = gold ? const Color(0xFF1A140E) : CoachStyle.ink;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(999),
+        onTap: onTap,
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(999),
+            gradient: gold ? CoachStyle.goldGradient : null,
+            color: gold ? null : CoachStyle.card,
+            border: gold ? null : Border.all(color: CoachStyle.line),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 15, color: gold ? ink : CoachStyle.goldLight),
+              const SizedBox(width: 7),
+              Flexible(
+                child: Text(
+                  text,
+                  overflow: TextOverflow.ellipsis,
+                  style: CoachStyle.body.copyWith(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: ink,
+                  ),
+                ),
+              ),
+              if (klein != null) ...[
+                const SizedBox(width: 6),
+                Text(
+                  klein!,
+                  style: CoachStyle.body.copyWith(
+                    fontSize: 11.5,
+                    color: CoachStyle.inkSoft,
+                  ),
+                ),
+              ],
+              const SizedBox(width: 2),
+              Icon(
+                Icons.chevron_right,
+                size: 16,
+                color: gold ? ink : CoachStyle.inkSoft,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

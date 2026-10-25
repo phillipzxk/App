@@ -173,20 +173,19 @@ void main() {
         ),
       );
     await openApp(tester, diary);
-    await scrollTo(tester, find.byKey(const ValueKey('schalter-schlaf')));
-    await tester.tap(find.byKey(const ValueKey('schalter-schlaf')));
-    await tester.pumpAndSettle();
+    final wert = find.byKey(const ValueKey('knoten-wert-schlaf'));
+    await scrollTo(tester, wert);
     expect(
       find.descendant(
-        of: find.byKey(const ValueKey('bereich-schlaf')),
-        matching: find.textContaining('↓'),
+        of: wert,
+        matching: find.textContaining('4', findRichText: true),
       ),
       findsOneWidget,
     );
-    expect(find.text('4'), findsWidgets);
-    await tester.tap(find.byKey(const ValueKey('bereich-schlaf')));
-    await tester.pumpAndSettle();
-    expect(find.text('Zwei kurze Nächte.'), findsOneWidget);
+    // The weakest area gets the coach's bubble.
+    expect(find.byKey(const ValueKey('knoten-sagt-schlaf')), findsOneWidget);
+    await openBereich(tester, 'schlaf');
+    expect(find.text('Zwei kurze Nächte.'), findsWidgets);
     expect(find.text('Schlaf & Energie'), findsWidgets);
   });
 }

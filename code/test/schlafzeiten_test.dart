@@ -78,6 +78,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      await tester.tap(find.byKey(const ValueKey('dein-tag')));
+      await tester.pumpAndSettle();
       final row = find.byKey(const ValueKey('tag-bettzeit'));
       await scrollTo(tester, row);
       expect(find.text('Trag ein, wann du aufstehst ›'), findsOneWidget);
@@ -101,7 +103,7 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.tap(find.text('Heute'));
+      await tester.pageBack();
       await tester.pumpAndSettle();
       await scrollTo(tester, find.byKey(const ValueKey('tag-bettzeit')));
       expect(find.text('22:30'), findsOneWidget);

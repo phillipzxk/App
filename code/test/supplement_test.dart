@@ -93,7 +93,7 @@ void main() {
     tester,
   ) async {
     final feed = await start(tester, supplements: [_magnesium, _kreatin]);
-    await scrollTo(tester, find.byKey(const ValueKey('supp-hinweis')));
+    await openBereich(tester, 'ernaehrung');
     expect(
       find.textContaining('2 offen, nächste 21:30 Magnesium'),
       findsOneWidget,

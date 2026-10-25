@@ -87,6 +87,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await openTab(tester, 'Training');
     await scrollTo(tester, find.byKey(const ValueKey('zukunft-karte')));
     await tester.tap(find.byKey(const ValueKey('zukunft-karte')));
     await tester.pumpAndSettle();
@@ -153,6 +154,10 @@ void main() {
 
   testWidgets('photo day: fixed photo slot in Dein Tag', (tester) async {
     await openApp(tester);
+    // On the photo day a gold chip shows on top of Heute.
+    expect(find.byKey(const ValueKey('foto-chip')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('dein-tag')));
+    await tester.pumpAndSettle();
     await scrollTo(tester, find.byKey(const ValueKey('tag-foto')));
     expect(find.byKey(const ValueKey('tag-foto')), findsOneWidget);
     expect(find.text('Foto · Woche 1'), findsOneWidget);
@@ -162,6 +167,7 @@ void main() {
     tester,
   ) async {
     await openApp(tester);
+    await openTab(tester, 'Training');
     await scrollTo(tester, find.byKey(const ValueKey('zukunft-karte')));
     await tester.tap(find.byKey(const ValueKey('zukunft-karte')));
     await tester.pumpAndSettle();
@@ -174,6 +180,7 @@ void main() {
     tester,
   ) async {
     final feed = await openApp(tester);
+    await openTab(tester, 'Training');
     await scrollTo(tester, find.byKey(const ValueKey('zukunft-karte')));
     await tester.tap(find.byKey(const ValueKey('zukunft-karte')));
     await tester.pumpAndSettle();

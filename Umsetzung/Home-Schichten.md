@@ -1,7 +1,7 @@
 ---
 title: Home-Feed als Wurzelwerk
 tags: [umsetzung, feed, design, animation]
-status: entwurf
+status: gebaut
 ---
 
 # Home-Feed als Wurzelwerk (früher: Schichten)
@@ -31,3 +31,22 @@ Phillip zu Entwurf 4: noch zu einfach und unrealistisch. Neu entschieden:
 - **Darunter ein echtes Wurzelwerk mit kleinem Baum** über der Bodenlinie, daneben „Tage am Stück“. Die Bereiche hängen **nicht in einer Reihe**, sondern verteilt und verschieden tief an eigenen Wurzeln: Training oben rechts, Ernährung links, Schlaf & Energie tiefer rechts, Mindset ganz unten. Durch die Wurzeln läuft ständig Licht; wo der Coach heute etwas sagt, hängt eine kleine Sprechblase am Bereich.
 - **Antippen:** Licht schießt die Wurzel runter, Funken sprühen, der Bereich geht aus seinem Kreis über den ganzen Bildschirm auf. Darin: Wert mit Trend, Coach-Satz (tippt sich), die 4 festen Kacheln (Diagramme zeichnen sich, Zahlen zählen hoch, Listen zum Abhaken), ein Hauptknopf und „Alles zu … ›“. ✕ schließt zurück in den Kreis.
 - Ersetzt die Schichten-Liste aus Entwurf 1 bis 4. Die Entscheidungen oben (feste Kacheln, Alles zu …, Felder nur wenn fällig, ? vom Coach) gelten weiter.
+
+## Gebaut (25.10.2026, PR offen bis Phillips Ja)
+
+Phillip: „wenn keine sachen verloren gehen … alles noch da unbedingt so machen“. Die Leiste unten ist weg. Wo jetzt was liegt:
+
+| Was | Wo |
+|---|---|
+| Coach-Karte (Text/Stichpunkte, Jubel, Affe) | oben auf Heute, unverändert |
+| Fokus der Woche, Reality Check, Fokus-Wahl | oben auf Heute, unverändert |
+| Dein Tag (Termine, Mahlzeiten, Bettzeit, Foto-Zeile) | Chip „Dein Tag“ oben → eigene Seite |
+| Fortschrittsfoto inkl. Frame Kit | am Fototag goldener Chip oben; immer auf der Training-Seite |
+| Neues Muster | oben auf Heute, wenn höchstens 2 Tage alt; immer auf der Mindset-Seite (mit „Alle Muster“) |
+| Supplements | Kachel in Ernährung (Antippen → Ernährung-Seite zum Abhaken) |
+| Spross / Tage am Stück | Baum über der Bodenlinie; Blätter wachsen mit den Tagen am Stück, Wurzeln mit „Heute geschafft“, Funken beim Jubel |
+| Bereichs-Werte | Ring und Zahl an jedem Bereich, Verlauf-Kachel in der großen Ansicht, 30-Tage-Verlauf auf der ganzen Seite |
+| Trainingsplan, Schwerpunkt, kcal, Gewicht, Schlafzeiten, Abendroutine, Durchgezogen, Dein Warum, Frag den Coach | ganze Bereichsseite über „Alles zu … ›“ (wie bisher) |
+| Fragebogen neu starten | ganz unten auf Heute |
+
+Code: `code/lib/home/wurzelwerk.dart` (Wurzelwerk, Kreis-Öffnen), `code/lib/home/bereich_uebersicht.dart` (große Ansicht mit Kacheln), `code/lib/home/today_tab.dart`, `code/lib/home/home_page.dart`. Die Kacheln öffnen beim Antippen die ganze Bereichsseite.
