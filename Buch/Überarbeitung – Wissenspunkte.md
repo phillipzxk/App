@@ -1,0 +1,16 @@
+---
+title: Überarbeitung – Wissenspunkte
+tags: [buch, todo]
+erstellt: 2026-10-25
+---
+
+# Überarbeitung – Wissenspunkte fürs Buch
+
+Phillips Liste vom 2026-10-25, wörtlich übernommen. Übersicht: [[Buch – Übersicht]].
+
+- [ ] 1. Fragen überarbeiten
+- [ ] 2. Gucken ob ich vielleicht doch mehr im psycholgischem Sinne bleibe und Maximale Versorgung überarbeite, da wären neue Punkte: 1. alles geheim halten, neue ziele, Visionen egal wie unrealitisch - es ist wichtig diese zu haben, niemanden verraten denn das einzigste was passieren kann ist das man dich davon irgendwie abringt weil der neutrale beoachter es als unmöglich empfindet und sich so in dein empfinden mit einklingt und dich im schlimmsten Fall davon überzeugt.
+- [ ] 3. Sport mit Calis Gym und Powerlift überarbeiten
+- [ ] 4. Meinen Weg anpassen mit fussball...
+- [ ] 5. generelle anpassung und Verbesserung wie z.B. stärker in beide Richtugnen
+- [ ] 6. Chapter Summary
