@@ -57,7 +57,7 @@ class TodayTab extends StatelessWidget {
     required this.wochenFotos,
     required this.onOpenZukunft,
     required this.onOpenTag,
-    this.offeneSupps = 0,
+    required this.heuteDran,
     this.muster = const [],
     required this.onMusterAblehnen,
     required this.onOpenMuster,
@@ -88,7 +88,8 @@ class TodayTab extends StatelessWidget {
   final VoidCallback onOpenTag;
 
   /// Supplements still to take today (shown in "Heute dran").
-  final int offeneSupps;
+  /// The small sun arc "Heute dran"; tapping it opens Dein Tag.
+  final Widget heuteDran;
 
   /// Visible patterns, newest first (see Umsetzung/Deine Muster.md).
   final List<Muster> muster;
@@ -128,21 +129,6 @@ class TodayTab extends StatelessWidget {
     return null;
   }
 
-  /// "Foto · Woche 7" on the photo day, null on other days.
-  String? get _fotoHeute {
-    final e = fotoEinstellungen;
-    if (e == null) return null;
-    final lage = fotoLage(today, e, wochenFotos);
-    switch (lage.status) {
-      case FotoStatus.heute:
-        return 'Fortschrittsfoto · Woche ${lage.woche}';
-      case FotoStatus.nachholen:
-        return 'Foto nachholen · Woche ${lage.woche}';
-      case FotoStatus.spaeter:
-        return null;
-    }
-  }
-
   /// A pattern found in the last two days counts as new and shows on top.
   Muster? get _neuesMuster {
     if (muster.isEmpty) return null;
@@ -156,10 +142,7 @@ class TodayTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = _todayCheckIn;
     final streak = checkInStreak(checkIns, today);
-    final foto = _fotoHeute;
     final m = _neuesMuster;
-    final tag = shortDay(training);
-    final b = bettzeit;
     return NightScope(
       child: ListView(
         controller: scroll,
@@ -185,37 +168,7 @@ class TodayTab extends StatelessWidget {
               const SizedBox(height: 12),
             ],
             ?fokus,
-            HeuteDran(
-              key: const ValueKey('dein-tag'),
-              punkte: [
-                (Icons.fitness_center, tag == 'frei' ? 'Kein Training' : tag),
-                (
-                  Icons.bedtime_outlined,
-                  b == null
-                      ? 'Bettzeit eintragen'
-                      : 'Bett ${formatUhrzeit(b.bett)}',
-                ),
-                if (offeneSupps > 0)
-                  (
-                    Icons.medication_outlined,
-                    '$offeneSupps ${offeneSupps == 1 ? 'Supplement' : 'Supplements'} offen',
-                  ),
-              ],
-              onTap: onOpenTag,
-            ),
-            if (foto != null) ...[
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: HeuteChip(
-                  key: const ValueKey('foto-chip'),
-                  icon: Icons.photo_camera_outlined,
-                  text: foto,
-                  gold: true,
-                  onTap: onOpenZukunft,
-                ),
-              ),
-            ],
+            heuteDran,
             if (m != null) ...[
               const SizedBox(height: 14),
               const GroupLabel('Neues Muster'),
@@ -247,152 +200,6 @@ class TodayTab extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// "Heute dran": one slim row under the focus with what is still on today
-/// (training, bedtime, open supplements). Tapping it opens "Dein Tag"
-/// (decided with Phillip 2026-10-25).
-class HeuteDran extends StatelessWidget {
-  const HeuteDran({super.key, required this.punkte, required this.onTap});
-
-  final List<(IconData, String)> punkte;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: onTap,
-        child: Ink(
-          padding: const EdgeInsets.fromLTRB(14, 11, 10, 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            color: CoachStyle.card,
-            border: Border.all(color: CoachStyle.line),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'HEUTE DRAN',
-                      style: CoachStyle.goldLabel.copyWith(
-                        fontFamily: 'Sora',
-                        fontSize: 10,
-                        letterSpacing: 1.8,
-                        color: CoachStyle.gold,
-                      ),
-                    ),
-                    const SizedBox(height: 7),
-                    Wrap(
-                      spacing: 14,
-                      runSpacing: 6,
-                      children: [
-                        for (final (icon, text) in punkte)
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(icon, size: 15, color: CoachStyle.goldLight),
-                              const SizedBox(width: 6),
-                              Text(
-                                text,
-                                style: CoachStyle.body.copyWith(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: CoachStyle.ink,
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right, color: CoachStyle.inkSoft),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Small round field on top of "Heute", e.g. the day or the photo day.
-class HeuteChip extends StatelessWidget {
-  const HeuteChip({
-    super.key,
-    required this.icon,
-    required this.text,
-    this.klein,
-    this.gold = false,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String text;
-  final String? klein;
-  final bool gold;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final ink = gold ? const Color(0xFF1A140E) : CoachStyle.ink;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(999),
-        onTap: onTap,
-        child: Ink(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(999),
-            gradient: gold ? CoachStyle.goldGradient : null,
-            color: gold ? null : CoachStyle.card,
-            border: gold ? null : Border.all(color: CoachStyle.line),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 15, color: gold ? ink : CoachStyle.goldLight),
-              const SizedBox(width: 7),
-              Flexible(
-                child: Text(
-                  text,
-                  overflow: TextOverflow.ellipsis,
-                  style: CoachStyle.body.copyWith(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: ink,
-                  ),
-                ),
-              ),
-              if (klein != null) ...[
-                const SizedBox(width: 6),
-                Text(
-                  klein!,
-                  style: CoachStyle.body.copyWith(
-                    fontSize: 11.5,
-                    color: CoachStyle.inkSoft,
-                  ),
-                ),
-              ],
-              const SizedBox(width: 2),
-              Icon(
-                Icons.chevron_right,
-                size: 16,
-                color: gold ? ink : CoachStyle.inkSoft,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

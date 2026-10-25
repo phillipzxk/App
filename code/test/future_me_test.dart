@@ -154,8 +154,7 @@ void main() {
 
   testWidgets('photo day: fixed photo slot in Dein Tag', (tester) async {
     await openApp(tester);
-    // On the photo day a gold chip shows on top of Heute.
-    expect(find.byKey(const ValueKey('foto-chip')), findsOneWidget);
+    // On the photo day the photo sits on the small sun arc of Heute.
     await scrollTo(tester, find.byKey(const ValueKey('dein-tag')));
     await tester.tap(find.byKey(const ValueKey('dein-tag')));
     await tester.pumpAndSettle();

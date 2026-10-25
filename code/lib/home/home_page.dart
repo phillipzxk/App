@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../checkin/checkin.dart';
@@ -698,14 +700,22 @@ class _HomePageState extends State<HomePage> {
     ),
   );
 
-  /// The sun arc on top of "Dein Tag": from getting up to bedtime.
-  Widget _sonnenbogen() {
+  /// Today from getting up to bedtime: arc start and end (minutes, end may
+  /// pass midnight) and every point with a time, for both sun arcs.
+  ({int start, int ende, List<BogenPunkt> punkte, String? ohneZeit})
+  _tagesPunkte() {
     final jetzt = widget.clock();
     final aufstehen = _schlafzeiten.aufstehenAm(jetzt);
     final bz = _bettzeit;
     final start = aufstehen ?? 7 * 60;
     var ende = bz?.bett ?? 23 * 60;
     if (ende <= start) ende += 1440;
+    final training = _plan.forDay(jetzt).trim();
+    final trZeit = trainingZeit(training);
+    // Until the coach plans meals, they are spread evenly over the day:
+    // from half an hour after getting up to 2.5 hours before bed.
+    final n = _mahlzeiten ?? 0;
+    final von = start + 30, bis = math.max(von, ende - 150);
     final punkte = <BogenPunkt>[
       if (aufstehen != null)
         BogenPunkt(
@@ -730,6 +740,34 @@ class _HomePageState extends State<HomePage> {
             art: 'Termin',
             titel: t.text,
           ),
+      if (trZeit != null)
+        BogenPunkt(
+          id: 'training',
+          minute: trZeit < start ? trZeit + 1440 : trZeit,
+          art: 'Training',
+          titel: shortDay(training),
+          text: dayDetails(training).isEmpty ? null : 'Übungen in deinem Plan',
+        ),
+      for (var i = 0; i < n; i++)
+        BogenPunkt(
+          id: 'mahlzeit-$i',
+          minute: n == 1 ? (von + bis) ~/ 2 : von + (bis - von) * i ~/ (n - 1),
+          art: 'Essen',
+          titel: 'Mahlzeit ${i + 1} von $n',
+        ),
+      for (final x in _supplements)
+        if (parseUhrzeit(x.zeit) case final m?)
+          BogenPunkt(
+            id: 'supp-${x.id}',
+            minute: m < start ? m + 1440 : m,
+            art: 'Supplement',
+            titel: x.name,
+            text: [
+              if (x.menge.isNotEmpty) x.menge,
+              if (_genommen.contains(x.id)) 'genommen ✓',
+            ].join(' · '),
+            erledigt: _genommen.contains(x.id),
+          ),
       if (bz != null && _routine.isNotEmpty)
         if (parseUhrzeit(_routine.first.zeit) case final ab?)
           if (ab < bz.bett && bz.bett - ab <= 180)
@@ -748,13 +786,42 @@ class _HomePageState extends State<HomePage> {
           text: 'Morgen um ${formatUhrzeit(bz.aufstehen)} raus',
         ),
     ];
-    final training = _plan.forDay(jetzt).trim();
-    return Sonnenbogen(
-      punkte: punkte,
+    return (
       start: start,
       ende: ende,
-      jetzt: jetzt.hour * 60 + jetzt.minute + jetzt.second / 60,
-      ohneZeit: training.isEmpty ? null : shortDay(training),
+      punkte: punkte,
+      ohneZeit: training.isEmpty || trZeit != null ? null : shortDay(training),
+    );
+  }
+
+  double get _jetztMinute {
+    final j = widget.clock();
+    return j.hour * 60 + j.minute + j.second / 60;
+  }
+
+  /// The sun arc on top of "Dein Tag": from getting up to bedtime.
+  Widget _sonnenbogen() {
+    final t = _tagesPunkte();
+    return Sonnenbogen(
+      punkte: t.punkte,
+      start: t.start,
+      ende: t.ende,
+      jetzt: _jetztMinute,
+      ohneZeit: t.ohneZeit,
+    );
+  }
+
+  /// "Heute dran" on Heute: the small sun arc with everything of today.
+  Widget _heuteBogen() {
+    final t = _tagesPunkte();
+    return HeuteBogen(
+      key: const ValueKey('dein-tag'),
+      punkte: t.punkte,
+      start: t.start,
+      ende: t.ende,
+      jetzt: _jetztMinute,
+      ohneZeit: t.ohneZeit,
+      onTap: _oeffneTag,
     );
   }
 
@@ -947,7 +1014,7 @@ class _HomePageState extends State<HomePage> {
       wochenFotos: _wochenFotos,
       onOpenZukunft: _oeffneZukunft,
       onOpenTag: _oeffneTag,
-      offeneSupps: _supplements.where((x) => !_genommen.contains(x.id)).length,
+      heuteDran: _heuteBogen(),
       muster: sichtbareMuster(_muster),
       onMusterAblehnen: _musterAblehnen,
       onOpenMuster: _oeffneMuster,

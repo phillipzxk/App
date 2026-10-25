@@ -1,4 +1,5 @@
 import 'package:coach_app/data/user_profile.dart';
+import 'package:coach_app/feed/feed_data.dart';
 import 'package:coach_app/main.dart';
 import 'package:coach_app/planner/planner_data.dart';
 import 'package:coach_app/sleep/schlafzeiten.dart';
@@ -55,5 +56,53 @@ void main() {
     final jetzt = tester.getTopLeft(find.byKey(const ValueKey('tag-jetzt')));
     final kino = tester.getTopLeft(find.text('Kino').last);
     expect(auf.dy < jetzt.dy && jetzt.dy < kino.dy, isTrue);
+  });
+
+  test('a training time in the day name is read and kept out of the name', () {
+    expect(trainingZeit('Push 17:30\nBankdrücken 5x5'), 17 * 60 + 30);
+    expect(trainingZeit('Beine um 7 Uhr'), 7 * 60);
+    expect(trainingZeit('Push\nLaufen 5 km'), isNull);
+    expect(shortDay('Push 17:30\nBankdrücken'), 'Push');
+    expect(shortDay('Push 17:30'), 'Push');
+    expect(dayDetails('Push 17:30'), '');
+    expect(dayName('Push 17:30\nBankdrücken'), 'Push 17:30');
+    expect(dayName('Push 17:30'), 'Push 17:30');
+  });
+
+  testWidgets('Heute dran is the small sun arc with the next point and '
+      'what comes after it', (tester) async {
+    final diary = MemoryDiaryStore()..checkIns.add(checkInOn(fixedNow));
+    final feed = MemoryFeedStore()
+      ..schlafzeiten = const Schlafzeiten(werktag: 6 * 60 + 30)
+      ..plan = TrainingPlan([
+        for (var i = 0; i < 7; i++) 'Push 19:00\nBankdrücken 5x5',
+      ])
+      ..termine.add(
+        Termin(
+          datum: fixedNow,
+          zeit: '18:30',
+          text: 'Kino',
+          erstellt: fixedNow,
+        ),
+      );
+    await tester.pumpWidget(
+      CoachApp(
+        store: MemoryProfileStore(const UserProfile(ziel: 'Frei sein')),
+        diary: diary,
+        feed: feed,
+        clock: fixedClock,
+      ),
+    );
+    await tester.pumpAndSettle();
+    final zeile = find.byKey(const ValueKey('heute-naechstes'));
+    await scrollTo(tester, zeile);
+    expect(
+      find.descendant(of: zeile, matching: find.text('bis Kino · 18:30')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: zeile, matching: find.text('Danach Push um 19:00')),
+      findsOneWidget,
+    );
   });
 }

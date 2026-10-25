@@ -40,7 +40,7 @@ Phillip: „wenn keine sachen verloren gehen … alles noch da unbedingt so mach
 |---|---|
 | Coach-Karte (Text/Stichpunkte, Jubel, Affe) | oben auf Heute, unverändert |
 | Fokus der Woche, Reality Check, Fokus-Wahl | oben auf Heute, unverändert |
-| Dein Tag (Termine, Mahlzeiten, Bettzeit, Foto-Zeile) | Zeile „Heute dran“ unter Fokus (Training, Bettzeit, offene Supplements) → tippen öffnet Dein Tag |
+| Dein Tag (Termine, Mahlzeiten, Bettzeit, Foto-Zeile) | Feld „Heute dran“ unter Fokus = kleiner Sonnenbogen mit allem von heute → tippen öffnet Dein Tag |
 | Fortschrittsfoto inkl. Frame Kit | am Fototag goldener Chip oben; immer auf der Training-Seite |
 | Neues Muster | oben auf Heute, wenn höchstens 2 Tage alt; immer auf der Mindset-Seite (mit „Alle Muster“) |
 | Supplements | Kachel in Ernährung (Antippen → Ernährung-Seite zum Abhaken) |
@@ -50,3 +50,15 @@ Phillip: „wenn keine sachen verloren gehen … alles noch da unbedingt so mach
 | Fragebogen neu starten | ganz unten auf Heute |
 
 Code: `code/lib/home/wurzelwerk.dart` (Wurzelwerk, Kreis-Öffnen), `code/lib/home/bereich_uebersicht.dart` (große Ansicht mit Kacheln), `code/lib/home/today_tab.dart`, `code/lib/home/home_page.dart`. Die Kacheln öffnen beim Antippen die ganze Bereichsseite.
+
+## Feld „Heute dran“ (2026-10-25)
+
+Phillip: unter „Heute dran“ nichts mehr, das Feld selbst größer, übersichtlicher und besonderer, mit Animation. Aus fünf Entwürfen (https://claude.ai/artifact/6EPQiBoxoCpqKTHxPxrLiJ) gewählt: **E · ein Feld mit allem**, und zwar kleiner („nur kleiner Überblick für den schnellen Blick, wenn man etwas eintragen oder genauer sehen möchte, tippt man eh drauf“).
+
+- Das Feld ist ein kleiner Sonnenbogen. Alles von heute liegt als Zeichen darauf, gleichmäßig verteilt in der Reihenfolge des Tages: Aufstehen, Fortschrittsfoto (am Fototag), Termine, Training, Mahlzeiten, Supplements, Abendroutine, Bettzeit.
+- Erledigtes leuchtet gold (genommene Supplements auch vor ihrer Uhrzeit), das Nächste pulsiert. Beim Öffnen läuft die Sonne bis „jetzt“, die Zeichen springen nacheinander auf.
+- Darunter eine Zeile: Countdown bis zum Nächsten und „Danach … um …“.
+- Tippen öffnet Dein Tag. Der goldene Foto-Chip und die alte Zeile sind weg, das Foto steht am Fototag auf dem Bogen.
+- **Trainingszeit:** steht im Namen des Trainingstags, z. B. „Push 17:30“ oder „Push um 17 Uhr“ (Hinweis im Plan-Editor). Ohne Uhrzeit steht das Training nicht auf dem Bogen, nur „Heute noch: …“.
+- **Mahlzeiten:** bis der Coach sie plant, verteilt die App die eingestellte Anzahl gleichmäßig von 30 Min. nach dem Aufstehen bis 2,5 Std. vor dem Bett.
+- Gebaut 2026-10-25 (`code/lib/home/sonnenbogen.dart`, `HeuteBogen`), PR #59.

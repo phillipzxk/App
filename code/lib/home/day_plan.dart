@@ -228,7 +228,10 @@ extension on DayPlanCard {
     out.add(
       _PlanRow(
         key: const ValueKey('tag-training'),
-        zeit: '–',
+        zeit: switch (trainingZeit(training)) {
+          final z? => formatUhrzeit(z),
+          null => '–',
+        },
         art: 'Training',
         dark: true,
         titel: training.trim().isEmpty ? 'Heute frei' : shortDay(training),
