@@ -27,3 +27,4 @@ Weitere Inspiration (weitere Studien und Erinnerungsfragen zu deinem Weg): [[Ins
 Phillips Antworten auf die Erinnerungsfragen, wörtlich:
 
 - Gaming und Corona – „Gab es einen Moment, in dem du nach Stunden vom Bildschirm aufgeschaut hast und dich leer gefühlt hast?“ → „spazieren nach zocken angefühlt wie online“ (25.10.2026)
+- Gaming und Corona – „Hast du später etwas aus dem Gaming mitgenommen…?“ → „tatsächlich das Dinge nur wachsen wenn man sie immer wieder ewig lange wiedeholt, früher jeden Tag gezockt für mehrere Stunden und nie aufgegeben auch wenn ich nicht gewonnen habe... heute sehr lange immer wieder schule, buch, startup, app, social media immer wieder jeden Tag ewig lange wiederholen und auch wenn das nicht klappt einfach weiter machen und es beim nächsten mal schaffen“ (25.10.2026)
