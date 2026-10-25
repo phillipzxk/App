@@ -100,27 +100,32 @@ void main() {
     expect(feed.muster, isEmpty);
   });
 
-  testWidgets('pattern shows on Heute, list opens, "Stimmt nicht" hides it', (
-    tester,
-  ) async {
+  testWidgets('pattern shows small on Heute, list opens, "Stimmt nicht" '
+      'on the Mindset page hides it', (tester) async {
     final (feed, coach) = await _open(tester, tage: 5);
     expect(coach.calls, 1);
-    final karte = find.byKey(const ValueKey('muster-karte'));
-    await scrollTo(tester, karte);
-    expect(find.text('Eiweiß zum Frühstück.'), findsOneWidget);
+    final feld = find.byKey(const ValueKey('muster-feld'));
+    await scrollTo(tester, feld);
+    expect(find.text('NEUES MUSTER'), findsOneWidget);
+    expect(find.byKey(const ValueKey('muster-karte')), findsNothing);
 
-    await tester.tap(find.byKey(const ValueKey('muster-alle')));
+    await tester.tap(feld);
     await tester.pumpAndSettle();
     expect(find.text('Deine Muster'), findsWidgets);
-    expect(find.textContaining('heute'), findsWidgets);
+    expect(
+      find.textContaining('Eiweiß zum Frühstück.', findRichText: true),
+      findsOneWidget,
+    );
     await tester.pageBack();
     await tester.pumpAndSettle();
 
+    await openTab(tester, 'Mindset');
     await scrollTo(tester, find.byKey(const ValueKey('muster-ablehnen')));
     await tester.tap(find.byKey(const ValueKey('muster-ablehnen')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('muster-karte')), findsNothing);
     expect(feed.muster.single.abgelehnt, isTrue);
+    await openTab(tester, 'Heute');
+    expect(find.byKey(const ValueKey('muster-feld')), findsNothing);
     // Checked once today already: no second search.
     expect(coach.calls, 1);
   });

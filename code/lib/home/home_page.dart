@@ -722,6 +722,22 @@ class _HomePageState extends State<HomePage> {
     ];
   }
 
+  /// Two short facts for the info card next to an area on "Heute", taken
+  /// from the area's first two tiles (draft B, Phillip 2026-10-25).
+  List<(String, String)> _infos(Bereich b) {
+    final k = _daten(b).kacheln;
+    String kurz(String t) => switch (t) {
+      'Heute ins Bett' => 'Bett',
+      'Nächte' => 'Ø',
+      'kcal-Ziel' => 'Ziel',
+      _ => t,
+    };
+    if (b == Bereich.mindset) {
+      return [(k[0].titel, k[0].wert), ('Dein Warum', '›')];
+    }
+    return [for (final x in k.take(2)) (kurz(x.titel), x.wert)];
+  }
+
   /// The big view of one area: its 4 fixed tiles (vault
   /// Umsetzung/Home-Schichten.md, decided 2026-10-25).
   BereichDaten _daten(Bereich b) {
@@ -1239,8 +1255,14 @@ class _HomePageState extends State<HomePage> {
       },
       warum: widget.profile.motivation,
       warumSatz: _warumSatz,
-      neuesMuster: _neuesMuster,
-      onMusterAblehnen: _musterAblehnen,
+      muster: sichtbareMuster(_muster).firstOrNull,
+      musterNeu: _neuesMuster != null,
+      fotoFeld: FotoFeld(
+        today: today,
+        einstellungen: _fotoEinstellungen,
+        fotos: _wochenFotos,
+        onOpen: _oeffneZukunft,
+      ),
       onOpenMuster: _oeffneMuster,
       bereiche: [
         for (final b in Bereich.values)
@@ -1253,6 +1275,8 @@ class _HomePageState extends State<HomePage> {
               wert: w,
               diff: d,
               grund: _heute?.gruende[b.name],
+              woche: werteVerlauf(_checkIns, b, today, 7),
+              infos: _infos(b),
             );
           }(),
       ],

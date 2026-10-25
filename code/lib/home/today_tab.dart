@@ -60,8 +60,9 @@ class TodayTab extends StatelessWidget {
     required this.onStichpunkte,
     this.warum = '',
     this.warumSatz,
-    this.neuesMuster,
-    required this.onMusterAblehnen,
+    this.muster,
+    this.musterNeu = false,
+    required this.fotoFeld,
     required this.onOpenMuster,
     required this.bereiche,
     required this.onOpenBereich,
@@ -98,10 +99,14 @@ class TodayTab extends StatelessWidget {
   final String warum;
   final String? warumSatz;
 
-  /// A pattern found in the last two days, shown on its day.
-  final Muster? neuesMuster;
-  final void Function(Muster m) onMusterAblehnen;
+  /// The newest pattern as a small field ([musterNeu]: found in the last
+  /// two days); tapping opens all patterns.
+  final Muster? muster;
+  final bool musterNeu;
   final VoidCallback onOpenMuster;
+
+  /// The small progress photo field next to the days in a row.
+  final Widget fotoFeld;
 
   /// The four areas on the roots and what happens on a tap.
   final List<WurzelBereich> bereiche;
@@ -130,7 +135,7 @@ class TodayTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = _todayCheckIn;
     final streak = checkInStreak(checkIns, today);
-    final m = neuesMuster;
+    final m = muster;
     return NightScope(
       child: ListView(
         controller: scroll,
@@ -187,19 +192,26 @@ class TodayTab extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
-                _TageFeld(
-                  streak: streak,
-                  woche: lastSevenDays(checkIns, today),
-                  jubelTick: jubelTick,
+                IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: _TageFeld(
+                          streak: streak,
+                          woche: lastSevenDays(checkIns, today),
+                          jubelTick: jubelTick,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(flex: 2, child: fotoFeld),
+                    ],
+                  ),
                 ),
                 if (m != null) ...[
-                  const SizedBox(height: 14),
-                  const GroupLabel('Neues Muster'),
-                  MusterKarte(
-                    muster: m,
-                    onAblehnen: () => onMusterAblehnen(m),
-                    onAlle: onOpenMuster,
-                  ),
+                  const SizedBox(height: 10),
+                  MusterFeld(muster: m, neu: musterNeu, onTap: onOpenMuster),
                 ],
                 const SizedBox(height: 18),
               ],
@@ -297,7 +309,7 @@ class _TageFeld extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [Color(0xFF261C12), Color(0xFF140F0A)],
@@ -308,48 +320,57 @@ class _TageFeld extends StatelessWidget {
           children: [
             ShaderMask(
               shaderCallback: (r) => CoachStyle.goldGradient.createShader(r),
-              child: const Icon(Icons.spa, size: 28, color: Colors.white),
+              child: const Icon(Icons.spa, size: 24, color: Colors.white),
             ),
-            const SizedBox(width: 12),
-            // Bumps on every cheer.
-            TweenAnimationBuilder<double>(
-              key: ValueKey(jubelTick),
-              tween: Tween(begin: jubelTick > 0 ? 1.3 : 1, end: 1),
-              duration: const Duration(milliseconds: 700),
-              curve: Curves.elasticOut,
-              builder: (context, v, child) =>
-                  Transform.scale(scale: v, child: child),
-              child: ShaderMask(
-                shaderCallback: (r) => CoachStyle.goldGradient.createShader(r),
-                child: Text(
-                  '$streak',
-                  key: const ValueKey('spross-tage'),
-                  style: const TextStyle(
-                    fontFamily: 'Sora',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 26,
-                    height: 1,
-                    color: Colors.white,
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Bumps on every cheer.
+                  TweenAnimationBuilder<double>(
+                    key: ValueKey(jubelTick),
+                    tween: Tween(begin: jubelTick > 0 ? 1.3 : 1, end: 1),
+                    duration: const Duration(milliseconds: 700),
+                    curve: Curves.elasticOut,
+                    builder: (context, v, child) =>
+                        Transform.scale(scale: v, child: child),
+                    child: ShaderMask(
+                      shaderCallback: (r) =>
+                          CoachStyle.goldGradient.createShader(r),
+                      child: Text(
+                        '$streak',
+                        key: const ValueKey('spross-tage'),
+                        style: const TextStyle(
+                          fontFamily: 'Sora',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 26,
+                          height: 1,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 3),
+                  Text(
+                    streak == 1 ? 'TAG AM STÜCK' : 'TAGE AM STÜCK',
+                    maxLines: 2,
+                    style: CoachStyle.goldLabel.copyWith(
+                      fontFamily: 'Sora',
+                      fontSize: 9,
+                      letterSpacing: 1.4,
+                      color: CoachStyle.gold,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: 10),
-            Text(
-              streak == 1 ? 'TAG AM STÜCK' : 'TAGE AM STÜCK',
-              style: CoachStyle.goldLabel.copyWith(
-                fontFamily: 'Sora',
-                fontSize: 9,
-                letterSpacing: 1.4,
-                color: CoachStyle.gold,
-              ),
-            ),
-            const Spacer(),
             for (final x in woche)
               Container(
-                width: 9,
-                height: 9,
-                margin: const EdgeInsets.only(left: 4),
+                width: 7,
+                height: 7,
+                margin: const EdgeInsets.only(left: 3),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: x ? CoachStyle.goldGradient : null,

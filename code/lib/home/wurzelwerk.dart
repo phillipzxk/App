@@ -21,6 +21,8 @@ class WurzelBereich {
     this.wert,
     this.diff,
     this.grund,
+    this.woche = const [],
+    this.infos = const [],
   });
 
   final Bereich bereich;
@@ -35,6 +37,12 @@ class WurzelBereich {
 
   /// The coach's sentence why the area stands where it does today.
   final String? grund;
+
+  /// Scores of the last 7 days, oldest first (null = no rating).
+  final List<int?> woche;
+
+  /// Two short facts from the area's tiles, e.g. ("Heute", "Push 17:30").
+  final List<(String, String)> infos;
 }
 
 /// Where the four areas hang: x as share of the width, y as share of the
@@ -47,6 +55,9 @@ const _lagenGross = [
   Offset(.70, .66),
   Offset(.30, 1.0),
 ];
+
+/// Circle radius of the big version.
+const _rGross = 46.0;
 
 const _lagen = [
   Offset(.74, .10),
@@ -91,10 +102,14 @@ class _Geo {
 _Geo _baue(Size size, double boden, int wurzeln, {bool gross = false}) {
   final r = _Rnd(11);
   final w = size.width, h = size.height, cx = w * .5;
-  final unten = h - boden - (gross ? 290 : 96);
+  final unten = h - boden - (gross ? 330 : 96);
   final ziele = [
     for (final l in gross ? _lagenGross : _lagen)
-      Offset(l.dx * w, boden + (gross ? 70 : 34) + l.dy * unten),
+      Offset(
+        // Big version: the circle sits at the edge, its info card beside it.
+        gross ? (l.dx < .5 ? 24 + _rGross : w - 24 - _rGross) : l.dx * w,
+        boden + (gross ? 130 : 34) + l.dy * unten,
+      ),
   ];
 
   List<_P> pfad(Offset a, Offset b, double w0, double w1, double wob) {
@@ -162,7 +177,7 @@ _Geo _baue(Size size, double boden, int wurzeln, {bool gross = false}) {
           cx + (gross ? (ziele.indexOf(z) - 1.5) * 7 : 0) + (r.next() - .5) * 6,
           boden,
         ),
-        z.translate(0, gross ? -48 : -26),
+        z.translate(0, gross ? -(_rGross - 2) : -26),
         gross ? 17 : 10,
         gross ? 5 : 2.6,
         10 + r.next() * 8,
@@ -578,7 +593,7 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
   final _box = GlobalKey();
 
   double get _boden => widget.gross ? 40.0 : 112.0;
-  double get _r => widget.gross ? 52.0 : 33.0;
+  double get _r => widget.gross ? _rGross : 33.0;
 
   @override
   void initState() {
@@ -643,7 +658,7 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, c) {
-        final size = Size(c.maxWidth, widget.gross ? 1060 : widget.hoehe);
+        final size = Size(c.maxWidth, widget.gross ? 1210 : widget.hoehe);
         if (_geo == null || _geo!.size != size) {
           _geo = _baue(size, _boden, widget.wurzeln, gross: widget.gross);
         }
@@ -721,7 +736,9 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
                 ),
               ],
               for (var i = 0; i < widget.bereiche.length && i < 4; i++)
-                ..._knoten(i, geo.ziele[i], i == schwach),
+                ...(widget.gross
+                    ? _knotenGross(i, geo.ziele[i], i == schwach)
+                    : _knoten(i, geo.ziele[i], i == schwach)),
             ],
           ),
         );
@@ -739,6 +756,131 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
       if (best < 0 || w < widget.bereiche[best].wert!) best = i;
     }
     return best;
+  }
+
+  /// Big version (variant B, chosen by Phillip 2026-10-25): a small circle
+  /// at the edge with the area's symbol, score and arrow, and beside it an
+  /// info card like the old big field: name, 7 bars, change to yesterday,
+  /// two facts and the coach's sentence. The weakest area's card glows.
+  List<Widget> _knotenGross(int i, Offset z, bool sagt) {
+    final b = widget.bereiche[i];
+    final dim = _wahl >= 0 && _wahl != i;
+    final links = z.dx < _geo!.size.width / 2;
+    final w = _geo!.size.width;
+    final (pfeil, farbe) = switch (b.diff) {
+      null => ('', CoachStyle.inkSoft),
+      0 => ('→', CoachStyle.beigeLabel),
+      > 0 => ('↑', const Color(0xFF9BCB8A)),
+      _ => ('↓', const Color(0xFFE39A7E)),
+    };
+    final trend = switch (b.diff) {
+      null => '',
+      0 => 'wie gestern',
+      > 0 => '+${b.diff} zu gestern',
+      _ => '−${-b.diff!} zu gestern',
+    };
+    Widget einblenden(Widget child, {double klein = .3}) =>
+        TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: Duration(milliseconds: 600 + i * 180),
+          curve: Curves.easeOutBack,
+          builder: (context, v, child) => Transform.scale(
+            scale:
+                (klein + (1 - klein) * v) *
+                (_wahl == i ? 1.06 : (dim ? .95 : 1)),
+            child: Opacity(opacity: v.clamp(0.0, 1.0), child: child),
+          ),
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 300),
+            opacity: dim ? .45 : 1,
+            child: child,
+          ),
+        );
+    final kartenLinks = links ? z.dx + _r + 12 : 16.0;
+    final kartenBreite = links ? w - 16 - kartenLinks : z.dx - _r - 12 - 16;
+    return [
+      Positioned(
+        left: z.dx - _r,
+        top: z.dy - _r,
+        width: _r * 2,
+        height: _r * 2,
+        child: einblenden(
+          Semantics(
+            button: true,
+            label: b.name,
+            child: GestureDetector(
+              key: ValueKey('wurzel-${b.bereich.name}'),
+              onTap: () => _tippen(i),
+              child: CustomPaint(
+                painter: _Ring(b.wert, leuchtet: sagt),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ShaderMask(
+                      shaderCallback: (r) =>
+                          CoachStyle.goldGradient.createShader(r),
+                      child: Icon(b.icon, size: 22, color: Colors.white),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        ShaderMask(
+                          shaderCallback: (r) =>
+                              CoachStyle.goldGradient.createShader(r),
+                          child: Text(
+                            b.wert?.toString() ?? '–',
+                            key: ValueKey('knoten-wert-${b.bereich.name}'),
+                            style: const TextStyle(
+                              fontFamily: 'Sora',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 26,
+                              height: 1.05,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        if (pfeil.isNotEmpty)
+                          Text(
+                            ' $pfeil',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: farbe,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      Positioned(
+        left: kartenLinks,
+        width: kartenBreite,
+        top: z.dy - 140,
+        height: 280,
+        child: Align(
+          alignment: Alignment.center,
+          child: einblenden(
+            GestureDetector(
+              onTap: () => _tippen(i),
+              child: _InfoKarte(
+                key: ValueKey('info-${b.bereich.name}'),
+                b: b,
+                trend: trend,
+                sagt: sagt,
+              ),
+            ),
+            klein: .8,
+          ),
+        ),
+      ),
+    ];
   }
 
   List<Widget> _knoten(int i, Offset z, bool sagt) {
@@ -892,8 +1034,11 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
 
 /// Dark round node with the score as a gold ring.
 class _Ring extends CustomPainter {
-  _Ring(this.wert);
+  _Ring(this.wert, {this.leuchtet = false});
   final int? wert;
+
+  /// Weakest area: a bright gold edge.
+  final bool leuchtet;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -921,7 +1066,7 @@ class _Ring extends CustomPainter {
       r,
       Paint()
         ..style = PaintingStyle.stroke
-        ..color = const Color(0xFF2E251B)
+        ..color = leuchtet ? const Color(0xFFE0BF7E) : const Color(0xFF2E251B)
         ..strokeWidth = 3,
     );
     final w = wert;
@@ -941,7 +1086,152 @@ class _Ring extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_Ring old) => old.wert != wert;
+  bool shouldRepaint(_Ring old) => old.wert != wert || old.leuchtet != leuchtet;
+}
+
+/// The info card beside a big area circle (see [_WurzelwerkState._knotenGross]).
+class _InfoKarte extends StatelessWidget {
+  const _InfoKarte({
+    super.key,
+    required this.b,
+    required this.trend,
+    required this.sagt,
+  });
+
+  final WurzelBereich b;
+  final String trend;
+  final bool sagt;
+
+  @override
+  Widget build(BuildContext context) {
+    final woche = b.woche;
+    final satz = [if (sagt) 'Hier hängt es gerade.', ?b.grund].join(' ');
+    return Container(
+      padding: const EdgeInsets.all(1),
+      decoration: BoxDecoration(
+        gradient: sagt ? CoachStyle.goldGradient : CoachStyle.goldEdgeGradient,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          if (sagt)
+            const BoxShadow(color: Color(0x55E0BF7E), blurRadius: 18)
+          else
+            const BoxShadow(
+              color: Color(0x99000000),
+              blurRadius: 18,
+              offset: Offset(0, 8),
+            ),
+        ],
+      ),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(11, 10, 11, 10),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xEE261C12), Color(0xEE140F0A)],
+          ),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              b.name,
+              style: CoachStyle.title.copyWith(
+                fontSize: 14.5,
+                height: 1.2,
+                color: CoachStyle.ink,
+              ),
+            ),
+            if (woche.isNotEmpty) ...[
+              const SizedBox(height: 5),
+              SizedBox(
+                height: 22,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    for (var j = 0; j < woche.length; j++)
+                      Container(
+                        width: 7,
+                        height: 3 + 19 * ((woche[j] ?? 0) / 10),
+                        margin: const EdgeInsets.only(right: 3),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(3),
+                          gradient: j == woche.length - 1 && woche[j] != null
+                              ? CoachStyle.goldGradient
+                              : null,
+                          color: j == woche.length - 1 && woche[j] != null
+                              ? null
+                              : const Color(0xFF5E4A33),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+            if (trend.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 3),
+                child: Text(
+                  trend,
+                  style: CoachStyle.body.copyWith(
+                    fontSize: 11,
+                    color: CoachStyle.beigeLabel,
+                  ),
+                ),
+              ),
+            for (final (titel, wert) in b.infos)
+              Padding(
+                padding: const EdgeInsets.only(top: 3),
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(text: '$titel '),
+                      TextSpan(
+                        text: wert,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: CoachStyle.ink,
+                        ),
+                      ),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: CoachStyle.body.copyWith(
+                    fontSize: 12,
+                    color: CoachStyle.beigeLabel,
+                  ),
+                ),
+              ),
+            if (satz.isNotEmpty) ...[
+              Container(
+                margin: const EdgeInsets.only(top: 7),
+                height: 1,
+                color: const Color(0xFF4A3B2A),
+              ),
+              Padding(
+                key: sagt ? ValueKey('knoten-sagt-${b.bereich.name}') : null,
+                padding: const EdgeInsets.only(top: 7),
+                child: Text(
+                  satz,
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
+                  style: CoachStyle.body.copyWith(
+                    fontSize: 11.5,
+                    height: 1.35,
+                    fontWeight: sagt ? FontWeight.w600 : FontWeight.w400,
+                    color: const Color(0xFFD9CCB1),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// Opens [builder]'s page growing as a circle out of [mitte] (a point on

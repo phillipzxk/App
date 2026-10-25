@@ -257,3 +257,95 @@ class MusterSeite extends StatelessWidget {
     );
   }
 }
+
+/// Small field for a pattern on "Heute" (Phillip 2026-10-25: much smaller
+/// than the old card, only there to find it): symbol, label and the
+/// pattern in one line. Tapping opens all patterns.
+class MusterFeld extends StatelessWidget {
+  const MusterFeld({
+    super.key,
+    required this.muster,
+    required this.neu,
+    required this.onTap,
+  });
+
+  final Muster muster;
+
+  /// Found in the last two days: "NEUES MUSTER", else "DEINE MUSTER".
+  final bool neu;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const ValueKey('muster-feld'),
+      padding: const EdgeInsets.all(1.2),
+      decoration: BoxDecoration(
+        gradient: CoachStyle.goldEdgeGradient,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF261C12), Color(0xFF140F0A)],
+            ),
+            borderRadius: BorderRadius.circular(17),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(17),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 10, 8),
+              child: Row(
+                children: [
+                  ShaderMask(
+                    shaderCallback: (r) =>
+                        CoachStyle.goldGradient.createShader(r),
+                    child: const Icon(
+                      Icons.insights,
+                      size: 24,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          neu ? 'NEUES MUSTER' : 'DEINE MUSTER',
+                          style: CoachStyle.goldLabel.copyWith(
+                            fontFamily: 'Sora',
+                            fontSize: 9,
+                            letterSpacing: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          muster.text,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: CoachStyle.body.copyWith(
+                            fontSize: 12.5,
+                            color: CoachStyle.ink,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  const Text(
+                    '›',
+                    style: TextStyle(fontSize: 18, color: CoachStyle.goldLight),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
