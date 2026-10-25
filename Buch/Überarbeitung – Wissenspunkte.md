@@ -21,3 +21,9 @@ Passende Studien und Begriffe pro Kapitel, nur Vorschläge, noch nicht eingebaut
 Top 5: Wilson 2014 (Kap. 7), Gollwitzer 2009 „Ziele geheim halten“ (eher Kap. 8), hedonische Anpassung (Kap. 4), starre vs. flexible Essenskontrolle (Kap. 6), Lally 2010 – 66 Tage bis zur Gewohnheit (Kap. 10).
 
 Weitere Inspiration (weitere Studien und Erinnerungsfragen zu deinem Weg): [[Inspiration-Studien-und-Erinnerungen.docx]].
+
+## Eigene Erinnerungen (für Kapitel 2 & 3 o. Ä.)
+
+Phillips Antworten auf die Erinnerungsfragen, wörtlich:
+
+- Gaming und Corona – „Gab es einen Moment, in dem du nach Stunden vom Bildschirm aufgeschaut hast und dich leer gefühlt hast?“ → „spazieren nach zocken angefühlt wie online“ (25.10.2026)
