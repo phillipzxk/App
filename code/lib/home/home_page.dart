@@ -88,6 +88,9 @@ class _HomePageState extends State<HomePage> {
   Schlafzeiten _schlafzeiten = const Schlafzeiten();
   String _coachAnsicht = 'text';
   List<Durchgezogen> _durchgezogen = const [];
+
+  /// The coach's "Dein Warum" sentence for today, null on a normal day.
+  String? _warumSatz;
   String? _jubel;
   int _jubelTick = 0;
   final _heuteScroll = ScrollController();
@@ -133,6 +136,7 @@ class _HomePageState extends State<HomePage> {
     final schlafzeiten = await widget.feed.loadSchlafzeiten();
     final coachAnsicht = await widget.feed.loadCoachAnsicht();
     final durchgezogen = await widget.feed.loadDurchgezogen();
+    final warumHeute = await widget.feed.loadWarumHeute();
     if (!mounted) return;
     setState(() {
       _loaded = true;
@@ -156,10 +160,14 @@ class _HomePageState extends State<HomePage> {
       _schlafzeiten = schlafzeiten;
       _coachAnsicht = coachAnsicht;
       _durchgezogen = durchgezogen;
+      _warumSatz = warumHeute?.tag == dayKey(widget.clock())
+          ? warumHeute!.satz
+          : null;
     });
     _stand.value++;
     _pruefeMuster(checkIns, muster);
     _pruefeDurchgezogen(checkIns, durchgezogen);
+    _pruefeWarum(checkIns, warumHeute?.tag);
     if (!_fokusVersucht) _holeFokusVorschlaege();
   }
 
@@ -462,6 +470,30 @@ class _HomePageState extends State<HomePage> {
     await _reload();
   }
 
+  bool _warumPrueft = false;
+
+  /// Once per day after the check-in the coach decides whether the user is
+  /// in a weak phase; then "Dein Warum" shows on Heute (vault
+  /// Umsetzung/Dein Warum.md).
+  Future<void> _pruefeWarum(List<CheckIn> checkIns, String? geprueft) async {
+    final today = widget.clock();
+    final key = dayKey(today);
+    if (_warumPrueft || geprueft == key) return;
+    if (widget.profile.motivation.trim().isEmpty) return;
+    final heute = checkIns.where((c) => dayKey(c.datum) == key).toList();
+    if (heute.isEmpty) return;
+    _warumPrueft = true;
+    final satz = await widget.coach.warumSatz(
+      widget.profile,
+      heute.last,
+      checkIns.length > 6 ? checkIns.sublist(checkIns.length - 6) : checkIns,
+    );
+    _warumPrueft = false;
+    await widget.feed.saveWarumHeute(today, satz);
+    if (!mounted) return;
+    setState(() => _warumSatz = satz);
+  }
+
   bool _durchPrueft = false;
 
   /// Once a day after today's check-in the coach may add one entry to
@@ -688,6 +720,22 @@ class _HomePageState extends State<HomePage> {
           return p.isNotEmpty && !ruhe.hasMatch(p) ? false : null;
         }(),
     ];
+  }
+
+  /// Two short facts for the info card next to an area on "Heute", taken
+  /// from the area's first two tiles (draft B, Phillip 2026-10-25).
+  List<(String, String)> _infos(Bereich b) {
+    final k = _daten(b).kacheln;
+    String kurz(String t) => switch (t) {
+      'Heute ins Bett' => 'Bett',
+      'Nächte' => 'Ø',
+      'kcal-Ziel' => 'Ziel',
+      _ => t,
+    };
+    if (b == Bereich.mindset) {
+      return [(k[0].titel, k[0].wert), ('Dein Warum', '›')];
+    }
+    return [for (final x in k.take(2)) (kurz(x.titel), x.wert)];
   }
 
   /// The big view of one area: its 4 fixed tiles (vault
@@ -1205,8 +1253,16 @@ class _HomePageState extends State<HomePage> {
         await widget.store.saveCheckIn(c.withStichpunkte(p));
         await _reload();
       },
-      neuesMuster: _neuesMuster,
-      onMusterAblehnen: _musterAblehnen,
+      warum: widget.profile.motivation,
+      warumSatz: _warumSatz,
+      muster: sichtbareMuster(_muster).firstOrNull,
+      musterNeu: _neuesMuster != null,
+      fotoFeld: FotoFeld(
+        today: today,
+        einstellungen: _fotoEinstellungen,
+        fotos: _wochenFotos,
+        onOpen: _oeffneZukunft,
+      ),
       onOpenMuster: _oeffneMuster,
       bereiche: [
         for (final b in Bereich.values)
@@ -1219,6 +1275,8 @@ class _HomePageState extends State<HomePage> {
               wert: w,
               diff: d,
               grund: _heute?.gruende[b.name],
+              woche: werteVerlauf(_checkIns, b, today, 7),
+              infos: _infos(b),
             );
           }(),
       ],

@@ -102,6 +102,11 @@ abstract class FeedStore {
   /// Day the coach last looked for an entry (once per day at most).
   Future<String?> loadDurchGeprueft();
   Future<void> saveDurchGeprueft(DateTime day);
+
+  /// "Dein Warum" on Heute: the day the coach last checked for a weak
+  /// phase and its sentence (null on a normal day).
+  Future<({String tag, String? satz})?> loadWarumHeute();
+  Future<void> saveWarumHeute(DateTime day, String? satz);
 }
 
 class LocalFeedStore implements FeedStore {
@@ -125,6 +130,7 @@ class LocalFeedStore implements FeedStore {
   static const _coachAnsichtKey = 'coach_ansicht';
   static const _durchKey = 'durchgezogen';
   static const _durchGeprueftKey = 'durchgezogen_geprueft';
+  static const _warumKey = 'warum_heute';
 
   Future<Object?> _read(String key) async {
     final raw = (await SharedPreferences.getInstance()).getString(key);
@@ -380,4 +386,17 @@ class LocalFeedStore implements FeedStore {
   @override
   Future<void> saveDurchGeprueft(DateTime day) =>
       _write(_durchGeprueftKey, dayKey(day));
+
+  @override
+  Future<({String tag, String? satz})?> loadWarumHeute() async {
+    final json = await _read(_warumKey) as Map?;
+    final tag = json?['tag'];
+    if (tag is! String) return null;
+    final satz = json!['satz'];
+    return (tag: tag, satz: satz is String ? satz : null);
+  }
+
+  @override
+  Future<void> saveWarumHeute(DateTime day, String? satz) =>
+      _write(_warumKey, {'tag': dayKey(day), 'satz': satz});
 }

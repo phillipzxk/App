@@ -229,3 +229,139 @@ class FotoBild extends StatelessWidget {
     );
   }
 }
+
+/// Small "Foto" field on "Heute" next to the days in a row (Phillip
+/// 2026-10-25): the latest photo as a thumbnail, the week and the next
+/// photo day. On the photo day (or catch-up day) it turns gold.
+class FotoFeld extends StatelessWidget {
+  const FotoFeld({
+    super.key,
+    required this.today,
+    required this.einstellungen,
+    required this.fotos,
+    required this.onOpen,
+  });
+
+  final DateTime today;
+  final FotoEinstellungen? einstellungen;
+  final List<WochenFoto> fotos;
+  final VoidCallback onOpen;
+
+  static const _kurz = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+
+  @override
+  Widget build(BuildContext context) {
+    final e = einstellungen;
+    final lage = e == null ? null : fotoLage(today, e, fotos);
+    final jetzt =
+        lage != null &&
+        (lage.status == FotoStatus.heute ||
+            lage.status == FotoStatus.nachholen);
+    final (titel, unter) = switch (lage?.status) {
+      null => ('Festlegen ›', 'Fototag'),
+      FotoStatus.heute => ('Heute dran ›', 'Woche ${lage!.woche}'),
+      FotoStatus.nachholen => ('Nachholen ›', 'Woche ${lage!.woche}'),
+      FotoStatus.spaeter => (
+        'Woche ${lage!.woche}',
+        'nächstes ${_kurz[lage.tag.weekday - 1]}',
+      ),
+    };
+    final letztes = fotos.isEmpty ? null : fotos.last;
+    final pose = letztes == null || letztes.bilder.isEmpty
+        ? ''
+        : letztes.bilder.keys.first;
+    return Container(
+      key: const ValueKey('foto-feld'),
+      padding: const EdgeInsets.all(1.2),
+      decoration: BoxDecoration(
+        gradient: jetzt ? CoachStyle.goldGradient : CoachStyle.goldEdgeGradient,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: jetzt
+            ? const [BoxShadow(color: Color(0x55E0BF7E), blurRadius: 18)]
+            : null,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: jetzt
+                  ? const [Color(0xFF3A2A16), Color(0xFF1A120B)]
+                  : const [Color(0xFF261C12), Color(0xFF140F0A)],
+            ),
+            borderRadius: BorderRadius.circular(19),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(19),
+            onTap: onOpen,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(9, 9, 10, 9),
+              child: Row(
+                children: [
+                  Container(
+                    width: 34,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(9),
+                      border: Border.all(color: CoachStyle.goldEdge),
+                    ),
+                    child: letztes == null || pose.isEmpty
+                        ? const Icon(
+                            Icons.person,
+                            size: 26,
+                            color: Color(0xFF8A7158),
+                          )
+                        : FotoBild(
+                            foto: letztes,
+                            pose: pose,
+                            width: 34,
+                            height: 42,
+                          ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'FOTO',
+                          style: CoachStyle.goldLabel.copyWith(
+                            fontFamily: 'Sora',
+                            fontSize: 9,
+                            letterSpacing: 1.4,
+                          ),
+                        ),
+                        Text(
+                          titel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: CoachStyle.title.copyWith(
+                            fontSize: 12.5,
+                            height: 1.3,
+                            color: CoachStyle.ink,
+                          ),
+                        ),
+                        Text(
+                          unter,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: CoachStyle.body.copyWith(
+                            fontSize: 11,
+                            color: CoachStyle.beigeLabel,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

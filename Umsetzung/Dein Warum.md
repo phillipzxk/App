@@ -1,7 +1,7 @@
 ---
 title: Dein Warum
 tags: [umsetzung, feed, mindset, ki]
-status: entschieden
+status: gebaut
 ---
 
 # Dein Warum
@@ -17,4 +17,18 @@ Die Motivation aus dem Onboarding (Frage 2) kommt in schwachen Phasen zurück. H
 | Was steht drauf? | Dein Warum in deinen eigenen Worten **plus ein Coach-Satz**, der es mit dem schwachen Moment heute verbindet. |
 | Mindset-Seite | Die Karte „Dein Warum“ **bleibt dort immer** stehen. |
 
-Entwurf wartet auf Phillip ("Warte mit Entwurf"); kommt in den neuen Aufbau [[Home-Schichten]].
+## Entwurf (25.10.2026)
+
+Phillip hat den Entwurf am 25.10.2026 mit „Ja“ freigegeben: https://claude.ai/artifact/7cdvnU9jaWnZ4W5x43GNf7
+
+- Goldumrandete dunkle Karte direkt **unter der Coach-Karte** auf Heute, gleitet sanft herein.
+- Oben „DEIN WARUM“ mit Herz, darunter die eigenen Worte aus Frage 2 als Zitat.
+- Unter einer feinen Goldlinie ein Satz vom Coach mit kleinem Nasenaffen-Bild.
+- An normalen Tagen fehlt die Karte. Auf der Mindset-Seite steht „Dein Warum“ immer (unter „Deine Basis“).
+
+## So läuft es im Code
+
+- Einmal am Tag nach dem Check-in fragt die App den Coach (Worker-Route `/warum`, mit dem Check-in von heute und den letzten Tagen).
+- Der Coach antwortet mit einem Satz (höchstens 22 Wörter) oder mit nichts, wenn es ein normaler Tag ist. Ein einzelner mittlerer Tag zählt nicht.
+- Das Ergebnis wird für den Tag gespeichert (`warum_heute`), damit der Coach nicht mehrmals gefragt wird.
+- Ohne Antwort auf Frage 2 gibt es keine Karte.

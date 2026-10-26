@@ -84,3 +84,17 @@ Phillip fand den Baum oben zu leer und wollte oben wieder Felder „wie früher�
 - **Unten:** großes Wurzelwerk, dicke Wurzeln mit Saftlicht, kleiner Goldtrieb an der Bodenlinie statt Baum. Jeder Bereich hat einen großen Ring mit Wert, Name, Wert/10 und darunter den Satz vom Coach („Warum gerade hier“). Der schwächste bekommt eine goldene Blase „Hier hängt es gerade.“ plus Satz.
 - Abgelehnt: Heute als großer Baum mit Kronenfeldern, Himmel + Goldblätter.
 - Gebaut 2026-10-25 (`today_tab.dart`, `wurzelwerk.dart` mit `gross`), PR #59.
+
+## Feinschliff: Foto, kleines Muster, Infokarten an den Bereichen (2026-10-25)
+
+Phillip wollte das Fortschrittsfoto wieder auf Heute, das Muster viel kleiner (nur noch auffindbar, aber bildlich wie die anderen Felder) und an den vier Bereichen die groben Infos ohne Tippen, ähnlich wie früher im großen Feld. Oben-Entwurf: https://claude.ai/artifact/BC4WjYCjZUDzHdyXBBnfnm („oben perfekt“), vier Vorschläge für unten: https://claude.ai/artifact/TMBX7Rcpdix86gvsScfz3Q. Gewählt: **B · Infokarte am Kreis** („B exakt so ist sehr stark“), dazu die Symbole der Bereiche in die Kreise.
+
+- **Fortschrittsfoto:** kleines Feld rechts neben Tage am Stück, mit dem letzten Foto als Vorschaubild, der Woche und dem nächsten Fototag. Am Fototag (oder Nachholtag) wird es golden: „Heute dran ›“ bzw. „Nachholen ›“. Tippen öffnet die Foto-Seite.
+- **Muster:** schmales Feld im gleichen Stil wie die anderen, mit Symbol, „NEUES MUSTER“ (bis 2 Tage alt) oder „DEINE MUSTER“ und dem neuesten Muster in einer Zeile. Tippen öffnet alle Muster. „Stimmt nicht“ gibt es weiter auf der Mindset-Seite.
+- **Bereiche unten:** kleiner Kreis am Rand mit Symbol, Wert und Pfeil zu gestern. Daneben eine Infokarte: Name, 7 Balken der letzten Tage, Vergleich zu gestern, zwei Infos aus den Kacheln des Bereichs und der Coach-Satz. Die Kreise wechseln links und rechts.
+  - Training: Heute (Trainingstag) und Woche (gemacht von geplant)
+  - Ernährung: Supplements und kcal-Ziel
+  - Schlaf & Energie: Bettzeit und Schnitt der Nächte
+  - Mindset: Durchgezogen und Dein Warum
+- Der schwächste Bereich bekommt einen goldenen Rand und „Hier hängt es gerade.“ vor dem Coach-Satz.
+- Gebaut 2026-10-25 (`today_tab.dart`, `wurzelwerk.dart` `_knotenGross` und `_InfoKarte`, `muster_widgets.dart` `MusterFeld`, `future_me_card.dart` `FotoFeld`).
