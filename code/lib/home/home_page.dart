@@ -18,6 +18,9 @@ import '../planner/planner_data.dart';
 import '../sleep/schlafzeiten.dart';
 import '../sleep/sleep.dart';
 import '../supplements/supplement_data.dart';
+import '../training/training_coach.dart';
+import '../training/training_data.dart';
+import '../training/training_logik.dart';
 import '../ui/coach_style.dart';
 import '../weight/weight.dart';
 import 'durchgezogen_widgets.dart';
@@ -70,6 +73,14 @@ class _HomePageState extends State<HomePage> {
   List<WeightEntry> _weights = const [];
   List<SleepEntry> _sleep = const [];
   TrainingPlan _plan = TrainingPlan.empty();
+  TrainingDaten _training = const TrainingDaten();
+
+  /// This week's plan with skipped and moved sessions.
+  TrainingPlan get _woche => wochenPlan(_plan, _training, widget.clock());
+
+  TrainingCoach get _trainingCoach => widget.coach is TrainingCoach
+      ? widget.coach as TrainingCoach
+      : const NoTrainingCoach();
   List<RoutineStep> _routine = const [];
   KcalProfil? _kcal;
   List<CoachFrage> _fragen = const [];
@@ -137,6 +148,7 @@ class _HomePageState extends State<HomePage> {
     final coachAnsicht = await widget.feed.loadCoachAnsicht();
     final durchgezogen = await widget.feed.loadDurchgezogen();
     final warumHeute = await widget.feed.loadWarumHeute();
+    final training = await widget.feed.loadTraining();
     if (!mounted) return;
     setState(() {
       _loaded = true;
@@ -144,6 +156,7 @@ class _HomePageState extends State<HomePage> {
       _weights = weights;
       _sleep = sleep;
       _plan = plan;
+      _training = training;
       _routine = routine;
       _kcal = kcal;
       _fragen = fragen;
@@ -634,6 +647,8 @@ class _HomePageState extends State<HomePage> {
           for (var i = 0; i < 7; i++)
             '${days[i]}: ${_plan.tage[i].trim().isEmpty ? 'frei' : _plan.tage[i].trim()}',
           'Heute ist ${days[widget.clock().weekday - 1]}.',
+          for (final e in _training.einheiten.reversed.take(3))
+            'Eingetragen ${dayKey(e.datum)} (${e.name}): ${e.status == EinheitStatus.uebersprungen ? 'übersprungen, ${e.grund ?? ''}' : e.uebungen.map((u) => '${u.name} ${u.fertige.map((x) => satzText(u.art, x.werte)).join(', ')}${u.gefuehl == null ? '' : ' (${u.gefuehl})'}').join('; ')}',
         ].join('\n');
       case Bereich.ernaehrung:
         final ziel = _kcalZiel;
@@ -714,9 +729,12 @@ class _HomePageState extends State<HomePage> {
         () {
           final d = DateTime(mo.year, mo.month, mo.day + i);
           final c = byDay[dayKey(d)];
+          if (_training.einheitAm(d)?.status == EinheitStatus.fertig) {
+            return true;
+          }
           final a = c?.training.trim() ?? '';
           if (a.isNotEmpty && !a.startsWith('Pause')) return true;
-          final p = _plan.tage[i].trim();
+          final p = _woche.tage[i].trim();
           return p.isNotEmpty && !ruhe.hasMatch(p) ? false : null;
         }(),
     ];
@@ -753,7 +771,7 @@ class _HomePageState extends State<HomePage> {
     final List<Kachel> kacheln;
     switch (b) {
       case Bereich.training:
-        final tag = _plan.forDay(today);
+        final tag = _woche.forDay(today);
         final name = shortDay(tag);
         final uebungen = [
           for (final l in dayDetails(tag).split('\n'))
@@ -762,7 +780,7 @@ class _HomePageState extends State<HomePage> {
         final woche = _trainingsWoche();
         final gemacht = woche.where((x) => x == true).length;
         final ruhe = RegExp(r'^(ruhe|pause|frei|off\b)', caseSensitive: false);
-        final geplant = _plan.tage
+        final geplant = _woche.tage
             .where((t) => t.trim().isNotEmpty && !ruhe.hasMatch(t.trim()))
             .length;
         final antwort = _heute?.training.trim() ?? '';
@@ -937,7 +955,7 @@ class _HomePageState extends State<HomePage> {
     final start = aufstehen ?? 7 * 60;
     var ende = bz?.bett ?? 23 * 60;
     if (ende <= start) ende += 1440;
-    final training = _plan.forDay(jetzt).trim();
+    final training = _woche.forDay(jetzt).trim();
     final trZeit = trainingZeit(training);
     // Until the coach plans meals, they are spread evenly over the day:
     // from half an hour after getting up to 2.5 hours before bed.
@@ -1068,7 +1086,7 @@ class _HomePageState extends State<HomePage> {
                 DayPlanCard(
                   today: widget.clock(),
                   termine: _termine,
-                  training: _plan.forDay(widget.clock()),
+                  training: _woche.forDay(widget.clock()),
                   mahlzeiten: _mahlzeiten,
                   kcalZiel: _kcalZiel,
                   onAddTermin: (text) async {
@@ -1141,6 +1159,11 @@ class _HomePageState extends State<HomePage> {
     switch (b) {
       case Bereich.training:
         return TrainingTab(
+          profile: widget.profile,
+          feed: widget.feed,
+          coach: _trainingCoach,
+          checkIns: _checkIns,
+          onGeaendert: _reload,
           plan: _plan,
           schwerpunkt: _schwerpunkt,
           today: widget.clock(),

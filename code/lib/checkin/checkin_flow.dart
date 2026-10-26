@@ -27,7 +27,12 @@ class CheckInFlow extends StatefulWidget {
     required this.evaluator,
     required this.today,
     required this.onFinished,
+    this.vorgemerkt = const {},
   });
+
+  /// Answers already picked when the check-in opens, e.g. "Gut trainiert"
+  /// after a logged session (vault Umsetzung/Training eintragen.md).
+  final Map<String, String> vorgemerkt;
 
   final UserProfile profile;
   final DiaryStore store;
@@ -46,9 +51,11 @@ enum _Phase { questions, reading, reply }
 class _CheckInFlowState extends State<CheckInFlow> {
   _Phase _phase = _Phase.questions;
   CheckIn? _saved;
-  final _picked = <String, String>{};
+  late final _picked = <String, String>{...widget.vorgemerkt};
   final _note = TextEditingController();
-  String? _open = checkInRows.first.topic;
+  late String? _open = _picked.containsKey(checkInRows.first.topic)
+      ? _nextOpen(checkInRows.first.topic)
+      : checkInRows.first.topic;
 
   @override
   void dispose() {

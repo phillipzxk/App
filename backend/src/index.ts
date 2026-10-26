@@ -14,6 +14,12 @@ import {
   stichpunktePrompt,
   durchgezogenPrompt,
   warumPrompt,
+  tagesformPrompt,
+  vorschlagPrompt,
+  stagnationPrompt,
+  balancePrompt,
+  formPrompt,
+  verlaufPrompt,
   type LetzterFokus,
   type CheckIn,
   type Profile,
@@ -40,13 +46,26 @@ const json = (body: unknown, status = 200) =>
     headers: { "content-type": "application/json; charset=utf-8", ...CORS },
   });
 
-async function ask(env: Env, prompt: string): Promise<string> {
+async function ask(env: Env, prompt: string, bilder: string[] = []): Promise<string> {
   const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
   const response = await client.messages.create({
     model: MODEL,
     max_tokens: 4000,
     system: COACH_STYLE,
-    messages: [{ role: "user", content: prompt }],
+    messages: [
+      {
+        role: "user",
+        content: bilder.length
+          ? [
+              ...bilder.map((data) => ({
+                type: "image" as const,
+                source: { type: "base64" as const, media_type: "image/jpeg" as const, data },
+              })),
+              { type: "text" as const, text: prompt },
+            ]
+          : prompt,
+      },
+    ],
   });
   if (response.stop_reason === "refusal") return "";
   return response.content
@@ -189,6 +208,105 @@ export function parseEintrag(raw: string): string | null {
   }
 }
 
+/// The first JSON object in the model's answer, or {}.
+export function parseObjekt(raw: string): Record<string, unknown> {
+  const start = raw.indexOf("{");
+  const end = raw.lastIndexOf("}");
+  if (start < 0 || end <= start) return {};
+  try {
+    const d = JSON.parse(raw.slice(start, end + 1));
+    return d && typeof d === "object" ? (d as Record<string, unknown>) : {};
+  } catch {
+    return {};
+  }
+}
+
+const text = (v: unknown, max = 400): string | null =>
+  typeof v === "string" && v.trim() ? v.trim().slice(0, max) : null;
+const zahl = (v: unknown): number | null =>
+  typeof v === "number" && Number.isFinite(v) && v >= 0 && v < 1000 ? v : null;
+
+/// Training logging: one route, the part in "art" (vault Umsetzung/Training eintragen.md).
+export async function training(env: Env, body: Record<string, unknown>, profile: Profile): Promise<unknown> {
+  const recent = Array.isArray(body.recent) ? (body.recent as CheckIn[]) : [];
+  switch (body.art) {
+    case "tagesform": {
+      const d = parseObjekt(
+        await ask(env, tagesformPrompt(profile, (body.today ?? null) as CheckIn | null, recent, String(body.einheit ?? ""))),
+      );
+      const a = d.anpassung as Record<string, unknown> | null | undefined;
+      const anpassung =
+        a && text(a.uebung, 80) && text(a.grund, 200) && (zahl(a.saetze) !== null || zahl(a.wdh) !== null)
+          ? { uebung: text(a.uebung, 80), saetze: zahl(a.saetze), wdh: zahl(a.wdh), grund: text(a.grund, 200) }
+          : null;
+      return { satz: text(d.satz, 300), anpassung };
+    }
+    case "vorschlag": {
+      const d = parseObjekt(
+        await ask(env, vorschlagPrompt(profile, String(body.uebung ?? ""), String(body.heute ?? ""), String(body.vorschlag ?? ""))),
+      );
+      return { antwort: text(d.antwort, 300), ok: d.ok !== false, wert: zahl(d.wert), wdh: zahl(d.wdh) };
+    }
+    case "stagnation": {
+      const d = parseObjekt(
+        await ask(
+          env,
+          stagnationPrompt(
+            profile,
+            String(body.uebung ?? ""),
+            String(body.plan ?? ""),
+            String(body.verlauf ?? ""),
+            String(body.grund ?? ""),
+            String(body.tag ?? ""),
+            recent,
+          ),
+        ),
+      );
+      const a = d.aenderung as Record<string, unknown> | null | undefined;
+      return {
+        sicht: text(d.sicht, 600),
+        vorschlag: text(d.vorschlag, 300),
+        aenderung: a
+          ? { saetze: zahl(a.saetze), wdh_von: zahl(a.wdh_von), wdh_bis: zahl(a.wdh_bis), wert: zahl(a.wert), zuerst: a.zuerst === true }
+          : null,
+      };
+    }
+    case "balance":
+      return { satz: text(parseObjekt(await ask(env, balancePrompt(profile, String(body.woche ?? "")))).satz, 300) };
+    case "form": {
+      const bilder = (Array.isArray(body.bilder) ? body.bilder : [])
+        .filter((b): b is string => typeof b === "string" && b.length > 100 && b.length < 400000)
+        .slice(0, 4);
+      if (!bilder.length) return { gut: [], besser: [], vergleich: null };
+      const d = parseObjekt(
+        await ask(env, formPrompt(String(body.uebung ?? ""), String(body.satz ?? ""), text(body.frueher, 800)), bilder),
+      );
+      const liste = (v: unknown) => (Array.isArray(v) ? v : []);
+      return {
+        gut: liste(d.gut).map((g) => text(g, 200)).filter(Boolean).slice(0, 3),
+        besser: liste(d.besser)
+          .map((b) => {
+            const x = (b ?? {}) as Record<string, unknown>;
+            const bild = zahl(x.bild);
+            return { text: text(x.text, 300), bild: bild && bild >= 1 && bild <= 4 ? Math.round(bild) : null };
+          })
+          .filter((b) => b.text)
+          .slice(0, 3),
+        vergleich: text(d.vergleich, 300),
+      };
+    }
+    case "verlauf":
+      return {
+        satz: text(
+          parseObjekt(await ask(env, verlaufPrompt(profile, String(body.uebung ?? ""), String(body.verlauf ?? ""), recent))).satz,
+          300,
+        ),
+      };
+    default:
+      return null;
+  }
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
@@ -286,6 +404,15 @@ export default {
         if (!String(profile.motivation ?? "").trim()) return json({ satz: null });
         try {
           return json({ satz: parseSatz(await ask(env, warumPrompt(profile, today, recent))) });
+        } catch (e) {
+          console.error(e);
+          return json({ error: "coach unavailable" }, 502);
+        }
+      }
+      case "/training": {
+        try {
+          const res = await training(env, body, profile);
+          return res === null ? json({ error: "not found" }, 404) : json(res);
         } catch (e) {
           console.error(e);
           return json({ error: "coach unavailable" }, 502);

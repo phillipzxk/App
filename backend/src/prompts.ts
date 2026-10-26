@@ -312,3 +312,143 @@ Antworte nur mit JSON, ohne weiteren Text, entweder
 oder
 {"satz": "..."}`;
 }
+
+// Training logging (vault Umsetzung/Training eintragen.md, Phillip
+// 2026-10-26). Each part answers with JSON only.
+
+const JSON_ONLY = "Antworte nur mit JSON, ohne weiteren Text:";
+
+/// Idea 4: "Deine Tagesform" before training, at most one change.
+export function tagesformPrompt(p: Profile, today: CheckIn | null, recent: CheckIn[], einheit: string): string {
+  const earlier = recent
+    .filter((c) => !today || c.datum !== today.datum)
+    .slice(-3)
+    .map(checkInBlock)
+    .join("\n\n");
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+${earlier ? `Ihre letzten Tage:\n<nutzer>\n${earlier}\n</nutzer>\n\n` : ""}${today ? `Ihr Check-in von heute:\n<nutzer>\n${checkInBlock(today)}\n</nutzer>\n\n` : ""}Ihr Training heute, mit den Zielen aus ihrem Plan:
+<nutzer>
+${clip(einheit, 1500)}
+</nutzer>
+
+Schreib ihre Tagesform vor dem Training: genau ein bis zwei kurze Sätze (zusammen höchstens 28 Wörter), ob sie heute normal oder etwas leichter trainiert, begründet mit Schlaf und Energie. Ohne Anrede, ohne Floskeln.
+
+Nur wenn es ein klares Muster gibt (zum Beispiel zwei kurze Nächte hintereinander, oder sie ist krank oder sehr erschöpft), darfst du für genau eine Übung heute weniger Sätze oder Wiederholungen festlegen. Sonst "anpassung": null. Bei Krankheit oder Schmerzen: kein Training und "geh zum Arzt", wenn es nicht besser wird.
+
+"grund" sagt in einem Satz, was du änderst und warum, z. B. "Dips heute 2 statt 3 Sätze, damit Bank frisch bleibt."
+
+${JSON_ONLY}
+{"satz": "...", "anpassung": null}
+oder
+{"satz": "...", "anpassung": {"uebung": "Name wie im Plan", "saetze": 2, "wdh": null, "grund": "..."}}`;
+}
+
+/// Idea 6: the person suggests the next target, the coach confirms.
+export function vorschlagPrompt(p: Profile, uebung: string, heute: string, vorschlag: string): string {
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Übung: ${clip(uebung, 80)}
+Heute geschafft:
+<nutzer>
+${clip(heute, 600)}
+</nutzer>
+Ihr eigener Vorschlag fürs nächste Mal:
+<nutzer>
+${clip(vorschlag, 100)}
+</nutzer>
+
+Sie soll lernen, ihr Training selbst zu steuern. Passt ihr Vorschlag zu dem, was sie heute geschafft hat und wie es sich angefühlt hat? Wenn ja: bestätige in einem kurzen Satz und sag konkret warum ("ok": true). Wenn der Sprung zu groß oder zu klein ist: sag es ehrlich in höchstens zwei Sätzen und schlag andere Werte vor ("ok": false, mit "wert" in kg oder km und "wdh"). Ohne Anrede, ohne Floskeln.
+
+${JSON_ONLY}
+{"antwort": "...", "ok": true}
+oder
+{"antwort": "...", "ok": false, "wert": 82.5, "wdh": 8}`;
+}
+
+/// Idea 7: a stuck exercise, after the person's own guess.
+export function stagnationPrompt(
+  p: Profile,
+  uebung: string,
+  plan: string,
+  verlauf: string,
+  grund: string,
+  tag: string,
+  recent: CheckIn[],
+): string {
+  const tage = recent.slice(-14).map(checkInBlock).join("\n\n");
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Die Übung ${clip(uebung, 80)} geht seit 3 Wochen nicht voran.
+So steht sie im Plan: ${clip(plan, 200)} (${clip(tag, 80)}).
+Ihre Einträge (Datum: Sätze, Gefühl):
+<nutzer>
+${clip(verlauf, 1500)}
+</nutzer>
+${tage ? `\nIhre Check-ins der letzten Zeit:\n<nutzer>\n${tage}\n</nutzer>\n` : ""}
+Sie wurde zuerst selbst gefragt, woran es liegt. Ihre Antwort:
+<nutzer>
+${clip(grund, 100)}
+</nutzer>
+
+Geh auf ihre Antwort ein (stimmst du zu oder nicht?), dann zeig deine Sicht aus den Daten: Was hängt zusammen (Schlaf, Energie, Reihenfolge, Gefühl)? "sicht" höchstens 3 kurze Sätze. "vorschlag" ist ein Satz mit genau einer Änderung für die nächsten 2 Wochen. "aenderung" sind die neuen Werte im Plan: "saetze", "wdh_von", "wdh_bis", "wert" (kg) und "zuerst" (true, wenn die Übung an den Anfang des Tages soll). Nicht passende Felder null. Ohne Anrede, ohne Floskeln, keine Standard-Tipps.
+
+${JSON_ONLY}
+{"sicht": "...", "vorschlag": "...", "aenderung": {"saetze": 3, "wdh_von": 8, "wdh_bis": 8, "wert": 42.5, "zuerst": true}}`;
+}
+
+/// Idea 8: one sentence on the balance of strength and endurance.
+export function balancePrompt(p: Profile, woche: string): string {
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Ihre Trainingswoche:
+<nutzer>
+${clip(woche, 1200)}
+</nutzer>
+
+Sie macht Kraft und Ausdauer. Schreib genau einen Satz (höchstens 26 Wörter): Passt die Verteilung zu ihrem Schwerpunkt, und bremst sich etwas aus (zum Beispiel ein langer Lauf direkt nach dem Beintag)? Wenn ja, ein konkreter Hinweis. Ohne Anrede, ohne Floskeln.
+
+${JSON_ONLY}
+{"satz": "..."}`;
+}
+
+/// Idea 10: "Hinweise vom Coach" from stills of one set.
+export function formPrompt(uebung: string, satz: string, frueher: string | null): string {
+  return `Du siehst 4 Standbilder aus dem Video eines Satzes ${clip(uebung, 80)}${satz ? ` (${clip(satz, 40)})` : ""}, in zeitlicher Reihenfolge (Bild 1 bis 4).
+${frueher ? `\nDeine Hinweise zum letzten Video dieser Übung:\n<nutzer>\n${clip(frueher, 800)}\n</nutzer>\n` : ""}
+Gib Hinweise zur Ausführung, so wie ein Trainer, der danebensteht. Nur was du auf den Bildern wirklich sehen kannst; wenn etwas nicht zu erkennen ist, lass es weg. Keine Diagnose. Wenn du etwas siehst, das Schmerzen machen kann, sag: Wenn es weh tut, geh zum Arzt.
+
+"gut": 1 bis 2 Dinge, die gut sind (je ein kurzer Satz).
+"besser": 1 bis 2 Dinge, die sie besser machen kann, je ein kurzer Satz mit dem konkreten Tipp, und "bild" (1 bis 4), auf dem man es sieht.
+"vergleich": nur wenn es Hinweise zum letzten Video gibt, ein Satz, was sich verändert hat und worauf sie nächstes Mal nur achten soll; sonst null.
+Sind die Bilder unbrauchbar (keine Person, keine Übung zu sehen), dann "gut": [], "besser": [{"text": "Auf den Bildern ist die Übung nicht zu erkennen. Leg das Handy seitlich hin, ganzer Körper im Bild.", "bild": null}].
+
+${JSON_ONLY}
+{"gut": ["..."], "besser": [{"text": "...", "bild": 2}], "vergleich": null}`;
+}
+
+/// One sentence for an exercise's history page.
+export function verlaufPrompt(p: Profile, uebung: string, verlauf: string, recent: CheckIn[]): string {
+  const tage = recent.slice(-21).map(checkInBlock).join("\n\n");
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Ihre Einträge bei ${clip(uebung, 80)} (Datum: Sätze, Gefühl):
+<nutzer>
+${clip(verlauf, 1500)}
+</nutzer>
+${tage ? `\nIhre Check-ins:\n<nutzer>\n${tage}\n</nutzer>\n` : ""}
+Schreib genau einen Satz (höchstens 25 Wörter) zu ihrem Verlauf: wie es läuft und, wenn erkennbar, womit es zusammenhängt (Schlaf, Essen, Kopf). Konkret, ohne Anrede, ohne Floskeln.
+
+${JSON_ONLY}
+{"satz": "..."}`;
+}
