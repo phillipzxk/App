@@ -5,6 +5,7 @@ import 'durchgezogen.dart';
 import 'fokus.dart';
 import 'muster.dart';
 import '../ernaehrung/ernaehrung_data.dart';
+import '../schlaf/schlaf_data.dart';
 
 import 'dart:convert';
 
@@ -124,6 +125,8 @@ abstract class FeedStore {
   /// list and weight checks.
   Future<ErnaehrungDaten> loadErnaehrung();
   Future<void> saveErnaehrung(ErnaehrungDaten daten);
+  Future<SchlafDaten> loadSchlaf();
+  Future<void> saveSchlaf(SchlafDaten daten);
 }
 
 class LocalFeedStore implements FeedStore {
@@ -151,6 +154,7 @@ class LocalFeedStore implements FeedStore {
   static const _trainingKey = 'training_daten';
   static const _formKey = 'form_videos';
   static const _ernaehrungKey = 'ernaehrung_daten';
+  static const _schlafKey = 'schlaf_daten';
 
   Future<Object?> _read(String key) async {
     final raw = (await SharedPreferences.getInstance()).getString(key);
@@ -450,4 +454,16 @@ class LocalFeedStore implements FeedStore {
   @override
   Future<void> saveErnaehrung(ErnaehrungDaten daten) =>
       _write(_ernaehrungKey, daten.toJson());
+
+  @override
+  Future<SchlafDaten> loadSchlaf() async {
+    final json = await _read(_schlafKey);
+    return json == null
+        ? const SchlafDaten()
+        : SchlafDaten.fromJson(json as Map<String, dynamic>);
+  }
+
+  @override
+  Future<void> saveSchlaf(SchlafDaten daten) =>
+      _write(_schlafKey, daten.toJson());
 }

@@ -483,6 +483,7 @@ IconData _icon(String art) => switch (art) {
   'Training' => Icons.fitness_center,
   'Essen' => Icons.restaurant,
   'Supplement' => Icons.medication,
+  'Coach' => Icons.auto_awesome,
   _ => Icons.bedtime,
 };
 

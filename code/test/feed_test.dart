@@ -75,7 +75,7 @@ void main() {
     expect(find.text('ABENDROUTINE'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('alles-schlaf')));
     await tester.pumpAndSettle();
-    expect(find.text('Deine Abendroutine'), findsOneWidget);
+    expect(find.text('Wie hast du geschlafen?'), findsOneWidget);
 
     // Closing the big view goes back to the roots.
     await tester.pageBack();

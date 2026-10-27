@@ -26,6 +26,10 @@ import {
   kuehlschrankPrompt,
   rettungPrompt,
   gewichtPrompt,
+  morgenPrompt,
+  energiePrompt,
+  schlafMusterPrompt,
+  tagesablaufPrompt,
   type LetzterFokus,
   type CheckIn,
   type Profile,
@@ -326,6 +330,47 @@ export async function ernaehrung(env: Env, body: Record<string, unknown>, profil
   }
 }
 
+/// Schlaf & Energie: one route, the part in "art".
+export async function schlaf(env: Env, body: Record<string, unknown>, profile: Profile): Promise<unknown> {
+  const kontext = String(body.kontext ?? "");
+  switch (body.art) {
+    case "morgen":
+      return { satz: text(parseObjekt(await ask(env, morgenPrompt(profile, kontext))).satz, 400) };
+    case "energie":
+      return { satz: text(parseObjekt(await ask(env, energiePrompt(profile, kontext))).satz, 400) };
+    case "muster": {
+      const d = parseObjekt(await ask(env, schlafMusterPrompt(profile, kontext)));
+      const muster = (Array.isArray(d.muster) ? d.muster : [])
+        .map((m) => {
+          const x = (m ?? {}) as Record<string, unknown>;
+          const t = text(x.text, 200);
+          return t ? { text: t, gut: x.gut === true, beleg: kurz(x.beleg, 30) } : null;
+        })
+        .filter(Boolean)
+        .slice(0, 5);
+      const b = (d.beste_zeit ?? null) as Record<string, unknown> | null;
+      const typ = b ? kurz(b.typ, 30) : null;
+      const bt = b ? text(b.text, 300) : null;
+      return { muster, beste_zeit: typ && bt ? { typ, text: bt } : null };
+    }
+    case "tag": {
+      const d = parseObjekt(await ask(env, tagesablaufPrompt(profile, kontext)));
+      const punkte = (Array.isArray(d.punkte) ? d.punkte : [])
+        .map((p) => {
+          const x = (p ?? {}) as Record<string, unknown>;
+          const zeit = typeof x.zeit === "string" && /^\d{1,2}:\d{2}$/.test(x.zeit.trim()) ? x.zeit.trim() : null;
+          const was = kurz(x.was, 80);
+          return zeit && was ? { zeit, was, warum: text(x.warum, 200), neu: x.neu === true } : null;
+        })
+        .filter(Boolean)
+        .slice(0, 14);
+      return { satz: text(d.satz, 300), punkte };
+    }
+    default:
+      return null;
+  }
+}
+
 export async function training(env: Env, body: Record<string, unknown>, profile: Profile): Promise<unknown> {
   const recent = Array.isArray(body.recent) ? (body.recent as CheckIn[]) : [];
   switch (body.art) {
@@ -503,6 +548,15 @@ export default {
         if (!String(profile.motivation ?? "").trim()) return json({ satz: null });
         try {
           return json({ satz: parseSatz(await ask(env, warumPrompt(profile, today, recent))) });
+        } catch (e) {
+          console.error(e);
+          return json({ error: "coach unavailable" }, 502);
+        }
+      }
+      case "/schlaf": {
+        try {
+          const res = await schlaf(env, body, profile);
+          return res === null ? json({ error: "not found" }, 404) : json(res);
         } catch (e) {
           console.error(e);
           return json({ error: "coach unavailable" }, 502);
