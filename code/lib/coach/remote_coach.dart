@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import '../checkin/checkin.dart';
 import '../checkin/checkin_evaluator.dart';
 import '../data/user_profile.dart';
+import '../ernaehrung/ernaehrung_coach.dart';
+import '../ernaehrung/ernaehrung_data.dart';
 import '../feed/feed_coach.dart';
 import '../feed/feed_data.dart';
 import '../feed/durchgezogen.dart';
@@ -26,7 +28,12 @@ const coachToken = String.fromEnvironment('COACH_TOKEN');
 /// Any failure (offline, backend down) returns null, so the app shows its
 /// "kommt bald" text instead of an error.
 class RemoteCoach
-    implements OnboardingEvaluator, CheckInEvaluator, FeedCoach, TrainingCoach {
+    implements
+        OnboardingEvaluator,
+        CheckInEvaluator,
+        FeedCoach,
+        TrainingCoach,
+        ErnaehrungCoach {
   RemoteCoach({required this.baseUrl, required this.token, http.Client? client})
     : _client = client ?? http.Client();
 
@@ -420,6 +427,162 @@ class RemoteCoach
     'text': text,
     'context': context,
   });
+
+  // --- Ernährung (route /ernaehrung) ---
+
+  Future<Map?> _essen(String art, Map<String, Object> body) =>
+      _postJson('/ernaehrung', {'art': art, ...body});
+
+  static Gericht? _gericht(Object? v, String id, String quelle) {
+    if (v is! Map) return null;
+    final name = _text(v['name'], 80);
+    if (name == null) return null;
+    return Gericht(
+      id: id,
+      name: name,
+      art: _text(v['art'], 20) ?? 'Hauptmahlzeit',
+      dauer: (v['dauer'] as num?)?.toInt(),
+      gegen: _text(v['gegen'], 80),
+      warum: _text(v['warum'], 300),
+      quelle: quelle,
+      zutaten: [
+        for (final z in v['zutaten'] as List? ?? const [])
+          if (z is Map && _text(z['name'], 60) != null)
+            Zutat(
+              name: _text(z['name'], 60)!,
+              menge: (z['menge'] as num?)?.toDouble(),
+              einheit: _text(z['einheit'], 12) ?? '',
+              gruppe: Zutat.gruppen.contains(z['gruppe'])
+                  ? z['gruppe'] as String
+                  : 'Sonstiges',
+            ),
+      ],
+      schritte: [
+        for (final s in v['schritte'] as List? ?? const []) ?_text(s, 200),
+      ],
+    );
+  }
+
+  @override
+  Future<String?> zusammenhang(
+    UserProfile profile,
+    List<CheckIn> recent,
+    String heisshunger,
+    String schlaf,
+  ) async {
+    final data = await _essen('zusammenhang', {
+      'profile': profileJson(profile),
+      'recent': [for (final c in recent) c.toJson()],
+      'heisshunger': heisshunger,
+      'schlaf': schlaf,
+    });
+    return _text(data?['satz'], 300);
+  }
+
+  @override
+  Future<String?> heisshunger(
+    UserProfile profile,
+    String grund,
+    String uhrzeit,
+    String kontext,
+  ) async {
+    final data = await _essen('heisshunger', {
+      'profile': profileJson(profile),
+      'grund': grund,
+      'uhrzeit': uhrzeit,
+      'kontext': kontext,
+    });
+    return _text(data?['schritt'], 400);
+  }
+
+  @override
+  Future<TellerHinweis?> teller(
+    UserProfile profile,
+    String mahlzeit,
+    String bild,
+  ) async {
+    final data = await _essen('teller', {
+      'profile': profileJson(profile),
+      'mahlzeit': mahlzeit,
+      'bild': bild,
+    });
+    if (data == null || data['eiweiss'] is! num) return null;
+    return TellerHinweis.fromJson(Map<String, dynamic>.from(data));
+  }
+
+  @override
+  Future<({List<String> zutaten, Gericht? gericht})?> kuehlschrank(
+    UserProfile profile,
+    String kontext, {
+    String? bild,
+    List<String>? zutaten,
+  }) async {
+    final data = await _essen('kuehlschrank', {
+      'profile': profileJson(profile),
+      'kontext': kontext,
+      'bild': ?bild,
+      'zutaten': ?zutaten,
+    });
+    if (data == null) return null;
+    return (
+      zutaten: [
+        for (final z in data['zutaten'] as List? ?? const []) ?_text(z, 60),
+      ],
+      gericht: _gericht(
+        data['gericht'],
+        'k${DateTime.now().microsecondsSinceEpoch}',
+        'kuehlschrank',
+      ),
+    );
+  }
+
+  @override
+  Future<List<Gericht>?> rettung(
+    UserProfile profile,
+    String muster,
+    String vorhanden,
+    int anzahl,
+  ) async {
+    final data = await _essen('rettung', {
+      'profile': profileJson(profile),
+      'muster': muster,
+      'vorhanden': vorhanden,
+      'anzahl': anzahl,
+    });
+    final liste = data?['gerichte'];
+    if (liste is! List) return null;
+    final t = DateTime.now().microsecondsSinceEpoch;
+    final out = <Gericht>[];
+    for (var i = 0; i < liste.length; i++) {
+      final g = _gericht(liste[i], 'r$t-$i', 'coach');
+      if (g != null) out.add(g);
+    }
+    return out.isEmpty ? null : out;
+  }
+
+  @override
+  Future<({String sicht, String? vorschlag, int? kcalNeu})?> gewicht(
+    UserProfile profile,
+    String verlauf,
+    int kcal,
+    String grund,
+    String kontext,
+  ) async {
+    final data = await _essen('gewicht', {
+      'profile': profileJson(profile),
+      'verlauf': verlauf,
+      'kcal': kcal,
+      'grund': grund,
+      'kontext': kontext,
+    });
+    final sicht = _text(data?['sicht'], 600);
+    if (sicht == null) return null;
+    return (
+      sicht: sicht,
+      vorschlag: _text(data!['vorschlag'], 300),
+      kcalNeu: (data['kcal_neu'] as num?)?.toInt(),
+    );
+  }
 }
 
 Map<String, Object> profileJson(UserProfile p) => {

@@ -20,6 +20,12 @@ import {
   balancePrompt,
   formPrompt,
   verlaufPrompt,
+  zusammenhangPrompt,
+  heisshungerPrompt,
+  tellerPrompt,
+  kuehlschrankPrompt,
+  rettungPrompt,
+  gewichtPrompt,
   type LetzterFokus,
   type CheckIn,
   type Profile,
@@ -223,10 +229,103 @@ export function parseObjekt(raw: string): Record<string, unknown> {
 
 const text = (v: unknown, max = 400): string | null =>
   typeof v === "string" && v.trim() ? v.trim().slice(0, max) : null;
+/// Cut at a word, never in the middle of one.
+const kurz = (v: unknown, max: number): string | null => {
+  const t = text(v, 1000);
+  if (!t || t.length <= max) return t;
+  const cut = t.slice(0, max);
+  return cut.slice(0, cut.lastIndexOf(" ") > 0 ? cut.lastIndexOf(" ") : max).replace(/[,;:.\s]+$/, "");
+};
 const zahl = (v: unknown): number | null =>
   typeof v === "number" && Number.isFinite(v) && v >= 0 && v < 1000 ? v : null;
 
 /// Training logging: one route, the part in "art" (vault Umsetzung/Training eintragen.md).
+function gericht(v: unknown): Record<string, unknown> | null {
+  const g = (v ?? {}) as Record<string, unknown>;
+  const name = text(g.name, 80);
+  if (!name) return null;
+  const gruppen = ["Eiweiß", "Gemüse", "Obst", "Kühlregal", "Vorrat", "Sonstiges"];
+  const zutaten = (Array.isArray(g.zutaten) ? g.zutaten : [])
+    .map((z) => {
+      const x = (z ?? {}) as Record<string, unknown>;
+      const n = text(x.name, 60);
+      if (!n) return null;
+      const gr = String(x.gruppe ?? "");
+      return { name: n, menge: zahl(x.menge), einheit: text(x.einheit, 12) ?? "", gruppe: gruppen.includes(gr) ? gr : "Sonstiges" };
+    })
+    .filter(Boolean)
+    .slice(0, 10);
+  const schritte = (Array.isArray(g.schritte) ? g.schritte : []).map((s) => text(s, 200)).filter(Boolean).slice(0, 6);
+  const art = ["Frühstück", "Hauptmahlzeit", "Snack"].includes(String(g.art)) ? String(g.art) : "Hauptmahlzeit";
+  return { name, art, dauer: zahl(g.dauer), gegen: kurz(g.gegen, 60), warum: text(g.warum, 300), zutaten, schritte };
+}
+
+export async function ernaehrung(env: Env, body: Record<string, unknown>, profile: Profile): Promise<unknown> {
+  const recent = Array.isArray(body.recent) ? (body.recent as CheckIn[]) : [];
+  const bild = (v: unknown) => (typeof v === "string" && v.length > 100 && v.length < 600000 ? [v] : []);
+  switch (body.art) {
+    case "zusammenhang":
+      return {
+        satz: text(
+          parseObjekt(await ask(env, zusammenhangPrompt(profile, recent, String(body.heisshunger ?? ""), String(body.schlaf ?? "")))).satz,
+          300,
+        ),
+      };
+    case "heisshunger":
+      return {
+        schritt: text(
+          parseObjekt(
+            await ask(env, heisshungerPrompt(profile, String(body.grund ?? ""), String(body.uhrzeit ?? ""), String(body.kontext ?? ""))),
+          ).schritt,
+          400,
+        ),
+      };
+    case "teller": {
+      const b = bild(body.bild);
+      if (!b.length) return null;
+      const d = parseObjekt(await ask(env, tellerPrompt(profile, String(body.mahlzeit ?? "")), b));
+      const stufe = (v: unknown) => Math.max(0, Math.min(3, Math.round(zahl(v) ?? 0)));
+      return {
+        eiweiss: stufe(d.eiweiss),
+        gemuese: stufe(d.gemuese),
+        groesse: stufe(d.groesse),
+        eiweiss_text: text(d.eiweiss_text, 200),
+        gemuese_text: text(d.gemuese_text, 200),
+        groesse_text: text(d.groesse_text, 200),
+        tipp: text(d.tipp, 300),
+      };
+    }
+    case "kuehlschrank": {
+      const zutaten = Array.isArray(body.zutaten) ? body.zutaten.map((z) => text(z, 60)).filter(Boolean).join(", ") : "";
+      const b = zutaten ? [] : bild(body.bild);
+      if (!zutaten && !b.length) return null;
+      const d = parseObjekt(await ask(env, kuehlschrankPrompt(profile, String(body.kontext ?? ""), zutaten), b));
+      const gesehen = zutaten
+        ? (body.zutaten as unknown[]).map((z) => text(z, 60)).filter(Boolean)
+        : (Array.isArray(d.zutaten) ? d.zutaten : []).map((z) => text(z, 60)).filter(Boolean).slice(0, 10);
+      return { zutaten: gesehen, gericht: gericht(d.gericht) };
+    }
+    case "rettung": {
+      const anzahl = Math.max(1, Math.min(3, zahl(body.anzahl) ?? 3));
+      const d = parseObjekt(await ask(env, rettungPrompt(profile, String(body.muster ?? ""), String(body.vorhanden ?? ""), anzahl)));
+      return { gerichte: (Array.isArray(d.gerichte) ? d.gerichte : []).map(gericht).filter(Boolean).slice(0, anzahl) };
+    }
+    case "gewicht": {
+      const kcal = zahl(body.kcal) ?? 0;
+      const d = parseObjekt(
+        await ask(env, gewichtPrompt(profile, String(body.verlauf ?? ""), kcal, String(body.grund ?? ""), String(body.kontext ?? ""))),
+      );
+      const roh = typeof d.kcal_neu === "number" && Number.isFinite(d.kcal_neu) ? d.kcal_neu : null;
+      // A small number is the change, not the new target.
+      let neu = roh === null ? null : Math.abs(roh) <= 600 ? kcal + roh : roh;
+      if (neu !== null && kcal > 0) neu = Math.round(Math.max(kcal - 300, Math.min(kcal + 300, neu)) / 50) * 50;
+      return { sicht: text(d.sicht, 600), vorschlag: text(d.vorschlag, 300), kcal_neu: neu };
+    }
+    default:
+      return null;
+  }
+}
+
 export async function training(env: Env, body: Record<string, unknown>, profile: Profile): Promise<unknown> {
   const recent = Array.isArray(body.recent) ? (body.recent as CheckIn[]) : [];
   switch (body.art) {
@@ -404,6 +503,15 @@ export default {
         if (!String(profile.motivation ?? "").trim()) return json({ satz: null });
         try {
           return json({ satz: parseSatz(await ask(env, warumPrompt(profile, today, recent))) });
+        } catch (e) {
+          console.error(e);
+          return json({ error: "coach unavailable" }, 502);
+        }
+      }
+      case "/ernaehrung": {
+        try {
+          const res = await ernaehrung(env, body, profile);
+          return res === null ? json({ error: "not found" }, 404) : json(res);
         } catch (e) {
           console.error(e);
           return json({ error: "coach unavailable" }, 502);

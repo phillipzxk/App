@@ -119,6 +119,7 @@ void main() {
 
     // Untick again.
     await openTab(tester, 'Ernährung');
+    await scrollTo(tester, find.byKey(const ValueKey('supp-check-0')));
     await tester.tap(find.byKey(const ValueKey('supp-check-0')));
     await tester.pumpAndSettle();
     expect(find.text('heute 1 von 2'), findsOneWidget);

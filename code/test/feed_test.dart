@@ -204,7 +204,7 @@ void main() {
 
     expect(feed.kcal?.aktivitaet, Aktivitaet.aktiv);
     expect(diary.weights.single.kg, 82.4);
-    expect(find.text('Dein kcal-Ziel heute'), findsOneWidget);
+    expect(find.text('DEIN KCAL-ZIEL HEUTE'), findsOneWidget);
     expect(find.textContaining('2.800'), findsOneWidget);
   });
 
