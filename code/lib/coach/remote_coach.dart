@@ -5,6 +5,9 @@ import 'package:http/http.dart' as http;
 import '../checkin/checkin.dart';
 import '../checkin/checkin_evaluator.dart';
 import '../data/user_profile.dart';
+import '../schlaf/schlaf_coach.dart';
+import '../schlaf/schlaf_data.dart';
+import '../sleep/schlafzeiten.dart';
 import '../ernaehrung/ernaehrung_coach.dart';
 import '../ernaehrung/ernaehrung_data.dart';
 import '../feed/feed_coach.dart';
@@ -33,7 +36,8 @@ class RemoteCoach
         CheckInEvaluator,
         FeedCoach,
         TrainingCoach,
-        ErnaehrungCoach {
+        ErnaehrungCoach,
+        SchlafCoach {
   RemoteCoach({required this.baseUrl, required this.token, http.Client? client})
     : _client = client ?? http.Client();
 
@@ -582,6 +586,66 @@ class RemoteCoach
       vorschlag: _text(data!['vorschlag'], 300),
       kcalNeu: (data['kcal_neu'] as num?)?.toInt(),
     );
+  }
+
+  // --- Schlaf & Energie (route /schlaf) ---
+
+  Future<Map?> _schlaf(String art, UserProfile p, String kontext) => _postJson(
+    '/schlaf',
+    {'art': art, 'profile': profileJson(p), 'kontext': kontext},
+  );
+
+  @override
+  Future<String?> morgen(UserProfile profile, String kontext) async =>
+      _text((await _schlaf('morgen', profile, kontext))?['satz'], 400);
+
+  @override
+  Future<String?> energie(UserProfile profile, String kontext) async =>
+      _text((await _schlaf('energie', profile, kontext))?['satz'], 400);
+
+  @override
+  Future<({List<SchlafMuster> muster, ({String typ, String text})? besteZeit})?>
+  muster(UserProfile profile, String kontext) async {
+    final data = await _schlaf('muster', profile, kontext);
+    if (data == null) return null;
+    final b = data['beste_zeit'];
+    final typ = b is Map ? _text(b['typ'], 40) : null;
+    final text = b is Map ? _text(b['text'], 300) : null;
+    return (
+      muster: [
+        for (final m in data['muster'] as List? ?? const [])
+          if (m is Map && _text(m['text'], 200) != null)
+            SchlafMuster(
+              text: _text(m['text'], 200)!,
+              gut: m['gut'] == true,
+              beleg: _text(m['beleg'], 40),
+            ),
+      ],
+      besteZeit: typ == null || text == null ? null : (typ: typ, text: text),
+    );
+  }
+
+  @override
+  Future<({List<AblaufPunkt> punkte, String? satz})?> tagesablauf(
+    UserProfile profile,
+    String kontext,
+  ) async {
+    final data = await _schlaf('tag', profile, kontext);
+    if (data == null) return null;
+    final punkte = [
+      for (final p in data['punkte'] as List? ?? const [])
+        if (p is Map &&
+            parseUhrzeit('${p['zeit']}') != null &&
+            _text(p['was'], 80) != null)
+          AblaufPunkt(
+            minute: parseUhrzeit('${p['zeit']}')!,
+            was: _text(p['was'], 80)!,
+            warum: _text(p['warum'], 200),
+            neu: p['neu'] == true,
+          ),
+    ]..sort((a, b) => a.minute.compareTo(b.minute));
+    if (punkte.length < 3) return null;
+    return (punkte: punkte, satz: _text(data['satz'], 300));
   }
 }
 

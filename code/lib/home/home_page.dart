@@ -16,6 +16,11 @@ import '../feed/muster.dart';
 import '../future_me/future_me_data.dart';
 import '../future_me/future_me_page.dart';
 import '../planner/planner_data.dart';
+import '../schlaf/abend.dart';
+import '../schlaf/schlaf_coach.dart';
+import '../schlaf/schlaf_data.dart';
+import '../schlaf/schlaf_logik.dart';
+import '../schlaf/schlaf_widgets.dart';
 import '../sleep/schlafzeiten.dart';
 import '../sleep/sleep.dart';
 import '../supplements/supplement_data.dart';
@@ -93,6 +98,14 @@ class _HomePageState extends State<HomePage> {
     if (mounted) setState(() {});
   }
 
+  SchlafCoach get _schlafCoach => widget.coach is SchlafCoach
+      ? widget.coach as SchlafCoach
+      : const NoSchlafCoach();
+
+  /// Everything of Schlaf & Energie (mornings, journal, alarm, patterns).
+  late final _schlaf = SchlafStand(widget.feed.saveSchlaf)
+    ..addListener(_essenGeaendert);
+
   List<RoutineStep> _routine = const [];
   KcalProfil? _kcal;
   List<CoachFrage> _fragen = const [];
@@ -123,6 +136,8 @@ class _HomePageState extends State<HomePage> {
     _heuteScroll.dispose();
     _essen.removeListener(_essenGeaendert);
     _essen.dispose();
+    _schlaf.removeListener(_essenGeaendert);
+    _schlaf.dispose();
     _stand.dispose();
     super.dispose();
   }
@@ -164,8 +179,10 @@ class _HomePageState extends State<HomePage> {
     final warumHeute = await widget.feed.loadWarumHeute();
     final training = await widget.feed.loadTraining();
     final essen = await widget.feed.loadErnaehrung();
+    final schlaf = await widget.feed.loadSchlaf();
     if (!mounted) return;
     _essen.laden(essen.aufgeraeumt(widget.clock()));
+    _schlaf.laden(schlaf);
     setState(() {
       _loaded = true;
       _checkIns = checkIns;
@@ -688,8 +705,11 @@ class _HomePageState extends State<HomePage> {
           for (final s in _routine) '${s.zeit} ${s.was}',
           for (final e in _sleep.reversed.take(7))
             'Schlaf ${dayKey(e.datum)}: ${e.stunden} Stunden',
+          schlafKontext(_schlaf.d, widget.clock()),
+          for (final m in sichtbareSchlafMuster(_schlaf.d))
+            'Erkanntes Muster: ${m.text}',
         ];
-        return lines.join('\n');
+        return lines.where((l) => l.trim().isNotEmpty).join('\n');
       case Bereich.mindset:
         return '';
     }
@@ -697,6 +717,33 @@ class _HomePageState extends State<HomePage> {
 
   Bettzeit? get _bettzeit =>
       bettzeitFuer(_schlafzeiten, widget.clock(), _termine);
+
+  SchlafUmfeld get _schlafUmfeld {
+    final jetzt = widget.clock();
+    final training = _woche.forDay(jetzt).trim();
+    return SchlafUmfeld(
+      stand: _schlaf,
+      profile: widget.profile,
+      coach: _schlafCoach,
+      jetzt: widget.clock,
+      zeiten: _schlafzeiten,
+      bett: _bettzeit?.bett,
+      weckzeit: _bettzeit?.aufstehen,
+      tagText: _essenTagText,
+      onMorgen: (h) async {
+        await widget.store.saveSleep(SleepEntry(widget.clock(), h));
+        await _reload();
+      },
+      routine: [for (final r in _routine) (r.zeit, r.was)],
+      training: _tagRahmen.training,
+      trainingName: training.isEmpty ? null : shortDay(training),
+      mahlzeiten: [for (final m in _mahlzeitSlots) (m.minute, m.name)],
+      termine: [
+        for (final t in termineAm(_termine, jetzt))
+          if (parseUhrzeit(t.zeit ?? '') case final m?) (m, t.text),
+      ],
+    );
+  }
 
   int? get _kcalZiel {
     final p = _kcal;
@@ -939,6 +986,7 @@ class _HomePageState extends State<HomePage> {
         ];
       case Bereich.schlaf:
         final bz = _bettzeit;
+        final morgen = _schlaf.d.morgenAm(dayKey(today));
         final naechte = [for (final e in _sleep.reversed.take(7)) e.stunden]
             .reversed
             .toList();
@@ -952,10 +1000,16 @@ class _HomePageState extends State<HomePage> {
           ),
           Kachel(
             titel: 'Nächte',
-            wert: naechte.isEmpty
+            wert: morgen != null
+                ? '${morgen.wert}'
+                : naechte.isEmpty
                 ? 'Eintragen'
                 : '${_komma(naechte.reduce((a, b) => a + b) / naechte.length)} h',
-            unter: naechte.isEmpty ? 'wie lange du schläfst' : 'Schnitt',
+            unter: morgen != null
+                ? 'Schlafwert heute'
+                : naechte.isEmpty
+                ? 'wie lange du schläfst'
+                : 'Schnitt',
             balken: naechte.length > 1 ? naechte : null,
           ),
           Kachel(
@@ -1102,6 +1156,17 @@ class _HomePageState extends State<HomePage> {
               art: 'Schlaf',
               titel: 'Abendroutine',
             ),
+      if (_schlaf.d.ablauf case final a?
+          when a.uebernommen && a.tag == dayKey(jetzt))
+        for (final p in a.punkte)
+          if (p.neu)
+            BogenPunkt(
+              id: 'coach-${p.minute}',
+              minute: p.minute < start ? p.minute + 1440 : p.minute,
+              art: 'Coach',
+              titel: p.was,
+              text: p.warum,
+            ),
       if (bz != null)
         BogenPunkt(
           id: 'bett',
@@ -1163,6 +1228,22 @@ class _HomePageState extends State<HomePage> {
                 ),
                 _sonnenbogen(),
                 const SizedBox(height: 16),
+                if (_schlaf.d.journalAm(SchlafDaten.gestern(widget.clock()))
+                    case final j? when j.besser.any((x) => x.isNotEmpty))
+                  FeedCard(
+                    key: const ValueKey('besser-heute'),
+                    title: 'Heute besser machen',
+                    icon: Icons.auto_awesome,
+                    children: [
+                      for (final b in j.besser)
+                        if (b.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Text(b, style: CoachStyle.body),
+                          ),
+                      const HintText('Aus deinem Abend-Journal von gestern.'),
+                    ],
+                  ),
                 DayPlanCard(
                   today: widget.clock(),
                   termine: _termine,
@@ -1304,6 +1385,7 @@ class _HomePageState extends State<HomePage> {
         );
       case Bereich.schlaf:
         return SleepTab(
+          umfeld: _schlafUmfeld,
           routine: _routine,
           sleep: _sleep,
           today: widget.clock(),
@@ -1405,6 +1487,10 @@ class _HomePageState extends State<HomePage> {
       scroll: _heuteScroll,
       onRestartOnboarding: widget.onRestartOnboarding,
     );
+    final ruhe = _schlaf.d.ruheBis;
+    if (_loaded && ruhe != null && ruhe.isAfter(today)) {
+      return RuheSchirm(umfeld: _schlafUmfeld, bis: ruhe);
+    }
     // The whole app is dark with beige and gold (Phillip 2026-10-18).
     return Scaffold(
       backgroundColor: CoachStyle.night,

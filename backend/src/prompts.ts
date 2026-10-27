@@ -567,3 +567,56 @@ Geh auf ihre Antwort ein (stimmst du zu oder nicht?), dann deine Sicht aus den D
 ${JSON_ONLY}
 {"sicht": "...", "vorschlag": "...", "kcal_neu": 3000}`;
 }
+
+// --- Schlaf & Energie (vault Umsetzung/Schlaf und Energie komplett.md) ---
+
+function schlafRahmen(p: Profile, kontext: string): string {
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Ihre Daten zu Schlaf, Energie, Training und Tag (aus ihren eigenen Angaben, nichts gemessen):
+<nutzer>
+${clip(kontext, 4000)}
+</nutzer>`;
+}
+
+/// One line after the morning entry: what this night means for today.
+export function morgenPrompt(p: Profile, kontext: string): string {
+  return `${schlafRahmen(p, kontext)}
+
+Sie hat gerade eingetragen, wie sie geschlafen hat. Sag ihr in 2 bis 3 kurzen Sätzen, was diese Nacht für heute heißt (schwere Sachen ja oder nein, Training, Bettzeit heute Abend), passend zu ihrem Ziel und ihren Mustern. Direkt, ohne Floskeln, keine medizinischen Ratschläge, kein Zählen.
+
+${JSON_ONLY}
+{"satz": "..."}`;
+}
+
+/// Today's energy forecast and where training or hard tasks fit best.
+export function energiePrompt(p: Profile, kontext: string): string {
+  return `${schlafRahmen(p, kontext)}
+
+Sag ihre Energie für heute voraus: wann sie am höchsten ist, wann das Tief kommt, und was sie deshalb wann machen sollte (z. B. Training oder wichtige Aufgaben ins Hoch). Nutze ihre letzte Nacht, ihr Training, ihre Rückmeldungen ("besser/schlechter als vorhergesagt") und erkannte Muster. Höchstens 3 kurze Sätze, mit Uhrzeiten.
+
+${JSON_ONLY}
+{"satz": "..."}`;
+}
+
+/// Personal patterns that clearly hold only for this person.
+export function schlafMusterPrompt(p: Profile, kontext: string): string {
+  return `${schlafRahmen(p, kontext)}
+
+Finde Muster, die bei genau dieser Person klar zu sehen sind: was ihr Energie gibt und was sie ihr nimmt, was ihren Schlaf stört oder verbessert. Nur was die Daten wirklich mehrfach zeigen, nichts Allgemeines, keine 0815-Tipps. Höchstens 5. "beleg" kurz, z. B. "6 von 7 Mal" oder "aus 4 Wochen". Dazu ihre beste Zeit: "typ" z. B. "Eher Morgenmensch" oder "Eher Abendmensch", "text" ein Satz mit Uhrzeiten. Ist etwas nicht klar zu sehen, lass es weg (leere Liste, "beste_zeit": null).
+
+${JSON_ONLY}
+{"muster": [{"text": "...", "gut": true, "beleg": "..."}], "beste_zeit": {"typ": "...", "text": "..."}}`;
+}
+
+/// The best day for today, built from her patterns around her appointments.
+export function tagesablaufPrompt(p: Profile, kontext: string): string {
+  return `${schlafRahmen(p, kontext)}
+
+Stell ihren besten Tagesablauf für heute zusammen, von Aufstehen bis Bettzeit. Ihre Termine, ihr Training und ihre Mahlzeiten bleiben (Uhrzeit nicht ändern, "neu": false). Ergänze nur, was ihr nach ihren Daten wirklich hilft ("neu": true): Licht am Morgen, die schwerste Aufgabe ins Energie-Hoch, Bewegung im Tief, Abend-Journal vor dem Schlafen. Bei jedem neuen Punkt "warum" in einem kurzen Satz, persönlich. 6 bis 12 Punkte, "zeit" als "H:MM", "was" höchstens 6 Wörter. "satz": ein kurzer Satz zum Tag.
+
+${JSON_ONLY}
+{"satz": "...", "punkte": [{"zeit": "6:30", "was": "...", "warum": "...", "neu": false}]}`;
+}

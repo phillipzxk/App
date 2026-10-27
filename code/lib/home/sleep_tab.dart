@@ -1,19 +1,32 @@
 import 'package:flutter/material.dart';
 
 import '../feed/feed_data.dart';
+import '../schlaf/abend.dart';
+import '../schlaf/aufwachen.dart';
+import '../schlaf/muster_tag.dart';
+import '../schlaf/schlaf_data.dart';
+import '../schlaf/schlaf_logik.dart';
+import '../schlaf/schlaf_widgets.dart';
+import '../schlaf/wecker_seite.dart';
 import '../sleep/schlafzeiten.dart';
 import '../sleep/sleep.dart';
 import '../sleep/sleep_chart.dart';
+import '../training/training_widgets.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import 'bereichs_werte.dart';
 import 'feed_widgets.dart';
 
-/// Schlaf page: progress, the evening routine (set once), a field for
-/// sleep tips and the sleep duration per night.
-class SleepTab extends StatelessWidget {
+/// Schlaf & Energie page (vault Umsetzung/Schlaf und Energie komplett.md,
+/// Phillip 2026-10-27): under its own sky the morning entry, the
+/// Schlafwert with the Schlaf-Mond, today's energy forecast, what only
+/// applies to you, alarm, bedtime, evening journal and the coach's day.
+/// Below the basics: sleep times, evening routine, the ask field and the
+/// nights.
+class SleepTab extends StatefulWidget {
   const SleepTab({
     super.key,
+    required this.umfeld,
     required this.routine,
     required this.sleep,
     required this.today,
@@ -26,6 +39,7 @@ class SleepTab extends StatelessWidget {
     this.onSaveSchlafzeiten,
   });
 
+  final SchlafUmfeld umfeld;
   final Schlafzeiten schlafzeiten;
 
   /// Tonight's bedtime, null until a wake-up time is set.
@@ -40,15 +54,59 @@ class SleepTab extends StatelessWidget {
   final Future<void> Function(List<RoutineStep> steps) onSaveRoutine;
   final Future<void> Function(String text) onAsk;
 
-  Future<void> _edit(BuildContext context) async {
-    final saved = await Navigator.of(context).push<List<RoutineStep>>(
-      MaterialPageRoute(builder: (_) => RoutineEditor(steps: routine)),
-    );
-    if (saved != null) await onSaveRoutine(saved);
-  }
+  @override
+  State<SleepTab> createState() => _SleepTabState();
+}
+
+class _SleepTabState extends State<SleepTab> {
+  SchlafUmfeld get u => widget.umfeld;
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
+    _holen();
+  }
+
+  Future<void> _holen() async {
+    await u.holeEnergieSatz();
+    await u.holeMuster();
+  }
+
+  Future<void> _edit(BuildContext context) async {
+    final saved = await Navigator.of(context).push<List<RoutineStep>>(
+      MaterialPageRoute(builder: (_) => RoutineEditor(steps: widget.routine)),
+    );
+    if (saved != null) await widget.onSaveRoutine(saved);
+  }
+
+  void _zeige(Widget seite) => zeigeSchlafSeite(context, seite);
+
+  @override
+  Widget build(BuildContext context) => SchlafHimmel(
+    phase: himmelPhase(u.jetzt(), u.zeiten.aufstehenAm(u.jetzt())),
+    child: ListenableBuilder(
+      listenable: u.stand,
+      builder: (context, _) => _liste(context),
+    ),
+  );
+
+  Widget _liste(BuildContext context) {
+    final d = u.d;
+    final heute = d.morgenAm(u.heute);
+    final fuell = mondFuell(d.morgen, u.jetzt());
+    final e = u.energieHeute();
+    final jetzt = u.jetzt();
+    final muster = sichtbareSchlafMuster(d);
+    final journal = d.journalAm(u.heute);
+    final ablauf = d.ablauf?.tag == u.heute ? d.ablauf : null;
+    final bz = widget.bettzeit;
+    final routine = widget.routine;
+    final nacht = [
+      for (final m in d.morgen)
+        if (!DateTime.parse(m.tag)
+            .isBefore(DateTime(jetzt.year, jetzt.month, jetzt.day - 13)))
+          m,
+    ];
     return ListView(
       padding: const EdgeInsets.only(bottom: 110),
       children: [
@@ -58,11 +116,296 @@ class SleepTab extends StatelessWidget {
           icon: Icons.bedtime,
         ),
         const AreaChart(bereich: Bereich.schlaf),
+        if (heute == null)
+          TKarte(
+            key: const ValueKey('wie-geschlafen'),
+            gold: true,
+            child: InkWell(
+              onTap: () => _zeige(AufwachSeite(umfeld: u)),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.wb_twilight,
+                    size: 30,
+                    color: CoachStyle.goldLight,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Wie hast du geschlafen?',
+                          style: tTitel.copyWith(fontSize: 15),
+                        ),
+                        const Text(
+                          'Aufwach-Himmel und kurz, was nachts war. Daraus '
+                          'kommt dein Schlafwert.',
+                          style: tSoft,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, color: CoachStyle.goldLight),
+                ],
+              ),
+            ),
+          )
+        else
+          TKarte(
+            key: const ValueKey('schlafwert-seite'),
+            gold: true,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Column(
+                      children: [
+                        SchlafMond(fuell: fuell ?? heute.wert / 100, size: 92),
+                        const SizedBox(height: 4),
+                        const Text('Schlaf-Mond', style: tSoft),
+                      ],
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const TLabel('Dein Schlafwert'),
+                          Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.end,
+                            spacing: 6,
+                            children: [
+                              GoldText(
+                                '${heute.wert}',
+                                key: const ValueKey('schlafwert-zahl'),
+                                style: tTitel.copyWith(fontSize: 40),
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.only(bottom: 8),
+                                child: Text('von 100', style: tSoft),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            '${formatDauer(heute.stunden)}, '
+                            '${himmelWort(heute.himmel).toLowerCase()} aufgewacht.',
+                            style: tSoft,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                for (final t in teilNamen.entries)
+                  TeilZeile(
+                    name: t.value,
+                    wert: heute.teile[t.key] ?? 0,
+                    text: teilText(t.key, heute),
+                  ),
+                const SizedBox(height: 8),
+                CoachZeile(text: heute.satz ?? mondSatz(fuell ?? .5)),
+                if (heute.satz != null && fuell != null) ...[
+                  const SizedBox(height: 6),
+                  Text(mondSatz(fuell), style: tSoft),
+                ],
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TLink(
+                    'Deine Nacht ansehen ›',
+                    key: const ValueKey('morgen-oeffnen'),
+                    onTap: () => _zeige(AufwachSeite(umfeld: u)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        TKarte(
+          key: const ValueKey('energie-heute'),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Row(
+                children: [
+                  Expanded(child: TLabel('Deine Energie heute')),
+                  Text('Vorhersage', style: tSoft),
+                ],
+              ),
+              const SizedBox(height: 6),
+              EnergieVorhersage(
+                werte: e.werte,
+                hoch: e.hoch,
+                jetzt: jetzt.hour * 60 + jetzt.minute,
+                training: u.training,
+              ),
+              const SizedBox(height: 8),
+              CoachZeile(
+                text: d.energieSatz?.tag == u.heute
+                    ? d.energieSatz!.satz
+                    : energieSatzOhneCoach(
+                        hoch: e.hoch,
+                        tief: e.tief,
+                        training: u.training,
+                        wert: heute?.wert,
+                      ),
+              ),
+              const SizedBox(height: 12),
+              const TLabel('Wie war deine Energie wirklich?'),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final w in const [
+                    'Wie vorhergesagt',
+                    'Besser',
+                    'Schlechter',
+                  ])
+                    TChip(
+                      w,
+                      key: ValueKey('energie-$w'),
+                      an: d.energieAm(u.heute) == w,
+                      onTap: () => u.stand.setze(
+                        d.mitEnergie(EnergieMeldung(tag: u.heute, wie: w)),
+                      ),
+                    ),
+                ],
+              ),
+              if (d.energieAm(u.heute) != null)
+                const Padding(
+                  padding: EdgeInsets.only(top: 6),
+                  child: Text(
+                    'Gemerkt. Daraus lernt der Coach deine eigene Kurve.',
+                    style: tSoft,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        TKarte(
+          key: const ValueKey('erkannt'),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const TLabel('Erkannt bei dir'),
+              if (muster.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    d.morgen.length < 14
+                        ? 'Nach 14 Morgen schaut der Coach, was nur bei dir gilt. '
+                              'Noch ${14 - d.morgen.length}.'
+                        : 'Gerade ist nichts klar zu sehen.',
+                    style: tSoft,
+                  ),
+                )
+              else
+                for (final m in muster.take(2)) MusterZeile(m: m),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TLink(
+                  'Alles, was nur bei dir gilt ›',
+                  key: const ValueKey('muster-oeffnen'),
+                  onTap: () => _zeige(SchlafMusterSeite(umfeld: u)),
+                ),
+              ),
+            ],
+          ),
+        ),
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          childAspectRatio: 1.45,
+          children: [
+            _Kachel(
+              key: const ValueKey('kachel-wecker'),
+              label: 'Wecker',
+              wert: u.weckzeit == null ? '–' : formatUhrzeit(u.weckzeit!),
+              text: weckerKurz(d.wecker),
+              onTap: () => _zeige(WeckerSeite(umfeld: u)),
+            ),
+            _Kachel(
+              key: const ValueKey('kachel-bett'),
+              label: 'Heute ins Bett',
+              wert: bz == null ? '–' : formatUhrzeit(bz.bett),
+              text: routine.isEmpty
+                  ? 'Gute Nacht über das Journal'
+                  : 'Routine ab ${routine.first.zeit}',
+              onTap: () => _zeige(AbendSeite(umfeld: u)),
+            ),
+            _Kachel(
+              key: const ValueKey('kachel-journal'),
+              label: 'Abend-Journal',
+              wert: journal?.guteNacht != null
+                  ? 'Fertig'
+                  : (journal?.fertig ?? false)
+                  ? 'Bereit'
+                  : 'Offen',
+              text: '3 dankbar, 3 besser',
+              onTap: () => _zeige(AbendSeite(umfeld: u)),
+            ),
+            _Kachel(
+              key: const ValueKey('kachel-tag'),
+              label: 'Dein Tag',
+              wert: ablauf?.uebernommen == true ? 'Übernommen' : 'Vom Coach',
+              text: 'bester Ablauf heute',
+              onTap: () => _zeige(TagesablaufSeite(umfeld: u)),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (nacht.length >= 2)
+          TKarte(
+            key: const ValueKey('naechte-wert'),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Row(
+                  children: [
+                    Expanded(child: TLabel('Letzte Nächte')),
+                    Text('Schlafwert', style: tSoft),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 60,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      for (final m in nacht)
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 2),
+                            child: Container(
+                              height: 60 * m.wert / 100,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(3),
+                                gradient: m.wert >= 75
+                                    ? CoachStyle.goldGradient
+                                    : null,
+                                color: m.wert >= 75
+                                    ? null
+                                    : const Color(0xFF4A3B2A),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         const GroupLabel('Deine Basis'),
         SchlafzeitenKarte(
-          zeiten: schlafzeiten,
-          bettzeit: bettzeit,
-          onSave: onSaveSchlafzeiten,
+          zeiten: widget.schlafzeiten,
+          bettzeit: bz,
+          onSave: widget.onSaveSchlafzeiten,
         ),
         FeedCard(
           title: 'Deine Abendroutine',
@@ -104,14 +447,129 @@ class SleepTab extends StatelessWidget {
         AskCoachCard(
           title: 'Frag zu deinem Schlaf',
           hint: 'Was stört dich gerade beim Schlafen?',
-          today: fragen,
-          onSend: onAsk,
+          today: widget.fragen,
+          onSend: widget.onAsk,
         ),
         const GroupLabel('Deine Werte'),
-        SleepCard(entries: sleep, today: today, onAdd: onAddSleep),
+        SleepCard(
+          entries: widget.sleep,
+          today: widget.today,
+          onAdd: widget.onAddSleep,
+        ),
+        TKarte(
+          key: const ValueKey('mehr-daten'),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const TLabel('Mehr Daten für deinen Schlafwert'),
+              const SizedBox(height: 6),
+              for (final o in const [
+                ('Apple Health', 'Schlafphasen, Puls, Herzratenvariabilität'),
+                ('Google Health Connect', 'für Android-Handys und Uhren'),
+                (
+                  'Deine Uhr oder dein Ring',
+                  'zum Beispiel Apple Watch, Garmin, Oura',
+                ),
+              ])
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(o.$1, style: tText),
+                            Text(o.$2, style: tSoft),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFF4A3B2A)),
+                        ),
+                        child: const Text(
+                          'Handy-Version',
+                          style: TextStyle(
+                            fontFamily: 'Figtree',
+                            fontSize: 10.5,
+                            color: CoachStyle.beigeLabel,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 4),
+              const Text(
+                'Bis dahin kommt der Schlafwert aus allem, was du angibst: '
+                'Aufwach-Himmel, was nachts war, Schlafzeiten, Bettzeit '
+                'eingehalten, Abend-Journal, Check-in.',
+                style: tSoft,
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
+}
+
+class _Kachel extends StatelessWidget {
+  const _Kachel({
+    super.key,
+    required this.label,
+    required this.wert,
+    required this.text,
+    required this.onTap,
+  });
+  final String label, wert, text;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    borderRadius: BorderRadius.circular(16),
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: const Color(0xCC1E1710),
+        border: Border.all(color: const Color(0xFF3A2E21)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          TLabel(label),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              wert,
+              style: tTitel.copyWith(
+                fontSize: 20,
+                color: const Color(0xFFF5DFAE),
+              ),
+            ),
+          ),
+          Text(
+            text,
+            style: tSoft,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 /// "Deine Schlafzeiten": wake-up time Mon-Fri and Sat/Sun and hours of
