@@ -452,3 +452,118 @@ Schreib genau einen Satz (höchstens 25 Wörter) zu ihrem Verlauf: wie es läuft
 ${JSON_ONLY}
 {"satz": "..."}`;
 }
+
+// --- Ernährung (vault Umsetzung/Ernährung komplett, 2026-10-27) ---
+
+const GERICHT_FORM = `{"name": "...", "art": "Hauptmahlzeit", "dauer": 20, "gegen": "...", "warum": "...", "zutaten": [{"name": "Rote Linsen", "menge": 80, "einheit": "g", "gruppe": "Vorrat"}], "schritte": ["...", "..."]}`;
+const GERICHT_REGELN = `Ein Gericht: "name" kurz und klar, "art" ist "Frühstück", "Hauptmahlzeit" oder "Snack", "dauer" in Minuten, "zutaten" für 1 Portion (3 bis 7, "menge" als Zahl oder null, "einheit" wie "g", "ml", "Stück", "EL" oder "", "gruppe" genau eins von "Eiweiß", "Gemüse", "Obst", "Kühlregal", "Vorrat", "Sonstiges"), "schritte" 3 bis 5 kurze Sätze. Alltagstauglich, normale Zutaten aus dem Supermarkt, keine Kalorien- oder Grammangaben im Text, keine Nährwerte.`;
+
+/// One sentence on how food links to sleep, training and head, or null.
+export function zusammenhangPrompt(p: Profile, recent: CheckIn[], heisshunger: string, schlaf: string): string {
+  const tage = recent.slice(-14).map(checkInBlock).join("\n\n");
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+${tage ? `\nIhre Check-ins der letzten 2 Wochen:\n<nutzer>\n${tage}\n</nutzer>\n` : ""}${heisshunger ? `\nIhre Heißhunger-Momente (Datum Uhrzeit: Grund, ob der Schritt geholfen hat):\n<nutzer>\n${clip(heisshunger, 1200)}\n</nutzer>\n` : ""}${schlaf ? `\nIhr Schlaf (Datum: Stunden):\n<nutzer>\n${clip(schlaf, 600)}\n</nutzer>\n` : ""}
+Gibt es einen klar sichtbaren Zusammenhang zwischen ihrem Essen und Schlaf, Training, Energie oder Kopf? Wenn ja: genau ein bis zwei kurze Sätze mit Zahl aus den Daten (z. B. "4 von 5 Mal") und, wenn es passt, was das für heute heißt. Wenn nichts klar zu sehen ist, "satz": null. Nichts erfinden, ohne Anrede.
+
+${JSON_ONLY}
+{"satz": "..."}`;
+}
+
+/// One concrete step for a craving right now.
+export function heisshungerPrompt(p: Profile, grund: string, uhrzeit: string, kontext: string): string {
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Sie hat gerade (${clip(uhrzeit, 20)}) Heißhunger und auf die Frage, was dahintersteckt, geantwortet:
+<nutzer>
+${clip(grund, 100)}
+</nutzer>
+Was du sonst weißt:
+<nutzer>
+${clip(kontext, 1200)}
+</nutzer>
+
+Gib ihr genau einen konkreten Schritt für jetzt, passend zum Grund und zu ihren Daten (z. B. kurze Nacht, lange nichts gegessen, Uhrzeit). 2 bis 3 kurze Sätze, direkt, ohne Moralisieren, kein Verbot. Wenn es echter Hunger ist, sag ihr, was sie jetzt richtig essen soll.
+
+${JSON_ONLY}
+{"schritt": "..."}`;
+}
+
+/// Rough read of one plate photo, in words only.
+export function tellerPrompt(p: Profile, mahlzeit: string): string {
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Du siehst ein Foto ihres Essens (${clip(mahlzeit, 60)}). Schätze grob ein, wie es zu ihrem Ziel passt. Keine Kalorien, keine Gramm, keine Nährwerte.
+"eiweiss", "gemuese", "groesse": je 0 bis 3 (0 = nichts, 3 = passt voll). Je ein kurzer Satz dazu ("eiweiss_text", "gemuese_text", "groesse_text"). "tipp": ein Satz, was sie nächstes Mal einfach besser machen kann, oder was gut ist.
+Ist kein Essen zu sehen, alle Werte 0 und "tipp": "Auf dem Foto ist kein Essen zu erkennen."
+
+${JSON_ONLY}
+{"eiweiss": 2, "gemuese": 3, "groesse": 3, "eiweiss_text": "...", "gemuese_text": "...", "groesse_text": "...", "tipp": "..."}`;
+}
+
+/// A dish from what is in the fridge (photo or a list of ingredients).
+export function kuehlschrankPrompt(p: Profile, kontext: string, zutaten: string): string {
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Ihr Tag heute:
+<nutzer>
+${clip(kontext, 800)}
+</nutzer>
+${zutaten ? `\nDas hat sie zu Hause:\n<nutzer>\n${clip(zutaten, 600)}\n</nutzer>\n` : "\nDu siehst ein Foto von ihrem Kühlschrank oder ihren Vorräten.\n"}
+${zutaten ? "" : `"zutaten": die Lebensmittel, die du klar erkennst (höchstens 10, kurze Namen). `}Bau aus diesen Zutaten (plus Salz, Öl, Gewürze) ein Gericht, das genau zu ihrem Tag und Ziel passt. "warum": 1 bis 2 Sätze, warum genau jetzt (z. B. nach dem Training, fehlendes Gemüse). "gegen": höchstens 6 Wörter, wofür es heute ist, z. B. "nach deinem Training".
+${GERICHT_REGELN}
+
+${JSON_ONLY}
+{"zutaten": ["..."], "gericht": ${GERICHT_FORM}}`;
+}
+
+/// Rescue dishes, each against one of the person's patterns.
+export function rettungPrompt(p: Profile, muster: string, vorhanden: string, anzahl: number): string {
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Ihre Muster beim Essen und was du aus ihren Daten weißt:
+<nutzer>
+${clip(muster, 1500)}
+</nutzer>
+${vorhanden ? `\nDiese Gerichte hat sie schon (nicht wiederholen):\n<nutzer>\n${clip(vorhanden, 500)}\n</nutzer>\n` : ""}
+Schlag ${anzahl} Rettungsgerichte vor. Jedes löst genau ein Problem von ihr, z. B. Heißhunger zu einer Uhrzeit, späte Trainingstage, Tage mit wenig Schlaf, volle Tage. "gegen" ist kurz, z. B. "gegen deinen 21-Uhr-Heißhunger". "warum": 1 bis 2 Sätze, warum genau dieses Gericht ihr Problem löst. Keine 0815-Rezepte, passend zu ihrem Ziel.
+${GERICHT_REGELN}
+
+${JSON_ONLY}
+{"gerichte": [${GERICHT_FORM}]}`;
+}
+
+/// Weight check: the coach's view and a new kcal target.
+export function gewichtPrompt(p: Profile, verlauf: string, kcal: number, grund: string, kontext: string): string {
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Ihr Gewicht als Wochenschnitt (ältestes zuerst):
+<nutzer>
+${clip(verlauf, 400)}
+</nutzer>
+Ihr kcal-Ziel gerade: ${kcal} kcal. Sie zählt nicht, das Ziel steuert nur die Größe ihrer Mahlzeiten.
+Was du sonst weißt:
+<nutzer>
+${clip(kontext, 1000)}
+</nutzer>
+Sie wurde zuerst selbst gefragt, woran es liegt. Ihre Antwort:
+<nutzer>
+${clip(grund, 100)}
+</nutzer>
+
+Geh auf ihre Antwort ein (stimmst du zu oder nicht?), dann deine Sicht aus den Daten, passend zu ihrem Ziel. "sicht" höchstens 3 kurze Sätze. "vorschlag" ein Satz, wie sie es im Alltag umsetzt (z. B. ein Snack extra), ohne Zählen. "kcal_neu": das ganze neue Tagesziel in kcal (nicht nur der Unterschied), auf 50 gerundet, höchstens 300 kcal Unterschied zum jetzigen. Ohne Anrede, ohne Floskeln.
+
+${JSON_ONLY}
+{"sicht": "...", "vorschlag": "...", "kcal_neu": 3000}`;
+}

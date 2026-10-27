@@ -4,6 +4,7 @@ import '../training/training_data.dart';
 import 'durchgezogen.dart';
 import 'fokus.dart';
 import 'muster.dart';
+import '../ernaehrung/ernaehrung_data.dart';
 
 import 'dart:convert';
 
@@ -118,6 +119,11 @@ abstract class FeedStore {
   /// Form videos (the stills of one filmed set) with the coach's hints.
   Future<List<FormVideo>> loadFormVideos();
   Future<void> saveFormVideos(List<FormVideo> list);
+
+  /// Everything of the Ernährung page: meals, cravings, cookbook, shopping
+  /// list and weight checks.
+  Future<ErnaehrungDaten> loadErnaehrung();
+  Future<void> saveErnaehrung(ErnaehrungDaten daten);
 }
 
 class LocalFeedStore implements FeedStore {
@@ -144,6 +150,7 @@ class LocalFeedStore implements FeedStore {
   static const _warumKey = 'warum_heute';
   static const _trainingKey = 'training_daten';
   static const _formKey = 'form_videos';
+  static const _ernaehrungKey = 'ernaehrung_daten';
 
   Future<Object?> _read(String key) async {
     final raw = (await SharedPreferences.getInstance()).getString(key);
@@ -431,4 +438,16 @@ class LocalFeedStore implements FeedStore {
   @override
   Future<void> saveFormVideos(List<FormVideo> list) =>
       _write(_formKey, [for (final v in list) v.toJson()]);
+
+  @override
+  Future<ErnaehrungDaten> loadErnaehrung() async {
+    final json = await _read(_ernaehrungKey);
+    return json == null
+        ? const ErnaehrungDaten()
+        : ErnaehrungDaten.fromJson(json as Map<String, dynamic>);
+  }
+
+  @override
+  Future<void> saveErnaehrung(ErnaehrungDaten daten) =>
+      _write(_ernaehrungKey, daten.toJson());
 }

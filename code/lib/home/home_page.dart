@@ -1,10 +1,11 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 import '../checkin/checkin.dart';
 import '../data/diary_store.dart';
 import '../data/user_profile.dart';
+import '../ernaehrung/ernaehrung_coach.dart';
+import '../ernaehrung/ernaehrung_logik.dart';
+import '../ernaehrung/ernaehrung_stand.dart';
 import '../feed/durchgezogen.dart';
 import '../feed/feed_coach.dart';
 import '../feed/feed_data.dart';
@@ -81,6 +82,17 @@ class _HomePageState extends State<HomePage> {
   TrainingCoach get _trainingCoach => widget.coach is TrainingCoach
       ? widget.coach as TrainingCoach
       : const NoTrainingCoach();
+  ErnaehrungCoach get _essenCoach => widget.coach is ErnaehrungCoach
+      ? widget.coach as ErnaehrungCoach
+      : const NoErnaehrungCoach();
+
+  /// Everything of the Ernährung page (meals, cookbook, list, checks).
+  late final _essen = ErnaehrungStand(widget.feed.saveErnaehrung)
+    ..addListener(_essenGeaendert);
+  void _essenGeaendert() {
+    if (mounted) setState(() {});
+  }
+
   List<RoutineStep> _routine = const [];
   KcalProfil? _kcal;
   List<CoachFrage> _fragen = const [];
@@ -109,6 +121,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     _heuteScroll.dispose();
+    _essen.removeListener(_essenGeaendert);
+    _essen.dispose();
     _stand.dispose();
     super.dispose();
   }
@@ -149,7 +163,9 @@ class _HomePageState extends State<HomePage> {
     final durchgezogen = await widget.feed.loadDurchgezogen();
     final warumHeute = await widget.feed.loadWarumHeute();
     final training = await widget.feed.loadTraining();
+    final essen = await widget.feed.loadErnaehrung();
     if (!mounted) return;
+    _essen.laden(essen.aufgeraeumt(widget.clock()));
     setState(() {
       _loaded = true;
       _checkIns = checkIns;
@@ -685,7 +701,72 @@ class _HomePageState extends State<HomePage> {
   int? get _kcalZiel {
     final p = _kcal;
     if (p == null || _weights.isEmpty) return null;
-    return kcalZiel(p, _weights.last.kg);
+    return kcalZiel(p, _weights.last.kg) + _essen.d.kcalAnpassung;
+  }
+
+  /// Today's start and end (minutes) and training time for the meals.
+  ({int start, int ende, int? training}) get _tagRahmen {
+    final jetzt = widget.clock();
+    final start = _schlafzeiten.aufstehenAm(jetzt) ?? 7 * 60;
+    var ende = _bettzeit?.bett ?? 23 * 60;
+    if (ende <= start) ende += 1440;
+    return (
+      start: start,
+      ende: ende,
+      training: trainingZeit(_woche.forDay(jetzt).trim()),
+    );
+  }
+
+  /// Today's meals: placed around training, moved by the user.
+  List<MahlzeitSlot> get _mahlzeitSlots {
+    final r = _tagRahmen;
+    return planeMahlzeiten(
+      anzahl: _mahlzeiten ?? 0,
+      start: r.start,
+      ende: r.ende,
+      training: r.training,
+      verschoben: _essen.d.verschoben[dayKey(widget.clock())] ?? const {},
+    );
+  }
+
+  EssenUmfeld get _essenUmfeld => EssenUmfeld(
+    stand: _essen,
+    profile: widget.profile,
+    coach: _essenCoach,
+    jetzt: widget.clock,
+    mahlzeiten: () => _mahlzeitSlots,
+    tagText: _essenTagText,
+    musterText: _essenMusterText,
+    training: _tagRahmen.training,
+  );
+
+  String _essenTagText() {
+    final jetzt = widget.clock();
+    final training = _woche.forDay(jetzt).trim();
+    final eintraege = _essen.d.tag(dayKey(jetzt));
+    final ziel = _kcalZiel;
+    return [
+      'Jetzt: ${formatUhrzeit(jetzt.hour * 60 + jetzt.minute)}',
+      training.isEmpty
+          ? 'Heute kein Training.'
+          : 'Training heute: ${shortDay(training)}',
+      if (ziel != null) 'kcal-Ziel (nur Orientierung): $ziel',
+      for (final m in _mahlzeitSlots)
+        '${m.name} ${m.uhrzeit}: ${eintraege[m.id]?.gegessen == true ? 'gegessen${eintraege[m.id]!.gefuehl == null ? '' : ', ${eintraege[m.id]!.gefuehl}'}' : 'noch offen'}',
+    ].join('\n');
+  }
+
+  String _essenMusterText() {
+    final d = _essen.d;
+    return [
+      for (final h in d.heisshunger.reversed.take(10))
+        'Heißhunger ${dayKey(h.zeit)} ${formatUhrzeit(h.zeit.hour * 60 + h.zeit.minute)}: ${h.grund}',
+      for (final c in _checkIns.reversed.take(10))
+        if (c.ernaehrung.isNotEmpty)
+          'Check-in ${dayKey(c.datum)}: ${c.ernaehrung}',
+      for (final e in _sleep.reversed.take(7))
+        'Schlaf ${dayKey(e.datum)}: ${e.stunden} h',
+    ].join('\n');
   }
 
   static const _icons = {
@@ -957,10 +1038,7 @@ class _HomePageState extends State<HomePage> {
     if (ende <= start) ende += 1440;
     final training = _woche.forDay(jetzt).trim();
     final trZeit = trainingZeit(training);
-    // Until the coach plans meals, they are spread evenly over the day:
-    // from half an hour after getting up to 2.5 hours before bed.
-    final n = _mahlzeiten ?? 0;
-    final von = start + 30, bis = math.max(von, ende - 150);
+    final gegessen = _essen.d.tag(dayKey(jetzt));
     final punkte = <BogenPunkt>[
       if (aufstehen != null)
         BogenPunkt(
@@ -993,12 +1071,14 @@ class _HomePageState extends State<HomePage> {
           titel: shortDay(training),
           text: dayDetails(training).isEmpty ? null : 'Übungen in deinem Plan',
         ),
-      for (var i = 0; i < n; i++)
+      for (final m in _mahlzeitSlots)
         BogenPunkt(
-          id: 'mahlzeit-$i',
-          minute: n == 1 ? (von + bis) ~/ 2 : von + (bis - von) * i ~/ (n - 1),
+          id: 'mahlzeit-${m.id}',
+          minute: m.minute,
           art: 'Essen',
-          titel: 'Mahlzeit ${i + 1} von $n',
+          titel: m.name,
+          text: gegessen[m.id]?.gegessen == true ? 'gegessen' : null,
+          erledigt: gegessen[m.id]?.gegessen == true,
         ),
       for (final x in _supplements)
         if (parseUhrzeit(x.zeit) case final m?)
@@ -1189,8 +1269,23 @@ class _HomePageState extends State<HomePage> {
           ],
         );
       case Bereich.ernaehrung:
+        final r = _tagRahmen;
         return NutritionTab(
+          umfeld: _essenUmfeld,
+          mahlzeiten: _mahlzeitSlots,
+          anzahl: _mahlzeiten,
+          start: r.start,
+          ende: r.ende,
+          training: r.training,
+          trainingName: shortDay(_woche.forDay(widget.clock()).trim()),
+          onSetMahlzeiten: (n) async {
+            await widget.feed.saveMahlzeiten(n);
+            await _reload();
+          },
           kcal: _kcal,
+          kcalHeute: _kcalZiel,
+          sleep: _sleep,
+          checkIns: _checkIns,
           weights: _weights,
           fragen: _todayFragen(Bereich.ernaehrung),
           onSaveKcal: _saveKcal,
