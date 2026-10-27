@@ -11,6 +11,9 @@ import '../feed/durchgezogen.dart';
 import '../feed/fokus.dart';
 import '../feed/muster.dart';
 import '../onboarding/onboarding_evaluator.dart';
+import '../training/form_video.dart';
+import '../training/training_coach.dart';
+import '../training/training_data.dart';
 
 /// Address of the coach backend (backend/ in the repo, a Cloudflare Worker)
 /// and the app token it checks. Set at build time:
@@ -22,7 +25,8 @@ const coachToken = String.fromEnvironment('COACH_TOKEN');
 /// summary, the reply to the daily check-in and the fields in the Main Feed.
 /// Any failure (offline, backend down) returns null, so the app shows its
 /// "kommt bald" text instead of an error.
-class RemoteCoach implements OnboardingEvaluator, CheckInEvaluator, FeedCoach {
+class RemoteCoach
+    implements OnboardingEvaluator, CheckInEvaluator, FeedCoach, TrainingCoach {
   RemoteCoach({required this.baseUrl, required this.token, http.Client? client})
     : _client = client ?? http.Client();
 
@@ -229,6 +233,179 @@ class RemoteCoach implements OnboardingEvaluator, CheckInEvaluator, FeedCoach {
     });
     final s = data?['satz'];
     return s is String && s.trim().isNotEmpty ? s.trim() : null;
+  }
+
+  // Training logging (vault Umsetzung/Training eintragen.md): one route,
+  // the part is named in "art".
+  Future<Map?> _training(String art, Map<String, Object> body) =>
+      _postJson('/training', {'art': art, ...body});
+
+  static String? _text(Object? v, [int max = 400]) {
+    if (v is! String || v.trim().isEmpty) return null;
+    final t = v.trim();
+    return t.length > max ? t.substring(0, max) : t;
+  }
+
+  @override
+  Future<({String satz, Anpassung? anpassung})?> tagesform(
+    UserProfile profile,
+    CheckIn? heute,
+    List<CheckIn> recent,
+    String einheit,
+  ) async {
+    final data = await _training('tagesform', {
+      'profile': profileJson(profile),
+      if (heute != null) 'today': heute.toJson(),
+      'recent': [for (final c in recent) c.toJson()],
+      'einheit': einheit,
+    });
+    final satz = _text(data?['satz']);
+    if (satz == null) return null;
+    final a = data!['anpassung'];
+    Anpassung? anpassung;
+    if (a is Map && _text(a['uebung']) != null && _text(a['grund']) != null) {
+      anpassung = Anpassung(
+        uebung: _text(a['uebung'])!,
+        saetze: (a['saetze'] as num?)?.toInt(),
+        menge: (a['wdh'] as num?)?.toInt(),
+        grund: _text(a['grund'])!,
+      );
+      if (anpassung.saetze == null && anpassung.menge == null) anpassung = null;
+    }
+    return (satz: satz, anpassung: anpassung);
+  }
+
+  @override
+  Future<({String antwort, bool ok, SatzWert? werte})?> vorschlag(
+    UserProfile profile,
+    String uebung,
+    String heute,
+    String vorschlag,
+  ) async {
+    final data = await _training('vorschlag', {
+      'profile': profileJson(profile),
+      'uebung': uebung,
+      'heute': heute,
+      'vorschlag': vorschlag,
+    });
+    final antwort = _text(data?['antwort']);
+    if (antwort == null) return null;
+    final w = data!['wert'], m = data['wdh'];
+    return (
+      antwort: antwort,
+      ok: data['ok'] != false,
+      werte: w is num || m is num
+          ? SatzWert((w as num?)?.toDouble(), (m as num?)?.toDouble())
+          : null,
+    );
+  }
+
+  @override
+  Future<
+    ({
+      String sicht,
+      String vorschlag,
+      ({bool zuerst, PlanUebung uebung})? aenderung,
+    })?
+  >
+  stagnation(
+    UserProfile profile,
+    PlanUebung uebung,
+    String verlauf,
+    String grund,
+    List<CheckIn> recent,
+    String tag,
+  ) async {
+    final data = await _training('stagnation', {
+      'profile': profileJson(profile),
+      'uebung': uebung.name,
+      'plan': uebung.zeile,
+      'verlauf': verlauf,
+      'grund': grund,
+      'tag': tag,
+      'recent': [for (final c in recent) c.toJson()],
+    });
+    final sicht = _text(data?['sicht'], 600);
+    final vorschlag = _text(data?['vorschlag']);
+    if (sicht == null || vorschlag == null) return null;
+    final a = data!['aenderung'];
+    ({bool zuerst, PlanUebung uebung})? aenderung;
+    if (a is Map) {
+      final saetze = (a['saetze'] as num?)?.toInt();
+      final von = (a['wdh_von'] as num?)?.toInt();
+      final bis = (a['wdh_bis'] as num?)?.toInt();
+      final wert = (a['wert'] as num?)?.toDouble();
+      aenderung = (
+        zuerst: a['zuerst'] == true,
+        uebung: uebung.copyWith(
+          saetze: saetze != null && saetze > 0 && saetze < 10 ? saetze : null,
+          wdhVon: von != null && von > 0 ? von : null,
+          wdhBis: bis != null && bis > 0
+              ? bis
+              : (von != null && von > 0 ? von : null),
+          modus: von != null && bis != null && bis > von
+              ? WdhModus.bereich
+              : null,
+          wert: wert != null && wert >= 0 ? wert : null,
+          jederSatz: const [],
+        ),
+      );
+    }
+    return (sicht: sicht, vorschlag: vorschlag, aenderung: aenderung);
+  }
+
+  @override
+  Future<String?> balance(UserProfile profile, String woche) async {
+    final data = await _training('balance', {
+      'profile': profileJson(profile),
+      'woche': woche,
+    });
+    return _text(data?['satz']);
+  }
+
+  @override
+  Future<FormHinweise?> formCheck(
+    String uebung,
+    String satz,
+    List<String> bilder, {
+    String? frueher,
+  }) async {
+    final data = await _training('form', {
+      'uebung': uebung,
+      'satz': satz,
+      'bilder': bilder.take(4).toList(),
+      'frueher': ?frueher,
+    });
+    if (data == null) return null;
+    final h = FormHinweise(
+      gut: [
+        for (final g in data['gut'] as List? ?? const [])
+          if (_text(g) != null) _text(g)!,
+      ].take(3).toList(),
+      besser: [
+        for (final b in data['besser'] as List? ?? const [])
+          if (b is Map && _text(b['text']) != null)
+            (text: _text(b['text'])!, bild: (b['bild'] as num?)?.toInt()),
+      ].take(3).toList(),
+      vergleich: _text(data['vergleich']),
+    );
+    return h.leer ? null : h;
+  }
+
+  @override
+  Future<String?> verlauf(
+    UserProfile profile,
+    String uebung,
+    String verlauf,
+    List<CheckIn> recent,
+  ) async {
+    final data = await _training('verlauf', {
+      'profile': profileJson(profile),
+      'uebung': uebung,
+      'verlauf': verlauf,
+      'recent': [for (final c in recent) c.toJson()],
+    });
+    return _text(data?['satz']);
   }
 
   @override

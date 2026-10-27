@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'checkin/checkin.dart';
 import 'checkin/checkin_evaluator.dart';
 import 'checkin/checkin_flow.dart';
+import 'training/training_logik.dart';
 import 'coach/remote_coach.dart';
 import 'data/diary_store.dart';
 import 'data/profile_store.dart';
@@ -95,6 +96,7 @@ class StartGate extends StatefulWidget {
 class _StartGateState extends State<StartGate> {
   UserProfile? _profile;
   bool _checkedInToday = false;
+  Map<String, String> _vorgemerkt = const {};
   late bool _splashing = widget.app.splash > Duration.zero;
   Timer? _splashTimer;
 
@@ -120,8 +122,11 @@ class _StartGateState extends State<StartGate> {
     final profile = await widget.app.store.load();
     final checkIns = await widget.app.diary.loadCheckIns();
     final today = dayKey(widget.app.clock());
+    final training = await widget.app.feed.loadTraining();
+    final vorgemerkt = checkInVormerkung(training, widget.app.clock());
     if (!mounted) return;
     setState(() {
+      _vorgemerkt = {'Training': ?vorgemerkt};
       _profile = profile;
       _checkedInToday = checkIns.any((c) => dayKey(c.datum) == today);
     });
@@ -149,6 +154,7 @@ class _StartGateState extends State<StartGate> {
         store: widget.app.diary,
         evaluator: widget.app.checkInEvaluator,
         today: widget.app.clock(),
+        vorgemerkt: _vorgemerkt,
         onFinished: (_) => setState(() => _checkedInToday = true),
       );
     }

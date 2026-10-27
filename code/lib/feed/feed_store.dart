@@ -1,4 +1,6 @@
 import '../sleep/schlafzeiten.dart';
+import '../training/form_video.dart';
+import '../training/training_data.dart';
 import 'durchgezogen.dart';
 import 'fokus.dart';
 import 'muster.dart';
@@ -107,6 +109,15 @@ abstract class FeedStore {
   /// phase and its sentence (null on a normal day).
   Future<({String tag, String? satz})?> loadWarumHeute();
   Future<void> saveWarumHeute(DateTime day, String? satz);
+
+  /// Training logging: sports, sessions, own targets, checks
+  /// (vault Umsetzung/Training eintragen.md).
+  Future<TrainingDaten> loadTraining();
+  Future<void> saveTraining(TrainingDaten daten);
+
+  /// Form videos (the stills of one filmed set) with the coach's hints.
+  Future<List<FormVideo>> loadFormVideos();
+  Future<void> saveFormVideos(List<FormVideo> list);
 }
 
 class LocalFeedStore implements FeedStore {
@@ -131,6 +142,8 @@ class LocalFeedStore implements FeedStore {
   static const _durchKey = 'durchgezogen';
   static const _durchGeprueftKey = 'durchgezogen_geprueft';
   static const _warumKey = 'warum_heute';
+  static const _trainingKey = 'training_daten';
+  static const _formKey = 'form_videos';
 
   Future<Object?> _read(String key) async {
     final raw = (await SharedPreferences.getInstance()).getString(key);
@@ -143,9 +156,7 @@ class LocalFeedStore implements FeedStore {
   @override
   Future<TrainingPlan> loadPlan() async {
     final json = await _read(_planKey);
-    return json == null
-        ? TrainingPlan.empty()
-        : TrainingPlan.fromJson(json as List);
+    return json == null ? TrainingPlan.empty() : TrainingPlan.fromJson(json);
   }
 
   @override
@@ -216,11 +227,7 @@ class LocalFeedStore implements FeedStore {
 
   @override
   Future<Schwerpunkt?> loadSchwerpunkt() async {
-    final name = await _read(_schwerpunktKey) as String?;
-    for (final s in Schwerpunkt.values) {
-      if (s.name == name) return s;
-    }
-    return null;
+    return Schwerpunkt.lesen(await _read(_schwerpunktKey) as String?);
   }
 
   @override
@@ -399,4 +406,29 @@ class LocalFeedStore implements FeedStore {
   @override
   Future<void> saveWarumHeute(DateTime day, String? satz) =>
       _write(_warumKey, {'tag': dayKey(day), 'satz': satz});
+
+  @override
+  Future<TrainingDaten> loadTraining() async {
+    final json = await _read(_trainingKey);
+    return json == null
+        ? const TrainingDaten()
+        : TrainingDaten.fromJson(json as Map<String, dynamic>);
+  }
+
+  @override
+  Future<void> saveTraining(TrainingDaten daten) =>
+      _write(_trainingKey, daten.toJson());
+
+  @override
+  Future<List<FormVideo>> loadFormVideos() async {
+    final json = await _read(_formKey) as List?;
+    return [
+      for (final e in json ?? const [])
+        FormVideo.fromJson(e as Map<String, dynamic>),
+    ];
+  }
+
+  @override
+  Future<void> saveFormVideos(List<FormVideo> list) =>
+      _write(_formKey, [for (final v in list) v.toJson()]);
 }

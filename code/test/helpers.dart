@@ -14,6 +14,8 @@ import 'package:coach_app/sleep/schlafzeiten.dart';
 import 'package:coach_app/future_me/future_me_data.dart';
 import 'package:coach_app/planner/planner_data.dart';
 import 'package:coach_app/supplements/supplement_data.dart';
+import 'package:coach_app/training/form_video.dart';
+import 'package:coach_app/training/training_data.dart';
 import 'package:coach_app/sleep/sleep.dart';
 import 'package:coach_app/weight/weight.dart';
 
@@ -245,6 +247,21 @@ class MemoryFeedStore implements FeedStore {
   @override
   Future<void> saveWarumHeute(DateTime day, String? satz) async =>
       warumHeute = (tag: dayKey(day), satz: satz);
+
+  TrainingDaten training = const TrainingDaten();
+  List<FormVideo> formVideos = [];
+
+  @override
+  Future<TrainingDaten> loadTraining() async => training;
+
+  @override
+  Future<void> saveTraining(TrainingDaten d) async => training = d;
+
+  @override
+  Future<List<FormVideo>> loadFormVideos() async => List.of(formVideos);
+
+  @override
+  Future<void> saveFormVideos(List<FormVideo> list) async => formVideos = list;
 }
 
 /// Monday, 12 October 2026, 18:00.

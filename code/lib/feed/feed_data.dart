@@ -1,3 +1,5 @@
+import '../training/training_data.dart';
+
 /// The four areas of the app. Each has its own page in the Main Feed.
 enum Bereich {
   training('Training'),
@@ -10,39 +12,128 @@ enum Bereich {
   final String label;
 }
 
-/// The user's own training plan, one free-text entry per weekday
-/// (Monday first). Any sport works, e.g. "Oberkörper: Bankdrücken 3x8"
-/// or "Laufen 5 km". An empty day is a day off.
+/// The user's own training plan, one entry per weekday (Monday first).
+/// [tage] holds each day as text: the name (with time) on the first line,
+/// the exercises below, e.g. "Push 17:30\nBankdrücken 3 × 8 80 kg". Since
+/// 2026-10-26 the exercises are also kept with all their settings in
+/// [uebungen] (vault Umsetzung/Training eintragen.md). An empty day is a
+/// day off.
 class TrainingPlan {
-  TrainingPlan(List<String> tage)
+  TrainingPlan(List<String> tage, {List<List<PlanUebung>>? uebungen})
     : assert(tage.length == 7),
-      tage = List.unmodifiable(tage);
+      tage = List.unmodifiable(tage),
+      _uebungen = uebungen == null
+          ? null
+          : List<List<PlanUebung>>.unmodifiable([
+              for (final u in uebungen) List<PlanUebung>.unmodifiable(u),
+            ]);
 
   TrainingPlan.empty() : this(List.filled(7, ''));
 
+  /// A plan from day names and exercises with settings; the text of each
+  /// day is written from them.
+  factory TrainingPlan.aus(
+    List<String> namen,
+    List<List<PlanUebung>> uebungen,
+  ) => TrainingPlan([
+    for (var i = 0; i < 7; i++)
+      joinDay(namen[i], [for (final u in uebungen[i]) u.zeile].join('\n')),
+  ], uebungen: uebungen);
+
   final List<String> tage;
+  final List<List<PlanUebung>>? _uebungen;
 
   bool get isEmpty => tage.every((t) => t.trim().isEmpty);
 
   /// The plan for [day] (any time on that day).
   String forDay(DateTime day) => tage[day.weekday - 1];
 
-  List<String> toJson() => tage;
+  /// The exercises of weekday [i] (0 = Monday) with their settings. Older
+  /// plans in own words are read line by line.
+  List<PlanUebung> uebungenAm(int i) {
+    final u = _uebungen;
+    if (u != null) return u[i];
+    return [
+      for (final l in dayDetails(tage[i]).split('\n'))
+        if (l.trim().isNotEmpty) PlanUebung.lesen(l),
+    ];
+  }
 
-  factory TrainingPlan.fromJson(List<dynamic> json) =>
-      TrainingPlan([for (final t in json) t as String]);
+  /// The same plan with day [i] replaced (name and exercises).
+  TrainingPlan mitTag(int i, String text, List<PlanUebung> uebungen) =>
+      TrainingPlan(
+        [for (var k = 0; k < 7; k++) k == i ? text : tage[k]],
+        uebungen: [
+          for (var k = 0; k < 7; k++) k == i ? uebungen : uebungenAm(k),
+        ],
+      );
+
+  /// Changes every exercise called [name] on all days; [zuerst] moves it
+  /// to the front of its day.
+  TrainingPlan mitUebung(String name, PlanUebung neu, {bool zuerst = false}) {
+    final namen = [for (final t in tage) dayName(t)];
+    final alle = [
+      for (var k = 0; k < 7; k++)
+        () {
+          final list = [
+            for (final u in uebungenAm(k))
+              u.name.trim().toLowerCase() == name.trim().toLowerCase()
+                  ? neu
+                  : u,
+          ];
+          if (zuerst) {
+            final i = list.indexWhere((u) => identical(u, neu));
+            if (i > 0) list.insert(0, list.removeAt(i));
+          }
+          return list;
+        }(),
+    ];
+    return TrainingPlan.aus(namen, alle);
+  }
+
+  Object toJson() => _uebungen == null
+      ? tage
+      : {
+          'tage': tage,
+          'uebungen': [
+            for (final d in _uebungen) [for (final u in d) u.toJson()],
+          ],
+        };
+
+  factory TrainingPlan.fromJson(Object json) {
+    if (json is List) return TrainingPlan([for (final t in json) t as String]);
+    final m = json as Map<String, dynamic>;
+    return TrainingPlan(
+      [for (final t in m['tage'] as List) t as String],
+      uebungen: [
+        for (final d in m['uebungen'] as List)
+          [
+            for (final u in d as List)
+              PlanUebung.fromJson(u as Map<String, dynamic>),
+          ],
+      ],
+    );
+  }
 }
 
 /// What the user puts first when the AI swaps or progresses sessions.
+/// Since 2026-10-26: Kraft, Muskelaufbau, Ausdauer, Hybrid.
 enum Schwerpunkt {
   kraft('Kraft'),
-  calisthenics('Calisthenics'),
+  muskelaufbau('Muskelaufbau'),
   ausdauer('Ausdauer'),
-  ausgeglichen('Ausgeglichen');
+  hybrid('Hybrid');
 
   const Schwerpunkt(this.label);
 
   final String label;
+
+  /// Also reads the names used before 2026-10-26.
+  static Schwerpunkt? lesen(String? name) => switch (name) {
+    'calisthenics' => kraft,
+    'ausgeglichen' => hybrid,
+    _ => values.where((s) => s.name == name).firstOrNull,
+  };
 }
 
 /// A plan day is stored as "Name" on the first line and the exercises

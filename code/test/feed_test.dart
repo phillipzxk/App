@@ -88,41 +88,62 @@ void main() {
     expect(find.text('„Ich will stolz auf mich sein.“'), findsOneWidget);
   });
 
-  testWidgets('training plan is saved with name and exercises', (tester) async {
+  testWidgets('training plan is saved with names, exercises and settings', (
+    tester,
+  ) async {
     final (_, feed) = await _openFeed(tester);
     await openTab(tester, 'Training');
     await tester.tap(find.text('Plan festlegen'));
     await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('sportart-Krafttraining')));
+    await tester.tap(find.byKey(const ValueKey('sportart-Laufen')));
+    await tester.tap(find.byKey(const ValueKey('plan-schwerpunkt-hybrid')));
+    await tester.pumpAndSettle();
+    await scrollTo(tester, find.byKey(const ValueKey('plan-name-0')));
     await tester.enterText(
       find.byKey(const ValueKey('plan-name-0')),
       'Push + Laufen',
     );
+    await scrollTo(tester, find.byKey(const ValueKey('plan-add-0')));
+    await tester.tap(find.byKey(const ValueKey('plan-add-0')));
+    await tester.pumpAndSettle();
     await tester.enterText(
-      find.byKey(const ValueKey('plan-uebungen-0')),
-      'Bankdrücken 5x5\nSchulterdrücken 3x8\nDips 3x10\nLaufen 5 km',
+      find.byKey(const ValueKey('uebung-name')),
+      'Bankdrücken',
     );
+    await tester.enterText(find.byKey(const ValueKey('uebung-wert')), '80');
+    await scrollTo(tester, find.byKey(const ValueKey('modus-Bereich')));
+    await tester.tap(find.byKey(const ValueKey('modus-Bereich')));
+    await tester.pumpAndSettle();
+    await scrollTo(tester, find.byKey(const ValueKey('plan-add-0')));
+    await tester.tap(find.byKey(const ValueKey('plan-add-0')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('uebung-name')), 'Laufen');
+    await scrollTo(tester, find.byKey(const ValueKey('art-Strecke')));
+    await tester.tap(find.byKey(const ValueKey('art-Strecke')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('uebung-wert')), '5');
+    await scrollTo(tester, find.byKey(const ValueKey('plan-name-1')));
     await tester.enterText(
       find.byKey(const ValueKey('plan-name-1')),
       'Kampfsport',
     );
-    await tester.ensureVisible(find.text('Speichern'));
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
 
     expect(
       feed.plan.tage[0],
-      'Push + Laufen\nBankdrücken 5x5\nSchulterdrücken 3x8\nDips 3x10\n'
-      'Laufen 5 km',
+      'Push + Laufen\nBankdrücken 3 × 8–10 80 kg\nLaufen 5 km',
     );
+    expect(feed.plan.uebungenAm(0).first.wdhBis, 10);
+    expect(feed.plan.uebungenAm(0).last.art.name, 'strecke');
     expect(feed.plan.tage[1], 'Kampfsport');
-    expect(find.text('Push + Laufen · heute'), findsOneWidget);
-    expect(
-      find.text('Bankdrücken 5x5\nSchulterdrücken 3x8\nDips 3x10\nLaufen 5 km'),
-      findsOneWidget,
-    );
-    expect(find.text('Plan bearbeiten'), findsOneWidget);
+    expect(feed.training.sportarten, ['Krafttraining', 'Laufen']);
+    expect(feed.schwerpunkt, Schwerpunkt.hybrid);
+    expect(find.text('Heute: Push + Laufen'), findsOneWidget);
+    expect(find.text('Letztes Mal'), findsNothing);
 
-    await tester.ensureVisible(find.byKey(const ValueKey('schwerpunkt-kraft')));
+    await scrollTo(tester, find.byKey(const ValueKey('schwerpunkt-kraft')));
     await tester.tap(find.byKey(const ValueKey('schwerpunkt-kraft')));
     await tester.pumpAndSettle();
     expect(feed.schwerpunkt, Schwerpunkt.kraft);
@@ -153,7 +174,7 @@ void main() {
     );
     await tester.tap(row);
     await tester.pumpAndSettle();
-    expect(find.text('Push + Laufen · heute'), findsOneWidget);
+    expect(find.text('Heute: Push + Laufen'), findsOneWidget);
   });
 
   testWidgets('kcal setup asks for the first weight and shows the target', (
@@ -237,11 +258,12 @@ void main() {
   ) async {
     final (_, feed) = await _openFeed(tester);
     await openTab(tester, 'Training');
+    await scrollTo(tester, find.text('Wie war dein Training?'));
     await tester.enterText(
       find.widgetWithText(
         TextField,
-        'Was hast du geschafft, was nicht, und warum? Gern mit Gewicht, '
-        'Wiederholungen oder Kilometern.',
+        'Was hast du geschafft, was nicht, und warum? Der Coach sieht '
+        'auch deine Einträge.',
       ),
       'Nur die Hälfte, war zu kaputt.',
     );
