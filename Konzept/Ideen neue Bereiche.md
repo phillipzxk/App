@@ -106,3 +106,9 @@ Phillip will noch mehr Ideen.
 12. **Gedanken-Ablage:** steckt schon im Brainstorming (Punkt 1), auf jeden Fall drin.
 13. **Business-Baum:** ja (Meilensteine = Äste, eigener Look der Seite).
 14. **Woche im Business** im Reality Check: ja.
+
+## Persönlichkeit (Auswahl 2026-10-28, Ideen von Claude)
+
+- Drin: **Stimme aufnehmen** (KI-Hinweise zu Tempo, Füllwörtern, Sicherheit), **Pflege-Routine** (auf jeden Fall), **Stil-Check** (Outfit-Foto), **Wissen umsetzen**.
+- Nicht gewählt: Wer willst du sein, Wirkungs-Spiegel, Mut-Aufgabe der Woche.
+- Phillip will den Bereich mehr Richtung **Wissen** und **Looksmaxing** („alles, was man dafür benötigt“). Weitere Ideen folgen.
