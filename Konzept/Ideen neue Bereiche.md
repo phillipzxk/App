@@ -78,3 +78,9 @@ Orientiert sich an dem bisherigen Feed Energie, der wegfällt.
 5. **Handy-Spiegel:** Bildschirmzeit ehrlich gezeigt und mit dem Rest verbunden. Dazu: wann am Tag die Unkonzentriertheit kommt, durch die man zu TikTok usw. greift.
 6. **Handyfreie Zeiten:** die handyfreie Zeit nach dem Aufstehen (wie besprochen) plus ein **Fokus-Knopf**, der erst nach 30 Minuten (oder selbst eingestellter Zeit) wieder weggeht.
 7. **Gewohnheit andocken:** neue Gewohnheit an etwas hängen, das man sowieso macht (passt zum Danach-Plan aus Mindset).
+
+### Energie wandert zu Produktivität & Fokus (entschieden 2026-10-28)
+
+- Zu Produktivität & Fokus: Energie heute (Vorhersage + abends wie war es wirklich), Energie-Geber und -Räuber mit „Stimmt nicht“, beste Zeit (zusammen mit „Deine besten Stunden“, für Arbeit und Training), Energie-Frage im Check-in.
+- Bleibt bei Schlaf: Schlafwert, Mond, Wecker, Aufwach-Himmel, Sonnenlicht, Licht-Modus, Abend-Journal, Ruhezustand. „Dein Tag vom Coach“ bleibt in „Dein Tag“.
+- Unterbereich im Körper heißt nur noch **Schlaf & Routine**.
