@@ -127,3 +127,9 @@ Phillip will noch mehr Ideen.
 5. **Sorgen abgeben:** frei äußern, was einen gerade bedrückt, bei Bedarf Tipps erhalten.
 6. **Frage am Abend:** vor dem Einschlafen eine Art Motivation und Verdeutlichung des Lebens, um den wahren Sinn Stück für Stück kennenzulernen (passt zum Runterfahren / Abend-Journal).
 7. **Lebensrad-Check:** ja, allgemein alle 3 Monate.
+
+## Startseite mit 7 Feeds (Entwurf 2026-10-28)
+
+Phillip: jeder besprochene Bereich ist ein eigener Feed. Also 7 Feeds: Training, Ernährung, Schlaf & Routine, Produktivität & Fokus, Business & Beruf, Persönlichkeit, Mindset.
+
+Entwurf https://claude.ai/artifact/VTAMqf6z8qxjLX9vj2jRG8: oben alles wie jetzt. Unten Wurzelwerk mit Infokarte am Kreis (wie gebaut). Die drei Körper-Feeds teilen eine dicke Wurzel, die sich an einem goldenen Schild „Körper“ teilt. Die neuen Feeds und Mindset wachsen von der Hauptwurzel ab, Mindset am tiefsten. Die Hauptwurzel endet ganz unten in einem leuchtenden Punkt „Deine Lebensziele“ (tippen öffnet Lebensziele und Werte). Wartet auf OK.
