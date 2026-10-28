@@ -84,3 +84,15 @@ Orientiert sich an dem bisherigen Feed Energie, der wegfällt.
 - Zu Produktivität & Fokus: Energie heute (Vorhersage + abends wie war es wirklich), Energie-Geber und -Räuber mit „Stimmt nicht“, beste Zeit (zusammen mit „Deine besten Stunden“, für Arbeit und Training), Energie-Frage im Check-in.
 - Bleibt bei Schlaf: Schlafwert, Mond, Wecker, Aufwach-Himmel, Sonnenlicht, Licht-Modus, Abend-Journal, Ruhezustand. „Dein Tag vom Coach“ bleibt in „Dein Tag“.
 - Unterbereich im Körper heißt nur noch **Schlaf & Routine**.
+
+## Business & Beruf (Auswahl 2026-10-28, Ideen 1–7 von Claude)
+
+1. **Ziel + Brainstorming:** auf der Seite eigene Gedanken und erste Kernideen eingeben. Die KI arbeitet mit dir Möglichkeiten aus, daraus setzt ihr zusammen Ziele und Umsetzungspläne vom Anfang bis Ende. Guter Leitfaden für Struktur und Überblick.
+2. **Hebel der Woche:** eine Aktion pro Woche, dazu besondere Tipps der KI, auf die man sonst nicht kommt, damit die Umsetzung Realität wird.
+3. **Mutige Anfrage:** Dinge, die einem schwerfallen, beliebig viele aufschreiben. Jedes Mal, wenn man eins schafft, wächst etwas.
+4. **Skill-Leiter:** ja.
+5. **Umsatz-Ziel** statt Einnahmen-Verlauf (dafür gibt es andere Apps): ein Umsatzziel festlegen und ganz groß abhaken, wenn es geschafft ist.
+6. **Spar-Plan:** wie eine Spar-App mittendrin. Die KI sagt, ob sich etwas lohnt, und hilft, das Sparen zu maximieren.
+7. **Arbeit und Körper zusammen:** ja.
+
+Phillip will noch mehr Ideen.
