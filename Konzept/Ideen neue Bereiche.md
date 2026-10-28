@@ -96,3 +96,13 @@ Orientiert sich an dem bisherigen Feed Energie, der wegfällt.
 7. **Arbeit und Körper zusammen:** ja.
 
 Phillip will noch mehr Ideen.
+
+### Weitere Business-Ideen (8–14 von Claude, Auswahl 2026-10-28)
+
+8. **Ideen-Prüfer:** ja (harte Fragen, wie reif ist die Idee).
+9. **Der erste Euro:** ja (kleinste verkaufbare Version diese Woche).
+10. **Gesprächs-Hilfe** statt Rollenspiel: der Coach gibt vor einem Gespräch eine Hilfe, z. B. einen Gesprächsleitfaden.
+11. **Dein Stundenwert:** ja, und der Coach empfiehlt, worauf man sich konzentrieren muss, maximiert den Alltag auf Produktivität.
+12. **Gedanken-Ablage:** steckt schon im Brainstorming (Punkt 1), auf jeden Fall drin.
+13. **Business-Baum:** ja (Meilensteine = Äste, eigener Look der Seite).
+14. **Woche im Business** im Reality Check: ja.
