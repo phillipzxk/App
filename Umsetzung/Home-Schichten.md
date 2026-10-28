@@ -110,3 +110,10 @@ Phillip wollte das Design besonderer, „wie Apple“, aber mit dem Wurzel-Prinz
 - Unten 5 Wurzeln (Körper mit 3 Teilen, Produktivität & Fokus, Business & Beruf, Persönlichkeit, Mindset), Lebensziele ganz unten.
 - Verworfen: Ein Glasblatt, Goldfaden, Pur, Live-Insel, Tiefenschärfe, Taschenlampe, Jahresringe, Wurzelkarte, Durch die Erde, sowie die 6 Design-Welten (Topografie usw.).
 - Nächster Schritt: Animationen feinschleifen.
+
+### Animationen im Glas-Look (2026-10-28)
+
+- Phillip „Ja gut“ zu den 6 Animationen (Entwurf https://claude.ai/artifact/WhfrZXDgKYUBi8KTSekUPX): App-Start (Karten schweben aus der Unschärfe ein, Licht geht auf wie Sonnenaufgang), Glas antippen (drückt sich ein, Licht vom Finger), Werte zählen hoch beim Reinscrollen, Lichtteilchen steigen an den Wurzeln hoch, Heute geschafft (Karte leuchtet golden, Funken, neue kleine Wurzel am Spross).
+- **Bereich öffnen = Aufblühen** (entschieden 17:58, Entwurf https://claude.ai/artifact/Q1tLKYnJunAfwy2VKRmcPi): Homefeed verschwimmt hinter Glas, der Kreis fliegt nach oben links und wird Kopf der Seite (Name + Coach-Satz), aus seiner Mitte springen die vier Felder wie Blütenblätter im Bogen nacheinander heraus, mit Funken. Zuletzt kommt „Alles zu …“. „‹ Heute“ spielt alles rückwärts.
+- Felder je Bereich (Entwurf): Körper = Training, Ernährung, Schlaf & Routine, Verlauf. Produktivität = Fokus heute, Fokus-Block, Handy-Spiegel, Beste Stunden. Business = Hebel der Woche, Umsatz-Ziel, Business-Baum, Brainstorming. Persönlichkeit = Pflege, Look, Lernen, Stimme. Mindset = Dein Berg, Wort gehalten, Werte, Ruhe.
+- Verworfen: Wurzeln wachsen, Zellteilung, Karten austeilen; Felder-Umordnen-Varianten (Morph-Leiste, Wallet, Folien, Goldfaden-Liste) waren ein Missverständnis.
