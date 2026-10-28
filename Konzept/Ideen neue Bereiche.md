@@ -133,3 +133,5 @@ Phillip will noch mehr Ideen.
 Phillip: jeder besprochene Bereich ist ein eigener Feed. Also 7 Feeds: Training, Ernährung, Schlaf & Routine, Produktivität & Fokus, Business & Beruf, Persönlichkeit, Mindset.
 
 Entwurf https://claude.ai/artifact/VTAMqf6z8qxjLX9vj2jRG8: oben alles wie jetzt. Unten Wurzelwerk mit Infokarte am Kreis (wie gebaut). Die drei Körper-Feeds teilen eine dicke Wurzel, die sich an einem goldenen Schild „Körper“ teilt. Die neuen Feeds und Mindset wachsen von der Hauptwurzel ab, Mindset am tiefsten. Die Hauptwurzel endet ganz unten in einem leuchtenden Punkt „Deine Lebensziele“ (tippen öffnet Lebensziele und Werte). Wartet auf OK.
+
+**Änderung 17:23:** Phillip wollte es kleiner und übersichtlicher. Jetzt 5 Wurzeln mit kleinen Kreisen und kurzen Karten: Körper (Karte nennt nur die 3 Teile Training, Ernährung, Schlaf & Routine), Produktivität & Fokus, Business & Beruf, Persönlichkeit, Mindset. Ganz unten die Lebensziele. Gleicher Link, Version 2.
