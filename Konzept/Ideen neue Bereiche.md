@@ -112,3 +112,8 @@ Phillip will noch mehr Ideen.
 - Drin: **Stimme aufnehmen** (KI-Hinweise zu Tempo, Füllwörtern, Sicherheit), **Pflege-Routine** (auf jeden Fall), **Stil-Check** (Outfit-Foto), **Wissen umsetzen**.
 - Nicht gewählt: Wer willst du sein, Wirkungs-Spiegel, Mut-Aufgabe der Woche.
 - Phillip will den Bereich mehr Richtung **Wissen** und **Looksmaxing** („alles, was man dafür benötigt“). Weitere Ideen folgen.
+
+### Persönlichkeit: weitere Ideen, alle gewählt (2026-10-28)
+
+- **Looksmaxing:** Look-Analyse vom Foto (ohne Punktzahl fürs Gesicht), Frisur-Berater, Haut-Plan (bei echten Problemen: Hautarzt), Haltung (Übungen landen im Training), Look-Verlauf mit dem Fortschrittsfoto, Die kleinen Dinge (Zähne, Duft, Hände, Augenbrauen).
+- **Wissen:** Deine Bibliothek (Coach fragt später ab), Lern-Ziel mit 10 Minuten am Tag. Skills werden durch den Coach **linear Schritt für Schritt** erlernt (wie ein Kurs, der aufeinander aufbaut).
