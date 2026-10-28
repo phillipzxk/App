@@ -27,3 +27,16 @@ Entwurf 1 (6 Ansichten): https://claude.ai/artifact/Kc1tTh8v6iihhj8CBevMS9 — w
 ## Entwurf 2 (2026-10-28 abends)
 
 https://claude.ai/artifact/XE1EFnqeGX6MxLmR4EgZVn: Entwurf 1 im Glas-Look (Berg bleibt das Bild), dazu Sinn & innere Ruhe (siehe Konzept/Ideen neue Bereiche): Block „Sinn & innere Ruhe“ auf der Seite mit Lebensziele (leuchtender Punkt), Werte (wöchentlich ehrlich 1–5), Ruhe-Knopf (3 Min Musik + Atemkreis, alles andere gesperrt), Sorgen abgeben (Coach trennt „kannst du ändern“ / „liegt nicht bei dir“, Änderbares auf Wunsch als Stein), Frage am Abend (nach dem Journal, formt Leitsatz), Lebensrad (alle 3 Monate, Vergleich gestrichelt). Ruhe im Alltag: Meditation, Lesen usw. zum Abhaken. Wartet auf OK.
+
+## Entwurf 3 (2026-10-28): alles auf einer Seite
+
+Phillip zu Entwurf 2: „nicht alles als einzelne Seite, sondern das was passt auf eine Seite … geil animiert … Das letzte (Lebensrad) ist sehr stark.“
+
+Entwurf: https://claude.ai/artifact/AGHofZHMefkU44xGGKYdQU (wartet auf sein OK)
+
+- Eine Seite, alles untereinander: Coach-Satz, Berg, Wort gehalten + Selbstständig, Ausreden-Spiegel, „Sinn & innere Ruhe“ (Lebensziele, Werte, Ruhe-Knopf, Sorgen abgeben), Lebensrad, Durchgezogen, Dein Warum, Brief an dich, Frage heute Abend.
+- Aufklappen an Ort und Stelle: Feld klappt weich auf, Inhalt schwebt Zeile für Zeile herein, Rand leuchtet, alle anderen Felder treten kurz zurück (dunkler, etwas kleiner). Nochmal tippen klappt zu.
+- Berg: Stein antippen → 2-Minuten-Schritt mit Timer + Danach-Plan direkt unter dem Berg; „Erledigt“ → Stein rollt mit Funken weg, dein Punkt klettert hoch.
+- Sorgen abgeben: nach „Abgeben“ lösen sich die Zeilen auf, Coach-Antwort baut sich auf (Kannst du ändern | Liegt nicht bei dir).
+- Ruhe-Knopf ist das Einzige mit ganzem Bildschirm: Kreis wächst aus dem Knopf, nur Atmen + Musik, 3 Minuten gesperrt.
+- Lebensrad hat festen Platz und baut sich beim Hinscrollen auf (gold = heute, gestrichelt = vor 3 Monaten).
