@@ -27,3 +27,10 @@ Wird erst nach der Mindset-Seite zusammen besprochen. Siehe [[Kern der App]].
 4. **Mut & Komfortzone:** jede Woche eine passende kleine Mutprobe vom Coach.
 5. **Stress & Nervensystem:** Atmung, Pausen, später Puls und HRV von der Uhr.
 6. **Handy & Zeit:** Bildschirmzeit, Ablenkung; überschneidet sich mit „Dopamin kontrollieren“.
+
+## Phillips Antwort (2026-10-28 09:19)
+
+Alle 6 Ideen von Claude: ja.
+- 3 Aussehen & Pflege: ja, als eigener Bereich, nicht bei Mindset.
+- 5 Stress & Nervensystem: der Coach sagt genau, wann eine Pause oder Schlaf nötig ist und was man dann machen soll.
+- 6 Handy & Zeit: mit einer Art Bildschirmsperre. Geht erst in der Handy-Version (iPhone über Apples Bildschirmzeit-Schnittstelle, Android über Nutzungszugriff), nicht in der Web-Vorschau.
