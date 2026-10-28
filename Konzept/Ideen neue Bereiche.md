@@ -66,3 +66,15 @@ Phillip wollte die Bereiche ganz allgemein haben. Aus den 8 allgemeinen Bereiche
 5. **Persönlichkeit** (Auftreten, Kommunikation, Aussehen, Stil, dazu Wissen & Wachstum)
 
 Beziehungen kommt **nicht** rein.
+
+## Produktivität & Fokus (entschieden 2026-10-28)
+
+Orientiert sich an dem bisherigen Feed Energie, der wegfällt.
+
+1. **Fokus für den Tag:** jeden Morgen EINE wichtigste Sache für den Tag. Der Rest steht im Tagesablauf.
+2. **Fokus-Block:** Arbeitsphase starten, Länge legt der Coach nach deiner Energie fest. In der Handy-Version werden dabei Apps gesperrt.
+3. **Deine besten Stunden:** der Coach erkennt, wann du am klarsten bist, und legt die wichtige Arbeit in „Dein Tag“ dorthin.
+4. **Ablenkungs-Knopf:** kurz tippen, wenn der Drang zum Handy kommt. Der Coach sieht mit der Zeit, wann und warum.
+5. **Handy-Spiegel:** Bildschirmzeit ehrlich gezeigt und mit dem Rest verbunden. Dazu: wann am Tag die Unkonzentriertheit kommt, durch die man zu TikTok usw. greift.
+6. **Handyfreie Zeiten:** die handyfreie Zeit nach dem Aufstehen (wie besprochen) plus ein **Fokus-Knopf**, der erst nach 30 Minuten (oder selbst eingestellter Zeit) wieder weggeht.
+7. **Gewohnheit andocken:** neue Gewohnheit an etwas hängen, das man sowieso macht (passt zum Danach-Plan aus Mindset).
