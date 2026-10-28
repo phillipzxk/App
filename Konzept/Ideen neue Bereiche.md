@@ -40,3 +40,17 @@ Alle 6 Ideen von Claude: ja.
 Nach dem Lebensrad (8 bis 12 Lebensbereiche). Schon da oder geplant: Körper (Training, Ernährung, Schlaf & Energie), Mindset (inkl. Mut), Fokus & Handy, Geld & Arbeit, Beziehungen & Umfeld, Innere Ruhe & Glaube, Auftreten/Aussehen/Pflege, Wissen umsetzen.
 Fehlt noch (gefragt, ob dazu): Liebe & Partnerschaft, Sinn & Lebensziele, Freizeit & Erlebnisse, Wohnen & Ordnung, Beitrag. „Durchbruch in der modernen Welt“ eher als Haltung, die überall mitläuft.
 Offene Frage Aufbau: 4 bisherige immer, neue selbst wählen (höchstens 2 oder 3 gleichzeitig), Coach schlägt vor.
+
+## Zusammengefasst (2026-10-28 09:24)
+
+Phillip: Körper ist **ein** Bereich, darunter wie gehabt Sport, Ernährung/Supplements, Schlaf/Routine. Themen zu großen Bereichen zusammenfassen (z. B. „Produktivität“, „Aussehen“). Vorschlag Claude, 7 Bereiche:
+
+1. **Körper:** Sport, Ernährung & Supplements, Schlaf & Routine, Energie
+2. **Mindset:** durchziehen, Mut & Komfortzone, Ausreden, Selbstständigkeit
+3. **Produktivität:** Fokus & Handy (Dopamin, Bildschirmsperre), Zeit, Ordnung & Alltag, Wissen umsetzen
+4. **Geld:** Einnahmequellen, Arbeit & Karriere, Sparen
+5. **Aussehen:** Pflege, Kleidung, Auftreten & Wirkung
+6. **Beziehungen:** Partnerschaft, Freunde & Familie, Umfeld, Selbstliebe
+7. **Innere Ruhe:** mentaler Frieden, Glaube, Stress & Pausen, Sinn & Lebensziele
+
+Freizeit und „anderen helfen“ laufen unter Innere Ruhe und Beziehungen mit, „Durchbruch in der modernen Welt“ als Haltung überall. Wartet auf Phillips OK.
