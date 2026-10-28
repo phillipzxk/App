@@ -117,3 +117,13 @@ Phillip will noch mehr Ideen.
 
 - **Looksmaxing:** Look-Analyse vom Foto (ohne Punktzahl fürs Gesicht), Frisur-Berater, Haut-Plan (bei echten Problemen: Hautarzt), Haltung (Übungen landen im Training), Look-Verlauf mit dem Fortschrittsfoto, Die kleinen Dinge (Zähne, Duft, Hände, Augenbrauen).
 - **Wissen:** Deine Bibliothek (Coach fragt später ab), Lern-Ziel mit 10 Minuten am Tag. Skills werden durch den Coach **linear Schritt für Schritt** erlernt (wie ein Kurs, der aufeinander aufbaut).
+
+## Mindset: Sinn & innere Ruhe (entschieden 2026-10-28, Ideen von Claude)
+
+1. **Lebensziele:** man hält allgemein seine Lebensziele fest, sie stehen im Wurzelwerk (Gipfel/Ziel sichtbar).
+2. **Deine Werte:** auf jeden Fall, z. B. ruhig bleiben, immer nett bleiben, wöchentlich ehrlich beantworten. Dazu routinierte Sachen wie Meditation, Lesen, um Ruhe in den Alltag zu bringen. Das ist der Sinn.
+3. **Ruhe-Knopf:** jederzeit drückbar, dann kommt ruhige, besinnliche Musik für ca. 3 Minuten Meditation, in der man nichts anderes machen kann.
+4. **Deine Praxis:** ja (Gebet, Meditation, Lesen als Routine, Coach predigt nicht).
+5. **Sorgen abgeben:** frei äußern, was einen gerade bedrückt, bei Bedarf Tipps erhalten.
+6. **Frage am Abend:** vor dem Einschlafen eine Art Motivation und Verdeutlichung des Lebens, um den wahren Sinn Stück für Stück kennenzulernen (passt zum Runterfahren / Abend-Journal).
+7. **Lebensrad-Check:** ja, allgemein alle 3 Monate.
