@@ -23,3 +23,7 @@ Dazu ein eigener Look (Vorschlag von Claude): Berg im Morgengrauen, kühles Stei
 ## Entwurf
 
 Entwurf 1 (6 Ansichten): https://claude.ai/artifact/Kc1tTh8v6iihhj8CBevMS9 — wartet auf Phillips OK.
+
+## Entwurf 2 (2026-10-28 abends)
+
+https://claude.ai/artifact/XE1EFnqeGX6MxLmR4EgZVn: Entwurf 1 im Glas-Look (Berg bleibt das Bild), dazu Sinn & innere Ruhe (siehe Konzept/Ideen neue Bereiche): Block „Sinn & innere Ruhe“ auf der Seite mit Lebensziele (leuchtender Punkt), Werte (wöchentlich ehrlich 1–5), Ruhe-Knopf (3 Min Musik + Atemkreis, alles andere gesperrt), Sorgen abgeben (Coach trennt „kannst du ändern“ / „liegt nicht bei dir“, Änderbares auf Wunsch als Stein), Frage am Abend (nach dem Journal, formt Leitsatz), Lebensrad (alle 3 Monate, Vergleich gestrichelt). Ruhe im Alltag: Meditation, Lesen usw. zum Abhaken. Wartet auf OK.
