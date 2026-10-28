@@ -98,3 +98,15 @@ Phillip wollte das Fortschrittsfoto wieder auf Heute, das Muster viel kleiner (n
   - Mindset: Durchgezogen und Dein Warum
 - Der schwächste Bereich bekommt einen goldenen Rand und „Hier hängt es gerade.“ vor dem Coach-Satz.
 - Gebaut 2026-10-25 (`today_tab.dart`, `wurzelwerk.dart` `_knotenGross` und `_InfoKarte`, `muster_widgets.dart` `MusterFeld`, `future_me_card.dart` `FotoFeld`).
+
+## Glas-Look (entschieden 2026-10-28)
+
+Phillip wollte das Design besonderer, „wie Apple“, aber mit dem Wurzel-Prinzip. Gewählt: **Glas-Wurzelwerk** https://claude.ai/artifact/UNXrcw6iMmXRJg1dormGgF („sehr geil“, danach weitere Varianten verworfen: „lass die erste Idee“).
+
+- Alle Karten und Kreise wie mattes Glas (iOS-Glas-Look): verschwommenes Durchscheinen von Licht und Wurzeln, feine Lichtkante oben, Glanz wandert beim Neigen mit.
+- Weiche goldene Lichtflecken hinter dem oberen Bereich.
+- Apple-Systemschrift: groß und fett „Heute, Phillip“, sonst ruhig, keine Großbuchstaben-Labels.
+- Beim Scrollen kleine Glas-Leiste oben mit dem Wichtigsten, Wurzeln bewegen sich etwas langsamer (Tiefe).
+- Unten 5 Wurzeln (Körper mit 3 Teilen, Produktivität & Fokus, Business & Beruf, Persönlichkeit, Mindset), Lebensziele ganz unten.
+- Verworfen: Ein Glasblatt, Goldfaden, Pur, Live-Insel, Tiefenschärfe, Taschenlampe, Jahresringe, Wurzelkarte, Durch die Erde, sowie die 6 Design-Welten (Topografie usw.).
+- Nächster Schritt: Animationen feinschleifen.
