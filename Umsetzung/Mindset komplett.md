@@ -40,3 +40,15 @@ Entwurf: https://claude.ai/artifact/AGHofZHMefkU44xGGKYdQU (wartet auf sein OK)
 - Sorgen abgeben: nach „Abgeben“ lösen sich die Zeilen auf, Coach-Antwort baut sich auf (Kannst du ändern | Liegt nicht bei dir).
 - Ruhe-Knopf ist das Einzige mit ganzem Bildschirm: Kreis wächst aus dem Knopf, nur Atmen + Musik, 3 Minuten gesperrt.
 - Lebensrad hat festen Platz und baut sich beim Hinscrollen auf (gold = heute, gestrichelt = vor 3 Monaten).
+
+## Entwurf 4 (2026-10-28): im Home-Look, jedes Feld eigene Seite
+
+Phillip zu Entwurf 3: „Design anders so wie Home-Feed, dazu nicht alles auf eine Seite, und Animationen, wie die Felder sich aneinanderreihen und da sind, richtige Animationen im modernen Stil.“
+
+Entwurf: https://claude.ai/artifact/JNBRjFFJN6Vgp8rvEiiBcG (wartet auf sein OK)
+
+- Übersicht wie der Home-Feed: Glas-Kreise an einer goldenen Wurzel, daneben kurze Glas-Karten (Name, ein Satz, kleines Bild rechts). Oben Ring 8 + „Mindset“, Coach-Satz, Dein Warum. Reihenfolge: Berg, Wort gehalten, Selbstständig, Ausreden-Spiegel, Durchgezogen, dann Pille „Sinn & innere Ruhe“: Werte, Ruhe-Knopf, Sorgen abgeben, Frage heute Abend, Brief an dich, Lebensrad; am Wurzelende leuchten die Lebensziele.
+- Einflug: Die Wurzel wächst von oben nach unten. Wo sie ankommt, ploppt der Kreis mit Funken auf, und die Karte gleitet aus ihm heraus. Danach wandern Lichtpunkte die Wurzel hoch.
+- Feld öffnen: Die Karte wächst zur ganzen Seite, dahinter wird alles unscharf. Alle Kreise fliegen im Bogen nach oben und reihen sich als Leiste auf. Der Inhalt schwebt Zeile für Zeile herein.
+- Wechseln: Kreis oben antippen oder wischen. Der goldene Strich gleitet mit, der Inhalt rutscht seitlich raus und rein. „‹ Mindset“ spielt alles rückwärts.
+- Ruhe-Knopf bleibt der einzige Vollbild-Moment (Kreis wächst über alles, 3 Minuten nur Atmen + Musik).
