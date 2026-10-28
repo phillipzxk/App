@@ -54,3 +54,15 @@ Phillip: Körper ist **ein** Bereich, darunter wie gehabt Sport, Ernährung/Supp
 7. **Innere Ruhe:** mentaler Frieden, Glaube, Stress & Pausen, Sinn & Lebensziele
 
 Freizeit und „anderen helfen“ laufen unter Innere Ruhe und Beziehungen mit, „Durchbruch in der modernen Welt“ als Haltung überall. Wartet auf Phillips OK.
+
+## Entscheidung 2026-10-28 (allgemein, nicht nach Phillips Notizen)
+
+Phillip wollte die Bereiche ganz allgemein haben. Aus den 8 allgemeinen Bereichen (Lebensrad) hat er gewählt:
+
+1. **Körper** (Sport, Ernährung & Supplements, Schlaf & Routine, Energie)
+2. **Kopf & Mindset** (inklusive Sinn & innere Ruhe: Werte, Glaube, Lebensziele, Zufriedenheit)
+3. **Produktivität & Fokus** (Zeit, Gewohnheiten, Konzentration, Handy)
+4. **Business & Beruf** (Einkommen, Arbeit, Karriere, Sparen)
+5. **Persönlichkeit** (Auftreten, Kommunikation, Aussehen, Stil, dazu Wissen & Wachstum)
+
+Beziehungen kommt **nicht** rein.
