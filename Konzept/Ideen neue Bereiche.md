@@ -34,3 +34,9 @@ Alle 6 Ideen von Claude: ja.
 - 3 Aussehen & Pflege: ja, als eigener Bereich, nicht bei Mindset.
 - 5 Stress & Nervensystem: der Coach sagt genau, wann eine Pause oder Schlaf nötig ist und was man dann machen soll.
 - 6 Handy & Zeit: mit einer Art Bildschirmsperre. Geht erst in der Handy-Version (iPhone über Apples Bildschirmzeit-Schnittstelle, Android über Nutzungszugriff), nicht in der Web-Vorschau.
+
+## Ganze Karte (Vorschlag Claude, 2026-10-28 09:22)
+
+Nach dem Lebensrad (8 bis 12 Lebensbereiche). Schon da oder geplant: Körper (Training, Ernährung, Schlaf & Energie), Mindset (inkl. Mut), Fokus & Handy, Geld & Arbeit, Beziehungen & Umfeld, Innere Ruhe & Glaube, Auftreten/Aussehen/Pflege, Wissen umsetzen.
+Fehlt noch (gefragt, ob dazu): Liebe & Partnerschaft, Sinn & Lebensziele, Freizeit & Erlebnisse, Wohnen & Ordnung, Beitrag. „Durchbruch in der modernen Welt“ eher als Haltung, die überall mitläuft.
+Offene Frage Aufbau: 4 bisherige immer, neue selbst wählen (höchstens 2 oder 3 gleichzeitig), Coach schlägt vor.
