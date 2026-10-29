@@ -173,7 +173,7 @@ void main() {
         ),
       );
     await openApp(tester, diary);
-    final wert = find.byKey(const ValueKey('knoten-wert-schlaf'));
+    final wert = find.byKey(const ValueKey('knoten-wert-koerper'));
     await scrollTo(tester, wert);
     expect(
       find.descendant(
@@ -183,7 +183,7 @@ void main() {
       findsOneWidget,
     );
     // The weakest area gets the coach's bubble.
-    expect(find.byKey(const ValueKey('knoten-sagt-schlaf')), findsOneWidget);
+    expect(find.byKey(const ValueKey('knoten-sagt-koerper')), findsOneWidget);
     await openBereich(tester, 'schlaf');
     expect(find.text('Zwei kurze Nächte.'), findsWidgets);
     expect(find.text('Schlaf & Routine'), findsWidgets);

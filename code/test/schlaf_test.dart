@@ -198,7 +198,7 @@ void main() {
       }
       if (key == 'energie-Besser' &&
           find.byKey(ValueKey(key)).evaluate().isEmpty) {
-        await openKachel(tester, 's-energie');
+        await openKachel(tester, 'p-energie');
       }
       final f = find.byKey(ValueKey(key));
       await scrollTo(tester, f);
@@ -235,7 +235,10 @@ void main() {
 
     testWidgets('energy feedback is remembered', (tester) async {
       final (_, feed) = await start(tester);
-      await openKachel(tester, 's-energie');
+      // Energie lives in Produktivität & Fokus since 2026-10-29.
+      await openTab(tester, 'Heute');
+      await openBereich(tester, 'produktiv');
+      await openKachel(tester, 'p-energie');
       expect(find.byKey(const ValueKey('energie-vorhersage')), findsOneWidget);
       await tippe(tester, 'energie-Besser');
       expect(feed.schlaf.energieAm('2026-10-12'), 'Besser');

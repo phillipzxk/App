@@ -1131,14 +1131,219 @@ class _HomePageState extends State<HomePage> {
         WerteScope(checkIns: _checkIns, today: widget.clock(), child: bau()),
   );
 
-  Future<void> _oeffneBereich(Bereich b, Offset mitte) => oeffneMitKreis(
+  /// The five roots on Heute (vault Home-Schichten, Glas-Look
+  /// 2026-10-28): Körper with its 3 parts, Produktivität & Fokus, Business
+  /// & Beruf, Persönlichkeit and Mindset.
+  List<WurzelBereich> _wurzeln(DateTime today) {
+    final koerper = [Bereich.training, Bereich.ernaehrung, Bereich.schlaf];
+    int? schnitt(List<int?> l) {
+      final da = [for (final x in l) ?x];
+      return da.isEmpty
+          ? null
+          : (da.reduce((a, b) => a + b) / da.length).round();
+    }
+
+    final kw = schnitt([for (final b in koerper) _wert(b).$1]);
+    final kd = schnitt([for (final b in koerper) _wert(b).$2]);
+    final kWoche = [
+      for (var i = 0; i < 7; i++)
+        schnitt([
+          for (final b in koerper) werteVerlauf(_checkIns, b, today, 7)[i],
+        ]),
+    ];
+    // The coach's sentence of the weakest part.
+    Bereich? schwach;
+    for (final b in koerper) {
+      final w = _wert(b).$1;
+      if (w == null) continue;
+      if (schwach == null || w < _wert(schwach).$1!) schwach = b;
+    }
+    (int?, int?) diff(List<int?> woche) => (
+      woche.last,
+      woche.last == null || woche[woche.length - 2] == null
+          ? null
+          : woche.last! - woche[woche.length - 2]!,
+    );
+    final heute = dayKey(today);
+    final p = _produktiv.d;
+    final pWoche = [
+      for (var i = 6; i >= 0; i--)
+        produktivWert(p, dayKey(today.subtract(Duration(days: i)))),
+    ];
+    final pf = p.fokusAm(heute);
+    final bz = _business.d;
+    final bWoche = [
+      for (var i = 6; i >= 0; i--)
+        businessWert(bz, today.subtract(Duration(days: i))),
+    ];
+    final h = bz.hebelIn(dayKey(montagVon(today)));
+    final pe = _persoenlich.d;
+    final peWoche = [
+      for (var i = 6; i >= 0; i--)
+        persoenlichWert(pe, dayKey(today.subtract(Duration(days: i)))),
+    ];
+    final (mw, md) = _wert(Bereich.mindset);
+    final steine = _mindset.d.offeneSteine;
+    return [
+      WurzelBereich(
+        id: 'koerper',
+        name: 'Körper',
+        icon: Icons.fitness_center,
+        wert: kw,
+        diff: kd,
+        grund: schwach == null ? null : _heute?.gruende[schwach.name],
+        woche: kWoche,
+        teile: const ['Training', 'Ernährung', 'Schlaf & Routine'],
+      ),
+      WurzelBereich(
+        id: 'produktiv',
+        name: 'Produktivität & Fokus',
+        icon: Icons.bolt,
+        wert: diff(pWoche).$1,
+        diff: diff(pWoche).$2,
+        woche: pWoche,
+        grund: pf == null
+            ? 'Noch keine Sache festgelegt, die heute zählt.'
+            : pf.erledigt
+            ? 'Die eine Sache heute ist geschafft.'
+            : null,
+        infos: [if (pf != null) ('Fokus', pf.text)],
+      ),
+      WurzelBereich(
+        id: 'business',
+        name: 'Business & Beruf',
+        icon: Icons.work_outline,
+        wert: diff(bWoche).$1,
+        diff: diff(bWoche).$2,
+        woche: bWoche,
+        infos: [
+          if (h != null) ('Hebel', '${h.erledigt} von ${h.punkte.length}'),
+          if (bz.ziele[monatVon(today)] case final z?)
+            ('Umsatz', '${euro(umsatzIm(bz, monatVon(today)))} von ${euro(z)}'),
+        ],
+        grund: h == null ? 'Noch kein Hebel für diese Woche.' : null,
+      ),
+      WurzelBereich(
+        id: 'persoenlich',
+        name: 'Persönlichkeit',
+        icon: Icons.person_outline,
+        wert: diff(peWoche).$1,
+        diff: diff(peWoche).$2,
+        woche: peWoche,
+        infos: [
+          (
+            'Pflege',
+            '${morgensErledigt(pe, heute)} von ${pe.morgens.length} morgens',
+          ),
+          if (pe.kurs?.aktuelle case final l?) ('Lernen', l.titel),
+        ],
+      ),
+      WurzelBereich(
+        id: 'mindset',
+        name: 'Mindset',
+        icon: Icons.landscape,
+        wert: mw,
+        diff: md,
+        grund: _heute?.gruende[Bereich.mindset.name],
+        woche: werteVerlauf(_checkIns, Bereich.mindset, today, 7),
+        infos: [
+          if (steine.isNotEmpty) ('Dein Berg', steine.first.titel),
+          ..._infos(Bereich.mindset).take(steine.isEmpty ? 2 : 1),
+        ],
+      ),
+    ];
+  }
+
+  /// "Deine Lebensziele" at the end of the tap root.
+  Widget _lebenszieleKarte() {
+    final z = _mindset.d.ziele;
+    return GestureDetector(
+      key: const ValueKey('lebensziele'),
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => _lebendig(
+            () => FeldSeite(
+              bereich: 'Mindset',
+              feld: Feld(
+                titel: 'Deine Lebensziele',
+                icon: Icons.brightness_7_outlined,
+                coach:
+                    'Ganz unten, wo alle Wurzeln hinführen. Groß gedacht, '
+                    'aus allen Bereichen.',
+                inhalt: (_) => [ZieleSeite(u: _mindsetUmfeld)],
+              ),
+            ),
+          ),
+        ),
+      ),
+      child: GlasBox(
+        art: GlasArt.gold,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 30,
+              height: 30,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: CoachStyle.goldGradient,
+                boxShadow: CoachStyle.goldGlow,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text('Ganz unten', style: Glas.tSoft.copyWith(fontSize: 12)),
+            GoldSchrift(
+              'Deine Lebensziele',
+              style: Glas.tBig.copyWith(fontSize: 20),
+            ),
+            const SizedBox(height: 8),
+            if (z.isEmpty)
+              Text(
+                'Tippen und aufschreiben, was du im Leben erreichen willst',
+                textAlign: TextAlign.center,
+                style: Glas.tSoft,
+              )
+            else
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final x in z.take(4))
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(99),
+                        border: Border.all(color: const Color(0x55E0BF7E)),
+                      ),
+                      child: Text(
+                        x.text,
+                        style: Glas.tLabel.copyWith(fontSize: 12),
+                      ),
+                    ),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _oeffneBereich(String id, Offset mitte) => oeffneMitKreis(
     context,
     mitte,
-    (_) => b == Bereich.mindset
-        ? _lebendig(_mindsetSeite)
-        // Training, Ernährung and Schlaf & Routine live in Körper now
-        // (vault Umsetzung/Körper komplett, Entwurf 3, 2026-10-29).
-        : _lebendig(() => _koerperSeite(b)),
+    (_) => _lebendig(switch (id) {
+      'mindset' => _mindsetSeite,
+      'produktiv' => _produktivSeite,
+      'business' => _businessSeite,
+      'persoenlich' => _persoenlichSeite,
+      // Training, Ernährung and Schlaf & Routine live in Körper now
+      // (vault Umsetzung/Körper komplett, Entwurf 3, 2026-10-29).
+      _ => () => _koerperSeite(Bereich.training),
+    }),
   );
 
   /// The full area page with everything the old tab had.
@@ -1535,22 +1740,8 @@ class _HomePageState extends State<HomePage> {
         onOpen: _oeffneZukunft,
       ),
       onOpenMuster: _oeffneMuster,
-      bereiche: [
-        for (final b in Bereich.values)
-          () {
-            final (w, d) = _wert(b);
-            return WurzelBereich(
-              bereich: b,
-              name: _namen[b]!,
-              icon: _icons[b]!,
-              wert: w,
-              diff: d,
-              grund: _heute?.gruende[b.name],
-              woche: werteVerlauf(_checkIns, b, today, 7),
-              infos: _infos(b),
-            );
-          }(),
-      ],
+      bereiche: _wurzeln(today),
+      lebensziele: _lebenszieleKarte(),
       onOpenBereich: _oeffneBereich,
       wurzeln: _fokusLaeuft ? _fokus!.anzahlGeschafft : 0,
       jubel: _jubel,

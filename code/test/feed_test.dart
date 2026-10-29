@@ -93,7 +93,7 @@ void main() {
     // Closing Körper goes back to the roots.
     await tester.tap(find.byKey(const ValueKey('bereich-zurueck')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('wurzel-schlaf')), findsOneWidget);
+    expect(find.byKey(const ValueKey('wurzel-koerper')), findsOneWidget);
 
     await openTab(tester, 'Mindset');
     expect(find.byKey(const ValueKey('mindset-seite')), findsOneWidget);

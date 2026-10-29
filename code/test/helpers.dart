@@ -396,9 +396,16 @@ Future<void> openKachel(WidgetTester tester, String id) async {
 
 /// Taps the area [b] on its root: it opens big over the whole screen.
 Future<void> openBereich(WidgetTester tester, String b) async {
-  await scrollTo(tester, find.byKey(ValueKey('wurzel-$b')));
-  await tester.tap(find.byKey(ValueKey('wurzel-$b')));
+  // Training, Ernährung and Schlaf are the three parts of Körper.
+  const koerper = ['training', 'ernaehrung', 'schlaf'];
+  final w = koerper.contains(b) ? 'koerper' : b;
+  await scrollTo(tester, find.byKey(ValueKey('wurzel-$w')));
+  await tester.tap(find.byKey(ValueKey('wurzel-$w')));
   await tester.pumpAndSettle();
+  if (koerper.contains(b) && b != 'training') {
+    await tester.tap(find.byKey(ValueKey('teil-$b')));
+    await tester.pumpAndSettle();
+  }
 }
 
 /// Phone-sized portrait view, tall enough that whole pages are built.

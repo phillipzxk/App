@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../checkin/checkin.dart';
 import '../checkin/checkin_flow.dart';
-import '../feed/feed_data.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import '../feed/muster.dart';
@@ -66,6 +65,7 @@ class TodayTab extends StatelessWidget {
     required this.onOpenMuster,
     required this.bereiche,
     required this.onOpenBereich,
+    this.lebensziele,
     this.wurzeln = 0,
     this.jubel,
     this.jubelTick = 0,
@@ -110,7 +110,10 @@ class TodayTab extends StatelessWidget {
 
   /// The four areas on the roots and what happens on a tap.
   final List<WurzelBereich> bereiche;
-  final Future<void> Function(Bereich b, Offset mitte) onOpenBereich;
+  final Future<void> Function(String id, Offset mitte) onOpenBereich;
+
+  /// The life goals card at the end of the tap root.
+  final Widget? lebensziele;
 
   /// How deep the roots reach (each "Heute geschafft" this week).
   final int wurzeln;
@@ -225,6 +228,7 @@ class TodayTab extends StatelessWidget {
             wurzeln: wurzeln,
             jubelTick: jubelTick,
             gross: true,
+            lebensziele: lebensziele,
           ),
           TextButton(
             onPressed: onRestartOnboarding,

@@ -305,25 +305,30 @@ class HakenZeile extends StatelessWidget {
   final String? unter;
   final String? rechts;
 
+  // The whole row is tappable, not only the tick.
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 6),
-    child: Row(
-      children: [
-        GlasHaken(an: an, onTap: onTap),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(titel, style: Glas.tText.copyWith(fontSize: 14.5)),
-              if (unter != null && unter!.isNotEmpty)
-                Text(unter!, style: Glas.tSoft),
-            ],
+  Widget build(BuildContext context) => GestureDetector(
+    behavior: HitTestBehavior.opaque,
+    onTap: onTap,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          GlasHaken(an: an, onTap: onTap),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(titel, style: Glas.tText.copyWith(fontSize: 14.5)),
+                if (unter != null && unter!.isNotEmpty)
+                  Text(unter!, style: Glas.tSoft),
+              ],
+            ),
           ),
-        ),
-        if (rechts != null) Text(rechts!, style: Glas.tSoft),
-      ],
+          if (rechts != null) Text(rechts!, style: Glas.tSoft),
+        ],
+      ),
     ),
   );
 }
