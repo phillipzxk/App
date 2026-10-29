@@ -76,3 +76,17 @@ Entwurf: https://claude.ai/artifact/VqnA2o1AKAjDHFwtdSAMfp (wartet auf sein OK)
 - Jedes Feld zeigt nur eine Zahl oder einen Satz, der Rest steht auf seiner Seite.
 - Übergang vom Home: Der Mindset-Kreis kommt aus der Mitte und landet oben. Aus ihm schießen Lichtpunkte nacheinander zu jedem Feld, das sich aus dem Punkt entfaltet. Dann füllen sich Ringe und Balken, die Zahlen zählen hoch. Weiter unten kippen die Felder beim Scrollen nacheinander hoch.
 - Feld antippen: Das Feld wächst zur ganzen Seite, die anderen treten zurück. Das kleine Symbol wird zum großen Kreis, der Name wird zur Überschrift, der Inhalt baut sich Block für Block auf. „‹ Mindset“ schrumpft alles zurück ins Feld.
+
+## Entwurf 7 (2026-10-29): vier Seiten statt einer langen
+
+Phillip zu Entwurf 6: „Gutes Design, aber noch besser die einzelnen Felder sortieren, dass es mehrere Seiten gibt, getrennt, also nicht alle auf einer.“
+
+Entwurf: https://claude.ai/artifact/35C38P1NaixM3kK58phqNN (wartet auf sein OK)
+
+- Kopf bleibt (Kreis 8, „Mindset“, +1 zu gestern). Darunter eine Glas-Leiste mit 4 Seiten und goldenem Knopf, dann ein eigener Coach-Satz pro Seite.
+- Heute: Dein Berg (groß), Wort gehalten, Ruhe-Knopf.
+- Dranbleiben: Durchgezogen, Selbstständig, Ausreden-Spiegel.
+- Ruhe: Deine Werte, Sorgen abgeben, Frage heute Abend.
+- Langfristig: Lebensrad (groß), Brief an dich, Lebensziele, Dein Warum.
+- Wechseln per Antippen oder Wischen: Der Knopf gleitet und dehnt sich, die alten Felder kippen nacheinander weg, die neuen schwingen von der Seite herein, und die Zahlen zählen hoch. Der Coach-Satz wechselt mit.
+- Übergang vom Home und Feld öffnen wie in Entwurf 6.
