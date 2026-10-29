@@ -1,13 +1,15 @@
 ---
 tags: [umsetzung, produktivitaet]
-status: entwurf
+status: entschieden
 ---
 
 # Produktivität & Fokus komplett
 
 Inhalte siehe [[Ideen neue Bereiche]] (entschieden 2026-10-28). Aufbau wie die Mindset-Seite, Entwurf 7 aus [[Mindset komplett]].
 
-## Entwurf 1 (2026-10-29, wartet auf Phillips OK)
+## Entwurf 1 (2026-10-29)
+
+**Entschieden 2026-10-29:** Phillip „mach“ (16:35) = OK, weiter mit Business & Beruf.
 
 Link: https://claude.ai/artifact/XNqwTag99sy1ueARLXwnsV
 
