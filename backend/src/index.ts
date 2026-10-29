@@ -36,6 +36,7 @@ import {
   sorgenPrompt,
   leitsatzPrompt,
   briefPrompt,
+  businessPrompt,
   type LetzterFokus,
   type CheckIn,
   type Profile,
@@ -396,6 +397,68 @@ export async function mindset(env: Env, body: Record<string, unknown>, profile: 
   }
 }
 
+/// Business & Beruf: one route, the part in "art".
+export async function business(env: Env, body: Record<string, unknown>, profile: Profile): Promise<unknown> {
+  const art = String(body.art ?? "");
+  const prompt = businessPrompt(profile, art, body);
+  if (prompt === null) return null;
+  const d = parseObjekt(await ask(env, prompt));
+  const tipps = (v: unknown, n: number) =>
+    (Array.isArray(v) ? v : [])
+      .map((x) => {
+        const o = (x ?? {}) as Record<string, unknown>;
+        const titel = text(o.titel, 120);
+        return titel ? { titel, text: text(o.text, 300) ?? "" } : null;
+      })
+      .filter(Boolean)
+      .slice(0, n);
+  const liste = (v: unknown, n: number, max = 160) =>
+    (Array.isArray(v) ? v : []).map((x) => text(x, max)).filter(Boolean).slice(0, n);
+  switch (art) {
+    case "hebel":
+      return { hebel: text(d.hebel, 160), punkte: liste(d.punkte, 5), tipps: tipps(d.tipps, 3) };
+    case "tipps":
+      return { tipps: tipps(d.tipps, 3) };
+    case "euro": {
+      const preis = typeof d.preis === "number" && d.preis > 0 ? Math.round(d.preis) : null;
+      return { angebot: text(d.angebot, 200), preis };
+    }
+    case "lohnt":
+      return { antwort: text(d.antwort, 500) };
+    case "sparen":
+      return { tipps: tipps(d.tipps, 3), satz: text(d.satz, 300) };
+    case "stunde":
+      return { satz: text(d.satz, 400) };
+    case "ausarbeiten":
+      return { ziel: text(d.ziel, 200), schritte: liste(d.schritte, 8) };
+    case "pruefen":
+      return { fragen: liste(d.fragen, 5) };
+    case "urteil": {
+      const reife = typeof d.reife === "number" ? Math.max(0, Math.min(100, Math.round(d.reife))) : null;
+      return { reife, satz: text(d.satz, 400) };
+    }
+    case "gespraech":
+      return {
+        schritte: tipps(d.schritte, 5),
+        einwaende: (Array.isArray(d.einwaende) ? d.einwaende : [])
+          .map((x) => {
+            const o = (x ?? {}) as Record<string, unknown>;
+            const sagt = text(o.sagt, 160);
+            const antwort = text(o.antwort, 300);
+            return sagt && antwort ? { sagt, antwort } : null;
+          })
+          .filter(Boolean)
+          .slice(0, 3),
+      };
+    case "meilensteine":
+      return { vorschlaege: liste(d.vorschlaege, 3, 80) };
+    case "skill":
+      return { stufen: tipps(d.stufen, 7) };
+    default:
+      return null;
+  }
+}
+
 /// Schlaf & Energie: one route, the part in "art".
 export async function schlaf(env: Env, body: Record<string, unknown>, profile: Profile): Promise<unknown> {
   const kontext = String(body.kontext ?? "");
@@ -622,6 +685,15 @@ export default {
       case "/mindset": {
         try {
           const res = await mindset(env, body, profile);
+          return res === null ? json({ error: "not found" }, 404) : json(res);
+        } catch (e) {
+          console.error(e);
+          return json({ error: "coach unavailable" }, 502);
+        }
+      }
+      case "/business": {
+        try {
+          const res = await business(env, body, profile);
           return res === null ? json({ error: "not found" }, 404) : json(res);
         } catch (e) {
           console.error(e);

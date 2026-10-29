@@ -715,3 +715,148 @@ Leg ihr in 2 bis 3 kurzen Sätzen daneben, was sich seitdem verändert hat, nach
 ${JSON_ONLY}
 {"satz": "..."}`;
 }
+
+// --- Business & Beruf (vault Umsetzung/Business und Beruf komplett.md) ---
+
+function businessRahmen(p: Profile, kontext: string): string {
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Ihr Business- und Berufs-Bereich (aus ihren eigenen Angaben):
+<nutzer>
+${clip(kontext, 4000)}
+</nutzer>
+
+Du bist hier ihr Business-Coach: direkt, konkret, mit Zahlen aus ihren Angaben, keine 0815-Tipps, keine Rechts- oder Steuerberatung (dafür: frag einen Steuerberater). Ziel ist, dass sie dich immer weniger braucht.`;
+}
+
+const s = (v: unknown, max = 300) => clip(String(v ?? ""), max);
+
+/// One prompt per part of the Business page; null when the input is empty.
+export function businessPrompt(p: Profile, art: string, b: Record<string, unknown>): string | null {
+  const r = businessRahmen(p, String(b.kontext ?? ""));
+  switch (art) {
+    case "hebel":
+      return `${r}
+
+Schlag ihr den einen Hebel für diese Woche vor: die eine Aktion, die ihr Business diese Woche am meisten bewegt. "hebel" höchstens 12 Wörter. "punkte": 2 bis 4 einzelne Schritte zum Abhaken (je höchstens 8 Wörter). "tipps": genau 3 Tipps, auf die man allein nicht kommt, je "titel" (kurz, fett) und "text" (ein Satz).
+
+${JSON_ONLY}
+{"hebel": "...", "punkte": ["..."], "tipps": [{"titel": "...", "text": "..."}]}`;
+    case "tipps":
+      if (!s(b.hebel).trim()) return null;
+      return `${r}
+
+Ihr Hebel diese Woche: <hebel>${s(b.hebel, 200)}</hebel>
+Gib genau 3 Tipps dazu, auf die man allein nicht kommt, je "titel" (kurz) und "text" (ein Satz, konkret).
+
+${JSON_ONLY}
+{"tipps": [{"titel": "...", "text": "..."}]}`;
+    case "euro":
+      if (!s(b.idee).trim()) return null;
+      return `${r}
+
+Was sie verkaufen könnte: <idee>${s(b.idee, 400)}</idee>
+Mach daraus die kleinste Version, für die diese Woche jemand zahlt. "angebot": das Angebot in einem Satz, wie sie es verschicken würde (mit Zeit und Umfang). "preis": eine ganze Zahl in Euro, ehrlich und nicht zu billig.
+
+${JSON_ONLY}
+{"angebot": "...", "preis": 149}`;
+    case "lohnt":
+      if (!s(b.frage).trim()) return null;
+      return `${r}
+
+Sie überlegt: <frage>${s(b.frage, 300)}</frage>
+Lohnt sich das? Antworte in 2 bis 3 kurzen Sätzen, mit ihrem Spar-Ziel und Umsatz im Blick: was dafür spricht, was dagegen, und deine klare Empfehlung.
+
+${JSON_ONLY}
+{"antwort": "..."}`;
+    case "sparen":
+      if (!s(b.ausgaben).trim()) return null;
+      return `${r}
+
+Wofür sie jeden Monat Geld ausgibt: <ausgaben>${s(b.ausgaben, 1500)}</ausgaben>
+Gib 2 bis 3 konkrete Wege, mehr zu sparen, je "titel" (was, z. B. "3 Abos kaum genutzt") und "text" (wie viel im Monat und was tun). "satz": ein Satz, was das für ihr Spar-Ziel heißt.
+
+${JSON_ONLY}
+{"tipps": [{"titel": "...", "text": "..."}], "satz": "..."}`;
+    case "stunde":
+      return `${r}
+
+Schau auf ihre Tätigkeiten und was jede pro Stunde bringt. Sag in 2 kurzen Sätzen, worauf sie sich konzentrieren soll, was sie weniger machen oder schneller erledigen soll.
+
+${JSON_ONLY}
+{"satz": "..."}`;
+    case "ausarbeiten": {
+      if (!s(b.idee).trim()) return null;
+      const g = (Array.isArray(b.gedanken) ? b.gedanken : []).map((x) => `- ${s(x, 200)}`).slice(-20).join("\n");
+      return `${r}
+
+Ihre Kernidee: <idee>${s(b.idee, 300)}</idee>
+Ihre anderen Gedanken:
+<gedanken>
+${g}
+</gedanken>
+Arbeite die Kernidee aus: "ziel" ein messbares Ziel in einem Satz, "schritte" 4 bis 7 Schritte vom Anfang bis zum Ende, in Reihenfolge, je höchstens 12 Wörter, der erste geht diese Woche.
+
+${JSON_ONLY}
+{"ziel": "...", "schritte": ["..."]}`;
+    }
+    case "pruefen":
+      if (!s(b.idee).trim()) return null;
+      return `${r}
+
+Ihre Idee: <idee>${s(b.idee, 300)}</idee>
+Stell genau 4 harte Fragen, bevor sie Zeit hineinsteckt (wer kauft es, würde jemand heute zahlen, was kostet es sie, warum bei ihr). Je höchstens 12 Wörter, auf diese Idee zugeschnitten.
+
+${JSON_ONLY}
+{"fragen": ["...", "...", "...", "..."]}`;
+    case "urteil": {
+      const f = (Array.isArray(b.fragen) ? b.fragen : [])
+        .map((x) => {
+          const o = (x ?? {}) as Record<string, unknown>;
+          return `Frage: ${s(o.frage, 200)}\nAntwort: ${s(o.antwort, 400) || "(keine)"}`;
+        })
+        .join("\n\n");
+      if (!s(b.idee).trim() || !f) return null;
+      return `${r}
+
+Ihre Idee: <idee>${s(b.idee, 300)}</idee>
+Ihre Antworten auf die harten Fragen:
+<antworten>
+${f}
+</antworten>
+Wie reif ist die Idee? "reife" eine ganze Zahl 0 bis 100 (ab 80 lohnt sich Bauen; fehlende oder vage Antworten ziehen stark runter). "satz": 1 bis 2 Sätze, ehrlich, mit dem einen nächsten Schritt.
+
+${JSON_ONLY}
+{"reife": 40, "satz": "..."}`;
+    }
+    case "gespraech":
+      if (!s(b.mit).trim() || !s(b.ziel).trim()) return null;
+      return `${r}
+
+Sie hat ein wichtiges Gespräch mit <mit>${s(b.mit, 120)}</mit>. Ihr Ziel: <ziel>${s(b.ziel, 300)}</ziel>
+Mach einen Leitfaden: "schritte" genau 4 Teile (Einstieg, Angebot, Beweis, Abschluss), je "titel" und "text" (ein Satz, was sie sagt oder zeigt). "einwaende": 2 bis 3 Einwände, die kommen können, je "sagt" (in Anführungszeichen) und "antwort" (ihr Satz darauf).
+
+${JSON_ONLY}
+{"schritte": [{"titel": "...", "text": "..."}], "einwaende": [{"sagt": "...", "antwort": "..."}]}`;
+    case "meilensteine":
+      return `${r}
+
+Schlag genau 3 nächste Meilensteine für ihren Business-Baum vor, die auf den erreichten aufbauen. Je höchstens 6 Wörter, messbar, z. B. "3.000 € im Monat" oder "Erster fester Partner".
+
+${JSON_ONLY}
+{"vorschlaege": ["...", "...", "..."]}`;
+    case "skill":
+      if (!s(b.skill).trim()) return null;
+      return `${r}
+
+Sie will diesen Skill aufbauen: <skill>${s(b.skill, 80)}</skill>
+Bau eine Leiter aus genau 7 Stufen, jede baut auf der letzten auf, von leicht bis schwer. Je "titel" (höchstens 6 Wörter) und "text" (die Aufgabe für eine Woche in einem Satz, konkret für ihr Business).
+
+${JSON_ONLY}
+{"stufen": [{"titel": "...", "text": "..."}]}`;
+    default:
+      return null;
+  }
+}
