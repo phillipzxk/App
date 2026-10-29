@@ -63,3 +63,16 @@ Entwurf: https://claude.ai/artifact/KrAcAAZKYcMtSX5Po1GL5t (wartet auf seine Wah
 - A · Wachsen: Felder steigen nacheinander aus der Unschärfe, die Bodenlinie leuchtet von der Mitte auf, die Hauptwurzel wächst. Beim Scrollen wächst jede Seitenwurzel zu ihrem Kreis, der Kreis ploppt, die Zahl zählt hoch, die Karte klappt heraus. Öffnen = Aufblühen (Teile fliegen nacheinander aus dem Kreis).
 - B · Lichtfall: Ein Lichtball fällt durch die Seite, Felder leuchten auf, wo er vorbeikommt. Lichttropfen laufen die Wurzeln hinab. Öffnen = Lichtfaden (die Teile gleiten aus einem goldenen Faden).
 - C · Tiefe: Die Felder kommen aus der Tiefe nach vorne wie ein Kartenstapel. Die Kreise steigen auf, die Karten schwingen auf wie Türen. Öffnen = die Teile steigen aus der Tiefe auf, der Feed tritt zurück.
+
+## Entwurf 6 (2026-10-29): eigene Mindset-Seite, clean sortiert
+
+Phillip zu Entwürfe 5: „Das ist der Homefeed, du sollst doch den Mindset erstellen, die Übergänge mit geilen Animationen, clean modern ansortieren, die Felder übersichtlich.“ Wichtig: Die Bereichsseite ist KEIN zweiter Homefeed (keine Erde und Wurzeln). Sie nutzt nur den Glas-Look.
+
+Entwurf: https://claude.ai/artifact/VqnA2o1AKAjDHFwtdSAMfp (wartet auf sein OK)
+
+- Kopf: Kreis 8 + „Mindset“ + „+1 zu gestern“, Coach-Satz.
+- Gruppe „Durchziehen“ (Raster aus 2 Spalten): Dein Berg (breit, gold, „heute dran“), Wort gehalten | Selbstständig, Ausreden-Spiegel (breit), Durchgezogen | Ruhe-Knopf (mit Starten).
+- Gruppe „Sinn & innere Ruhe“: Lebensrad (breit), Werte | Sorgen abgeben, Frage heute Abend (breit, Nachthimmel), Brief an dich | Lebensziele. Unten Dein Warum.
+- Jedes Feld zeigt nur eine Zahl oder einen Satz, der Rest steht auf seiner Seite.
+- Übergang vom Home: Der Mindset-Kreis kommt aus der Mitte und landet oben. Aus ihm schießen Lichtpunkte nacheinander zu jedem Feld, das sich aus dem Punkt entfaltet. Dann füllen sich Ringe und Balken, die Zahlen zählen hoch. Weiter unten kippen die Felder beim Scrollen nacheinander hoch.
+- Feld antippen: Das Feld wächst zur ganzen Seite, die anderen treten zurück. Das kleine Symbol wird zum großen Kreis, der Name wird zur Überschrift, der Inhalt baut sich Block für Block auf. „‹ Mindset“ schrumpft alles zurück ins Feld.
