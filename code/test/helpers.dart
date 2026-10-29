@@ -16,6 +16,10 @@ import 'package:coach_app/planner/planner_data.dart';
 import 'package:coach_app/supplements/supplement_data.dart';
 import 'package:coach_app/ernaehrung/ernaehrung_data.dart';
 import 'package:coach_app/schlaf/schlaf_data.dart';
+import 'package:coach_app/mindset/mindset_data.dart';
+import 'package:coach_app/produktiv/produktiv_data.dart';
+import 'package:coach_app/business/business_data.dart';
+import 'package:coach_app/persoenlich/persoenlich_data.dart';
 import 'package:coach_app/training/form_video.dart';
 import 'package:coach_app/training/training_data.dart';
 import 'package:coach_app/sleep/sleep.dart';
@@ -280,6 +284,38 @@ class MemoryFeedStore implements FeedStore {
 
   @override
   Future<void> saveSchlaf(SchlafDaten d) async => schlaf = d;
+
+  MindsetDaten mindset = const MindsetDaten();
+
+  @override
+  Future<MindsetDaten> loadMindset() async => mindset;
+
+  @override
+  Future<void> saveMindset(MindsetDaten d) async => mindset = d;
+
+  ProduktivDaten produktiv = const ProduktivDaten();
+
+  @override
+  Future<ProduktivDaten> loadProduktiv() async => produktiv;
+
+  @override
+  Future<void> saveProduktiv(ProduktivDaten d) async => produktiv = d;
+
+  BusinessDaten business = const BusinessDaten();
+
+  @override
+  Future<BusinessDaten> loadBusiness() async => business;
+
+  @override
+  Future<void> saveBusiness(BusinessDaten d) async => business = d;
+
+  PersoenlichDaten persoenlich = const PersoenlichDaten();
+
+  @override
+  Future<PersoenlichDaten> loadPersoenlich() async => persoenlich;
+
+  @override
+  Future<void> savePersoenlich(PersoenlichDaten d) async => persoenlich = d;
 }
 
 /// Monday, 12 October 2026, 18:00.
@@ -296,9 +332,14 @@ CheckIn checkInOn(DateTime day, {String reply = '', String training = 't'}) =>
       kiAntwort: reply,
     );
 
-/// Goes back to "Heute" and, for an area, opens it on its root and then
-/// its full page ("Alles zu …").
-Future<void> openTab(WidgetTester tester, String label) async {
+/// Goes back to "Heute" and opens an area. Training, Ernährung and Schlaf
+/// open in Körper, Mindset on its own page; with [kachel] that tile is
+/// opened too (searching through the four pages).
+Future<void> openTab(
+  WidgetTester tester,
+  String label, [
+  String? kachel,
+]) async {
   tester
       .state<NavigatorState>(find.byType(Navigator).first)
       .popUntil((r) => r.isFirst);
@@ -311,15 +352,60 @@ Future<void> openTab(WidgetTester tester, String label) async {
     _ => 'mindset',
   };
   await openBereich(tester, b);
-  await tester.tap(find.byKey(ValueKey('alles-$b')));
+  if (kachel != null) await openKachel(tester, kachel);
+}
+
+/// Shows the page of an area that has tile [id] on it.
+Future<void> zeigeKachel(WidgetTester tester, String id) async {
+  final k = find.byKey(ValueKey('kachel-$id'));
+  if (k.evaluate().isNotEmpty) return;
+  final seiten = find.byWidgetPredicate(
+    (w) =>
+        w.key is ValueKey<String> &&
+        (w.key! as ValueKey<String>).value.startsWith('seite-'),
+  );
+  final n = seiten.evaluate().length;
+  // Tiles further down are only built once scrolled near.
+  final liste = find
+      .byWidgetPredicate(
+        (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+      )
+      .hitTestable();
+  for (var i = 0; i < n; i++) {
+    await tester.tap(seiten.at(i));
+    await tester.pumpAndSettle();
+    for (var j = 0; j < 4 && k.evaluate().isEmpty; j++) {
+      if (liste.evaluate().isEmpty) break;
+      await tester.drag(liste.first, const Offset(0, -300));
+      await tester.pumpAndSettle();
+    }
+    if (k.evaluate().isNotEmpty) return;
+  }
+  fail('Kachel $id nicht gefunden');
+}
+
+/// Opens tile [id] on the open area page.
+Future<void> openKachel(WidgetTester tester, String id) async {
+  await zeigeKachel(tester, id);
+  final k = find.byKey(ValueKey('kachel-$id'));
+  await tester.ensureVisible(k);
+  await tester.pumpAndSettle();
+  await tester.tap(k);
   await tester.pumpAndSettle();
 }
 
 /// Taps the area [b] on its root: it opens big over the whole screen.
 Future<void> openBereich(WidgetTester tester, String b) async {
-  await scrollTo(tester, find.byKey(ValueKey('wurzel-$b')));
-  await tester.tap(find.byKey(ValueKey('wurzel-$b')));
+  // Training, Ernährung and Schlaf are the three parts of Körper.
+  const koerper = ['training', 'ernaehrung', 'schlaf'];
+  final w = koerper.contains(b) ? 'koerper' : b;
+  await scrollTo(tester, find.byKey(ValueKey('wurzel-$w')));
+  await tester.tap(find.byKey(ValueKey('wurzel-$w')));
   await tester.pumpAndSettle();
+  if (koerper.contains(b) && b != 'training') {
+    await tester.tap(find.byKey(ValueKey('teil-$b')));
+    await tester.pumpAndSettle();
+  }
 }
 
 /// Phone-sized portrait view, tall enough that whole pages are built.

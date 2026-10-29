@@ -43,7 +43,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await openTab(tester, 'Ernährung');
+    await openTab(tester, 'Ernährung', 'e-gewicht');
     await scrollTo(tester, find.text('Gewicht eintragen'));
     expect(find.text('83,0 kg'), findsOneWidget);
 
@@ -72,7 +72,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await openTab(tester, 'Ernährung');
+    await openTab(tester, 'Ernährung', 'e-gewicht');
     await scrollTo(tester, find.text('Gewicht eintragen'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Gewicht eintragen'));

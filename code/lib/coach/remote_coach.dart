@@ -5,6 +5,10 @@ import 'package:http/http.dart' as http;
 import '../checkin/checkin.dart';
 import '../checkin/checkin_evaluator.dart';
 import '../data/user_profile.dart';
+import '../business/business_coach.dart';
+import '../persoenlich/persoenlich_coach.dart';
+import '../mindset/mindset_coach.dart';
+import '../mindset/mindset_data.dart';
 import '../schlaf/schlaf_coach.dart';
 import '../schlaf/schlaf_data.dart';
 import '../sleep/schlafzeiten.dart';
@@ -37,7 +41,10 @@ class RemoteCoach
         FeedCoach,
         TrainingCoach,
         ErnaehrungCoach,
-        SchlafCoach {
+        SchlafCoach,
+        MindsetCoach,
+        BusinessCoach,
+        PersoenlichCoach {
   RemoteCoach({required this.baseUrl, required this.token, http.Client? client})
     : _client = client ?? http.Client();
 
@@ -647,6 +654,139 @@ class RemoteCoach
     if (punkte.length < 3) return null;
     return (punkte: punkte, satz: _text(data['satz'], 300));
   }
+
+  // --- Mindset (route /mindset) ---
+
+  Future<Map?> _mindset(String art, UserProfile p, Map<String, Object> mehr) =>
+      _postJson('/mindset', {'art': art, 'profile': profileJson(p), ...mehr});
+
+  @override
+  Future<({String schritt, String satz, bool passt})?> schritt(
+    UserProfile profile,
+    String titel,
+    String? eigener,
+    String kontext,
+  ) async {
+    final d = await _mindset('schritt', profile, {
+      'titel': titel,
+      'eigener': ?eigener,
+      'kontext': kontext,
+    });
+    final schritt = _text(d?['schritt'], 200);
+    final satz = _text(d?['satz'], 300);
+    if (schritt == null || satz == null) return null;
+    return (schritt: schritt, satz: satz, passt: d!['passt'] == true);
+  }
+
+  @override
+  Future<List<String>?> danach(
+    UserProfile profile,
+    String titel,
+    String kontext,
+  ) async {
+    final d = await _mindset('danach', profile, {
+      'titel': titel,
+      'kontext': kontext,
+    });
+    final l = [
+      for (final p in d?['punkte'] as List? ?? const []) ?_text(p, 120),
+    ];
+    return l.length < 2 ? null : l.take(3).toList();
+  }
+
+  @override
+  Future<String?> ausredenPlan(
+    UserProfile profile,
+    String ausrede,
+    String kontext,
+  ) async => _text(
+    (await _mindset('ausrede', profile, {
+      'ausrede': ausrede,
+      'kontext': kontext,
+    }))?['plan'],
+    400,
+  );
+
+  @override
+  Future<({List<Sorge> sorgen, String? satz})?> sorgen(
+    UserProfile profile,
+    String text,
+    String kontext,
+  ) async {
+    final d = await _mindset('sorgen', profile, {
+      'text': text,
+      'kontext': kontext,
+    });
+    if (d == null) return null;
+    final sorgen = [
+      for (final x in d['sorgen'] as List? ?? const [])
+        if (x is Map &&
+            _text(x['sorge'], 200) != null &&
+            _text(x['aendern'], 300) != null)
+          Sorge(
+            tag: '',
+            text: _text(x['sorge'], 200)!,
+            aendern: _text(x['aendern'], 300)!,
+            nicht: _text(x['nicht'], 300) ?? '',
+          ),
+    ];
+    if (sorgen.isEmpty) return null;
+    return (sorgen: sorgen, satz: _text(d['satz'], 300));
+  }
+
+  @override
+  Future<String?> leitsatz(
+    UserProfile profile,
+    List<Abendantwort> antworten,
+  ) async => _text(
+    (await _mindset('leitsatz', profile, {
+      'antworten': [
+        for (final a in antworten.reversed.take(20))
+          {'frage': a.frage, 'antwort': a.antwort},
+      ],
+    }))?['leitsatz'],
+    240,
+  );
+
+  @override
+  Future<String?> brief(
+    UserProfile profile,
+    Brief brief,
+    String kontext,
+  ) async => _text(
+    (await _mindset('brief', profile, {
+      'brief': brief.text,
+      'geschrieben': brief.geschrieben,
+      'kontext': kontext,
+    }))?['satz'],
+    500,
+  );
+
+  // --- Business (route /business) ---
+
+  @override
+  Future<Map?> business(
+    UserProfile profile,
+    String art,
+    Map<String, Object> mehr,
+  ) => _postJson('/business', {
+    'art': art,
+    'profile': profileJson(profile),
+    ...mehr,
+  });
+
+  // --- Persönlichkeit (route /persoenlich) ---
+
+  @override
+  Future<Map?> persoenlich(
+    UserProfile profile,
+    String art,
+    Map<String, Object> mehr,
+  ) => _postJson('/persoenlich', {
+    'art': art,
+    'profile': profileJson(profile),
+    ...mehr,
+  });
 }
 
 Map<String, Object> profileJson(UserProfile p) => {

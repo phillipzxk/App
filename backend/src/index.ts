@@ -30,6 +30,14 @@ import {
   energiePrompt,
   schlafMusterPrompt,
   tagesablaufPrompt,
+  steinSchrittPrompt,
+  danachPrompt,
+  ausredePrompt,
+  sorgenPrompt,
+  leitsatzPrompt,
+  briefPrompt,
+  businessPrompt,
+  persoenlichPrompt,
   type LetzterFokus,
   type CheckIn,
   type Profile,
@@ -330,6 +338,186 @@ export async function ernaehrung(env: Env, body: Record<string, unknown>, profil
   }
 }
 
+/// Mindset: one route, the part in "art" (vault Umsetzung/Mindset komplett.md).
+export async function mindset(env: Env, body: Record<string, unknown>, profile: Profile): Promise<unknown> {
+  const kontext = String(body.kontext ?? "");
+  switch (body.art) {
+    case "schritt": {
+      const titel = String(body.titel ?? "").trim();
+      if (!titel) return null;
+      const eigener = typeof body.eigener === "string" && body.eigener.trim() ? body.eigener.trim() : null;
+      const d = parseObjekt(await ask(env, steinSchrittPrompt(profile, titel, eigener, kontext)));
+      return { schritt: text(d.schritt, 200), satz: text(d.satz, 300), passt: eigener !== null && d.passt === true };
+    }
+    case "danach": {
+      const titel = String(body.titel ?? "").trim();
+      if (!titel) return null;
+      const d = parseObjekt(await ask(env, danachPrompt(profile, titel, kontext)));
+      const punkte = (Array.isArray(d.punkte) ? d.punkte : []).map((x) => text(x, 120)).filter(Boolean).slice(0, 3);
+      return { punkte };
+    }
+    case "ausrede": {
+      const ausrede = String(body.ausrede ?? "").trim();
+      if (!ausrede) return null;
+      return { plan: text(parseObjekt(await ask(env, ausredePrompt(profile, ausrede, kontext))).plan, 400) };
+    }
+    case "sorgen": {
+      const t = String(body.text ?? "").trim();
+      if (!t) return null;
+      const d = parseObjekt(await ask(env, sorgenPrompt(profile, t, kontext)));
+      const sorgen = (Array.isArray(d.sorgen) ? d.sorgen : [])
+        .map((x) => {
+          const o = (x ?? {}) as Record<string, unknown>;
+          const sorge = text(o.sorge, 200);
+          const aendern = text(o.aendern, 300);
+          return sorge && aendern ? { sorge, aendern, nicht: text(o.nicht, 300) ?? "" } : null;
+        })
+        .filter(Boolean)
+        .slice(0, 4);
+      return { sorgen, satz: text(d.satz, 300) };
+    }
+    case "leitsatz": {
+      const antworten = (Array.isArray(body.antworten) ? body.antworten : [])
+        .map((x) => {
+          const o = (x ?? {}) as Record<string, unknown>;
+          return { frage: String(o.frage ?? ""), antwort: String(o.antwort ?? "") };
+        })
+        .filter((x) => x.antwort.trim())
+        .slice(0, 20);
+      if (!antworten.length) return null;
+      return { leitsatz: text(parseObjekt(await ask(env, leitsatzPrompt(profile, antworten))).leitsatz, 240) };
+    }
+    case "brief": {
+      const b = String(body.brief ?? "").trim();
+      if (!b) return null;
+      const d = parseObjekt(await ask(env, briefPrompt(profile, b, String(body.geschrieben ?? ""), kontext)));
+      return { satz: text(d.satz, 500) };
+    }
+    default:
+      return null;
+  }
+}
+
+/// Business & Beruf: one route, the part in "art".
+export async function business(env: Env, body: Record<string, unknown>, profile: Profile): Promise<unknown> {
+  const art = String(body.art ?? "");
+  const prompt = businessPrompt(profile, art, body);
+  if (prompt === null) return null;
+  const d = parseObjekt(await ask(env, prompt));
+  const tipps = (v: unknown, n: number) =>
+    (Array.isArray(v) ? v : [])
+      .map((x) => {
+        const o = (x ?? {}) as Record<string, unknown>;
+        const titel = text(o.titel, 120);
+        return titel ? { titel, text: text(o.text, 300) ?? "" } : null;
+      })
+      .filter(Boolean)
+      .slice(0, n);
+  const liste = (v: unknown, n: number, max = 160) =>
+    (Array.isArray(v) ? v : []).map((x) => text(x, max)).filter(Boolean).slice(0, n);
+  switch (art) {
+    case "hebel":
+      return { hebel: text(d.hebel, 160), punkte: liste(d.punkte, 5), tipps: tipps(d.tipps, 3) };
+    case "tipps":
+      return { tipps: tipps(d.tipps, 3) };
+    case "euro": {
+      const preis = typeof d.preis === "number" && d.preis > 0 ? Math.round(d.preis) : null;
+      return { angebot: text(d.angebot, 200), preis };
+    }
+    case "lohnt":
+      return { antwort: text(d.antwort, 500) };
+    case "sparen":
+      return { tipps: tipps(d.tipps, 3), satz: text(d.satz, 300) };
+    case "stunde":
+      return { satz: text(d.satz, 400) };
+    case "ausarbeiten":
+      return { ziel: text(d.ziel, 200), schritte: liste(d.schritte, 8) };
+    case "pruefen":
+      return { fragen: liste(d.fragen, 5) };
+    case "urteil": {
+      const reife = typeof d.reife === "number" ? Math.max(0, Math.min(100, Math.round(d.reife))) : null;
+      return { reife, satz: text(d.satz, 400) };
+    }
+    case "gespraech":
+      return {
+        schritte: tipps(d.schritte, 5),
+        einwaende: (Array.isArray(d.einwaende) ? d.einwaende : [])
+          .map((x) => {
+            const o = (x ?? {}) as Record<string, unknown>;
+            const sagt = text(o.sagt, 160);
+            const antwort = text(o.antwort, 300);
+            return sagt && antwort ? { sagt, antwort } : null;
+          })
+          .filter(Boolean)
+          .slice(0, 3),
+      };
+    case "meilensteine":
+      return { vorschlaege: liste(d.vorschlaege, 3, 80) };
+    case "skill":
+      return { stufen: tipps(d.stufen, 7) };
+    default:
+      return null;
+  }
+}
+
+/// Persönlichkeit: one route, the part in "art". Look, Stil, Haltung and
+/// Frisur may carry a photo.
+export async function persoenlich(env: Env, body: Record<string, unknown>, profile: Profile): Promise<unknown> {
+  const art = String(body.art ?? "");
+  const bild = typeof body.bild === "string" && body.bild.length > 100 ? body.bild : null;
+  if (["look", "stil", "haltung"].includes(art) && !bild) return null;
+  const prompt = persoenlichPrompt(profile, art, body);
+  if (prompt === null) return null;
+  const d = parseObjekt(await ask(env, prompt, bild ? [bild] : []));
+  const tipps = (v: unknown, n: number) =>
+    (Array.isArray(v) ? v : [])
+      .map((x) => {
+        const o = (x ?? {}) as Record<string, unknown>;
+        const titel = text(o.titel, 120);
+        return titel ? { titel, text: text(o.text, 300) ?? "" } : null;
+      })
+      .filter(Boolean)
+      .slice(0, n);
+  const quiz = (v: unknown) => {
+    const o = (v ?? {}) as Record<string, unknown>;
+    const frage = text(o.frage, 200);
+    const antworten = (Array.isArray(o.antworten) ? o.antworten : []).map((x) => text(x, 120)).filter(Boolean).slice(0, 4);
+    const richtig = typeof o.richtig === "number" ? Math.round(o.richtig) : -1;
+    return frage && antworten.length >= 2 && richtig >= 0 && richtig < antworten.length ? { frage, antworten, richtig } : null;
+  };
+  switch (art) {
+    case "look":
+      return { titel: text(d.titel, 80), hebel: tipps(d.hebel, 3) };
+    case "stil":
+      return {
+        titel: text(d.titel, 80),
+        passt: text(d.passt, 300),
+        aendern: text(d.aendern, 300),
+        farben: (Array.isArray(d.farben) ? d.farben : []).filter((f) => typeof f === "string" && /^#[0-9a-fA-F]{6}$/.test(f)).slice(0, 6),
+      };
+    case "haltung":
+      return { befund: text(d.befund, 200), uebungen: tipps(d.uebungen, 3) };
+    case "haut":
+      return { phasen: tipps(d.phasen, 4) };
+    case "frisur": {
+      const wochen = typeof d.wochen === "number" ? Math.max(2, Math.min(12, Math.round(d.wochen))) : 4;
+      return { empfehlung: text(d.empfehlung, 120), friseur: text(d.friseur, 500), styling: text(d.styling, 300), wochen };
+    }
+    case "kurs":
+      return { lektionen: (Array.isArray(d.lektionen) ? d.lektionen : []).map((x) => text(x, 80)).filter(Boolean).slice(0, 12) };
+    case "lektion": {
+      const q = quiz(d);
+      return q ? { text: text(d.text, 700), ...q } : null;
+    }
+    case "quiz":
+      return { fragen: (Array.isArray(d.fragen) ? d.fragen : []).map(quiz).filter(Boolean).slice(0, 3) };
+    case "umsetzen":
+      return { schritt: text(d.schritt, 200) };
+    default:
+      return null;
+  }
+}
+
 /// Schlaf & Energie: one route, the part in "art".
 export async function schlaf(env: Env, body: Record<string, unknown>, profile: Profile): Promise<unknown> {
   const kontext = String(body.kontext ?? "");
@@ -548,6 +736,33 @@ export default {
         if (!String(profile.motivation ?? "").trim()) return json({ satz: null });
         try {
           return json({ satz: parseSatz(await ask(env, warumPrompt(profile, today, recent))) });
+        } catch (e) {
+          console.error(e);
+          return json({ error: "coach unavailable" }, 502);
+        }
+      }
+      case "/mindset": {
+        try {
+          const res = await mindset(env, body, profile);
+          return res === null ? json({ error: "not found" }, 404) : json(res);
+        } catch (e) {
+          console.error(e);
+          return json({ error: "coach unavailable" }, 502);
+        }
+      }
+      case "/business": {
+        try {
+          const res = await business(env, body, profile);
+          return res === null ? json({ error: "not found" }, 404) : json(res);
+        } catch (e) {
+          console.error(e);
+          return json({ error: "coach unavailable" }, 502);
+        }
+      }
+      case "/persoenlich": {
+        try {
+          const res = await persoenlich(env, body, profile);
+          return res === null ? json({ error: "not found" }, 404) : json(res);
         } catch (e) {
           console.error(e);
           return json({ error: "coach unavailable" }, 502);

@@ -3,7 +3,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import '../feed/feed_data.dart';
 import '../ui/coach_style.dart';
 
 /// "Home-Feed als Wurzelwerk" (vault Umsetzung/Home-Schichten.md, decided
@@ -15,7 +14,7 @@ import '../ui/coach_style.dart';
 /// What one area node shows.
 class WurzelBereich {
   const WurzelBereich({
-    required this.bereich,
+    required this.id,
     required this.name,
     required this.icon,
     this.wert,
@@ -23,9 +22,11 @@ class WurzelBereich {
     this.grund,
     this.woche = const [],
     this.infos = const [],
+    this.teile = const [],
   });
 
-  final Bereich bereich;
+  /// Key of the area: koerper, produktiv, business, persoenlich, mindset.
+  final String id;
   final String name;
   final IconData icon;
 
@@ -43,18 +44,25 @@ class WurzelBereich {
 
   /// Two short facts from the area's tiles, e.g. ("Heute", "Push 17:30").
   final List<(String, String)> infos;
+
+  /// Körper names its three parts on the card.
+  final List<String> teile;
 }
 
-/// Where the four areas hang: x as share of the width, y as share of the
+/// Where the areas hang: x as share of the width, y as share of the
 /// depth below the ground line. Not in one line on purpose.
 /// The big version on Heute: zig-zag so each area and its coach line has
-/// room.
-const _lagenGross = [
-  Offset(.70, .0),
-  Offset(.30, .33),
-  Offset(.70, .66),
-  Offset(.30, 1.0),
+/// room (five roots since the glass look, 2026-10-28).
+List<Offset> _lagenGross(int n) => [
+  for (var i = 0; i < n; i++)
+    Offset(i.isEven ? .70 : .30, n < 2 ? 0 : i / (n - 1)),
 ];
+
+/// Space per area in the big version.
+const _abstandGross = 280.0;
+
+/// Room at the bottom for the life goals.
+const _zieleHoehe = 230.0;
 
 /// Circle radius of the big version.
 const _rGross = 46.0;
@@ -99,12 +107,20 @@ class _Geo {
   final List<_Ast> baum;
 }
 
-_Geo _baue(Size size, double boden, int wurzeln, {bool gross = false}) {
+_Geo _baue(
+  Size size,
+  double boden,
+  int wurzeln, {
+  bool gross = false,
+  int n = 4,
+  bool lebensziele = false,
+}) {
   final r = _Rnd(11);
-  final w = size.width, h = size.height, cx = w * .5;
+  final w = size.width, cx = w * .5;
+  final h = size.height - (lebensziele ? _zieleHoehe : 0);
   final unten = h - boden - (gross ? 330 : 96);
   final ziele = [
-    for (final l in gross ? _lagenGross : _lagen)
+    for (final l in gross ? _lagenGross(n) : _lagen)
       Offset(
         // Big version: the circle sits at the edge, its info card beside it.
         gross ? (l.dx < .5 ? 24 + _rGross : w - 24 - _rGross) : l.dx * w,
@@ -174,13 +190,24 @@ _Geo _baue(Size size, double boden, int wurzeln, {bool gross = false}) {
     for (final z in ziele)
       pfad(
         Offset(
-          cx + (gross ? (ziele.indexOf(z) - 1.5) * 7 : 0) + (r.next() - .5) * 6,
+          cx +
+              (gross ? (ziele.indexOf(z) - (ziele.length - 1) / 2) * 7 : 0) +
+              (r.next() - .5) * 6,
           boden,
         ),
         z.translate(0, gross ? -(_rGross - 2) : -26),
         gross ? 17 : 10,
         gross ? 5 : 2.6,
         10 + r.next() * 8,
+      ),
+    // The tap root ends in the life goals.
+    if (lebensziele)
+      pfad(
+        Offset(cx, boden),
+        Offset(cx, size.height - _zieleHoehe + 40),
+        gross ? 19 : 10,
+        gross ? 6 : 2.6,
+        14,
       ),
   ];
   for (final p in haupt) {
@@ -546,10 +573,14 @@ class Wurzelwerk extends StatefulWidget {
     this.jubelTick = 0,
     this.hoehe = 600,
     this.gross = false,
+    this.lebensziele,
   });
 
   final List<WurzelBereich> bereiche;
-  final Future<void> Function(Bereich b, Offset mitte) onOpen;
+  final Future<void> Function(String id, Offset mitte) onOpen;
+
+  /// The card at the end of the tap root (big version).
+  final Widget? lebensziele;
   final int streak;
   final int wurzeln;
   final int jubelTick;
@@ -614,7 +645,7 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
       final box = _box.currentContext?.findRenderObject() as RenderBox?;
       final z = _geo!.ziele[i];
       final mitte = box?.localToGlobal(z) ?? z;
-      await widget.onOpen(widget.bereiche[i].bereich, mitte);
+      await widget.onOpen(widget.bereiche[i].id, mitte);
       if (!mounted) return;
       _funken.value = 0;
       await _licht.reverse();
@@ -658,9 +689,26 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, c) {
-        final size = Size(c.maxWidth, widget.gross ? 1210 : widget.hoehe);
+        final n = widget.bereiche.length;
+        final mitZielen = widget.gross && widget.lebensziele != null;
+        final size = Size(
+          c.maxWidth,
+          widget.gross
+              ? _boden +
+                    330 +
+                    _abstandGross * math.max(1, n - 1) +
+                    (mitZielen ? _zieleHoehe : 0)
+              : widget.hoehe,
+        );
         if (_geo == null || _geo!.size != size) {
-          _geo = _baue(size, _boden, widget.wurzeln, gross: widget.gross);
+          _geo = _baue(
+            size,
+            _boden,
+            widget.wurzeln,
+            gross: widget.gross,
+            n: n,
+            lebensziele: mitZielen,
+          );
         }
         final geo = _geo!;
         final s = widget.streak;
@@ -735,10 +783,18 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
                   ),
                 ),
               ],
-              for (var i = 0; i < widget.bereiche.length && i < 4; i++)
+              for (var i = 0; i < geo.ziele.length; i++)
                 ...(widget.gross
                     ? _knotenGross(i, geo.ziele[i], i == schwach)
                     : _knoten(i, geo.ziele[i], i == schwach)),
+              if (mitZielen)
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  bottom: 18,
+                  height: _zieleHoehe - 40,
+                  child: Center(child: widget.lebensziele),
+                ),
             ],
           ),
         );
@@ -809,7 +865,7 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
             button: true,
             label: b.name,
             child: GestureDetector(
-              key: ValueKey('wurzel-${b.bereich.name}'),
+              key: ValueKey('wurzel-${b.id}'),
               onTap: () => _tippen(i),
               child: CustomPaint(
                 painter: _Ring(b.wert, leuchtet: sagt),
@@ -831,7 +887,7 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
                               CoachStyle.goldGradient.createShader(r),
                           child: Text(
                             b.wert?.toString() ?? '–',
-                            key: ValueKey('knoten-wert-${b.bereich.name}'),
+                            key: ValueKey('knoten-wert-${b.id}'),
                             style: const TextStyle(
                               fontFamily: 'Sora',
                               fontWeight: FontWeight.w700,
@@ -870,7 +926,7 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
             GestureDetector(
               onTap: () => _tippen(i),
               child: _InfoKarte(
-                key: ValueKey('info-${b.bereich.name}'),
+                key: ValueKey('info-${b.id}'),
                 b: b,
                 trend: trend,
                 sagt: sagt,
@@ -912,7 +968,7 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
               button: true,
               label: b.name,
               child: GestureDetector(
-                key: ValueKey('wurzel-${b.bereich.name}'),
+                key: ValueKey('wurzel-${b.id}'),
                 onTap: () => _tippen(i),
                 child: CustomPaint(
                   painter: _Ring(b.wert),
@@ -952,7 +1008,7 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
                 ),
               ),
               Text.rich(
-                key: ValueKey('knoten-wert-${b.bereich.name}'),
+                key: ValueKey('knoten-wert-${b.id}'),
                 TextSpan(
                   children: [
                     TextSpan(
@@ -977,7 +1033,7 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
               ),
               if (widget.gross && (sagt || b.grund != null))
                 Container(
-                  key: sagt ? ValueKey('knoten-sagt-${b.bereich.name}') : null,
+                  key: sagt ? ValueKey('knoten-sagt-${b.id}') : null,
                   margin: const EdgeInsets.only(top: 7),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -1006,7 +1062,7 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
                 ),
               if (sagt && !widget.gross)
                 Container(
-                  key: ValueKey('knoten-sagt-${b.bereich.name}'),
+                  key: ValueKey('knoten-sagt-${b.id}'),
                   margin: const EdgeInsets.only(top: 5),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 9,
@@ -1181,6 +1237,34 @@ class _InfoKarte extends StatelessWidget {
                   ),
                 ),
               ),
+            if (b.teile.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 5),
+                child: Wrap(
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: [
+                    for (final t in b.teile)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(99),
+                          border: Border.all(color: const Color(0x44E0BF7E)),
+                        ),
+                        child: Text(
+                          t,
+                          style: CoachStyle.body.copyWith(
+                            fontSize: 10.5,
+                            color: CoachStyle.beigeLabel,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             for (final (titel, wert) in b.infos)
               Padding(
                 padding: const EdgeInsets.only(top: 3),
@@ -1212,7 +1296,7 @@ class _InfoKarte extends StatelessWidget {
                 color: const Color(0xFF4A3B2A),
               ),
               Padding(
-                key: sagt ? ValueKey('knoten-sagt-${b.bereich.name}') : null,
+                key: sagt ? ValueKey('knoten-sagt-${b.id}') : null,
                 padding: const EdgeInsets.only(top: 7),
                 child: Text(
                   satz,

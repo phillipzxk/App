@@ -98,3 +98,23 @@ Phillip wollte das Fortschrittsfoto wieder auf Heute, das Muster viel kleiner (n
   - Mindset: Durchgezogen und Dein Warum
 - Der schwächste Bereich bekommt einen goldenen Rand und „Hier hängt es gerade.“ vor dem Coach-Satz.
 - Gebaut 2026-10-25 (`today_tab.dart`, `wurzelwerk.dart` `_knotenGross` und `_InfoKarte`, `muster_widgets.dart` `MusterFeld`, `future_me_card.dart` `FotoFeld`).
+
+## Glas-Look (entschieden 2026-10-28)
+
+Phillip wollte das Design besonderer, „wie Apple“, aber mit dem Wurzel-Prinzip. Gewählt: **Glas-Wurzelwerk** https://claude.ai/artifact/UNXrcw6iMmXRJg1dormGgF („sehr geil“, danach weitere Varianten verworfen: „lass die erste Idee“).
+
+- Alle Karten und Kreise wie mattes Glas (iOS-Glas-Look): verschwommenes Durchscheinen von Licht und Wurzeln, feine Lichtkante oben, Glanz wandert beim Neigen mit.
+- Weiche goldene Lichtflecken hinter dem oberen Bereich.
+- Apple-Systemschrift: groß und fett „Heute, Phillip“, sonst ruhig, keine Großbuchstaben-Labels.
+- Beim Scrollen kleine Glas-Leiste oben mit dem Wichtigsten, Wurzeln bewegen sich etwas langsamer (Tiefe).
+- Unten 5 Wurzeln (Körper mit 3 Teilen, Produktivität & Fokus, Business & Beruf, Persönlichkeit, Mindset), Lebensziele ganz unten.
+- Verworfen: Ein Glasblatt, Goldfaden, Pur, Live-Insel, Tiefenschärfe, Taschenlampe, Jahresringe, Wurzelkarte, Durch die Erde, sowie die 6 Design-Welten (Topografie usw.).
+- Nächster Schritt: Animationen feinschleifen.
+- **Gebaut 2026-10-29 (PR #64, Teil 6):** unten 5 Wurzeln (Körper mit den Teilen Training, Ernährung, Schlaf & Routine als Wert-Schnitt; Produktivität & Fokus; Business & Beruf; Persönlichkeit; Mindset), die Hauptwurzel endet in der Karte „Deine Lebensziele“ (öffnet die Lebensziele aus Mindset). Oben bleibt Heute wie bisher.
+
+### Animationen im Glas-Look (2026-10-28)
+
+- Phillip „Ja gut“ zu den 6 Animationen (Entwurf https://claude.ai/artifact/WhfrZXDgKYUBi8KTSekUPX): App-Start (Karten schweben aus der Unschärfe ein, Licht geht auf wie Sonnenaufgang), Glas antippen (drückt sich ein, Licht vom Finger), Werte zählen hoch beim Reinscrollen, Lichtteilchen steigen an den Wurzeln hoch, Heute geschafft (Karte leuchtet golden, Funken, neue kleine Wurzel am Spross).
+- **Bereich öffnen = Aufblühen** (entschieden 17:58, Entwurf https://claude.ai/artifact/Q1tLKYnJunAfwy2VKRmcPi): Homefeed verschwimmt hinter Glas, der Kreis fliegt nach oben links und wird Kopf der Seite (Name + Coach-Satz), aus seiner Mitte springen die vier Felder wie Blütenblätter im Bogen nacheinander heraus, mit Funken. Zuletzt kommt „Alles zu …“. „‹ Heute“ spielt alles rückwärts.
+- Felder je Bereich (Entwurf): Körper = Training, Ernährung, Schlaf & Routine, Verlauf. Produktivität = Fokus heute, Fokus-Block, Handy-Spiegel, Beste Stunden. Business = Hebel der Woche, Umsatz-Ziel, Business-Baum, Brainstorming. Persönlichkeit = Pflege, Look, Lernen, Stimme. Mindset = Dein Berg, Wort gehalten, Werte, Ruhe.
+- Verworfen: Wurzeln wachsen, Zellteilung, Karten austeilen; Felder-Umordnen-Varianten (Morph-Leiste, Wallet, Folien, Goldfaden-Liste) waren ein Missverständnis.

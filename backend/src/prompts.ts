@@ -620,3 +620,337 @@ Stell ihren besten Tagesablauf für heute zusammen, von Aufstehen bis Bettzeit. 
 ${JSON_ONLY}
 {"satz": "...", "punkte": [{"zeit": "6:30", "was": "...", "warum": "...", "neu": false}]}`;
 }
+
+// --- Mindset (vault Umsetzung/Mindset komplett.md, Entwurf 7) ---
+
+function mindsetRahmen(p: Profile, kontext: string): string {
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Ihr Mindset-Bereich und ihr Tag (aus ihren eigenen Angaben):
+<nutzer>
+${clip(kontext, 4000)}
+</nutzer>
+
+Mindset heißt in Groundset: Sachen durchziehen, vor denen man sich drückt. Ziel ist, dass sie dich immer weniger braucht.`;
+}
+
+/// The 2-minute first step for a stone; with her own step, only add to it.
+export function steinSchrittPrompt(p: Profile, titel: string, eigener: string | null, kontext: string): string {
+  return `${mindsetRahmen(p, kontext)}
+
+Sie drückt sich vor: <stein>${clip(titel, 200)}</stein>
+${eigener ? `Ihr eigener erster Schritt: <eigener>${clip(eigener, 200)}</eigener>
+Prüfe ihn: Ist er klein genug für 2 Minuten und ein echter Anfang? Dann "passt": true und "schritt" ist ihr Schritt (höchstens leicht geschärft). Sonst "passt": false und mach ihn kleiner.` : `Mach daraus einen allerersten Handgriff, der in 2 Minuten geht und sofort machbar ist ("passt": false).`}
+"schritt": höchstens 15 Wörter, konkret (was genau öffnen, schreiben, anrufen). "satz": ein kurzer Satz von dir dazu, direkt, ohne Floskeln.
+
+${JSON_ONLY}
+{"schritt": "...", "satz": "...", "passt": true}`;
+}
+
+/// What comes right after the stone, so no gap opens.
+export function danachPrompt(p: Profile, titel: string, kontext: string): string {
+  return `${mindsetRahmen(p, kontext)}
+
+Sie fängt jetzt an mit: <stein>${clip(titel, 200)}</stein>
+Mach einen Danach-Plan in genau 3 kurzen Punkten: 1. der Stein selbst (2 Minuten oder länger, wenn es läuft), 2. was direkt danach kommt, damit keine Lücke entsteht, in der sie abrutscht, 3. der nächste feste Punkt aus ihrem Tag (mit Uhrzeit, wenn bekannt). Jeder Punkt höchstens 10 Wörter.
+
+${JSON_ONLY}
+{"punkte": ["...", "...", "..."]}`;
+}
+
+/// A plan against the excuse that comes back most.
+export function ausredePrompt(p: Profile, ausrede: string, kontext: string): string {
+  return `${mindsetRahmen(p, kontext)}
+
+Die Ausrede, die am häufigsten kommt: <ausrede>${clip(ausrede, 100)}</ausrede>
+Gib ihr einen Plan dagegen in 1 bis 2 kurzen Sätzen, aus ihren Mustern und Zeiten (wann kommt die Ausrede, wann hat sie Energie). Konkret, mit Tagen oder Uhrzeiten, kein Vorwurf, keine 0815-Tipps.
+
+${JSON_ONLY}
+{"plan": "..."}`;
+}
+
+/// Sorts worries into what she can change and what is not up to her.
+export function sorgenPrompt(p: Profile, text: string, kontext: string): string {
+  return `${mindsetRahmen(p, kontext)}
+
+Sie hat ungeordnet aufgeschrieben, was sie bedrückt:
+<sorgen>
+${clip(text, 2000)}
+</sorgen>
+Trenne es in einzelne Sorgen (höchstens 4). Für jede: "sorge" kurz in ihren Worten, "aendern" ein konkreter kleiner Schritt, den sie selbst tun kann, "nicht" was davon nicht bei ihr liegt. "satz": ein ruhiger Satz von dir zum Schluss, ohne Floskeln. Keine medizinischen Ratschläge, bei Gesundheit: "geh zum Arzt". Wirkt es ernst (z. B. Gedanken, sich etwas anzutun), sag klar, dass sie sich sofort Hilfe holen soll (in Deutschland Telefonseelsorge 0800 111 0 111).
+
+${JSON_ONLY}
+{"sorgen": [{"sorge": "...", "aendern": "...", "nicht": "..."}], "satz": "..."}`;
+}
+
+/// The guiding sentence from her evening answers.
+export function leitsatzPrompt(p: Profile, antworten: { frage: string; antwort: string }[]): string {
+  const a = antworten.map((x) => `Frage: ${clip(x.frage, 200)}\nAntwort: ${clip(x.antwort, 500)}`).join("\n\n");
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Ihre Antworten auf die Abendfragen:
+<antworten>
+${clip(a, 5000)}
+</antworten>
+Forme daraus ihren Leitsatz: ein Satz in der Ich-Form, höchstens 20 Wörter, in ihren Worten, wer sie sein will. Nichts erfinden, was nicht in den Antworten steckt.
+
+${JSON_ONLY}
+{"leitsatz": "..."}`;
+}
+
+/// When a letter to herself opens after 6 months: what has changed.
+export function briefPrompt(p: Profile, brief: string, geschrieben: string, kontext: string): string {
+  return `${mindsetRahmen(p, kontext)}
+
+Vor 6 Monaten (${clip(geschrieben, 20)}) hat sie sich diesen Brief geschrieben, heute öffnet er sich:
+<brief>
+${clip(brief, 3000)}
+</brief>
+Leg ihr in 2 bis 3 kurzen Sätzen daneben, was sich seitdem verändert hat, nach ihren Daten. Ehrlich: was sie geschafft hat und was noch offen ist. Kein Lob ohne Grund.
+
+${JSON_ONLY}
+{"satz": "..."}`;
+}
+
+// --- Business & Beruf (vault Umsetzung/Business und Beruf komplett.md) ---
+
+function businessRahmen(p: Profile, kontext: string): string {
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Ihr Business- und Berufs-Bereich (aus ihren eigenen Angaben):
+<nutzer>
+${clip(kontext, 4000)}
+</nutzer>
+
+Du bist hier ihr Business-Coach: direkt, konkret, mit Zahlen aus ihren Angaben, keine 0815-Tipps, keine Rechts- oder Steuerberatung (dafür: frag einen Steuerberater). Ziel ist, dass sie dich immer weniger braucht.`;
+}
+
+const s = (v: unknown, max = 300) => clip(String(v ?? ""), max);
+
+/// One prompt per part of the Business page; null when the input is empty.
+export function businessPrompt(p: Profile, art: string, b: Record<string, unknown>): string | null {
+  const r = businessRahmen(p, String(b.kontext ?? ""));
+  switch (art) {
+    case "hebel":
+      return `${r}
+
+Schlag ihr den einen Hebel für diese Woche vor: die eine Aktion, die ihr Business diese Woche am meisten bewegt. "hebel" höchstens 12 Wörter. "punkte": 2 bis 4 einzelne Schritte zum Abhaken (je höchstens 8 Wörter). "tipps": genau 3 Tipps, auf die man allein nicht kommt, je "titel" (kurz, fett) und "text" (ein Satz).
+
+${JSON_ONLY}
+{"hebel": "...", "punkte": ["..."], "tipps": [{"titel": "...", "text": "..."}]}`;
+    case "tipps":
+      if (!s(b.hebel).trim()) return null;
+      return `${r}
+
+Ihr Hebel diese Woche: <hebel>${s(b.hebel, 200)}</hebel>
+Gib genau 3 Tipps dazu, auf die man allein nicht kommt, je "titel" (kurz) und "text" (ein Satz, konkret).
+
+${JSON_ONLY}
+{"tipps": [{"titel": "...", "text": "..."}]}`;
+    case "euro":
+      if (!s(b.idee).trim()) return null;
+      return `${r}
+
+Was sie verkaufen könnte: <idee>${s(b.idee, 400)}</idee>
+Mach daraus die kleinste Version, für die diese Woche jemand zahlt. "angebot": das Angebot in einem Satz, wie sie es verschicken würde (mit Zeit und Umfang). "preis": eine ganze Zahl in Euro, ehrlich und nicht zu billig.
+
+${JSON_ONLY}
+{"angebot": "...", "preis": 149}`;
+    case "lohnt":
+      if (!s(b.frage).trim()) return null;
+      return `${r}
+
+Sie überlegt: <frage>${s(b.frage, 300)}</frage>
+Lohnt sich das? Antworte in 2 bis 3 kurzen Sätzen, mit ihrem Spar-Ziel und Umsatz im Blick: was dafür spricht, was dagegen, und deine klare Empfehlung.
+
+${JSON_ONLY}
+{"antwort": "..."}`;
+    case "sparen":
+      if (!s(b.ausgaben).trim()) return null;
+      return `${r}
+
+Wofür sie jeden Monat Geld ausgibt: <ausgaben>${s(b.ausgaben, 1500)}</ausgaben>
+Gib 2 bis 3 konkrete Wege, mehr zu sparen, je "titel" (was, z. B. "3 Abos kaum genutzt") und "text" (wie viel im Monat und was tun). "satz": ein Satz, was das für ihr Spar-Ziel heißt.
+
+${JSON_ONLY}
+{"tipps": [{"titel": "...", "text": "..."}], "satz": "..."}`;
+    case "stunde":
+      return `${r}
+
+Schau auf ihre Tätigkeiten und was jede pro Stunde bringt. Sag in 2 kurzen Sätzen, worauf sie sich konzentrieren soll, was sie weniger machen oder schneller erledigen soll.
+
+${JSON_ONLY}
+{"satz": "..."}`;
+    case "ausarbeiten": {
+      if (!s(b.idee).trim()) return null;
+      const g = (Array.isArray(b.gedanken) ? b.gedanken : []).map((x) => `- ${s(x, 200)}`).slice(-20).join("\n");
+      return `${r}
+
+Ihre Kernidee: <idee>${s(b.idee, 300)}</idee>
+Ihre anderen Gedanken:
+<gedanken>
+${g}
+</gedanken>
+Arbeite die Kernidee aus: "ziel" ein messbares Ziel in einem Satz, "schritte" 4 bis 7 Schritte vom Anfang bis zum Ende, in Reihenfolge, je höchstens 12 Wörter, der erste geht diese Woche.
+
+${JSON_ONLY}
+{"ziel": "...", "schritte": ["..."]}`;
+    }
+    case "pruefen":
+      if (!s(b.idee).trim()) return null;
+      return `${r}
+
+Ihre Idee: <idee>${s(b.idee, 300)}</idee>
+Stell genau 4 harte Fragen, bevor sie Zeit hineinsteckt (wer kauft es, würde jemand heute zahlen, was kostet es sie, warum bei ihr). Je höchstens 12 Wörter, auf diese Idee zugeschnitten.
+
+${JSON_ONLY}
+{"fragen": ["...", "...", "...", "..."]}`;
+    case "urteil": {
+      const f = (Array.isArray(b.fragen) ? b.fragen : [])
+        .map((x) => {
+          const o = (x ?? {}) as Record<string, unknown>;
+          return `Frage: ${s(o.frage, 200)}\nAntwort: ${s(o.antwort, 400) || "(keine)"}`;
+        })
+        .join("\n\n");
+      if (!s(b.idee).trim() || !f) return null;
+      return `${r}
+
+Ihre Idee: <idee>${s(b.idee, 300)}</idee>
+Ihre Antworten auf die harten Fragen:
+<antworten>
+${f}
+</antworten>
+Wie reif ist die Idee? "reife" eine ganze Zahl 0 bis 100 (ab 80 lohnt sich Bauen; fehlende oder vage Antworten ziehen stark runter). "satz": 1 bis 2 Sätze, ehrlich, mit dem einen nächsten Schritt.
+
+${JSON_ONLY}
+{"reife": 40, "satz": "..."}`;
+    }
+    case "gespraech":
+      if (!s(b.mit).trim() || !s(b.ziel).trim()) return null;
+      return `${r}
+
+Sie hat ein wichtiges Gespräch mit <mit>${s(b.mit, 120)}</mit>. Ihr Ziel: <ziel>${s(b.ziel, 300)}</ziel>
+Mach einen Leitfaden: "schritte" genau 4 Teile (Einstieg, Angebot, Beweis, Abschluss), je "titel" und "text" (ein Satz, was sie sagt oder zeigt). "einwaende": 2 bis 3 Einwände, die kommen können, je "sagt" (in Anführungszeichen) und "antwort" (ihr Satz darauf).
+
+${JSON_ONLY}
+{"schritte": [{"titel": "...", "text": "..."}], "einwaende": [{"sagt": "...", "antwort": "..."}]}`;
+    case "meilensteine":
+      return `${r}
+
+Schlag genau 3 nächste Meilensteine für ihren Business-Baum vor, die auf den erreichten aufbauen. Je höchstens 6 Wörter, messbar, z. B. "3.000 € im Monat" oder "Erster fester Partner".
+
+${JSON_ONLY}
+{"vorschlaege": ["...", "...", "..."]}`;
+    case "skill":
+      if (!s(b.skill).trim()) return null;
+      return `${r}
+
+Sie will diesen Skill aufbauen: <skill>${s(b.skill, 80)}</skill>
+Bau eine Leiter aus genau 7 Stufen, jede baut auf der letzten auf, von leicht bis schwer. Je "titel" (höchstens 6 Wörter) und "text" (die Aufgabe für eine Woche in einem Satz, konkret für ihr Business).
+
+${JSON_ONLY}
+{"stufen": [{"titel": "...", "text": "..."}]}`;
+    default:
+      return null;
+  }
+}
+
+// --- Persönlichkeit (vault Umsetzung/Persönlichkeit komplett.md) ---
+
+/// One prompt per part of the Persönlichkeit page; null when the input is
+/// empty.
+export function persoenlichPrompt(p: Profile, art: string, b: Record<string, unknown>): string | null {
+  const r = `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Du bist hier ihr Coach für Auftreten, Look, Pflege und Lernen: ehrlich, freundlich, konkret, ohne Floskeln. Nie bewerten, wie jemand von Natur aus aussieht, keine Punktzahl, nur Dinge, die man selbst ändern kann. Keine medizinischen Ratschläge, bei Haut- oder Gesundheitsproblemen: "geh zum Hautarzt" bzw. "geh zum Arzt".`;
+  switch (art) {
+    case "look":
+      return `${r}
+
+Auf dem Foto ist die Person von vorn. Nenne genau 3 Hebel, die bei ihr am meisten ausmachen (z. B. Bart, Brauen, Frisur, Kragen, Brille), je "titel" (höchstens 6 Wörter) und "text" (ein Satz, wie genau). "titel" oben: die 3 Hebel in 3 Wörtern, mit Kommas. Wenn kein Mensch auf dem Foto ist: {"titel": null}.
+
+${JSON_ONLY}
+{"titel": "Bart, Brauen, Kragen", "hebel": [{"titel": "...", "text": "..."}]}`;
+    case "stil":
+      return `${r}
+
+Auf dem Foto ist ihr Outfit von heute. "titel": dein Urteil in höchstens 4 Wörtern (z. B. "Gut, eine Sache"). "passt": ein Satz, was gut ist. "aendern": ein Satz, die eine Sache, die mehr bringt. "farben": 3 bis 5 Farben, die ihr stehen, als Hex (#rrggbb), gedeckt statt grell.
+
+${JSON_ONLY}
+{"titel": "...", "passt": "...", "aendern": "...", "farben": ["#1f2a3a"]}`;
+    case "haltung":
+      return `${r}
+
+Auf dem Foto steht die Person von der Seite. "befund": ein Satz zu ihrer Haltung, ruhig und ohne Drama (z. B. "Schultern kippen leicht nach vorn"). "uebungen": genau 3 Übungen dagegen, je "titel" (Name der Übung) und "text" (Sätze × Wiederholungen und wann, z. B. "3 × 15, am Push-Tag"). Bei Schmerzen: "geh zum Arzt" in den Befund.
+
+${JSON_ONLY}
+{"befund": "...", "uebungen": [{"titel": "...", "text": "3 × 15, ..."}]}`;
+    case "haut":
+      if (!s(b.problem).trim()) return null;
+      return `${r}
+
+Was sie an ihrer Haut stört: <problem>${s(b.problem, 300)}</problem>
+Mach einen Plan über 8 Wochen in 3 Phasen, je "titel" ("Woche 1–2" usw.) und "text" (ein Satz, was sie macht, mit Wirkstoff statt Marke). Einfach, eins nach dem anderen.
+
+${JSON_ONLY}
+{"phasen": [{"titel": "Woche 1–2", "text": "..."}]}`;
+    case "frisur":
+      return `${r}
+
+Ihre Haare gerade: <haare>${s(b.beschreibung, 500) || "(siehe Foto)"}</haare>
+"empfehlung": was zu ihr passt, höchstens 7 Wörter. "friseur": der Text, den sie dem Friseur zeigt, 1 bis 3 Sätze, konkret (Maschinenstufe, Längen in cm). "styling": ein Satz Styling in 1 Minute. "wochen": alle wie viele Wochen schneiden (ganze Zahl).
+
+${JSON_ONLY}
+{"empfehlung": "...", "friseur": "...", "styling": "...", "wochen": 4}`;
+    case "kurs":
+      if (!s(b.skill).trim()) return null;
+      return `${r}
+
+Sie will diesen Skill lernen: <skill>${s(b.skill, 80)}</skill>
+Bau einen Kurs aus genau 12 Lektionen, jede baut auf der letzten auf, von den Grundlagen bis zum Können. Nur die Titel, je höchstens 5 Wörter.
+
+${JSON_ONLY}
+{"lektionen": ["...", "..."]}`;
+    case "lektion":
+      if (!s(b.titel).trim()) return null;
+      return `${r}
+
+Skill: <skill>${s(b.skill, 80)}</skill>, Lektion ${Number(b.nummer) || 1} von 12: <titel>${s(b.titel, 100)}</titel>
+"text": die Lektion in 3 bis 5 Sätzen, so dass man sie in 10 Minuten lesen und gleich üben kann, mit einer kleinen Übung am Ende. Dann eine kurze Frage, ob es sitzt: "frage", "antworten" (genau 3 kurze), "richtig" (Index 0 bis 2 der richtigen).
+
+${JSON_ONLY}
+{"text": "...", "frage": "...", "antworten": ["...", "...", "..."], "richtig": 1}`;
+    case "quiz":
+      if (!s(b.buch).trim()) return null;
+      return `${r}
+
+Sie hat gelesen oder gehört: <buch>${s(b.buch, 120)}</buch>
+Stell genau 3 Fragen zu den Kernideen, damit es hängen bleibt. Je "frage", "antworten" (genau 3 kurze) und "richtig" (Index 0 bis 2). Wenn du das Werk nicht sicher kennst, frag nach allgemeinen Kernideen, die man daraus mitnehmen sollte, ohne Details zu erfinden.
+
+${JSON_ONLY}
+{"fragen": [{"frage": "...", "antworten": ["...", "...", "..."], "richtig": 0}]}`;
+    case "umsetzen":
+      if (!s(b.gelernt).trim()) return null;
+      return `${r}
+
+Aus <quelle>${s(b.quelle, 120) || "einem Buch oder Podcast"}</quelle> ist hängen geblieben: <gelernt>${s(b.gelernt, 500)}</gelernt>
+Was sie sonst macht:
+<nutzer>
+${clip(String(b.kontext ?? ""), 2000)}
+</nutzer>
+Mach daraus einen kleinen Schritt, den sie diese Woche macht, höchstens 12 Wörter, konkret.
+
+${JSON_ONLY}
+{"schritt": "..."}`;
+    default:
+      return null;
+  }
+}
