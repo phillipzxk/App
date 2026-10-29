@@ -21,3 +21,9 @@ Aufteilung (Vorschlag Claude):
 - **Handy:** Handy-Spiegel (Bildschirmzeit heute, 24-Stunden-Balken, Apps, wann die Unruhe kommt + Plan in Dein Tag), Ablenkung (Drang-Knopf direkt im Feld tippbar, Liste mit Uhrzeit, Coach erkennt Muster), Handyfrei (07:00–07:45 nach dem Aufstehen, Fokus-Knopf 30/45/eigene Zeit, geht erst danach weg).
 - **Rhythmus:** Deine besten Stunden (Kurve aus 21 Tagen, so legt der Coach den Tag), Geber & Räuber (mit „Stimmt nicht“), Verlauf (30 Tage).
 - **Gewohnheiten:** Gewohnheit andocken (Anker → neue Gewohnheit als Kette, 21 Punkte), Neue andocken („Wenn ich …, dann …“), Läuft von allein.
+
+## Stand im Code (2026-10-29)
+- Gebaut in PR #64 (Teil 3): `code/lib/home/produktiv_seite.dart`, Felder in `code/lib/produktiv/`. Auf der Startseite eigene Wurzel „Produktivität & Fokus“.
+- Energie heute ist von Körper › Schlaf hierher gezogen.
+- Produktivitäts-Wert, Regel von Claude: die eine Sache geschafft, Minuten im Fokus (50 sind voll) und der handyfreie Morgen.
+- Bildschirmzeit trägt man bis zur Handy-Version selbst ein. Apps sperren geht erst in der Handy-Version.

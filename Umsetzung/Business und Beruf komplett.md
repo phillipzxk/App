@@ -20,3 +20,11 @@ Kopf: Kreis 6, „+2 in 3 Monaten · Hebel läuft“. Vier Seiten, je drei Felde
 - **Ideen:** Brainstorming mit Gedanken-Ablage (Kernideen gold, „Mit dem Coach ausarbeiten“ macht Ziel + Plan vom Anfang bis zum Ende), Ideen-Prüfer (harte Fragen, Reife in Prozent), Gesprächs-Hilfe (Leitfaden + Antworten auf Einwände).
 - **Wachstum:** Business-Baum (Meilensteine = Äste, nächster als leuchtende Knospe), Skill-Leiter (7 Stufen linear), Arbeit & Körper (Arbeit an Trainings- und Schlaftagen).
 - Woche im Business läuft im Reality Check mit.
+
+## Stand im Code (2026-10-29)
+- Gebaut in PR #64 (Teil 4): `code/lib/home/business_seite.dart`, Felder in `code/lib/business/`, Coach-Route `/business`. Auf der Startseite eigene Wurzel „Business & Beruf“.
+- Hebel: Coach schlägt einen vor (mit Schritten und 3 Tipps) oder man legt ihn selbst fest.
+- Umsatz-Ziel, Spar-Ziel und Business-Baum: beim Erreichen das große goldene Häkchen über den Bildschirm. Der erste Euro zählt als Eingang mit.
+- Ideen-Prüfer: ohne Coach 4 feste harte Fragen. Reife bis zur Antwort des Coachs = Anteil beantworteter Fragen (höchstens 60 %).
+- Arbeit & Körper vergleicht den Produktivitäts-Wert an Tagen mit und ohne Training (aus dem Check-in) und nach Nächten unter 7 Stunden, je ab 3 Tagen.
+- Business-Wert, Regel von Claude: Schritte des Hebels, Umsatz gegen das Monatsziel bis heute, mutige Anfragen der Woche.

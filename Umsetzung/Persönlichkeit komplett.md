@@ -21,3 +21,12 @@ Kopf: Kreis 7, „+1 zu gestern · Routine gehalten“. Vier Seiten (Aufteilung 
 - **Wissen:** Dein Skill als linearer Kurs (12 Lektionen, nächste öffnet nach der Frage), Deine Bibliothek (Coach fragt ab), Wissen umsetzen (aus Buch/Podcast ein kleiner Schritt).
 
 Kamera und Mikrofon erst in der Handy-Version.
+
+## Stand im Code (2026-10-29)
+- Gebaut in PR #64 (Teil 5): `code/lib/home/persoenlich_seite.dart`, Felder in `code/lib/persoenlich/`, Coach-Route `/persoenlich`. Auf der Startseite eigene Wurzel „Persönlichkeit“.
+- Pflege-Routine: Start morgens Gesicht waschen, Feuchtigkeitscreme, Sonnenschutz; abends Gesicht reinigen, Nachtcreme. Schritte lassen sich ändern.
+- Kurs: Coach baut 12 Lektionen, jede Lektion mit Text und einer Frage. Erst die richtige Antwort öffnet die nächste. Das Lern-Ziel zählt die 10 Minuten mit einer Uhr.
+- Look, Stil und Haltung gehen über ein Foto (in der Vorschau die Datei-Auswahl). Die Haltungs-Übungen kommen auf Knopfdruck an alle Trainingstage im Plan.
+- Look-Verlauf zeigt das erste und das neueste Fortschrittsfoto.
+- Stimme: das Feld ist da, die Aufnahme kommt mit der Handy-Version.
+- Persönlichkeits-Wert, Regel von Claude: Schritte der Pflege-Routine und die 10 Minuten Lernen.

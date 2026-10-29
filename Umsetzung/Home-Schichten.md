@@ -110,6 +110,7 @@ Phillip wollte das Design besonderer, „wie Apple“, aber mit dem Wurzel-Prinz
 - Unten 5 Wurzeln (Körper mit 3 Teilen, Produktivität & Fokus, Business & Beruf, Persönlichkeit, Mindset), Lebensziele ganz unten.
 - Verworfen: Ein Glasblatt, Goldfaden, Pur, Live-Insel, Tiefenschärfe, Taschenlampe, Jahresringe, Wurzelkarte, Durch die Erde, sowie die 6 Design-Welten (Topografie usw.).
 - Nächster Schritt: Animationen feinschleifen.
+- **Gebaut 2026-10-29 (PR #64, Teil 6):** unten 5 Wurzeln (Körper mit den Teilen Training, Ernährung, Schlaf & Routine als Wert-Schnitt; Produktivität & Fokus; Business & Beruf; Persönlichkeit; Mindset), die Hauptwurzel endet in der Karte „Deine Lebensziele“ (öffnet die Lebensziele aus Mindset). Oben bleibt Heute wie bisher.
 
 ### Animationen im Glas-Look (2026-10-28)
 
