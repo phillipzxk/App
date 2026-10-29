@@ -48,3 +48,10 @@ Phillip 17:35: „nich mit einem alles zu ... Knopf sondern direkt clean modern 
 - Darunter wie gewohnt die 4 Seiten des gewählten Teils (Inhalte wie Entwurf 2). Beim Wechsel tauschen Seitenleiste, Coach-Satz und Felder mit Animation.
 - Die alte Hub-Seite „Verlauf“ (alle drei zusammen, Hängt zusammen, Fortschrittsfoto) liegt jetzt hinter dem Körper-Kreis.
 - Coach-Karte = Frag den Coach (Fragen passend zum gewählten Teil).
+
+## Stand im Code (2026-10-29)
+- Gebaut in PR #64 (Teil 1): Körper-Seite im Glas-Look, `code/lib/home/koerper_seite.dart`, Vorlage für alle Bereiche in `code/lib/bereiche/`.
+- Oben die Leiste Training · Ernährung · Schlaf & Routine, darunter je 4 Seiten mit Glas-Kacheln. Tippen auf eine Kachel lässt sie in ihre Seite wachsen.
+- Ring oben = Körper-Verlauf (3 Kurven, „Hängt zusammen“, Fortschrittsfoto). Coach-Karte „Frag mich“ = Frag den Coach.
+- Energie heute liegt vorerst bei Schlaf & Routine auf der Seite „Tag“, bis Produktivität gebaut ist.
+- Mindset öffnet noch die alte Seite, bis Teil 2 fertig ist.
