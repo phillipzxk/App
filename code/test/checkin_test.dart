@@ -186,6 +186,6 @@ void main() {
     expect(find.byKey(const ValueKey('knoten-sagt-schlaf')), findsOneWidget);
     await openBereich(tester, 'schlaf');
     expect(find.text('Zwei kurze Nächte.'), findsWidgets);
-    expect(find.text('Schlaf & Energie'), findsWidgets);
+    expect(find.text('Schlaf & Routine'), findsWidgets);
   });
 }

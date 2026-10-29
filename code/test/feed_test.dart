@@ -70,17 +70,28 @@ void main() {
     expect(find.text('MONTAG, 12. OKTOBER'), findsOneWidget);
     expect(find.text('DEIN COACH · HEUTE'), findsOneWidget);
 
+    // Schlaf opens in Körper with Schlaf & Routine picked.
     await openBereich(tester, 'schlaf');
-    expect(find.text('Schlaf & Energie'), findsWidgets);
-    expect(find.text('ABENDROUTINE'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('alles-schlaf')));
-    await tester.pumpAndSettle();
-    expect(find.text('Wie hast du geschlafen?'), findsOneWidget);
+    expect(find.text('Körper'), findsOneWidget);
+    expect(find.text('Schlaf & Routine'), findsWidgets);
+    expect(find.byKey(const ValueKey('kachel-s-himmel')), findsOneWidget);
 
-    // Closing the big view goes back to the roots.
-    await tester.pageBack();
+    // Switch to Training directly at the top, then to its Plan page.
+    await tester.tap(find.byKey(const ValueKey('teil-training')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('uebersicht-zu')));
+    expect(find.byKey(const ValueKey('kachel-t-heute')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('seite-Plan')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('kachel-t-plan')), findsOneWidget);
+
+    // A tile grows into its page; back goes to Körper.
+    await openKachel(tester, 't-plan');
+    expect(find.text('Dein Plan'), findsWidgets);
+    await tester.tap(find.byKey(const ValueKey('feld-zurueck')));
+    await tester.pumpAndSettle();
+
+    // Closing Körper goes back to the roots.
+    await tester.tap(find.byKey(const ValueKey('bereich-zurueck')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('wurzel-schlaf')), findsOneWidget);
 
@@ -92,7 +103,7 @@ void main() {
     tester,
   ) async {
     final (_, feed) = await _openFeed(tester);
-    await openTab(tester, 'Training');
+    await openTab(tester, 'Training', 't-heute');
     await tester.tap(find.text('Plan festlegen'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('sportart-Krafttraining')));
@@ -143,6 +154,9 @@ void main() {
     expect(find.text('Heute: Push + Laufen'), findsOneWidget);
     expect(find.text('Letztes Mal'), findsNothing);
 
+    await tester.tap(find.byKey(const ValueKey('feld-zurueck')));
+    await tester.pumpAndSettle();
+    await openKachel(tester, 't-plan');
     await scrollTo(tester, find.byKey(const ValueKey('schwerpunkt-kraft')));
     await tester.tap(find.byKey(const ValueKey('schwerpunkt-kraft')));
     await tester.pumpAndSettle();
@@ -181,7 +195,7 @@ void main() {
     tester,
   ) async {
     final (diary, feed) = await _openFeed(tester);
-    await openTab(tester, 'Ernährung');
+    await openTab(tester, 'Ernährung', 'e-kcal');
     await tester.tap(find.text('kcal-Ziel einrichten'));
     await tester.pumpAndSettle();
 
@@ -229,14 +243,14 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await openTab(tester, 'Ernährung');
+    await openTab(tester, 'Ernährung', 'e-kcal');
     // (900 + 1125 - 150 + 5) * 1.55 = 2914
     expect(find.textContaining('2.900'), findsOneWidget);
   });
 
   testWidgets('evening routine is saved', (tester) async {
     final (_, feed) = await _openFeed(tester);
-    await openTab(tester, 'Schlaf');
+    await openTab(tester, 'Schlaf', 's-routine');
     await scrollTo(tester, find.text('Abendroutine festlegen'));
     await tester.tap(find.text('Abendroutine festlegen'));
     await tester.pumpAndSettle();
@@ -258,6 +272,9 @@ void main() {
   ) async {
     final (_, feed) = await _openFeed(tester);
     await openTab(tester, 'Training');
+    // The coach card opens "Frag den Coach".
+    await tester.tap(find.byKey(const ValueKey('bereich-coach')));
+    await tester.pumpAndSettle();
     await scrollTo(tester, find.text('Wie war dein Training?'));
     await tester.enterText(
       find.widgetWithText(
@@ -303,7 +320,7 @@ void main() {
   ) async {
     final (diary, _) = await _openFeed(tester);
     diary.sleep.add(SleepEntry(DateTime(2026, 10, 1), 6));
-    await openTab(tester, 'Schlaf');
+    await openTab(tester, 'Schlaf', 's-naechte');
     await scrollTo(tester, find.text('Schlaf eintragen'));
     await tester.tap(find.text('Schlaf eintragen'));
     await tester.pumpAndSettle();

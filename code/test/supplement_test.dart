@@ -57,7 +57,7 @@ void main() {
 
   testWidgets('set up the routine on Ernährung', (tester) async {
     final feed = await start(tester);
-    await openTab(tester, 'Ernährung');
+    await openTab(tester, 'Ernährung', 'e-supp');
     await scrollTo(tester, find.byKey(const ValueKey('supp-festlegen')));
     await tester.tap(find.byKey(const ValueKey('supp-festlegen')));
     await tester.pumpAndSettle();
@@ -78,7 +78,7 @@ void main() {
 
   testWidgets('a name without a valid time is not saved', (tester) async {
     final feed = await start(tester);
-    await openTab(tester, 'Ernährung');
+    await openTab(tester, 'Ernährung', 'e-supp');
     await scrollTo(tester, find.byKey(const ValueKey('supp-festlegen')));
     await tester.tap(find.byKey(const ValueKey('supp-festlegen')));
     await tester.pumpAndSettle();
@@ -94,13 +94,13 @@ void main() {
   ) async {
     final feed = await start(tester, supplements: [_magnesium, _kreatin]);
     await openBereich(tester, 'ernaehrung');
+    await zeigeKachel(tester, 'e-supp');
     expect(
       find.textContaining('2 offen, nächste 21:30 Magnesium'),
       findsOneWidget,
     );
 
-    await tester.tap(find.byKey(const ValueKey('supp-hinweis')));
-    await tester.pumpAndSettle();
+    await openKachel(tester, 'e-supp');
     await scrollTo(tester, find.byKey(const ValueKey('supp-check-1')));
     expect(find.text('heute 0 von 2'), findsOneWidget);
 
@@ -118,7 +118,7 @@ void main() {
     expect(find.byKey(const ValueKey('supp-hinweis')), findsNothing);
 
     // Untick again.
-    await openTab(tester, 'Ernährung');
+    await openTab(tester, 'Ernährung', 'e-supp');
     await scrollTo(tester, find.byKey(const ValueKey('supp-check-0')));
     await tester.tap(find.byKey(const ValueKey('supp-check-0')));
     await tester.pumpAndSettle();

@@ -88,6 +88,9 @@ void main() {
     await tester.pumpAndSettle();
 
     await openTab(tester, 'Training');
+    // The photo lives behind the Körper ring.
+    await tester.tap(find.byKey(const ValueKey('bereich-ring')));
+    await tester.pumpAndSettle();
     await scrollTo(tester, find.byKey(const ValueKey('zukunft-karte')));
     await tester.tap(find.byKey(const ValueKey('zukunft-karte')));
     await tester.pumpAndSettle();
@@ -168,6 +171,9 @@ void main() {
   ) async {
     await openApp(tester);
     await openTab(tester, 'Training');
+    // The photo lives behind the Körper ring.
+    await tester.tap(find.byKey(const ValueKey('bereich-ring')));
+    await tester.pumpAndSettle();
     await scrollTo(tester, find.byKey(const ValueKey('zukunft-karte')));
     await tester.tap(find.byKey(const ValueKey('zukunft-karte')));
     await tester.pumpAndSettle();
@@ -181,6 +187,9 @@ void main() {
   ) async {
     final feed = await openApp(tester);
     await openTab(tester, 'Training');
+    // The photo lives behind the Körper ring.
+    await tester.tap(find.byKey(const ValueKey('bereich-ring')));
+    await tester.pumpAndSettle();
     await scrollTo(tester, find.byKey(const ValueKey('zukunft-karte')));
     await tester.tap(find.byKey(const ValueKey('zukunft-karte')));
     await tester.pumpAndSettle();

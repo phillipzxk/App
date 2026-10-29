@@ -28,6 +28,7 @@ class TrainingTab extends StatefulWidget {
   const TrainingTab({
     super.key,
     this.extra = const [],
+    this.teil,
     required this.profile,
     required this.feed,
     required this.coach,
@@ -44,6 +45,10 @@ class TrainingTab extends StatefulWidget {
 
   /// Cards that moved here from the old "Heute" page.
   final List<Widget> extra;
+
+  /// Only one part for the glass area page: 'heute', 'woche', 'plan' or
+  /// 'uebungen'. Null = the whole old page.
+  final String? teil;
   final UserProfile profile;
   final FeedStore feed;
   final TrainingCoach coach;
@@ -505,6 +510,36 @@ class _TrainingTabState extends State<TrainingTab> {
 
   @override
   Widget build(BuildContext context) {
+    final teil = widget.teil;
+    if (teil != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: _d == null
+            ? const [
+                Padding(
+                  padding: EdgeInsets.all(30),
+                  child: Center(
+                    child: CircularProgressIndicator(color: CoachStyle.gold),
+                  ),
+                ),
+              ]
+            : switch (teil) {
+                'woche' => widget.plan.isEmpty ? _planTeil() : _wocheTeil(),
+                'plan' => _planTeil(),
+                'uebungen' =>
+                  _alleUebungen.isEmpty
+                      ? const [
+                          Text(
+                            'Sobald du eine Übung eingetragen hast, siehst du '
+                            'hier ihre Kurve, Rekorde und Form-Videos.',
+                            style: tSoft,
+                          ),
+                        ]
+                      : _uebungenTeil(),
+                _ => _heuteTeil(),
+              },
+      );
+    }
     return ListView(
       padding: const EdgeInsets.only(bottom: 110),
       children: [

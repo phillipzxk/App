@@ -37,7 +37,12 @@ class SleepTab extends StatefulWidget {
     this.schlafzeiten = const Schlafzeiten(),
     this.bettzeit,
     this.onSaveSchlafzeiten,
+    this.teil,
   });
+
+  /// Only one part for the glass area page: 'wert', 'energie', 'naechte',
+  /// 'zeiten', 'routine', 'daten'. Null = the whole old page.
+  final String? teil;
 
   final SchlafUmfeld umfeld;
   final Schlafzeiten schlafzeiten;
@@ -82,13 +87,17 @@ class _SleepTabState extends State<SleepTab> {
   void _zeige(Widget seite) => zeigeSchlafSeite(context, seite);
 
   @override
-  Widget build(BuildContext context) => SchlafHimmel(
-    phase: himmelPhase(u.jetzt(), u.zeiten.aufstehenAm(u.jetzt())),
-    child: ListenableBuilder(
+  Widget build(BuildContext context) {
+    final liste = ListenableBuilder(
       listenable: u.stand,
       builder: (context, _) => _liste(context),
-    ),
-  );
+    );
+    if (widget.teil != null) return liste;
+    return SchlafHimmel(
+      phase: himmelPhase(u.jetzt(), u.zeiten.aufstehenAm(u.jetzt())),
+      child: liste,
+    );
+  }
 
   Widget _liste(BuildContext context) {
     final d = u.d;
@@ -107,121 +116,126 @@ class _SleepTabState extends State<SleepTab> {
             .isBefore(DateTime(jetzt.year, jetzt.month, jetzt.day - 13)))
           m,
     ];
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 110),
-      children: [
+    final alles = widget.teil == null;
+    bool zeig(String t) => alles || widget.teil == t;
+    final kinder = <Widget>[
+      if (alles) ...[
         const PageHeader(
           label: 'Bereich',
           title: 'Schlaf & Energie',
           icon: Icons.bedtime,
         ),
         const AreaChart(bereich: Bereich.schlaf),
-        if (heute == null)
-          TKarte(
-            key: const ValueKey('wie-geschlafen'),
-            gold: true,
-            child: InkWell(
-              onTap: () => _zeige(AufwachSeite(umfeld: u)),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.wb_twilight,
-                    size: 30,
-                    color: CoachStyle.goldLight,
+      ],
+      if (!zeig('wert'))
+        const SizedBox.shrink()
+      else if (heute == null)
+        TKarte(
+          key: const ValueKey('wie-geschlafen'),
+          gold: true,
+          child: InkWell(
+            onTap: () => _zeige(AufwachSeite(umfeld: u)),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.wb_twilight,
+                  size: 30,
+                  color: CoachStyle.goldLight,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Wie hast du geschlafen?',
+                        style: tTitel.copyWith(fontSize: 15),
+                      ),
+                      const Text(
+                        'Aufwach-Himmel und kurz, was nachts war. Daraus '
+                        'kommt dein Schlafwert.',
+                        style: tSoft,
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
+                ),
+                const Icon(Icons.chevron_right, color: CoachStyle.goldLight),
+              ],
+            ),
+          ),
+        )
+      else
+        TKarte(
+          key: const ValueKey('schlafwert-seite'),
+          gold: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Column(
+                    children: [
+                      SchlafMond(fuell: fuell ?? heute.wert / 100, size: 92),
+                      const SizedBox(height: 4),
+                      const Text('Schlaf-Mond', style: tSoft),
+                    ],
+                  ),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Wie hast du geschlafen?',
-                          style: tTitel.copyWith(fontSize: 15),
+                        const TLabel('Dein Schlafwert'),
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.end,
+                          spacing: 6,
+                          children: [
+                            GoldText(
+                              '${heute.wert}',
+                              key: const ValueKey('schlafwert-zahl'),
+                              style: tTitel.copyWith(fontSize: 40),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(bottom: 8),
+                              child: Text('von 100', style: tSoft),
+                            ),
+                          ],
                         ),
-                        const Text(
-                          'Aufwach-Himmel und kurz, was nachts war. Daraus '
-                          'kommt dein Schlafwert.',
+                        Text(
+                          '${formatDauer(heute.stunden)}, '
+                          '${himmelWort(heute.himmel).toLowerCase()} aufgewacht.',
                           style: tSoft,
                         ),
                       ],
                     ),
                   ),
-                  const Icon(Icons.chevron_right, color: CoachStyle.goldLight),
                 ],
               ),
-            ),
-          )
-        else
-          TKarte(
-            key: const ValueKey('schlafwert-seite'),
-            gold: true,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Column(
-                      children: [
-                        SchlafMond(fuell: fuell ?? heute.wert / 100, size: 92),
-                        const SizedBox(height: 4),
-                        const Text('Schlaf-Mond', style: tSoft),
-                      ],
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const TLabel('Dein Schlafwert'),
-                          Wrap(
-                            crossAxisAlignment: WrapCrossAlignment.end,
-                            spacing: 6,
-                            children: [
-                              GoldText(
-                                '${heute.wert}',
-                                key: const ValueKey('schlafwert-zahl'),
-                                style: tTitel.copyWith(fontSize: 40),
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.only(bottom: 8),
-                                child: Text('von 100', style: tSoft),
-                              ),
-                            ],
-                          ),
-                          Text(
-                            '${formatDauer(heute.stunden)}, '
-                            '${himmelWort(heute.himmel).toLowerCase()} aufgewacht.',
-                            style: tSoft,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+              const SizedBox(height: 8),
+              for (final t in teilNamen.entries)
+                TeilZeile(
+                  name: t.value,
+                  wert: heute.teile[t.key] ?? 0,
+                  text: teilText(t.key, heute),
                 ),
-                const SizedBox(height: 8),
-                for (final t in teilNamen.entries)
-                  TeilZeile(
-                    name: t.value,
-                    wert: heute.teile[t.key] ?? 0,
-                    text: teilText(t.key, heute),
-                  ),
-                const SizedBox(height: 8),
-                CoachZeile(text: heute.satz ?? mondSatz(fuell ?? .5)),
-                if (heute.satz != null && fuell != null) ...[
-                  const SizedBox(height: 6),
-                  Text(mondSatz(fuell), style: tSoft),
-                ],
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TLink(
-                    'Deine Nacht ansehen ›',
-                    key: const ValueKey('morgen-oeffnen'),
-                    onTap: () => _zeige(AufwachSeite(umfeld: u)),
-                  ),
-                ),
+              const SizedBox(height: 8),
+              CoachZeile(text: heute.satz ?? mondSatz(fuell ?? .5)),
+              if (heute.satz != null && fuell != null) ...[
+                const SizedBox(height: 6),
+                Text(mondSatz(fuell), style: tSoft),
               ],
-            ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TLink(
+                  'Deine Nacht ansehen ›',
+                  key: const ValueKey('morgen-oeffnen'),
+                  onTap: () => _zeige(AufwachSeite(umfeld: u)),
+                ),
+              ),
+            ],
           ),
+        ),
+      if (zeig('energie'))
         TKarte(
           key: const ValueKey('energie-heute'),
           child: Column(
@@ -284,6 +298,7 @@ class _SleepTabState extends State<SleepTab> {
             ],
           ),
         ),
+      if (alles)
         TKarte(
           key: const ValueKey('erkannt'),
           child: Column(
@@ -314,6 +329,7 @@ class _SleepTabState extends State<SleepTab> {
             ],
           ),
         ),
+      if (alles)
         GridView.count(
           crossAxisCount: 2,
           shrinkWrap: true,
@@ -358,55 +374,57 @@ class _SleepTabState extends State<SleepTab> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
-        if (nacht.length >= 2)
-          TKarte(
-            key: const ValueKey('naechte-wert'),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Row(
+      if (alles) const SizedBox(height: 12),
+      if (zeig('naechte') && nacht.length >= 2)
+        TKarte(
+          key: const ValueKey('naechte-wert'),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Row(
+                children: [
+                  Expanded(child: TLabel('Letzte Nächte')),
+                  Text('Schlafwert', style: tSoft),
+                ],
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 60,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Expanded(child: TLabel('Letzte Nächte')),
-                    Text('Schlafwert', style: tSoft),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  height: 60,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      for (final m in nacht)
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 2),
-                            child: Container(
-                              height: 60 * m.wert / 100,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(3),
-                                gradient: m.wert >= 75
-                                    ? CoachStyle.goldGradient
-                                    : null,
-                                color: m.wert >= 75
-                                    ? null
-                                    : const Color(0xFF4A3B2A),
-                              ),
+                    for (final m in nacht)
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          child: Container(
+                            height: 60 * m.wert / 100,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(3),
+                              gradient: m.wert >= 75
+                                  ? CoachStyle.goldGradient
+                                  : null,
+                              color: m.wert >= 75
+                                  ? null
+                                  : const Color(0xFF4A3B2A),
                             ),
                           ),
                         ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        const GroupLabel('Deine Basis'),
+        ),
+      if (alles) const GroupLabel('Deine Basis'),
+      if (zeig('zeiten'))
         SchlafzeitenKarte(
           zeiten: widget.schlafzeiten,
           bettzeit: bz,
           onSave: widget.onSaveSchlafzeiten,
         ),
+      if (zeig('routine'))
         FeedCard(
           title: 'Deine Abendroutine',
           icon: Icons.nightlight_outlined,
@@ -443,19 +461,22 @@ class _SleepTabState extends State<SleepTab> {
             ),
           ],
         ),
-        const GroupLabel('Frag deinen Coach'),
+      if (alles) const GroupLabel('Frag deinen Coach'),
+      if (alles)
         AskCoachCard(
           title: 'Frag zu deinem Schlaf',
           hint: 'Was stört dich gerade beim Schlafen?',
           today: widget.fragen,
           onSend: widget.onAsk,
         ),
-        const GroupLabel('Deine Werte'),
+      if (alles) const GroupLabel('Deine Werte'),
+      if (zeig('naechte'))
         SleepCard(
           entries: widget.sleep,
           today: widget.today,
           onAdd: widget.onAddSleep,
         ),
+      if (zeig('daten'))
         TKarte(
           key: const ValueKey('mehr-daten'),
           child: Column(
@@ -516,7 +537,16 @@ class _SleepTabState extends State<SleepTab> {
             ],
           ),
         ),
-      ],
+    ];
+    if (!alles) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: kinder,
+      );
+    }
+    return ListView(
+      padding: const EdgeInsets.only(bottom: 110),
+      children: kinder,
     );
   }
 }

@@ -178,7 +178,28 @@ void main() {
       return (diary, feed);
     }
 
+    // Tiles on the new Körper page that open these parts directly.
+    const direkt = {
+      'wie-geschlafen': 's-himmel',
+      'kachel-journal': 's-journal',
+      'kachel-wecker': 's-wecker',
+      'kachel-tag': 's-tag',
+      'muster-oeffnen': 's-muster',
+    };
     Future<void> tippe(WidgetTester tester, String key) async {
+      final kachel = direkt[key];
+      final aufSeite = find
+          .byKey(const ValueKey('bereich-zurueck'))
+          .evaluate()
+          .isNotEmpty;
+      if (kachel != null && aufSeite) {
+        await openKachel(tester, kachel);
+        return;
+      }
+      if (key == 'energie-Besser' &&
+          find.byKey(ValueKey(key)).evaluate().isEmpty) {
+        await openKachel(tester, 's-energie');
+      }
       final f = find.byKey(ValueKey(key));
       await scrollTo(tester, f);
       await tester.tap(f);
@@ -207,12 +228,14 @@ void main() {
 
       await tester.pageBack();
       await tester.pumpAndSettle();
+      await openKachel(tester, 's-wert');
       expect(find.byKey(const ValueKey('schlafwert-seite')), findsOneWidget);
       expect(find.byKey(const ValueKey('wie-geschlafen')), findsNothing);
     });
 
     testWidgets('energy feedback is remembered', (tester) async {
       final (_, feed) = await start(tester);
+      await openKachel(tester, 's-energie');
       expect(find.byKey(const ValueKey('energie-vorhersage')), findsOneWidget);
       await tippe(tester, 'energie-Besser');
       expect(feed.schlaf.energieAm('2026-10-12'), 'Besser');

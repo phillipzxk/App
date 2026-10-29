@@ -281,6 +281,7 @@ void main() {
       WidgetTester tester, {
       int? mahlzeiten,
       ErnaehrungDaten? daten,
+      String kachel = 'e-kurve',
     }) async {
       coach = _EssenCoach();
       final diary = MemoryDiaryStore()..checkIns.add(checkInOn(fixedNow));
@@ -297,7 +298,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await openTab(tester, 'Ernährung');
+      await openTab(tester, 'Ernährung', kachel);
       return feed;
     }
 
@@ -342,11 +343,7 @@ void main() {
     });
 
     testWidgets('craving: reason, step, helped', (tester) async {
-      final feed = await start(tester);
-      final knopf = find.byKey(const ValueKey('heisshunger-knopf'));
-      await scrollTo(tester, knopf);
-      await tester.tap(knopf);
-      await tester.pumpAndSettle();
+      final feed = await start(tester, kachel: 'e-heiss');
       await tester.tap(find.byKey(const ValueKey('hh-grund-Stress')));
       await tester.pumpAndSettle();
       expect(coach.grund, 'Stress');
@@ -362,11 +359,7 @@ void main() {
       tester,
     ) async {
       fotoAufnahme = () async => base64Encode([1]);
-      final feed = await start(tester);
-      final kachel = find.byKey(const ValueKey('kachel-kuehlschrank'));
-      await scrollTo(tester, kachel);
-      await tester.tap(kachel);
-      await tester.pumpAndSettle();
+      final feed = await start(tester, kachel: 'e-kuehl');
       await tester.tap(find.byKey(const ValueKey('kuehl-aufnehmen')));
       await tester.pumpAndSettle();
       expect(find.text('Spinat-Omelett'), findsOneWidget);
@@ -385,11 +378,7 @@ void main() {
     testWidgets('cookbook offers rescue dishes, shopping list adds them', (
       tester,
     ) async {
-      final feed = await start(tester);
-      final kachel = find.byKey(const ValueKey('kachel-kochbuch'));
-      await scrollTo(tester, kachel);
-      await tester.tap(kachel);
-      await tester.pumpAndSettle();
+      final feed = await start(tester, kachel: 'e-koch');
       // Without the coach, the built-in rescue dishes are there.
       expect(feed.ernaehrung.gerichte, isNotEmpty);
       final id = feed.ernaehrung.gerichte.first.id;
@@ -433,7 +422,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await openTab(tester, 'Ernährung');
+    await openTab(tester, 'Ernährung', 'e-kcal');
     final link = find.byKey(const ValueKey('gewicht-check-link'));
     await scrollTo(tester, link);
     await tester.tap(link);

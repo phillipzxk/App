@@ -46,6 +46,18 @@ import 'sleep_tab.dart';
 import 'bereichs_werte.dart';
 import 'today_tab.dart';
 import 'training_tab.dart';
+import '../bereiche/bereich_seite.dart';
+import '../bereiche/glas.dart';
+import '../ernaehrung/einkaufsliste.dart';
+import '../ernaehrung/heisshunger_seite.dart';
+import '../ernaehrung/kochbuch.dart';
+import '../ernaehrung/kuehlschrank.dart';
+import '../ernaehrung/teller_foto.dart';
+import '../schlaf/aufwachen.dart';
+import '../schlaf/muster_tag.dart';
+import '../schlaf/wecker_seite.dart';
+
+part 'koerper_seite.dart';
 
 /// The Main Feed: opens after the daily check-in. "Heute" on top, the
 /// four areas on the roots below; each opens big and leads to its full page
@@ -1068,9 +1080,16 @@ class _HomePageState extends State<HomePage> {
   Future<void> _oeffneBereich(Bereich b, Offset mitte) => oeffneMitKreis(
     context,
     mitte,
-    (_) => _lebendig(
-      () => BereichUebersicht(daten: _daten(b), onAlles: () => _oeffneSeite(b)),
-    ),
+    (_) => b == Bereich.mindset
+        ? _lebendig(
+            () => BereichUebersicht(
+              daten: _daten(b),
+              onAlles: () => _oeffneSeite(b),
+            ),
+          )
+        // Training, Ernährung and Schlaf & Routine live in Körper now
+        // (vault Umsetzung/Körper komplett, Entwurf 3, 2026-10-29).
+        : _lebendig(() => _koerperSeite(b)),
   );
 
   /// The full area page with everything the old tab had.
@@ -1316,10 +1335,11 @@ class _HomePageState extends State<HomePage> {
     await _reload();
   }
 
-  Widget _seite(Bereich b) {
+  Widget _seite(Bereich b, {String? teil}) {
     switch (b) {
       case Bereich.training:
         return TrainingTab(
+          teil: teil,
           profile: widget.profile,
           feed: widget.feed,
           coach: _trainingCoach,
@@ -1352,6 +1372,7 @@ class _HomePageState extends State<HomePage> {
       case Bereich.ernaehrung:
         final r = _tagRahmen;
         return NutritionTab(
+          teil: teil,
           umfeld: _essenUmfeld,
           mahlzeiten: _mahlzeitSlots,
           anzahl: _mahlzeiten,
@@ -1385,6 +1406,7 @@ class _HomePageState extends State<HomePage> {
         );
       case Bereich.schlaf:
         return SleepTab(
+          teil: teil,
           umfeld: _schlafUmfeld,
           routine: _routine,
           sleep: _sleep,

@@ -296,9 +296,14 @@ CheckIn checkInOn(DateTime day, {String reply = '', String training = 't'}) =>
       kiAntwort: reply,
     );
 
-/// Goes back to "Heute" and, for an area, opens it on its root and then
-/// its full page ("Alles zu …").
-Future<void> openTab(WidgetTester tester, String label) async {
+/// Goes back to "Heute" and opens an area. Training, Ernährung and Schlaf
+/// open in Körper; with [kachel] that tile is opened too (searching through
+/// the four pages).
+Future<void> openTab(
+  WidgetTester tester,
+  String label, [
+  String? kachel,
+]) async {
   tester
       .state<NavigatorState>(find.byType(Navigator).first)
       .popUntil((r) => r.isFirst);
@@ -311,7 +316,39 @@ Future<void> openTab(WidgetTester tester, String label) async {
     _ => 'mindset',
   };
   await openBereich(tester, b);
-  await tester.tap(find.byKey(ValueKey('alles-$b')));
+  if (b == 'mindset') {
+    await tester.tap(find.byKey(ValueKey('alles-$b')));
+    await tester.pumpAndSettle();
+    return;
+  }
+  if (kachel != null) await openKachel(tester, kachel);
+}
+
+/// Shows the page of an area that has tile [id] on it.
+Future<void> zeigeKachel(WidgetTester tester, String id) async {
+  final k = find.byKey(ValueKey('kachel-$id'));
+  if (k.evaluate().isNotEmpty) return;
+  final seiten = find.byWidgetPredicate(
+    (w) =>
+        w.key is ValueKey<String> &&
+        (w.key! as ValueKey<String>).value.startsWith('seite-'),
+  );
+  final n = seiten.evaluate().length;
+  for (var i = 0; i < n; i++) {
+    await tester.tap(seiten.at(i));
+    await tester.pumpAndSettle();
+    if (k.evaluate().isNotEmpty) return;
+  }
+  fail('Kachel $id nicht gefunden');
+}
+
+/// Opens tile [id] on the open area page.
+Future<void> openKachel(WidgetTester tester, String id) async {
+  await zeigeKachel(tester, id);
+  final k = find.byKey(ValueKey('kachel-$id'));
+  await tester.ensureVisible(k);
+  await tester.pumpAndSettle();
+  await tester.tap(k);
   await tester.pumpAndSettle();
 }
 

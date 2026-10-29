@@ -52,6 +52,7 @@ class NutritionTab extends StatefulWidget {
     required this.genommen,
     required this.onSaveSupplements,
     required this.onToggleSupplement,
+    this.teil,
     this.training,
     this.trainingName,
   });
@@ -80,6 +81,10 @@ class NutritionTab extends StatefulWidget {
   final Set<String> genommen;
   final Future<void> Function(List<Supplement> list) onSaveSupplements;
   final Future<void> Function(Supplement s, bool genommen) onToggleSupplement;
+
+  /// Only one part for the glass area page: 'energie', 'teller', 'kcal',
+  /// 'supp' or 'gewicht'. Null = the whole old page.
+  final String? teil;
 
   @override
   State<NutritionTab> createState() => _NutritionTabState();
@@ -204,25 +209,29 @@ class _NutritionTabState extends State<NutritionTab> {
     final kg = widget.weights.isEmpty ? null : widget.weights.last.kg;
     final naechste = slots.where((s) => !gegessen.contains(s.id));
     final schlaf = widget.sleep.isEmpty ? null : widget.sleep.last.stunden;
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 110),
-      children: [
+    final alles = widget.teil == null;
+    bool zeig(String t) => alles || widget.teil == t;
+    final kinder = <Widget>[
+      if (alles) ...[
         const PageHeader(label: 'Bereich', title: 'Ernährung', icon: Icons.eco),
         const AreaChart(bereich: Bereich.ernaehrung),
-        Padding(
-          padding: EdgeInsets.zero,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (d.zusammenhang?.tag == u.heute &&
-                  d.zusammenhang?.satz != null)
-                TKarte(
-                  key: const ValueKey('zusammenhang'),
-                  child: CoachZeile(
-                    label: 'Zusammenhang',
-                    text: d.zusammenhang!.satz!,
-                  ),
+      ],
+      Padding(
+        padding: EdgeInsets.zero,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (zeig('energie') &&
+                d.zusammenhang?.tag == u.heute &&
+                d.zusammenhang?.satz != null)
+              TKarte(
+                key: const ValueKey('zusammenhang'),
+                child: CoachZeile(
+                  label: 'Zusammenhang',
+                  text: d.zusammenhang!.satz!,
                 ),
+              ),
+            if (zeig('energie'))
               TKarte(
                 key: const ValueKey('energie-karte'),
                 child: Column(
@@ -333,84 +342,92 @@ class _NutritionTabState extends State<NutritionTab> {
                   ],
                 ),
               ),
-              if (slots.isNotEmpty)
-                TKarte(
-                  key: const ValueKey('tages-teller'),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const TLabel('Dein Teller heute'),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          TagesTeller(
-                            werte: [
-                              teller.eiweiss,
-                              teller.gemuese,
-                              teller.energie,
-                            ],
-                            gegessen: gegessen.length,
-                            geplant: slots.length,
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                for (var k = 0; k < 3; k++)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 4,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 9,
-                                          height: 9,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: tellerFarben[k],
-                                          ),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Text(tellerNamen[k], style: tText),
-                                        const SizedBox(width: 5),
-                                        Flexible(
-                                          child: Text(
-                                            tellerWort(
-                                              [
-                                                teller.eiweiss,
-                                                teller.gemuese,
-                                                teller.energie,
-                                              ][k],
-                                            ),
-                                            style: tSoft,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      CoachZeile(
-                        text: tellerSatz(
-                          teller,
+            if (zeig('teller') && slots.isEmpty && !alles)
+              const Text(
+                'Leg unter Energie-Kurve fest, wie oft du am Tag isst. '
+                'Dann füllt sich hier dein Teller.',
+                style: tSoft,
+              ),
+            if (zeig('teller') && slots.isNotEmpty)
+              TKarte(
+                key: const ValueKey('tages-teller'),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const TLabel('Dein Teller heute'),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        TagesTeller(
+                          werte: [
+                            teller.eiweiss,
+                            teller.gemuese,
+                            teller.energie,
+                          ],
                           gegessen: gegessen.length,
                           geplant: slots.length,
                         ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              for (var k = 0; k < 3; k++)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 4,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 9,
+                                        height: 9,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: tellerFarben[k],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(tellerNamen[k], style: tText),
+                                      const SizedBox(width: 5),
+                                      Flexible(
+                                        child: Text(
+                                          tellerWort(
+                                            [
+                                              teller.eiweiss,
+                                              teller.gemuese,
+                                              teller.energie,
+                                            ][k],
+                                          ),
+                                          style: tSoft,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    CoachZeile(
+                      text: tellerSatz(
+                        teller,
+                        gegessen: gegessen.length,
+                        geplant: slots.length,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
+              ),
+            if (alles)
               _HeisshungerKnopf(
                 onTap: () => zeigeSeite(context, HeisshungerSeite(umfeld: u)),
               ),
-              const SizedBox(height: 12),
+            if (alles) const SizedBox(height: 12),
+            if (zeig('kcal'))
               _KcalKarte(
                 profil: widget.kcal,
                 kg: kg,
@@ -429,6 +446,7 @@ class _NutritionTabState extends State<NutritionTab> {
                   ),
                 ),
               ),
+            if (alles)
               Row(
                 children: [
                   Expanded(
@@ -454,7 +472,8 @@ class _NutritionTabState extends State<NutritionTab> {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+            if (alles) const SizedBox(height: 10),
+            if (alles)
               _Kachel(
                 key: const ValueKey('kachel-einkauf'),
                 label: 'Einkaufsliste',
@@ -462,17 +481,19 @@ class _NutritionTabState extends State<NutritionTab> {
                 unter: 'Aus deinen Gerichten ›',
                 onTap: () => zeigeSeite(context, EinkaufslisteSeite(umfeld: u)),
               ),
-              const SizedBox(height: 12),
-            ],
-          ),
+            const SizedBox(height: 12),
+          ],
         ),
+      ),
+      if (zeig('supp'))
         SupplementCard(
           supplements: widget.supplements,
           genommen: widget.genommen,
           onSave: widget.onSaveSupplements,
           onToggle: widget.onToggleSupplement,
         ),
-        const GroupLabel('Frag deinen Coach'),
+      if (alles) const GroupLabel('Frag deinen Coach'),
+      if (alles)
         AskCoachCard(
           title: 'Wie sieht deine Ernährung heute aus?',
           hint:
@@ -481,9 +502,19 @@ class _NutritionTabState extends State<NutritionTab> {
           today: widget.fragen,
           onSend: widget.onAsk,
         ),
-        const GroupLabel('Deine Werte'),
+      if (alles) const GroupLabel('Deine Werte'),
+      if (zeig('gewicht'))
         WeightCard(weights: widget.weights, onAdd: widget.onAddWeight),
-      ],
+    ];
+    if (!alles) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: kinder,
+      );
+    }
+    return ListView(
+      padding: const EdgeInsets.only(bottom: 110),
+      children: kinder,
     );
   }
 }
