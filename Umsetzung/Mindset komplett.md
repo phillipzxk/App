@@ -81,7 +81,9 @@ Entwurf: https://claude.ai/artifact/VqnA2o1AKAjDHFwtdSAMfp (wartet auf sein OK)
 
 Phillip zu Entwurf 6: „Gutes Design, aber noch besser die einzelnen Felder sortieren, dass es mehrere Seiten gibt, getrennt, also nicht alle auf einer.“
 
-Entwurf: https://claude.ai/artifact/35C38P1NaixM3kK58phqNN (wartet auf sein OK)
+Entwurf: https://claude.ai/artifact/35C38P1NaixM3kK58phqNN
+
+**Entschieden 2026-10-29:** Phillip „Ja“. Das ist die Mindset-Seite. Das Muster (Glas-Raster, Seiten mit Glas-Leiste und Wischen, Coach-Satz pro Seite, Übergang vom Home mit Lichtpunkten, Feld wächst zur eigenen Seite) gilt als Vorlage für die anderen Bereichsseiten.
 
 - Kopf bleibt (Kreis 8, „Mindset“, +1 zu gestern). Darunter eine Glas-Leiste mit 4 Seiten und goldenem Knopf, dann ein eigener Coach-Satz pro Seite.
 - Heute: Dein Berg (groß), Wort gehalten, Ruhe-Knopf.
