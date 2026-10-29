@@ -1,13 +1,15 @@
 ---
 tags: [umsetzung, persoenlichkeit]
-status: entwurf
+status: entschieden
 ---
 
 # Persönlichkeit komplett
 
 Inhalte siehe [[Ideen neue Bereiche]] (Auswahl 2026-10-28). Aufbau wie [[Mindset komplett]] Entwurf 7.
 
-## Entwurf 1 (2026-10-29, wartet auf Phillips OK)
+## Entwurf 1 (2026-10-29)
+
+**Entschieden 2026-10-29 16:54:** Phillip „passt“. Kommt mit den anderen Bereichsseiten zusammen in den Code-Bau.
 
 Link: https://claude.ai/artifact/QxiAuqb88EsD8pYKkzj1w3
 
