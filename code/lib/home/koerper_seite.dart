@@ -789,21 +789,6 @@ extension _Koerper on _HomePageState {
               seite: (_) => seite(() => SchlafMusterSeite(umfeld: u)),
             ),
             BKachel(
-              id: 's-energie',
-              titel: 'Energie heute',
-              icon: Icons.bolt,
-              text: 'Vorhersage für heute',
-              unter: 'wann du am meisten Kraft hast',
-              feld: _feld(
-                b,
-                'energie',
-                'Energie heute',
-                Icons.bolt,
-                'Aus deinem Schlaf und deinen Mustern. Sag mir, ob es '
-                    'gestimmt hat.',
-              ),
-            ),
-            BKachel(
               id: 's-daten',
               titel: 'Mehr Daten',
               icon: Icons.favorite_border,

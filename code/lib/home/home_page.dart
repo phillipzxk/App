@@ -63,9 +63,13 @@ import '../mindset/mindset_coach.dart';
 import '../mindset/mindset_logik.dart';
 import '../mindset/mindset_ui.dart';
 import '../mindset/ruhe.dart';
+import '../produktiv/produktiv_logik.dart';
+import '../produktiv/produktiv_data.dart';
+import '../produktiv/produktiv_seiten.dart';
 
 part 'koerper_seite.dart';
 part 'mindset_seite.dart';
+part 'produktiv_seite.dart';
 
 /// The Main Feed: opens after the daily check-in. "Heute" on top, the
 /// four areas on the roots below; each opens big and leads to its full page
@@ -130,6 +134,10 @@ class _HomePageState extends State<HomePage> {
   late final _mindset = MindsetStand(widget.feed.saveMindset)
     ..addListener(_essenGeaendert);
 
+  /// Everything of Produktivität (focus, blocks, urges, habits).
+  late final _produktiv = ProduktivStand(widget.feed.saveProduktiv)
+    ..addListener(_essenGeaendert);
+
   List<RoutineStep> _routine = const [];
   KcalProfil? _kcal;
   List<CoachFrage> _fragen = const [];
@@ -164,6 +172,8 @@ class _HomePageState extends State<HomePage> {
     _schlaf.dispose();
     _mindset.removeListener(_essenGeaendert);
     _mindset.dispose();
+    _produktiv.removeListener(_essenGeaendert);
+    _produktiv.dispose();
     _stand.dispose();
     super.dispose();
   }
@@ -207,10 +217,12 @@ class _HomePageState extends State<HomePage> {
     final essen = await widget.feed.loadErnaehrung();
     final schlaf = await widget.feed.loadSchlaf();
     final mindset = await widget.feed.loadMindset();
+    final produktiv = await widget.feed.loadProduktiv();
     if (!mounted) return;
     _essen.laden(essen.aufgeraeumt(widget.clock()));
     _schlaf.laden(schlaf);
     _mindset.laden(mindset);
+    _produktiv.laden(produktiv);
     setState(() {
       _loaded = true;
       _checkIns = checkIns;
