@@ -1,13 +1,15 @@
 ---
 tags: [umsetzung, koerper]
-status: entwurf
+status: entschieden
 ---
 
 # Körper komplett
 
 Körper ist der Einstieg zu den schon gebauten Seiten [[Training eintragen]], [[Ernährung komplett]] und [[Schlaf und Energie komplett]] (Unterbereich heißt jetzt Schlaf & Routine). Aufbau wie [[Mindset komplett]] Entwurf 7.
 
-## Entwurf 1 (2026-10-29, wartet auf Phillips OK)
+## Entwurf 1 (2026-10-29)
+
+**Entschieden 2026-10-29 17:00:** Phillip „Passt super“. Frage von ihm: ob das alte Körper-Zeug drin ist. Antwort: Hub zeigt nur Auswahl, die drei fertigen Seiten bleiben komplett und öffnen über „Alles zu … ›“, bekommen beim Einbau den Glas-Look.
 
 Link: https://claude.ai/artifact/9N955p7NjWhuc8p4HtZkzp
 
