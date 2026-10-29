@@ -39,3 +39,12 @@ Damit nichts vom alten Main Feed verloren geht ([[Bereichs-Werte]], Schreibfeld 
 - **Mindset:** [[Deine Muster]] als Feld auf der Seite Dranbleiben (neuestes Muster + Gegenschritt), offen: alle Muster mit „Stimmt nicht“.
 
 Auf Heute bleiben: Check-in, Coach-Karte, Fokus der Woche, Reality Check, Dein Warum, Heute dran / Sonnenbogen, Tage am Stück, Foto- und Muster-Feld, Termine.
+
+## Entwurf 3 (2026-10-29): direkt, ohne „Alles zu“
+
+Phillip 17:35: „nich mit einem alles zu ... Knopf sondern direkt clean modern und vor allem übersichtlich einbauen“. Gleicher Link (Version 3). Status: wartet auf sein OK.
+
+- Unter dem Körper-Kopf eine Glas-Leiste mit 3 Feldern: Training · Ernährung · Schlaf & Routine, jedes mit Symbol, Wert und 7 Mini-Balken. Das gewählte ist gold umrandet, der Rahmen gleitet beim Wechsel mit.
+- Darunter wie gewohnt die 4 Seiten des gewählten Teils (Inhalte wie Entwurf 2). Beim Wechsel tauschen Seitenleiste, Coach-Satz und Felder mit Animation.
+- Die alte Hub-Seite „Verlauf“ (alle drei zusammen, Hängt zusammen, Fortschrittsfoto) liegt jetzt hinter dem Körper-Kreis.
+- Coach-Karte = Frag den Coach (Fragen passend zum gewählten Teil).
