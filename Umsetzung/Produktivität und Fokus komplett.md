@@ -1,6 +1,6 @@
 ---
 tags: [umsetzung, produktivitaet]
-status: entschieden
+status: entwurf
 ---
 
 # Produktivität & Fokus komplett
@@ -9,7 +9,7 @@ Inhalte siehe [[Ideen neue Bereiche]] (entschieden 2026-10-28). Aufbau wie die M
 
 ## Entwurf 1 (2026-10-29)
 
-**Entschieden 2026-10-29:** Phillip „mach“ (16:35) = OK, weiter mit Business & Beruf.
+Wartet auf Phillips OK (16:35 kurz „mach“, dann „achso neh, warte“).
 
 Link: https://claude.ai/artifact/XNqwTag99sy1ueARLXwnsV
 
