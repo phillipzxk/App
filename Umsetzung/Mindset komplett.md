@@ -92,3 +92,14 @@ Entwurf: https://claude.ai/artifact/35C38P1NaixM3kK58phqNN
 - Langfristig: Lebensrad (groß), Brief an dich, Lebensziele, Dein Warum.
 - Wechseln per Antippen oder Wischen: Der Knopf gleitet und dehnt sich, die alten Felder kippen nacheinander weg, die neuen schwingen von der Seite herein, und die Zahlen zählen hoch. Der Coach-Satz wechselt mit.
 - Übergang vom Home und Feld öffnen wie in Entwurf 6.
+
+## Stand im Code (2026-10-29)
+- Gebaut in PR #64 (Teil 2): neue Mindset-Seite im Glas-Look mit den 4 Seiten aus Entwurf 7, `code/lib/home/mindset_seite.dart`, Felder in `code/lib/mindset/`.
+- Heute: Dein Berg (Steine auf dem Pfad, 2-Minuten-Start mit Uhr, Danach-Plan, „Heute liegen lassen“ mit Ausrede), Wort gehalten (bis 3 am Tag, Ring, 6 Wochen), Ruhe-Knopf (3 Minuten Atemkreis, gesperrt bis die Zeit um ist).
+- Dranbleiben: Durchgezogen, Selbstständig-Stufe, Ausreden-Spiegel (ab der 3. gleichen Ausrede ein Plan vom Coach), Deine Muster mit „Stimmt nicht“.
+- Ruhe: Deine Werte (wöchentlich 1–5), Ruhe im Alltag zum Abhaken, Deine Praxis, Sorgen abgeben (Coach trennt „kannst du ändern“ und „liegt nicht bei dir“, Änderbares als Stein), Frage heute Abend mit Leitsatz.
+- Langfristig: Lebensrad (alle 3 Monate, gestrichelt der Vergleich), Brief an dich (öffnet nach 6 Monaten, dann mit Coach-Satz), Lebensziele mit Bereich, Dein Warum.
+- Selbstständig-Stufe, Regel von Claude: alle 3 eigenen ersten Schritte, die passen, eine Stufe höher (1 bis 5).
+- Die Abendfragen kommen aus einer festen Liste von 14 Fragen, der Reihe nach.
+- Coach-Route `/mindset` (schritt, danach, ausrede, sorgen, leitsatz, brief). Ohne Coach gibt es einfache Ersatztexte.
+- Offen: Musik beim Ruhe-Knopf kommt mit der Handy-Version.

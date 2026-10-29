@@ -96,6 +96,8 @@ void main() {
     expect(find.byKey(const ValueKey('wurzel-schlaf')), findsOneWidget);
 
     await openTab(tester, 'Mindset');
+    expect(find.byKey(const ValueKey('mindset-seite')), findsOneWidget);
+    await zeigeKachel(tester, 'm-warum');
     expect(find.text('„Ich will stolz auf mich sein.“'), findsOneWidget);
   });
 

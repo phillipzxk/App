@@ -30,6 +30,12 @@ import {
   energiePrompt,
   schlafMusterPrompt,
   tagesablaufPrompt,
+  steinSchrittPrompt,
+  danachPrompt,
+  ausredePrompt,
+  sorgenPrompt,
+  leitsatzPrompt,
+  briefPrompt,
   type LetzterFokus,
   type CheckIn,
   type Profile,
@@ -330,6 +336,66 @@ export async function ernaehrung(env: Env, body: Record<string, unknown>, profil
   }
 }
 
+/// Mindset: one route, the part in "art" (vault Umsetzung/Mindset komplett.md).
+export async function mindset(env: Env, body: Record<string, unknown>, profile: Profile): Promise<unknown> {
+  const kontext = String(body.kontext ?? "");
+  switch (body.art) {
+    case "schritt": {
+      const titel = String(body.titel ?? "").trim();
+      if (!titel) return null;
+      const eigener = typeof body.eigener === "string" && body.eigener.trim() ? body.eigener.trim() : null;
+      const d = parseObjekt(await ask(env, steinSchrittPrompt(profile, titel, eigener, kontext)));
+      return { schritt: text(d.schritt, 200), satz: text(d.satz, 300), passt: eigener !== null && d.passt === true };
+    }
+    case "danach": {
+      const titel = String(body.titel ?? "").trim();
+      if (!titel) return null;
+      const d = parseObjekt(await ask(env, danachPrompt(profile, titel, kontext)));
+      const punkte = (Array.isArray(d.punkte) ? d.punkte : []).map((x) => text(x, 120)).filter(Boolean).slice(0, 3);
+      return { punkte };
+    }
+    case "ausrede": {
+      const ausrede = String(body.ausrede ?? "").trim();
+      if (!ausrede) return null;
+      return { plan: text(parseObjekt(await ask(env, ausredePrompt(profile, ausrede, kontext))).plan, 400) };
+    }
+    case "sorgen": {
+      const t = String(body.text ?? "").trim();
+      if (!t) return null;
+      const d = parseObjekt(await ask(env, sorgenPrompt(profile, t, kontext)));
+      const sorgen = (Array.isArray(d.sorgen) ? d.sorgen : [])
+        .map((x) => {
+          const o = (x ?? {}) as Record<string, unknown>;
+          const sorge = text(o.sorge, 200);
+          const aendern = text(o.aendern, 300);
+          return sorge && aendern ? { sorge, aendern, nicht: text(o.nicht, 300) ?? "" } : null;
+        })
+        .filter(Boolean)
+        .slice(0, 4);
+      return { sorgen, satz: text(d.satz, 300) };
+    }
+    case "leitsatz": {
+      const antworten = (Array.isArray(body.antworten) ? body.antworten : [])
+        .map((x) => {
+          const o = (x ?? {}) as Record<string, unknown>;
+          return { frage: String(o.frage ?? ""), antwort: String(o.antwort ?? "") };
+        })
+        .filter((x) => x.antwort.trim())
+        .slice(0, 20);
+      if (!antworten.length) return null;
+      return { leitsatz: text(parseObjekt(await ask(env, leitsatzPrompt(profile, antworten))).leitsatz, 240) };
+    }
+    case "brief": {
+      const b = String(body.brief ?? "").trim();
+      if (!b) return null;
+      const d = parseObjekt(await ask(env, briefPrompt(profile, b, String(body.geschrieben ?? ""), kontext)));
+      return { satz: text(d.satz, 500) };
+    }
+    default:
+      return null;
+  }
+}
+
 /// Schlaf & Energie: one route, the part in "art".
 export async function schlaf(env: Env, body: Record<string, unknown>, profile: Profile): Promise<unknown> {
   const kontext = String(body.kontext ?? "");
@@ -548,6 +614,15 @@ export default {
         if (!String(profile.motivation ?? "").trim()) return json({ satz: null });
         try {
           return json({ satz: parseSatz(await ask(env, warumPrompt(profile, today, recent))) });
+        } catch (e) {
+          console.error(e);
+          return json({ error: "coach unavailable" }, 502);
+        }
+      }
+      case "/mindset": {
+        try {
+          const res = await mindset(env, body, profile);
+          return res === null ? json({ error: "not found" }, 404) : json(res);
         } catch (e) {
           console.error(e);
           return json({ error: "coach unavailable" }, 502);

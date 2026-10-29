@@ -620,3 +620,98 @@ Stell ihren besten Tagesablauf für heute zusammen, von Aufstehen bis Bettzeit. 
 ${JSON_ONLY}
 {"satz": "...", "punkte": [{"zeit": "6:30", "was": "...", "warum": "...", "neu": false}]}`;
 }
+
+// --- Mindset (vault Umsetzung/Mindset komplett.md, Entwurf 7) ---
+
+function mindsetRahmen(p: Profile, kontext: string): string {
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Ihr Mindset-Bereich und ihr Tag (aus ihren eigenen Angaben):
+<nutzer>
+${clip(kontext, 4000)}
+</nutzer>
+
+Mindset heißt in Groundset: Sachen durchziehen, vor denen man sich drückt. Ziel ist, dass sie dich immer weniger braucht.`;
+}
+
+/// The 2-minute first step for a stone; with her own step, only add to it.
+export function steinSchrittPrompt(p: Profile, titel: string, eigener: string | null, kontext: string): string {
+  return `${mindsetRahmen(p, kontext)}
+
+Sie drückt sich vor: <stein>${clip(titel, 200)}</stein>
+${eigener ? `Ihr eigener erster Schritt: <eigener>${clip(eigener, 200)}</eigener>
+Prüfe ihn: Ist er klein genug für 2 Minuten und ein echter Anfang? Dann "passt": true und "schritt" ist ihr Schritt (höchstens leicht geschärft). Sonst "passt": false und mach ihn kleiner.` : `Mach daraus einen allerersten Handgriff, der in 2 Minuten geht und sofort machbar ist ("passt": false).`}
+"schritt": höchstens 15 Wörter, konkret (was genau öffnen, schreiben, anrufen). "satz": ein kurzer Satz von dir dazu, direkt, ohne Floskeln.
+
+${JSON_ONLY}
+{"schritt": "...", "satz": "...", "passt": true}`;
+}
+
+/// What comes right after the stone, so no gap opens.
+export function danachPrompt(p: Profile, titel: string, kontext: string): string {
+  return `${mindsetRahmen(p, kontext)}
+
+Sie fängt jetzt an mit: <stein>${clip(titel, 200)}</stein>
+Mach einen Danach-Plan in genau 3 kurzen Punkten: 1. der Stein selbst (2 Minuten oder länger, wenn es läuft), 2. was direkt danach kommt, damit keine Lücke entsteht, in der sie abrutscht, 3. der nächste feste Punkt aus ihrem Tag (mit Uhrzeit, wenn bekannt). Jeder Punkt höchstens 10 Wörter.
+
+${JSON_ONLY}
+{"punkte": ["...", "...", "..."]}`;
+}
+
+/// A plan against the excuse that comes back most.
+export function ausredePrompt(p: Profile, ausrede: string, kontext: string): string {
+  return `${mindsetRahmen(p, kontext)}
+
+Die Ausrede, die am häufigsten kommt: <ausrede>${clip(ausrede, 100)}</ausrede>
+Gib ihr einen Plan dagegen in 1 bis 2 kurzen Sätzen, aus ihren Mustern und Zeiten (wann kommt die Ausrede, wann hat sie Energie). Konkret, mit Tagen oder Uhrzeiten, kein Vorwurf, keine 0815-Tipps.
+
+${JSON_ONLY}
+{"plan": "..."}`;
+}
+
+/// Sorts worries into what she can change and what is not up to her.
+export function sorgenPrompt(p: Profile, text: string, kontext: string): string {
+  return `${mindsetRahmen(p, kontext)}
+
+Sie hat ungeordnet aufgeschrieben, was sie bedrückt:
+<sorgen>
+${clip(text, 2000)}
+</sorgen>
+Trenne es in einzelne Sorgen (höchstens 4). Für jede: "sorge" kurz in ihren Worten, "aendern" ein konkreter kleiner Schritt, den sie selbst tun kann, "nicht" was davon nicht bei ihr liegt. "satz": ein ruhiger Satz von dir zum Schluss, ohne Floskeln. Keine medizinischen Ratschläge, bei Gesundheit: "geh zum Arzt". Wirkt es ernst (z. B. Gedanken, sich etwas anzutun), sag klar, dass sie sich sofort Hilfe holen soll (in Deutschland Telefonseelsorge 0800 111 0 111).
+
+${JSON_ONLY}
+{"sorgen": [{"sorge": "...", "aendern": "...", "nicht": "..."}], "satz": "..."}`;
+}
+
+/// The guiding sentence from her evening answers.
+export function leitsatzPrompt(p: Profile, antworten: { frage: string; antwort: string }[]): string {
+  const a = antworten.map((x) => `Frage: ${clip(x.frage, 200)}\nAntwort: ${clip(x.antwort, 500)}`).join("\n\n");
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Ihre Antworten auf die Abendfragen:
+<antworten>
+${clip(a, 5000)}
+</antworten>
+Forme daraus ihren Leitsatz: ein Satz in der Ich-Form, höchstens 20 Wörter, in ihren Worten, wer sie sein will. Nichts erfinden, was nicht in den Antworten steckt.
+
+${JSON_ONLY}
+{"leitsatz": "..."}`;
+}
+
+/// When a letter to herself opens after 6 months: what has changed.
+export function briefPrompt(p: Profile, brief: string, geschrieben: string, kontext: string): string {
+  return `${mindsetRahmen(p, kontext)}
+
+Vor 6 Monaten (${clip(geschrieben, 20)}) hat sie sich diesen Brief geschrieben, heute öffnet er sich:
+<brief>
+${clip(brief, 3000)}
+</brief>
+Leg ihr in 2 bis 3 kurzen Sätzen daneben, was sich seitdem verändert hat, nach ihren Daten. Ehrlich: was sie geschafft hat und was noch offen ist. Kein Lob ohne Grund.
+
+${JSON_ONLY}
+{"satz": "..."}`;
+}

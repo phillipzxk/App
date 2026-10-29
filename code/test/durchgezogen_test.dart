@@ -149,7 +149,7 @@ void main() {
     expect(feed.durchgezogen.last.vonCoach, isTrue);
     expect(feed.durchgezogen.last.datum, _tag(0));
 
-    await openTab(tester, 'Mindset');
+    await openTab(tester, 'Mindset', 'm-durch');
     await scrollTo(tester, find.byKey(const ValueKey('durch-karte')));
     expect(find.text('Trotz Unlust trainiert.'), findsOneWidget);
     expect(find.text('COACH'), findsOneWidget);
@@ -170,7 +170,7 @@ void main() {
 
   testWidgets('add an own entry, open all, delete one', (tester) async {
     final (feed, _) = await _open(tester, vorher: [_e(4, 'Alte Sache.')]);
-    await openTab(tester, 'Mindset');
+    await openTab(tester, 'Mindset', 'm-durch');
     await scrollTo(tester, find.byKey(const ValueKey('durch-feld')));
     await tester.enterText(
       find.byKey(const ValueKey('durch-feld')),

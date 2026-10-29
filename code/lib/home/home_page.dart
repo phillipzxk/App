@@ -56,8 +56,16 @@ import '../ernaehrung/teller_foto.dart';
 import '../schlaf/aufwachen.dart';
 import '../schlaf/muster_tag.dart';
 import '../schlaf/wecker_seite.dart';
+import '../mindset/berg.dart';
+import '../mindset/dranbleiben.dart';
+import '../mindset/langfristig.dart';
+import '../mindset/mindset_coach.dart';
+import '../mindset/mindset_logik.dart';
+import '../mindset/mindset_ui.dart';
+import '../mindset/ruhe.dart';
 
 part 'koerper_seite.dart';
+part 'mindset_seite.dart';
 
 /// The Main Feed: opens after the daily check-in. "Heute" on top, the
 /// four areas on the roots below; each opens big and leads to its full page
@@ -118,6 +126,10 @@ class _HomePageState extends State<HomePage> {
   late final _schlaf = SchlafStand(widget.feed.saveSchlaf)
     ..addListener(_essenGeaendert);
 
+  /// Everything of Mindset (stones, promises, values, letters, Lebensrad).
+  late final _mindset = MindsetStand(widget.feed.saveMindset)
+    ..addListener(_essenGeaendert);
+
   List<RoutineStep> _routine = const [];
   KcalProfil? _kcal;
   List<CoachFrage> _fragen = const [];
@@ -150,6 +162,8 @@ class _HomePageState extends State<HomePage> {
     _essen.dispose();
     _schlaf.removeListener(_essenGeaendert);
     _schlaf.dispose();
+    _mindset.removeListener(_essenGeaendert);
+    _mindset.dispose();
     _stand.dispose();
     super.dispose();
   }
@@ -192,9 +206,11 @@ class _HomePageState extends State<HomePage> {
     final training = await widget.feed.loadTraining();
     final essen = await widget.feed.loadErnaehrung();
     final schlaf = await widget.feed.loadSchlaf();
+    final mindset = await widget.feed.loadMindset();
     if (!mounted) return;
     _essen.laden(essen.aufgeraeumt(widget.clock()));
     _schlaf.laden(schlaf);
+    _mindset.laden(mindset);
     setState(() {
       _loaded = true;
       _checkIns = checkIns;
@@ -1081,12 +1097,7 @@ class _HomePageState extends State<HomePage> {
     context,
     mitte,
     (_) => b == Bereich.mindset
-        ? _lebendig(
-            () => BereichUebersicht(
-              daten: _daten(b),
-              onAlles: () => _oeffneSeite(b),
-            ),
-          )
+        ? _lebendig(_mindsetSeite)
         // Training, Ernährung and Schlaf & Routine live in Körper now
         // (vault Umsetzung/Körper komplett, Entwurf 3, 2026-10-29).
         : _lebendig(() => _koerperSeite(b)),

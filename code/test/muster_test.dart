@@ -119,7 +119,7 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
 
-    await openTab(tester, 'Mindset');
+    await openTab(tester, 'Mindset', 'm-muster');
     await scrollTo(tester, find.byKey(const ValueKey('muster-ablehnen')));
     await tester.tap(find.byKey(const ValueKey('muster-ablehnen')));
     await tester.pumpAndSettle();

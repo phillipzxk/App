@@ -16,6 +16,7 @@ import 'package:coach_app/planner/planner_data.dart';
 import 'package:coach_app/supplements/supplement_data.dart';
 import 'package:coach_app/ernaehrung/ernaehrung_data.dart';
 import 'package:coach_app/schlaf/schlaf_data.dart';
+import 'package:coach_app/mindset/mindset_data.dart';
 import 'package:coach_app/training/form_video.dart';
 import 'package:coach_app/training/training_data.dart';
 import 'package:coach_app/sleep/sleep.dart';
@@ -280,6 +281,14 @@ class MemoryFeedStore implements FeedStore {
 
   @override
   Future<void> saveSchlaf(SchlafDaten d) async => schlaf = d;
+
+  MindsetDaten mindset = const MindsetDaten();
+
+  @override
+  Future<MindsetDaten> loadMindset() async => mindset;
+
+  @override
+  Future<void> saveMindset(MindsetDaten d) async => mindset = d;
 }
 
 /// Monday, 12 October 2026, 18:00.
@@ -297,8 +306,8 @@ CheckIn checkInOn(DateTime day, {String reply = '', String training = 't'}) =>
     );
 
 /// Goes back to "Heute" and opens an area. Training, Ernährung and Schlaf
-/// open in Körper; with [kachel] that tile is opened too (searching through
-/// the four pages).
+/// open in Körper, Mindset on its own page; with [kachel] that tile is
+/// opened too (searching through the four pages).
 Future<void> openTab(
   WidgetTester tester,
   String label, [
@@ -316,11 +325,6 @@ Future<void> openTab(
     _ => 'mindset',
   };
   await openBereich(tester, b);
-  if (b == 'mindset') {
-    await tester.tap(find.byKey(ValueKey('alles-$b')));
-    await tester.pumpAndSettle();
-    return;
-  }
   if (kachel != null) await openKachel(tester, kachel);
 }
 
@@ -334,9 +338,20 @@ Future<void> zeigeKachel(WidgetTester tester, String id) async {
         (w.key! as ValueKey<String>).value.startsWith('seite-'),
   );
   final n = seiten.evaluate().length;
+  // Tiles further down are only built once scrolled near.
+  final liste = find
+      .byWidgetPredicate(
+        (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+      )
+      .hitTestable();
   for (var i = 0; i < n; i++) {
     await tester.tap(seiten.at(i));
     await tester.pumpAndSettle();
+    for (var j = 0; j < 4 && k.evaluate().isEmpty; j++) {
+      if (liste.evaluate().isEmpty) break;
+      await tester.drag(liste.first, const Offset(0, -300));
+      await tester.pumpAndSettle();
+    }
     if (k.evaluate().isNotEmpty) return;
   }
   fail('Kachel $id nicht gefunden');
