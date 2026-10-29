@@ -70,11 +70,16 @@ import '../business/business_bilder.dart';
 import '../business/business_coach.dart';
 import '../business/business_logik.dart';
 import '../business/business_seiten.dart';
+import '../persoenlich/persoenlich_coach.dart';
+import '../persoenlich/persoenlich_data.dart';
+import '../persoenlich/persoenlich_logik.dart';
+import '../persoenlich/persoenlich_seiten.dart';
 
 part 'koerper_seite.dart';
 part 'mindset_seite.dart';
 part 'produktiv_seite.dart';
 part 'business_seite.dart';
+part 'persoenlich_seite.dart';
 
 /// The Main Feed: opens after the daily check-in. "Heute" on top, the
 /// four areas on the roots below; each opens big and leads to its full page
@@ -147,6 +152,10 @@ class _HomePageState extends State<HomePage> {
   late final _business = BusinessStand(widget.feed.saveBusiness)
     ..addListener(_essenGeaendert);
 
+  /// Everything of Persönlichkeit (care, look, learning).
+  late final _persoenlich = PersoenlichStand(widget.feed.savePersoenlich)
+    ..addListener(_essenGeaendert);
+
   List<RoutineStep> _routine = const [];
   KcalProfil? _kcal;
   List<CoachFrage> _fragen = const [];
@@ -185,6 +194,8 @@ class _HomePageState extends State<HomePage> {
     _produktiv.dispose();
     _business.removeListener(_essenGeaendert);
     _business.dispose();
+    _persoenlich.removeListener(_essenGeaendert);
+    _persoenlich.dispose();
     _stand.dispose();
     super.dispose();
   }
@@ -230,12 +241,14 @@ class _HomePageState extends State<HomePage> {
     final mindset = await widget.feed.loadMindset();
     final produktiv = await widget.feed.loadProduktiv();
     final business = await widget.feed.loadBusiness();
+    final persoenlich = await widget.feed.loadPersoenlich();
     if (!mounted) return;
     _essen.laden(essen.aufgeraeumt(widget.clock()));
     _schlaf.laden(schlaf);
     _mindset.laden(mindset);
     _produktiv.laden(produktiv);
     _business.laden(business);
+    _persoenlich.laden(persoenlich);
     setState(() {
       _loaded = true;
       _checkIns = checkIns;

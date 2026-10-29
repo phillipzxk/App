@@ -6,6 +6,7 @@ import '../checkin/checkin.dart';
 import '../checkin/checkin_evaluator.dart';
 import '../data/user_profile.dart';
 import '../business/business_coach.dart';
+import '../persoenlich/persoenlich_coach.dart';
 import '../mindset/mindset_coach.dart';
 import '../mindset/mindset_data.dart';
 import '../schlaf/schlaf_coach.dart';
@@ -42,7 +43,8 @@ class RemoteCoach
         ErnaehrungCoach,
         SchlafCoach,
         MindsetCoach,
-        BusinessCoach {
+        BusinessCoach,
+        PersoenlichCoach {
   RemoteCoach({required this.baseUrl, required this.token, http.Client? client})
     : _client = client ?? http.Client();
 
@@ -768,6 +770,19 @@ class RemoteCoach
     String art,
     Map<String, Object> mehr,
   ) => _postJson('/business', {
+    'art': art,
+    'profile': profileJson(profile),
+    ...mehr,
+  });
+
+  // --- Persönlichkeit (route /persoenlich) ---
+
+  @override
+  Future<Map?> persoenlich(
+    UserProfile profile,
+    String art,
+    Map<String, Object> mehr,
+  ) => _postJson('/persoenlich', {
     'art': art,
     'profile': profileJson(profile),
     ...mehr,

@@ -9,6 +9,7 @@ import '../schlaf/schlaf_data.dart';
 import '../mindset/mindset_data.dart';
 import '../produktiv/produktiv_data.dart';
 import '../business/business_data.dart';
+import '../persoenlich/persoenlich_data.dart';
 
 import 'dart:convert';
 
@@ -142,6 +143,10 @@ abstract class FeedStore {
   /// Everything of the Business page.
   Future<BusinessDaten> loadBusiness();
   Future<void> saveBusiness(BusinessDaten daten);
+
+  /// Everything of the Persönlichkeit page.
+  Future<PersoenlichDaten> loadPersoenlich();
+  Future<void> savePersoenlich(PersoenlichDaten daten);
 }
 
 class LocalFeedStore implements FeedStore {
@@ -173,6 +178,7 @@ class LocalFeedStore implements FeedStore {
   static const _mindsetKey = 'mindset_daten';
   static const _produktivKey = 'produktiv_daten';
   static const _businessKey = 'business_daten';
+  static const _persoenlichKey = 'persoenlich_daten';
 
   Future<Object?> _read(String key) async {
     final raw = (await SharedPreferences.getInstance()).getString(key);
@@ -520,4 +526,16 @@ class LocalFeedStore implements FeedStore {
   @override
   Future<void> saveBusiness(BusinessDaten daten) =>
       _write(_businessKey, daten.toJson());
+
+  @override
+  Future<PersoenlichDaten> loadPersoenlich() async {
+    final json = await _read(_persoenlichKey);
+    return json == null
+        ? const PersoenlichDaten()
+        : PersoenlichDaten.fromJson(json as Map<String, dynamic>);
+  }
+
+  @override
+  Future<void> savePersoenlich(PersoenlichDaten daten) =>
+      _write(_persoenlichKey, daten.toJson());
 }

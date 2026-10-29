@@ -860,3 +860,97 @@ ${JSON_ONLY}
       return null;
   }
 }
+
+// --- Persönlichkeit (vault Umsetzung/Persönlichkeit komplett.md) ---
+
+/// One prompt per part of the Persönlichkeit page; null when the input is
+/// empty.
+export function persoenlichPrompt(p: Profile, art: string, b: Record<string, unknown>): string | null {
+  const r = `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Du bist hier ihr Coach für Auftreten, Look, Pflege und Lernen: ehrlich, freundlich, konkret, ohne Floskeln. Nie bewerten, wie jemand von Natur aus aussieht, keine Punktzahl, nur Dinge, die man selbst ändern kann. Keine medizinischen Ratschläge, bei Haut- oder Gesundheitsproblemen: "geh zum Hautarzt" bzw. "geh zum Arzt".`;
+  switch (art) {
+    case "look":
+      return `${r}
+
+Auf dem Foto ist die Person von vorn. Nenne genau 3 Hebel, die bei ihr am meisten ausmachen (z. B. Bart, Brauen, Frisur, Kragen, Brille), je "titel" (höchstens 6 Wörter) und "text" (ein Satz, wie genau). "titel" oben: die 3 Hebel in 3 Wörtern, mit Kommas. Wenn kein Mensch auf dem Foto ist: {"titel": null}.
+
+${JSON_ONLY}
+{"titel": "Bart, Brauen, Kragen", "hebel": [{"titel": "...", "text": "..."}]}`;
+    case "stil":
+      return `${r}
+
+Auf dem Foto ist ihr Outfit von heute. "titel": dein Urteil in höchstens 4 Wörtern (z. B. "Gut, eine Sache"). "passt": ein Satz, was gut ist. "aendern": ein Satz, die eine Sache, die mehr bringt. "farben": 3 bis 5 Farben, die ihr stehen, als Hex (#rrggbb), gedeckt statt grell.
+
+${JSON_ONLY}
+{"titel": "...", "passt": "...", "aendern": "...", "farben": ["#1f2a3a"]}`;
+    case "haltung":
+      return `${r}
+
+Auf dem Foto steht die Person von der Seite. "befund": ein Satz zu ihrer Haltung, ruhig und ohne Drama (z. B. "Schultern kippen leicht nach vorn"). "uebungen": genau 3 Übungen dagegen, je "titel" (Name der Übung) und "text" (Sätze × Wiederholungen und wann, z. B. "3 × 15, am Push-Tag"). Bei Schmerzen: "geh zum Arzt" in den Befund.
+
+${JSON_ONLY}
+{"befund": "...", "uebungen": [{"titel": "...", "text": "3 × 15, ..."}]}`;
+    case "haut":
+      if (!s(b.problem).trim()) return null;
+      return `${r}
+
+Was sie an ihrer Haut stört: <problem>${s(b.problem, 300)}</problem>
+Mach einen Plan über 8 Wochen in 3 Phasen, je "titel" ("Woche 1–2" usw.) und "text" (ein Satz, was sie macht, mit Wirkstoff statt Marke). Einfach, eins nach dem anderen.
+
+${JSON_ONLY}
+{"phasen": [{"titel": "Woche 1–2", "text": "..."}]}`;
+    case "frisur":
+      return `${r}
+
+Ihre Haare gerade: <haare>${s(b.beschreibung, 500) || "(siehe Foto)"}</haare>
+"empfehlung": was zu ihr passt, höchstens 7 Wörter. "friseur": der Text, den sie dem Friseur zeigt, 1 bis 3 Sätze, konkret (Maschinenstufe, Längen in cm). "styling": ein Satz Styling in 1 Minute. "wochen": alle wie viele Wochen schneiden (ganze Zahl).
+
+${JSON_ONLY}
+{"empfehlung": "...", "friseur": "...", "styling": "...", "wochen": 4}`;
+    case "kurs":
+      if (!s(b.skill).trim()) return null;
+      return `${r}
+
+Sie will diesen Skill lernen: <skill>${s(b.skill, 80)}</skill>
+Bau einen Kurs aus genau 12 Lektionen, jede baut auf der letzten auf, von den Grundlagen bis zum Können. Nur die Titel, je höchstens 5 Wörter.
+
+${JSON_ONLY}
+{"lektionen": ["...", "..."]}`;
+    case "lektion":
+      if (!s(b.titel).trim()) return null;
+      return `${r}
+
+Skill: <skill>${s(b.skill, 80)}</skill>, Lektion ${Number(b.nummer) || 1} von 12: <titel>${s(b.titel, 100)}</titel>
+"text": die Lektion in 3 bis 5 Sätzen, so dass man sie in 10 Minuten lesen und gleich üben kann, mit einer kleinen Übung am Ende. Dann eine kurze Frage, ob es sitzt: "frage", "antworten" (genau 3 kurze), "richtig" (Index 0 bis 2 der richtigen).
+
+${JSON_ONLY}
+{"text": "...", "frage": "...", "antworten": ["...", "...", "..."], "richtig": 1}`;
+    case "quiz":
+      if (!s(b.buch).trim()) return null;
+      return `${r}
+
+Sie hat gelesen oder gehört: <buch>${s(b.buch, 120)}</buch>
+Stell genau 3 Fragen zu den Kernideen, damit es hängen bleibt. Je "frage", "antworten" (genau 3 kurze) und "richtig" (Index 0 bis 2). Wenn du das Werk nicht sicher kennst, frag nach allgemeinen Kernideen, die man daraus mitnehmen sollte, ohne Details zu erfinden.
+
+${JSON_ONLY}
+{"fragen": [{"frage": "...", "antworten": ["...", "...", "..."], "richtig": 0}]}`;
+    case "umsetzen":
+      if (!s(b.gelernt).trim()) return null;
+      return `${r}
+
+Aus <quelle>${s(b.quelle, 120) || "einem Buch oder Podcast"}</quelle> ist hängen geblieben: <gelernt>${s(b.gelernt, 500)}</gelernt>
+Was sie sonst macht:
+<nutzer>
+${clip(String(b.kontext ?? ""), 2000)}
+</nutzer>
+Mach daraus einen kleinen Schritt, den sie diese Woche macht, höchstens 12 Wörter, konkret.
+
+${JSON_ONLY}
+{"schritt": "..."}`;
+    default:
+      return null;
+  }
+}

@@ -19,6 +19,7 @@ import 'package:coach_app/schlaf/schlaf_data.dart';
 import 'package:coach_app/mindset/mindset_data.dart';
 import 'package:coach_app/produktiv/produktiv_data.dart';
 import 'package:coach_app/business/business_data.dart';
+import 'package:coach_app/persoenlich/persoenlich_data.dart';
 import 'package:coach_app/training/form_video.dart';
 import 'package:coach_app/training/training_data.dart';
 import 'package:coach_app/sleep/sleep.dart';
@@ -307,6 +308,14 @@ class MemoryFeedStore implements FeedStore {
 
   @override
   Future<void> saveBusiness(BusinessDaten d) async => business = d;
+
+  PersoenlichDaten persoenlich = const PersoenlichDaten();
+
+  @override
+  Future<PersoenlichDaten> loadPersoenlich() async => persoenlich;
+
+  @override
+  Future<void> savePersoenlich(PersoenlichDaten d) async => persoenlich = d;
 }
 
 /// Monday, 12 October 2026, 18:00.
