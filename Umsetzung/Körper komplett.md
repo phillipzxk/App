@@ -19,3 +19,23 @@ Kopf: Kreis 7, „+1 zu gestern · Schlaf zieht mit“. Vier Seiten (Auswahl = V
 - **Ernährung:** Tages-Teller (füllt sich gold, ohne Zahlen, Mahlzeiten heute), Supplements, Gewicht.
 - **Schlaf:** Schlafwert mit Mond, Bettzeit mit Abendroutine, Abend-Journal (3 + 3 Pflicht, dann Gute Nacht).
 - **Verlauf:** Training, Ernährung und Schlaf zusammen (14 Tage), Fortschrittsfoto, Hängt zusammen.
+
+## Entwurf 2 (2026-10-29): alles schon Gebaute drin
+
+Phillip 17:01: „das von zuvor bitte auch überall mit reinbringen also bei körper und auch falls es iwo anders fehlen sollte“. Gleicher Link wie oben (Version 2). Status: wartet auf sein OK.
+
+„Alles zu … ›“ öffnet jetzt die ganze Seite im Glas-Look (alte Seite sinkt weg, Kreis fliegt neu ein), „‹ Körper“ geht zurück. Jede ganze Seite hat wieder 4 Seiten (Aufteilung = Vorschlag Claude):
+
+- **Training:** Heute (Ziele vorausgefüllt mit „Letztes Mal“, Überspringen mit Grund, leicht/passt/schwer, Coach passt an mit Rückgängig, Aufwärmsätze, Training fertig → Check-in hat „Gut trainiert“, dann schlägt Phillip selbst das nächste Ziel vor), Trainings-Modus, Form filmen (4 Standbilder, Hinweise vom Coach, Vergleich) · Woche (Termin schiebt Einheit, Rückgängig), Hybrid-Balance, Stagnations-Check (fragt zuerst) · Plan (alle Einstellungen pro Übung), Sportarten & Schwerpunkt, Nächstes Ziel selbst · Verlauf (Kurve pro Übung), Rekorde (goldener Trieb), Form-Videos.
+- **Ernährung:** Heute (Energie-Kurve mit Mahlzeiten, gegessen + satt/okay/Hunger), Teller, Heißhunger-Knopf · Gerichte (Kochbuch wächst, Rettungsgerichte, Kühlschrank-Foto) · Planen (Einkaufsliste, Basis-Gerichte, Teller-Foto) · Ziel (kcal-Ziel mit Gewichts-Check und „Wie sieht dein Essen heute aus?“, Gewicht, Supplements).
+- **Schlaf & Routine:** Morgen (Aufwach-Himmel mit Regler, Sonnenlicht-Timer + Licht-Modus + Winterlampe, Wecker) · Nacht (Schlafwert aus 4 Teilen mit Mond, 14 Nächte, Schlafzeiten/Bettzeit) · Abend (Abend-Journal 3+3 → Gute Nacht, Abendroutine, Ruhezustand) · Tag (Dein Tag vom Coach, Erkannt bei dir mit „Stimmt nicht“, Mehr Daten: Apple Health, Health Connect, Uhr/Ring).
+
+## Neu in allen 5 Bereichen (2026-10-29)
+
+Damit nichts vom alten Main Feed verloren geht ([[Bereichs-Werte]], Schreibfeld pro Bereich):
+
+- **Kreis oben antippen** = Verlauf 30 Tage mit gestrichelter Schnittlinie + „Warum gerade hier“ (ein Coach-Satz).
+- **Coach-Karte antippen** (kleines „Frag mich“) = Frag den Coach: Textfeld, 2 Beispielfragen, Antwort vom Coach.
+- **Mindset:** [[Deine Muster]] als Feld auf der Seite Dranbleiben (neuestes Muster + Gegenschritt), offen: alle Muster mit „Stimmt nicht“.
+
+Auf Heute bleiben: Check-in, Coach-Karte, Fokus der Woche, Reality Check, Dein Warum, Heute dran / Sonnenbogen, Tage am Stück, Foto- und Muster-Feld, Termine.
