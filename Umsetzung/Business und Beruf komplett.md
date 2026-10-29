@@ -1,13 +1,15 @@
 ---
 tags: [umsetzung, business]
-status: entwurf
+status: entschieden
 ---
 
 # Business & Beruf komplett
 
 Inhalte siehe [[Ideen neue Bereiche]] (Auswahl 2026-10-28, Punkte 1–14). Aufbau wie [[Mindset komplett]] Entwurf 7 und [[Produktivität und Fokus komplett]].
 
-## Entwurf 1 (2026-10-29, wartet auf Phillips OK)
+## Entwurf 1 (2026-10-29)
+
+**Entschieden 2026-10-29 16:46:** Phillip „jo passt“. Kommt mit den anderen Bereichsseiten zusammen in den Code-Bau.
 
 Link: https://claude.ai/artifact/PLyMQAoKjNUVTwuJx4Nvcq
 
