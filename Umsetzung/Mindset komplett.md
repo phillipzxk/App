@@ -52,3 +52,14 @@ Entwurf: https://claude.ai/artifact/JNBRjFFJN6Vgp8rvEiiBcG (wartet auf sein OK)
 - Feld öffnen: Die Karte wächst zur ganzen Seite, dahinter wird alles unscharf. Alle Kreise fliegen im Bogen nach oben und reihen sich als Leiste auf. Der Inhalt schwebt Zeile für Zeile herein.
 - Wechseln: Kreis oben antippen oder wischen. Der goldene Strich gleitet mit, der Inhalt rutscht seitlich raus und rein. „‹ Mindset“ spielt alles rückwärts.
 - Ruhe-Knopf bleibt der einzige Vollbild-Moment (Kreis wächst über alles, 3 Minuten nur Atmen + Musik).
+
+## Entwürfe 5 (2026-10-29): Aufbau wie der Main Feed, drei Animations-Arten
+
+Phillip zu Entwurf 4: „wie auf dem Main Feed … und bessere Animationen nacheinander, gib mal Entwürfe“.
+
+Entwurf: https://claude.ai/artifact/KrAcAAZKYcMtSX5Po1GL5t (wartet auf seine Wahl)
+
+- Aufbau genau wie der Main Feed. Oben Glas-Felder: Coach, Dein Warum, Wort gehalten | Ruhe-Knopf, Durchgezogen | Sorgen abgeben, schmales Feld Ausreden-Spiegel. Darunter Bodenlinie mit Spross und Erde: Berg, Selbstständig, Werte, Frage heute Abend, Brief an dich, Lebensrad als Kreise mit Infokarte an eigenen Wurzeln, abwechselnd links und rechts. Ganz unten die Lebensziele.
+- A · Wachsen: Felder steigen nacheinander aus der Unschärfe, die Bodenlinie leuchtet von der Mitte auf, die Hauptwurzel wächst. Beim Scrollen wächst jede Seitenwurzel zu ihrem Kreis, der Kreis ploppt, die Zahl zählt hoch, die Karte klappt heraus. Öffnen = Aufblühen (Teile fliegen nacheinander aus dem Kreis).
+- B · Lichtfall: Ein Lichtball fällt durch die Seite, Felder leuchten auf, wo er vorbeikommt. Lichttropfen laufen die Wurzeln hinab. Öffnen = Lichtfaden (die Teile gleiten aus einem goldenen Faden).
+- C · Tiefe: Die Felder kommen aus der Tiefe nach vorne wie ein Kartenstapel. Die Kreise steigen auf, die Karten schwingen auf wie Türen. Öffnen = die Teile steigen aus der Tiefe auf, der Feed tritt zurück.
