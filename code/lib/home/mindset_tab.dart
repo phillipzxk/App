@@ -57,7 +57,7 @@ class MindsetTab extends StatelessWidget {
             trailing: const Tag('in schwachen Phasen'),
             children: [
               Text(
-                '„${profile.motivation}“',
+                '„${profile.warum}“',
                 style: CoachStyle.question.copyWith(fontSize: 18),
               ),
             ],

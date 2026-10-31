@@ -47,8 +47,8 @@ extension _Produktiv on _HomePageState {
     final heute = dayKey(jetzt);
     final gestern = dayKey(jetzt.subtract(const Duration(days: 1)));
     final name = widget.profile.name.trim();
-    final wert = produktivWert(d, heute);
-    final wertGestern = produktivWert(d, gestern);
+    final wert = _pw(jetzt);
+    final wertGestern = _pw(jetzt.subtract(const Duration(days: 1)));
     final u = _produktivUmfeld;
     final e = _schlafUmfeld.energieHeute();
     final hoch =
@@ -65,7 +65,7 @@ extension _Produktiv on _HomePageState {
     final schlafMuster = sichtbareSchlafMuster(_schlaf.d);
     final gibt = schlafMuster.where((m) => m.gut).toList();
     final nimmt = schlafMuster.where((m) => !m.gut).toList();
-    final verlauf = produktivVerlauf(d, jetzt);
+    final verlauf = _verlauf(_pw, jetzt);
     final da = [for (final v in verlauf) ?v];
     final schnitt = da.isEmpty
         ? null
@@ -99,7 +99,7 @@ extension _Produktiv on _HomePageState {
                   style: Glas.tSoft.copyWith(fontSize: 13.5),
                 )
               else
-                Linie30(werte: produktivVerlauf(_produktiv.d, widget.clock())),
+                Linie30(werte: _verlauf(_pw, widget.clock())),
             ],
           ),
         ),
@@ -453,8 +453,7 @@ extension _Produktiv on _HomePageState {
           icon: Icons.bolt,
           wert: wert,
           woche: [
-            for (var i = 6; i >= 0; i--)
-              produktivWert(d, dayKey(jetzt.subtract(Duration(days: i)))),
+            for (var i = 6; i >= 0; i--) _pw(jetzt.subtract(Duration(days: i))),
           ],
           sub: sub(),
           seiten: seiten,

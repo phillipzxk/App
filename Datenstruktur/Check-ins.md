@@ -18,6 +18,10 @@ Teil von [[Datenmodell]]. Täglich, **ein Eintrag pro Tag pro Nutzer**. Entsteht
 | Antwort Ernährung | Freitext |
 | Antwort Schlaf | Freitext (Schlaf, Energie mit abgefragt) |
 | Antwort Mindset | Freitext (neu seit 2026-10-12) |
+| Energie | Hoch, Mittel oder Niedrig (zählt seit 2026-10-31 zu Produktivität) |
+| Fokus | Antwort Produktivität & Fokus (neu seit 2026-10-31) |
+| Business | Antwort Business & Beruf (neu seit 2026-10-31) |
+| Persönlichkeit | Antwort Persönlichkeit (neu seit 2026-10-31) |
 
 Jeder Check-in hat genau eine [[KI-Antworten|KI-Antwort]].
 

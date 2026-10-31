@@ -10,6 +10,9 @@ class CheckIn {
     required this.schlaf,
     required this.mindset,
     this.energie = '',
+    this.fokus = '',
+    this.business = '',
+    this.persoenlich = '',
     this.notiz = '',
     this.kiAntwort = '',
     this.werte = const {},
@@ -24,6 +27,12 @@ class CheckIn {
   final String schlaf;
   final String mindset;
   final String energie;
+
+  /// Produktivität & Fokus, Business & Beruf and Persönlichkeit, asked
+  /// since 2026-10-31 (vault Umsetzung/Täglicher Check-in.md).
+  final String fokus;
+  final String business;
+  final String persoenlich;
 
   /// Optional "Was war heute besonders?".
   final String notiz;
@@ -48,6 +57,9 @@ class CheckIn {
     'schlaf': schlaf,
     'mindset': mindset,
     'energie': energie,
+    'fokus': fokus,
+    'business': business,
+    'persoenlich': persoenlich,
     'notiz': notiz,
     'ki_antwort': kiAntwort,
     'werte': werte,
@@ -77,6 +89,9 @@ class CheckIn {
     schlaf: schlaf,
     mindset: mindset,
     energie: energie,
+    fokus: fokus,
+    business: business,
+    persoenlich: persoenlich,
     notiz: notiz,
     kiAntwort: kiAntwort ?? this.kiAntwort,
     werte: werte ?? this.werte,
@@ -91,6 +106,9 @@ class CheckIn {
     schlaf: json['schlaf'] as String? ?? '',
     mindset: json['mindset'] as String? ?? '',
     energie: json['energie'] as String? ?? '',
+    fokus: json['fokus'] as String? ?? '',
+    business: json['business'] as String? ?? '',
+    persoenlich: json['persoenlich'] as String? ?? '',
     notiz: json['notiz'] as String? ?? '',
     kiAntwort: json['ki_antwort'] as String? ?? '',
     werte: {

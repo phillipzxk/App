@@ -8,6 +8,8 @@ status: fest
 
 Der Coach bewertet nach jedem täglichen Check-in jeden Bereich mit einem Wert von 1 bis 10. Grundlage ist die Idee aus [[App-Gesamtübersicht (Original)]]: Der Wert zeigt, wie viel der Coach verbessern musste. Siehe auch [[Main Feed]] und [[Kern der App]].
 
+**Seit 2026-10-31:** Der Coach bewertet nach dem Check-in auch Produktivität & Fokus (`produktiv`, Energie zählt jetzt dazu), Business & Beruf (`business`) und Persönlichkeit (`persoenlich`). Der Wert dieser drei Bereiche ist der Mittelwert aus der Coach-Bewertung und dem Wert aus dem, was man auf der Seite gemacht hat (Regeln in den „komplett“-Notizen). Gibt es nur eins von beiden, zählt das. So hat jeder Bereich ab dem ersten Tag einen Wert.
+
 ## Entscheidungen (mit Phillip, 19.10.2026)
 
 | Frage | Entscheidung |

@@ -59,11 +59,8 @@ extension _Business on _HomePageState {
     final d = _business.d;
     final jetzt = widget.clock();
     final name = widget.profile.name.trim();
-    final wert = businessWert(d, jetzt);
-    final wertGestern = businessWert(
-      d,
-      jetzt.subtract(const Duration(days: 1)),
-    );
+    final wert = _bw(jetzt);
+    final wertGestern = _bw(jetzt.subtract(const Duration(days: 1)));
     final h = d.hebelIn(dayKey(montagVon(jetzt)));
     final monat = monatVon(jetzt);
     final ziel = d.ziele[monat];
@@ -83,7 +80,7 @@ extension _Business on _HomePageState {
     final erreicht = d.meilensteine.where((m) => m.an).length;
     final sk = d.skill;
     final plus = trainingsPlus(_arbeitKoerper());
-    final verlauf = businessVerlauf(d, jetzt);
+    final verlauf = _verlauf(_bw, jetzt);
     final da = [for (final v in verlauf) ?v];
     final schnitt = da.isEmpty
         ? null
@@ -118,7 +115,7 @@ extension _Business on _HomePageState {
                   style: Glas.tSoft.copyWith(fontSize: 13.5),
                 )
               else
-                Linie30(werte: businessVerlauf(_business.d, widget.clock())),
+                Linie30(werte: _verlauf(_bw, widget.clock())),
             ],
           ),
         ),
@@ -436,8 +433,7 @@ extension _Business on _HomePageState {
           icon: Icons.work_outline,
           wert: wert,
           woche: [
-            for (var i = 6; i >= 0; i--)
-              businessWert(d, jetzt.subtract(Duration(days: i))),
+            for (var i = 6; i >= 0; i--) _bw(jetzt.subtract(Duration(days: i))),
           ],
           sub: sub(),
           seiten: seiten,

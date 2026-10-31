@@ -205,9 +205,9 @@ extension _Mindset on _HomePageState {
           art: GlasArt.gold,
           children: [
             Text(
-              widget.profile.motivation.trim().isEmpty
+              widget.profile.warum.isEmpty
                   ? 'Noch kein Warum. Du kannst das Onboarding neu machen.'
-                  : '„${widget.profile.motivation.trim()}“',
+                  : '„${widget.profile.warum}“',
               style: CoachStyle.question.copyWith(
                 fontSize: 19,
                 color: Glas.text,

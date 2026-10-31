@@ -26,6 +26,7 @@ So schreibt die KI als Coach in der App, beim [[Täglicher Check-in|Check-in]] u
 3. Leere Floskeln wie „Super gemacht, weiter so!“. Lob nur, wenn es konkret ist.
 4. Langweilige 0815-Tipps. Immer bezogen auf das, was der Nutzer geschrieben hat und was der Coach schon von ihm kennt.
 5. Moralisieren oder ein schlechtes Gewissen machen. Ehrlich, aber nicht von oben herab.
+6. Etwas erfinden (2026-10-31, nach dem Rundgang): nur sagen, was in den Antworten oder früheren Tagen steht. Ohne frühere Tage keine Vorgeschichte wie „schon wieder“ oder „erfahrungsgemäß“. Die Tagesantwort hat höchstens 4 kurze Sätze (höchstens 60 Wörter) und nimmt den einen Punkt, an dem es am meisten hängt. Der Coach kennt seit dem 31.10. alle 5 Bereiche.
 
 ## Anzeige auf Heute (2026-10-20)
 

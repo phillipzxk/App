@@ -48,6 +48,20 @@ List<int?> werteVerlauf(
   ];
 }
 
+/// The value of Produktivität, Business or Persönlichkeit for a day
+/// (Phillip 2026-10-31): the coach's rating of the check-in answer and the
+/// value from what was done on the page, averaged when both exist.
+int? mitCheckIn(int? aktion, List<CheckIn> checkIns, String key, DateTime tag) {
+  final k = dayKey(tag);
+  int? c;
+  for (final x in checkIns) {
+    if (dayKey(x.datum) == k) c = x.werte[key];
+  }
+  if (aktion == null) return c;
+  if (c == null) return aktion;
+  return ((aktion + c) / 2).round();
+}
+
 /// The latest rated check-in for [bereich], or null.
 CheckIn? letzteBewertung(List<CheckIn> checkIns, Bereich bereich) {
   CheckIn? best;

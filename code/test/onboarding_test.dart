@@ -23,21 +23,28 @@ Future<void> enterName(WidgetTester tester, [String name = 'Max']) async {
   await tester.pumpAndSettle();
 }
 
-/// Question 1: taps the first answer and writes the goal; questions 2-6:
+/// Question 1: taps the first answer and writes the goal; questions 2-7:
 /// only write a text (taps alone are tested separately).
 Future<void> answerAll(WidgetTester tester) async {
   await enterName(tester);
   await tester.tap(find.text('Fitter und stärker werden'));
-  for (var i = 1; i <= 6; i++) {
+  for (var i = 1; i <= 7; i++) {
     await tester.enterText(find.byType(TextField), 'Antwort $i');
     await tester.pump();
-    await tester.tap(find.text(i < 6 ? 'Weiter' : 'Fertig'));
+    await tester.tap(find.text(i < 7 ? 'Weiter' : 'Fertig'));
     await tester.pumpAndSettle();
   }
 }
 
+Future<void> tapOption(WidgetTester tester, String text) async {
+  await tester.ensureVisible(find.text(text));
+  await tester.pump();
+  await tester.tap(find.text(text));
+  await tester.pump();
+}
+
 void main() {
-  testWidgets('six answers are stored in the right fields', (tester) async {
+  testWidgets('seven answers are stored in the right fields', (tester) async {
     final store = MemoryProfileStore();
     await tester.pumpWidget(
       CoachApp(
@@ -59,20 +66,23 @@ void main() {
         p.ziel,
         p.motivation,
         p.level,
-        p.training,
-        p.ernaehrung,
-        p.schlafEnergie,
+        p.koerper,
+        p.produktiv,
+        p.business,
+        p.persoenlich,
       ],
       [
         'Fitter und stärker werden\nDein Ziel in einem Satz: Antwort 1',
         'Was ist dein wahrer Grund?: Antwort 2',
         'Und was würde diese Person als deine Stärke nennen?: Antwort 3',
-        'Und was fällt dir dabei leicht?: Antwort 4',
-        'Was weißt du schon, oder was hast du an deiner Ernährung bereits '
-            'angepasst?: Antwort 5',
-        'Und wann fühlst du dich richtig fit?: Antwort 6',
+        'Und was klappt bei Schlaf, Essen oder Training schon gut?: '
+            'Antwort 4',
+        'Wann bist du am klarsten im Kopf?: Antwort 5',
+        'Was machst du gerade beruflich?: Antwort 6',
+        'Was willst du gerade lernen?: Antwort 7',
       ],
     );
+    expect(p.warum, 'Antwort 2');
     expect(p.zusammenfassung, isEmpty);
     expect(find.text('So sehe ich dich gerade'), findsOneWidget);
     expect(find.textContaining('Auswertung kommt bald'), findsOneWidget);
@@ -130,30 +140,39 @@ void main() {
     await enterName(tester);
 
     // Tapping alone is not enough on question 1.
-    await tester.tap(find.text('Mehr Energie im Alltag'));
+    await tester.tap(find.text('Beruflich vorankommen'));
     await tester.pump();
     await tester.tap(find.text('Weiter'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('FRAGE 1 VON 6'), findsOneWidget);
+    expect(find.textContaining('FRAGE 1 VON 7'), findsOneWidget);
 
     await tester.enterText(find.byType(TextField), 'Fit bleiben');
     await tester.pump();
     await tester.tap(find.text('Weiter'));
     await tester.pumpAndSettle();
 
-    // Questions 2-6: one tap is enough.
-    for (var i = 2; i <= 6; i++) {
+    // Questions 2-7: one tap is enough.
+    for (var i = 2; i <= 7; i++) {
       final q = onboardingQuestions[i - 1];
-      await tester.tap(find.text(q.options.first));
-      await tester.pump();
-      await tester.tap(find.text(i < 6 ? 'Weiter' : 'Fertig'));
+      await tapOption(tester, q.options.first);
+      if (i == 4) await tapOption(tester, 'Heißhunger, vor allem abends');
+      await tester.tap(find.text(i < 7 ? 'Weiter' : 'Fertig'));
       await tester.pumpAndSettle();
     }
     expect(
       store.profile.ziel,
-      'Mehr Energie im Alltag\nDein Ziel in einem Satz: Fit bleiben',
+      'Beruflich vorankommen\nDein Ziel in einem Satz: Fit bleiben',
     );
-    expect(store.profile.schlafEnergie, 'Ich schlafe schlecht ein');
+    expect(
+      store.profile.koerper,
+      'Ich schlafe schlecht ein oder wache nachts auf; '
+      'Heißhunger, vor allem abends',
+    );
+    expect(
+      store.profile.persoenlich,
+      'Ich fühle mich mit meinem Aussehen nicht wohl',
+    );
+    expect(store.profile.warum, 'Ich bin unzufrieden damit, wie es gerade ist');
   });
 
   testWidgets('empty answer cannot continue', (tester) async {
@@ -171,7 +190,7 @@ void main() {
     await tester.pump();
     await tester.tap(find.text('Weiter'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('FRAGE 1 VON 6'), findsOneWidget);
+    expect(find.textContaining('FRAGE 1 VON 7'), findsOneWidget);
   });
 
   testWidgets('back keeps the earlier answer', (tester) async {
@@ -189,11 +208,11 @@ void main() {
     await tester.pump();
     await tester.tap(find.text('Weiter'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('FRAGE 2 VON 6 · MOTIVATION'), findsOneWidget);
+    expect(find.textContaining('FRAGE 2 VON 7 · MOTIVATION'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Zurück'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('FRAGE 1 VON 6'), findsOneWidget);
+    expect(find.textContaining('FRAGE 1 VON 7'), findsOneWidget);
     expect(find.text('Mein Ziel'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Zurück'));

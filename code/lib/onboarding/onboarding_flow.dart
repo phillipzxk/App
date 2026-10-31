@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 
+import '../bereiche/glas.dart';
 import '../data/profile_store.dart';
 import '../data/user_profile.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
+import '../mindset/mindset_ui.dart' show CoachZeile;
 import '../ui/logo.dart';
 import 'onboarding_evaluator.dart';
 import 'onboarding_questions.dart';
 
-/// The onboarding: first the user's name, then six questions answered by
+/// The onboarding: first the user's name, then seven questions (one per
+/// area since 2026-10-31) answered by
 /// tapping answers plus a short field in the user's own words, then the AI reads all answers at once and shows
 /// "So sehe ich dich gerade".
 ///
-/// The profile is saved once all six answers are given, so a user who quits
+/// The profile is saved once all answers are given, so a user who quits
 /// halfway starts over next time.
 class OnboardingFlow extends StatefulWidget {
   const OnboardingFlow({
@@ -79,11 +82,14 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   @override
   Widget build(BuildContext context) {
     return CoachPage(
+      dark: true,
+      glas: true,
       child: switch (_phase) {
         _Phase.name => _buildName(),
         _Phase.questions => _buildQuestion(),
         _Phase.evaluating => const ReadingIndicator(
           text: 'Ich lese deine Antworten …',
+          dark: true,
         ),
         _Phase.summary => _Summary(
           summary: _profile.zusammenfassung,
@@ -103,19 +109,22 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         const SizedBox(height: 16),
         const Text('BEVOR WIR STARTEN', style: CoachStyle.goldLabel),
         const SizedBox(height: 12),
-        const Text('Wie heißt du?', style: CoachStyle.question),
+        GoldSchrift('Wie heißt du?', style: CoachStyle.question),
         const SizedBox(height: 6),
         Text(
           'So spricht dich dein Coach an.',
-          style: CoachStyle.body.copyWith(color: CoachStyle.inkSoft),
+          style: CoachStyle.body.copyWith(color: Glas.soft),
         ),
         const SizedBox(height: 20),
-        NameField(
+        _GlasFeld(
           controller: _nameController,
+          hint: 'Dein Vorname',
+          einzeilig: true,
           onChanged: (_) => setState(() {}),
         ),
         const Spacer(),
         MainButton(
+          gold: true,
           label: 'Weiter',
           onPressed: _nameController.text.trim().isEmpty
               ? null
@@ -133,12 +142,10 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       key: ValueKey(_index),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SegmentBar(count: onboardingQuestions.length, done: _index + 1),
-        const SizedBox(height: 8),
         Row(
           children: [
             IconButton(
-              icon: const Icon(Icons.arrow_back, color: CoachStyle.inkSoft),
+              icon: const Icon(Icons.arrow_back, color: Glas.soft),
               tooltip: 'Zurück',
               onPressed: () => setState(() {
                 if (_index > 0) {
@@ -152,25 +159,48 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
               child: Text(
                 'FRAGE ${_index + 1} VON ${onboardingQuestions.length} · '
                 '${question.topic.toUpperCase()}',
-                style: CoachStyle.label,
+                style: Glas.tLabel.copyWith(fontSize: 11.5, letterSpacing: 1.8),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 6),
+        _WurzelFortschritt(count: onboardingQuestions.length, done: _index + 1),
+        const SizedBox(height: 18),
         Expanded(
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(question.question, style: CoachStyle.question),
+                Text(
+                  question.question,
+                  style: CoachStyle.question.copyWith(color: Glas.text),
+                ),
                 const SizedBox(height: 6),
                 Text(
                   'Tippe an, was passt. Mehreres ist möglich.',
-                  style: CoachStyle.body.copyWith(color: CoachStyle.inkSoft),
+                  style: CoachStyle.body.copyWith(color: Glas.soft),
                 ),
                 const SizedBox(height: 16),
-                for (final option in question.options)
+                for (final option in question.options) ...[
+                  for (final g in question.gruppen.entries)
+                    if (g.value == option)
+                      Padding(
+                        padding: EdgeInsets.only(
+                          top: g.key.isEmpty ? 6 : 8,
+                          bottom: 8,
+                          left: 2,
+                        ),
+                        child: g.key.isEmpty
+                            ? const SizedBox.shrink()
+                            : Text(
+                                g.key.toUpperCase(),
+                                style: Glas.tLabel.copyWith(
+                                  fontSize: 11,
+                                  letterSpacing: 1.6,
+                                ),
+                              ),
+                      ),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: _OptionTile(
@@ -181,33 +211,31 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                       }),
                     ),
                   ),
+                ],
                 const SizedBox(height: 14),
                 Text(
                   question.fieldRequired
                       ? question.fieldLabel
                       : '${question.fieldLabel} (freiwillig)',
-                  style: CoachStyle.body.copyWith(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: controller,
-                  minLines: 2,
-                  maxLines: 4,
-                  style: CoachStyle.body,
-                  cursorColor: CoachStyle.gold,
-                  onChanged: (_) => setState(() {}),
-                  decoration: InputDecoration(
-                    hintText: question.fieldHint,
-                    hintStyle: CoachStyle.body.copyWith(
-                      color: CoachStyle.inkSoft,
-                    ),
-                    filled: true,
-                    fillColor: CoachStyle.card,
-                    contentPadding: const EdgeInsets.all(14),
-                    enabledBorder: AnswerField.border(CoachStyle.line),
-                    focusedBorder: AnswerField.border(CoachStyle.gold),
+                  style: CoachStyle.body.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Glas.text,
                   ),
                 ),
+                const SizedBox(height: 8),
+                _GlasFeld(
+                  controller: controller,
+                  hint: question.fieldHint,
+                  onChanged: (_) => setState(() {}),
+                ),
+                if (question.coach.isNotEmpty) ...[
+                  const SizedBox(height: 14),
+                  GlasBox(
+                    padding: const EdgeInsets.all(12),
+                    radius: 18,
+                    child: CoachZeile(question.coach),
+                  ),
+                ],
                 const SizedBox(height: 12),
               ],
             ),
@@ -215,6 +243,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         ),
         const SizedBox(height: 12),
         MainButton(
+          gold: true,
           label: _isLast ? 'Fertig' : 'Weiter',
           onPressed: question.canContinue(picked, controller.text)
               ? _next
@@ -239,23 +268,114 @@ class _Summary extends StatelessWidget {
         const SizedBox(height: 12),
         const Text('DEIN START', style: CoachStyle.goldLabel),
         const SizedBox(height: 12),
-        const Text('So sehe ich dich gerade', style: CoachStyle.question),
+        GoldSchrift('So sehe ich dich gerade', style: CoachStyle.question),
         const SizedBox(height: 20),
-        CoachNote(
-          text: summary.isNotEmpty
-              ? summary
-              : 'Deine Antworten sind gespeichert. Deine persönliche '
-                    'Auswertung kommt bald, sobald dein Coach '
-                    'freigeschaltet ist.',
+        GlasBox(
+          art: GlasArt.gold,
+          padding: const EdgeInsets.all(18),
+          child: CoachZeile(
+            summary.isNotEmpty
+                ? summary
+                : 'Deine Antworten sind gespeichert. Deine persönliche '
+                      'Auswertung kommt bald, sobald dein Coach '
+                      'freigeschaltet ist.',
+          ),
         ),
         const Spacer(),
-        MainButton(label: "Los geht's", onPressed: onContinue),
+        MainButton(label: "Los geht's", gold: true, onPressed: onContinue),
       ],
     );
   }
 }
 
-/// One answer to tap; gold edge and check mark when picked.
+/// The progress as a root: one dot per question, joined by a line that
+/// turns gold up to the current question.
+class _WurzelFortschritt extends StatelessWidget {
+  const _WurzelFortschritt({required this.count, required this.done});
+
+  final int count;
+  final int done;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget punkt(bool an) => AnimatedContainer(
+      duration: const Duration(milliseconds: 400),
+      width: an ? 9 : 7,
+      height: an ? 9 : 7,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: an ? const Color(0xFFF3DCA6) : const Color(0x26FFECDC),
+        boxShadow: an
+            ? const [BoxShadow(color: Color(0xB3E0BF7E), blurRadius: 10)]
+            : null,
+      ),
+    );
+    return Row(
+      children: [
+        for (var i = 0; i < count; i++) ...[
+          punkt(i < done),
+          if (i < count - 1)
+            Expanded(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 400),
+                height: 2.5,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(2),
+                  gradient: i < done - 1
+                      ? const LinearGradient(
+                          colors: [Color(0xFFC08E45), Color(0xFFF3DCA6)],
+                        )
+                      : null,
+                  color: i < done - 1 ? null : const Color(0x1AFFECDC),
+                ),
+              ),
+            ),
+        ],
+      ],
+    );
+  }
+}
+
+/// A text field on glass.
+class _GlasFeld extends StatelessWidget {
+  const _GlasFeld({
+    required this.controller,
+    required this.hint,
+    required this.onChanged,
+    this.einzeilig = false,
+  });
+
+  final TextEditingController controller;
+  final String hint;
+  final ValueChanged<String> onChanged;
+  final bool einzeilig;
+
+  @override
+  Widget build(BuildContext context) => GlasBox(
+    padding: EdgeInsets.zero,
+    radius: 18,
+    child: TextField(
+      controller: controller,
+      minLines: einzeilig ? 1 : 2,
+      maxLines: einzeilig ? 1 : 4,
+      textCapitalization: einzeilig
+          ? TextCapitalization.words
+          : TextCapitalization.sentences,
+      style: CoachStyle.body.copyWith(color: Glas.text),
+      cursorColor: CoachStyle.goldBright,
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: CoachStyle.body.copyWith(color: const Color(0x99CDBB98)),
+        border: InputBorder.none,
+        contentPadding: const EdgeInsets.all(15),
+      ),
+    ),
+  );
+}
+
+/// One answer to tap: a glass pane that turns gold with a glowing dot when
+/// picked.
 class _OptionTile extends StatelessWidget {
   const _OptionTile({
     required this.label,
@@ -272,30 +392,53 @@ class _OptionTile extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: selected ? CoachStyle.selectedFill : CoachStyle.card,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: selected ? CoachStyle.gold : CoachStyle.line,
-              width: selected ? 1.5 : 1,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 180),
+          child: GlasBox(
+            key: ValueKey(selected),
+            art: selected ? GlasArt.gold : GlasArt.normal,
+            radius: 16,
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    style: CoachStyle.body.copyWith(
+                      color: Glas.text,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Container(
+                  width: 18,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: selected
+                        ? const RadialGradient(
+                            colors: [Color(0xFFF8E6B8), Color(0xFFC08E45)],
+                          )
+                        : null,
+                    border: Border.all(
+                      color: selected
+                          ? const Color(0xFFF3DCA6)
+                          : const Color(0x59FFECDC),
+                      width: 1.5,
+                    ),
+                    boxShadow: selected
+                        ? const [
+                            BoxShadow(color: Color(0x99E0BF7E), blurRadius: 10),
+                          ]
+                        : null,
+                  ),
+                ),
+              ],
             ),
-          ),
-          child: Row(
-            children: [
-              Expanded(child: Text(label, style: CoachStyle.body)),
-              const SizedBox(width: 10),
-              Icon(
-                selected ? Icons.check_circle : Icons.circle_outlined,
-                size: 22,
-                color: selected ? CoachStyle.gold : CoachStyle.line,
-              ),
-            ],
           ),
         ),
       ),

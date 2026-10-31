@@ -9,6 +9,29 @@ status: programmiert, KI-Auswertung fehlt noch
 
 # Onboarding-Fragebogen
 
+## Überarbeitung 2026-10-31: eine Frage pro Bereich
+
+Nach dem Gesamt-Rundgang (31.10.) fehlten im Fragebogen die neuen Bereiche aus [[Ideen neue Bereiche]]. Entwurf: https://claude.ai/artifact/By4G16wHao2nUDGrHeoMPm. Phillip (2026-10-31): „ja“, Körper als **eine** Frage, aber so formuliert, dass alles drinsteckt, und unterteilt in Schlaf, Ernährung, Training. Bestehende Nutzer gibt es noch nicht, also kein Nachreichen.
+
+Jetzt **7 Fragen**, alle im Glas-Look (Fortschritt oben als Wurzel, die golden wird):
+
+1. **Ziel** wie bisher, neue Antworten: Fitter und stärker werden · Mehr Fokus, weniger Handy · Beruflich vorankommen · Besser aussehen und auftreten · Mental stärker werden und Dinge durchziehen. Feld „Dein Ziel in einem Satz“ (Pflicht).
+2. **Motivation** wie bisher.
+3. **Stand** wie bisher.
+4. **Körper:** „Wie geht es deinem Körper gerade? Wo hakt es bei Schlaf, Ernährung oder Training?“
+   - Schlaf: Ich schlafe schlecht ein oder wache nachts auf · Ich bin morgens nicht erholt
+   - Ernährung: Heißhunger, vor allem abends · Ich esse unregelmäßig oder oft Fast Food
+   - Training: Ich mache keine Fortschritte mehr · Ich bleibe beim Training nicht dran
+   - Gerade keine größeren Probleme
+   - Feld „Und was klappt bei Schlaf, Essen oder Training schon gut?“
+5. **Produktivität & Fokus:** „Was frisst gerade deinen Fokus?“ Ich verliere mich am Handy · Ich schiebe Wichtiges auf · Energietiefs am Tag · Mir fehlt eine feste Struktur · Gerade keine größeren Probleme. Feld „Wann bist du am klarsten im Kopf?“
+6. **Business & Beruf:** „Wo stehst du gerade beruflich?“ Ich weiß nicht, wo ich anfangen soll · Ich habe Ideen, setze aber nichts um · Ich verdiene weniger, als ich will · Ich komme im Job nicht weiter · Gerade keine größeren Probleme. Feld „Was machst du gerade beruflich?“
+7. **Persönlichkeit:** „Woran willst du an dir selbst arbeiten?“ Ich fühle mich mit meinem Aussehen nicht wohl · Mir fehlt eine Pflege-Routine · Ich trete unsicher auf · Ich lerne viel, setze aber wenig um · Gerade keine größeren Probleme. Feld „Was willst du gerade lernen?“
+
+Unter den Fragen 4 bis 7 sagt der Coach in einem Satz, wofür er die Antwort braucht (z. B. „Daraus mache ich deinen ersten Hebel der Woche.“). Mindset steckt in Frage 2 und 3. Gespeichert in [[Nutzer]] als `koerper`, `produktiv`, `business`, `persoenlich`. Die Zusammenfassung „So sehe ich dich gerade“ bleibt bei 2 bis 3 Sätzen.
+
+Die Abschnitte darunter beschreiben die ältere Fassung mit 6 Fragen.
+
 Zweiter Baustein im [[MVP-Fortschritt]]. Grundidee aus [[Kernmechanik#1. Onboarding]] und [[App-Gesamtübersicht (Original)]]: Ein Einstiegs-Fragebogen, der die App direkt personalisiert (Ziel, aktuelles Level, Ausgangssituation). Die Antworten landen beim [[Nutzer]].
 
 Alles hier haben Phillip und Claude am 2026-10-11 gemeinsam festgelegt, Frage für Frage. Abgenommenes Mockup: [Onboarding-Entwurf](https://claude.ai/artifact/JdmD7NVMayHub5fh3MN9Xn).

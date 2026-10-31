@@ -10,8 +10,17 @@ class OnboardingQuestion {
     required this.fieldLabel,
     this.fieldHint = 'Ein Satz reicht …',
     this.fieldRequired = false,
+    this.gruppen = const {},
+    this.coach = '',
     required this.apply,
   });
+
+  /// Small headings inside the answers: heading -> first answer under it
+  /// (only the Körper question, Phillip 2026-10-31).
+  final Map<String, String> gruppen;
+
+  /// One coach sentence under the field: what the answer is used for.
+  final String coach;
 
   /// Short label, e.g. "Ziel".
   final String topic;
@@ -51,20 +60,25 @@ class OnboardingQuestion {
 
 const keineProbleme = 'Gerade keine größeren Probleme';
 
-/// The six questions decided with Phillip on 2026-10-18, same for everyone,
-/// in this order (see Umsetzung/Onboarding-Fragebogen.md).
+/// The seven questions, same for everyone, in this order (vault
+/// Umsetzung/Onboarding-Fragebogen.md): Ziel, Motivation and Stand as decided
+/// on 2026-10-18, then one question per area of the home page since
+/// 2026-10-31 (Körper with sleep, nutrition and training together,
+/// Produktivität & Fokus, Business & Beruf, Persönlichkeit; Mindset lives in
+/// Motivation and Stand).
 final List<OnboardingQuestion> onboardingQuestions = [
   OnboardingQuestion(
     topic: 'Ziel',
     question: 'Was ist dein Ziel, und was willst du dafür vor allem verändern?',
     options: const [
       'Fitter und stärker werden',
-      'Mehr Energie im Alltag',
+      'Mehr Fokus, weniger Handy',
+      'Beruflich vorankommen',
+      'Besser aussehen und auftreten',
       'Mental stärker werden und Dinge durchziehen',
-      'Mich wohler in meiner Haut fühlen',
     ],
     fieldLabel: 'Dein Ziel in einem Satz',
-    fieldHint: 'z. B. Bis zum Sommer 8 kg leichter und wieder Spaß am Sport',
+    fieldHint: 'z. B. In einem Jahr fit und mein eigenes Business',
     fieldRequired: true,
     apply: (p, a) => p.copyWith(ziel: a),
   ),
@@ -93,44 +107,77 @@ final List<OnboardingQuestion> onboardingQuestions = [
     apply: (p, a) => p.copyWith(level: a),
   ),
   OnboardingQuestion(
-    topic: 'Training',
-    question: 'Welche Probleme hast du gerade bei Training und Sport?',
+    topic: 'Körper',
+    question:
+        'Wie geht es deinem Körper gerade? Wo hakt es bei Schlaf, Ernährung '
+        'oder Training?',
     options: const [
-      'Mein Plan passt nicht richtig zu mir',
-      'Ich mache keine Fortschritte mehr',
-      'Ich weiß nicht, wie viel Pause ich brauche',
-      'Ich bleibe nicht dran',
-      keineProbleme,
-    ],
-    fieldLabel: 'Und was fällt dir dabei leicht?',
-    apply: (p, a) => p.copyWith(training: a),
-  ),
-  OnboardingQuestion(
-    topic: 'Ernährung',
-    question: 'Welche Probleme hast du gerade mit deiner Ernährung?',
-    options: const [
-      'Heißhunger, vor allem abends',
-      'Keine Struktur, ich esse unregelmäßig',
-      'Ich weiß nicht, was mir wirklich guttut',
-      'Oft unterwegs oder Fast Food',
-      keineProbleme,
-    ],
-    fieldLabel:
-        'Was weißt du schon, oder was hast du an deiner Ernährung bereits '
-        'angepasst?',
-    apply: (p, a) => p.copyWith(ernaehrung: a),
-  ),
-  OnboardingQuestion(
-    topic: 'Schlaf & Energie',
-    question: 'Welche Probleme hast du gerade mit Schlaf und Energie?',
-    options: const [
-      'Ich schlafe schlecht ein',
-      'Ich wache nachts oft auf',
+      'Ich schlafe schlecht ein oder wache nachts auf',
       'Ich bin morgens nicht erholt',
-      'Ich habe tagsüber Energietiefs',
+      'Heißhunger, vor allem abends',
+      'Ich esse unregelmäßig oder oft Fast Food',
+      'Ich mache keine Fortschritte mehr',
+      'Ich bleibe beim Training nicht dran',
       keineProbleme,
     ],
-    fieldLabel: 'Und wann fühlst du dich richtig fit?',
-    apply: (p, a) => p.copyWith(schlafEnergie: a),
+    gruppen: const {
+      'Schlaf': 'Ich schlafe schlecht ein oder wache nachts auf',
+      'Ernährung': 'Heißhunger, vor allem abends',
+      'Training': 'Ich mache keine Fortschritte mehr',
+      '': keineProbleme,
+    },
+    fieldLabel: 'Und was klappt bei Schlaf, Essen oder Training schon gut?',
+    fieldHint: 'z. B. Ich trainiere gern früh und esse mittags gut',
+    coach:
+        'Daraus stelle ich deine Seiten für Schlaf, Ernährung und Training '
+        'zusammen.',
+    apply: (p, a) => p.copyWith(koerper: a),
+  ),
+  OnboardingQuestion(
+    topic: 'Produktivität',
+    question: 'Was frisst gerade deinen Fokus?',
+    options: const [
+      'Ich verliere mich am Handy',
+      'Ich schiebe Wichtiges auf',
+      'Energietiefs am Tag',
+      'Mir fehlt eine feste Struktur',
+      keineProbleme,
+    ],
+    fieldLabel: 'Wann bist du am klarsten im Kopf?',
+    fieldHint: 'z. B. Vormittags bis zum Mittagessen',
+    coach:
+        'Damit lege ich deine besten Stunden und deinen ersten Fokus-Block '
+        'fest.',
+    apply: (p, a) => p.copyWith(produktiv: a),
+  ),
+  OnboardingQuestion(
+    topic: 'Business',
+    question: 'Wo stehst du gerade beruflich?',
+    options: const [
+      'Ich weiß nicht, wo ich anfangen soll',
+      'Ich habe Ideen, setze aber nichts um',
+      'Ich verdiene weniger, als ich will',
+      'Ich komme im Job nicht weiter',
+      keineProbleme,
+    ],
+    fieldLabel: 'Was machst du gerade beruflich?',
+    fieldHint: 'z. B. Angestellt, nebenbei ein Online-Shop',
+    coach: 'Daraus mache ich deinen ersten Hebel der Woche.',
+    apply: (p, a) => p.copyWith(business: a),
+  ),
+  OnboardingQuestion(
+    topic: 'Persönlichkeit',
+    question: 'Woran willst du an dir selbst arbeiten?',
+    options: const [
+      'Ich fühle mich mit meinem Aussehen nicht wohl',
+      'Mir fehlt eine Pflege-Routine',
+      'Ich trete unsicher auf',
+      'Ich lerne viel, setze aber wenig um',
+      keineProbleme,
+    ],
+    fieldLabel: 'Was willst du gerade lernen?',
+    fieldHint: 'z. B. Verkaufen, Englisch, Kochen',
+    coach: 'Damit starte ich deine Pflege-Routine und deinen ersten Skill.',
+    apply: (p, a) => p.copyWith(persoenlich: a),
   ),
 ];

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../bereiche/glas.dart';
 import 'coach_style.dart';
 import 'logo.dart';
 
@@ -262,9 +263,18 @@ class CoachNote extends StatelessWidget {
 
 /// Sand-coloured page with the centred 480 px column used on every screen.
 class CoachPage extends StatelessWidget {
-  const CoachPage({super.key, required this.child, this.dark = false});
+  const CoachPage({
+    super.key,
+    required this.child,
+    this.dark = false,
+    this.glas = false,
+  });
 
   final Widget child;
+
+  /// Glass look: slow gold light blobs behind the content (like the area
+  /// pages since 2026-10-29). Only with [dark].
+  final bool glas;
 
   /// Black-brown with a gold shimmer instead of sand white.
   final bool dark;
@@ -277,7 +287,9 @@ class CoachPage extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: dark ? CoachStyle.nightGradient : CoachStyle.pageGradient,
         ),
-        child: dark
+        child: dark && glas
+            ? GlasHintergrund(child: _column())
+            : dark
             ? DecoratedBox(
                 decoration: const BoxDecoration(gradient: CoachStyle.nightGlow),
                 child: _column(),
