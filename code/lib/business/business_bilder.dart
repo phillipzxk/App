@@ -32,6 +32,22 @@ class _SprossMaler extends CustomPainter {
   @override
   void paint(Canvas c, Size s) {
     final x = s.width / 2;
+    if (n < .05) {
+      // Nothing done yet: just a seed in the ground, no bare stem.
+      c.drawLine(
+        Offset(x - s.width * .3, s.height - 2),
+        Offset(x + s.width * .3, s.height - 2),
+        Paint()
+          ..strokeWidth = 1.2
+          ..strokeCap = StrokeCap.round
+          ..color = CoachStyle.goldLight.withValues(alpha: .35),
+      );
+      c.drawOval(
+        Rect.fromCenter(center: Offset(x, s.height - 6), width: 8, height: 6),
+        Paint()..color = CoachStyle.goldLight.withValues(alpha: .8),
+      );
+      return;
+    }
     final blaetter = math.min(n, 8.0);
     final top = s.height * (.85 - .1 * math.min(blaetter, 7));
     final stiel = Path()

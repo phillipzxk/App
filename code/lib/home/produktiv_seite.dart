@@ -72,7 +72,7 @@ extension _Produktiv on _HomePageState {
         : (da.reduce((a, b) => a + b) / da.length).round();
 
     String sub() {
-      if (wert == null) return 'Heute noch kein Wert, leg deinen Fokus fest';
+      if (wert == null) return 'Leg heute deinen Fokus fest';
       if (wertGestern == null) return '$wert von 10';
       final diff = wert - wertGestern;
       return diff == 0
@@ -371,7 +371,7 @@ extension _Produktiv on _HomePageState {
         ],
       ),
       BSeite(
-        name: 'Gewohnheiten',
+        name: 'Routinen',
         coach: aktiv == null
             ? 'Dock eine neue Gewohnheit an etwas an, das du sowieso machst.'
             : '„${aktiv.neu}“ hält seit ${aktiv.tage.length} Tagen. Die '
@@ -444,7 +444,7 @@ extension _Produktiv on _HomePageState {
 
     return BereichSeite(
       key: const ValueKey('produktiv-seite'),
-      name: 'Produktivität',
+      name: 'Produktivität & Fokus',
       wert: wert,
       teile: [
         Unterbereich(

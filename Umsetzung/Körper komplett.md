@@ -55,3 +55,7 @@ Phillip 17:35: „nich mit einem alles zu ... Knopf sondern direkt clean modern 
 - Ring oben = Körper-Verlauf (3 Kurven, „Hängt zusammen“, Fortschrittsfoto). Coach-Karte „Frag mich“ = Frag den Coach.
 - Energie heute liegt vorerst bei Schlaf & Routine auf der Seite „Tag“, bis Produktivität gebaut ist.
 - Mindset öffnet noch die alte Seite, bis Teil 2 fertig ist.
+
+## Rundgang 2026-10-31
+
+- Unter dem Körper-Ring steht „Schnitt aus allen drei · ±x zu gestern“ statt des Werts vom Training. Die Werte der drei Teile stehen in der Leiste darunter.

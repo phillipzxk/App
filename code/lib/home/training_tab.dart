@@ -398,6 +398,7 @@ class _TrainingTabState extends State<TrainingTab> {
           plan: widget.plan,
           sportarten: d.sportarten,
           schwerpunkt: widget.schwerpunkt,
+          startTag: widget.today.weekday - 1,
         ),
       ),
     );

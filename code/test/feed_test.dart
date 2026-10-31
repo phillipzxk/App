@@ -84,10 +84,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('kachel-t-plan')), findsOneWidget);
 
-    // A tile grows into its page; back goes to Körper.
+    // Without a plan the tile opens the plan straight away; back goes to
+    // Körper.
     await openKachel(tester, 't-plan');
-    expect(find.text('Dein Plan'), findsWidgets);
-    await tester.tap(find.byKey(const ValueKey('feld-zurueck')));
+    expect(find.text('Dein Trainingsplan'), findsWidgets);
+    await tester.tap(find.byTooltip('Zurück'));
     await tester.pumpAndSettle();
 
     // Closing Körper goes back to the roots.
@@ -105,8 +106,10 @@ void main() {
     tester,
   ) async {
     final (_, feed) = await _openFeed(tester);
+    // Without a plan, "Plan anlegen" opens the plan straight away.
     await openTab(tester, 'Training', 't-heute');
-    await tester.tap(find.text('Plan festlegen'));
+    expect(find.text('Dein Trainingsplan'), findsWidgets);
+    await tester.tap(find.byKey(const ValueKey('plan-wochentag-0')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('sportart-Krafttraining')));
     await tester.tap(find.byKey(const ValueKey('sportart-Laufen')));
@@ -136,6 +139,9 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('art-Strecke')));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const ValueKey('uebung-wert')), '5');
+    await scrollTo(tester, find.byKey(const ValueKey('plan-wochentag-1')));
+    await tester.tap(find.byKey(const ValueKey('plan-wochentag-1')));
+    await tester.pumpAndSettle();
     await scrollTo(tester, find.byKey(const ValueKey('plan-name-1')));
     await tester.enterText(
       find.byKey(const ValueKey('plan-name-1')),
@@ -153,6 +159,8 @@ void main() {
     expect(feed.plan.tage[1], 'Kampfsport');
     expect(feed.training.sportarten, ['Krafttraining', 'Laufen']);
     expect(feed.schwerpunkt, Schwerpunkt.hybrid);
+    // Saving goes back to Körper; now the tile opens today's training.
+    await openKachel(tester, 't-heute');
     expect(find.text('Heute: Push + Laufen'), findsOneWidget);
     expect(find.text('Letztes Mal'), findsNothing);
 

@@ -28,3 +28,9 @@ Kopf: Kreis 6, „+2 in 3 Monaten · Hebel läuft“. Vier Seiten, je drei Felde
 - Ideen-Prüfer: ohne Coach 4 feste harte Fragen. Reife bis zur Antwort des Coachs = Anteil beantworteter Fragen (höchstens 60 %).
 - Arbeit & Körper vergleicht den Produktivitäts-Wert an Tagen mit und ohne Training (aus dem Check-in) und nach Nächten unter 7 Stunden, je ab 3 Tagen.
 - Business-Wert, Regel von Claude: Schritte des Hebels, Umsatz gegen das Monatsziel bis heute, mutige Anfragen der Woche.
+
+## Rundgang 2026-10-31
+
+- Überschrift wie auf der Startseite „Business & Beruf“.
+- Coach-Frage ohne Hebel: „Welche Aktion bringt dich diese Woche am weitesten?“
+- Mutige Anfrage bei 0: nur ein Samenkorn im Boden statt eines kahlen Stiels.

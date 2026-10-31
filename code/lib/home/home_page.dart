@@ -24,6 +24,7 @@ import '../schlaf/schlaf_widgets.dart';
 import '../sleep/schlafzeiten.dart';
 import '../sleep/sleep.dart';
 import '../supplements/supplement_data.dart';
+import '../training/plan_editor.dart';
 import '../training/training_coach.dart';
 import '../training/training_data.dart';
 import '../training/training_logik.dart';
@@ -1515,6 +1516,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _oeffneTag() => Navigator.of(context).push(
     MaterialPageRoute<void>(
       builder: (_) => _UnterSeite(
+        glas: true,
         child: _lebendig(
           () => NightScope(
             child: ListView(
@@ -1528,19 +1530,31 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 16),
                 if (_schlaf.d.journalAm(SchlafDaten.gestern(widget.clock()))
                     case final j? when j.besser.any((x) => x.isNotEmpty))
-                  FeedCard(
-                    key: const ValueKey('besser-heute'),
-                    title: 'Heute besser machen',
-                    icon: Icons.auto_awesome,
-                    children: [
-                      for (final b in j.besser)
-                        if (b.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 4),
-                            child: Text(b, style: CoachStyle.body),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: GlasBox(
+                      key: const ValueKey('besser-heute'),
+                      art: GlasArt.gold,
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Heute besser machen', style: Glas.tLabel),
+                          const SizedBox(height: 8),
+                          for (final b in j.besser)
+                            if (b.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 4),
+                                child: Text(b, style: Glas.tText),
+                              ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Aus deinem Abend-Journal von gestern.',
+                            style: Glas.tSoft,
                           ),
-                      const HintText('Aus deinem Abend-Journal von gestern.'),
-                    ],
+                        ],
+                      ),
+                    ),
                   ),
                 DayPlanCard(
                   today: widget.clock(),
@@ -1570,6 +1584,9 @@ class _HomePageState extends State<HomePage> {
                   routineAb: _routine.isEmpty ? null : _routine.first.zeit,
                   onOpenSchlaf: () => _oeffneSeite(Bereich.schlaf),
                   aufstehen: _schlafzeiten.aufstehenAm(widget.clock()),
+                  mahlzeitZeiten: [
+                    for (final m in _mahlzeitSlots) (m.minute, m.name),
+                  ],
                 ),
               ],
             ),
@@ -1816,8 +1833,11 @@ class _HomePageState extends State<HomePage> {
 
 /// A pushed page in the app's dark look with a back arrow.
 class _UnterSeite extends StatelessWidget {
-  const _UnterSeite({required this.child});
+  const _UnterSeite({required this.child, this.glas = false});
   final Widget child;
+
+  /// Glass look with the slow gold light behind (e.g. "Dein Tag").
+  final bool glas;
 
   @override
   Widget build(BuildContext context) {
@@ -1829,23 +1849,29 @@ class _UnterSeite extends StatelessWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
       ),
-      body: DecoratedBox(
-        decoration: const BoxDecoration(gradient: CoachStyle.nightGradient),
-        child: SafeArea(
-          top: false,
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: child,
+      body: glas
+          ? GlasHintergrund(child: _inhalt())
+          : DecoratedBox(
+              decoration: const BoxDecoration(
+                gradient: CoachStyle.nightGradient,
               ),
+              child: _inhalt(),
             ),
-          ),
-        ),
-      ),
     );
   }
+
+  Widget _inhalt() => SafeArea(
+    top: false,
+    child: Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 480),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: child,
+        ),
+      ),
+    ),
+  );
 }
 
 /// E.g. "Montag, 12. Oktober".

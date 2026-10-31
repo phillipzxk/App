@@ -66,3 +66,12 @@ Phillip wollte den Tagesplaner „krasser“ und als etwas Besonderes. Aus drei 
 
 - Hintergrund (Phillip): Vorsprung ist die Trainingsintelligenz: KI-Kalender gibt es schon (Motion, Reclaim, Google/Apple), die Kombination mit Trainingssteuerung und Essen nicht.
 - Erster Test ohne App: 4 Wochen mit Claude planen, notieren, wie oft kein Training ausgefallen ist; dazu Content „So plant KI meine Woche“.
+
+## Glas-Look (beschlossen 2026-10-31, Phillip „ja“)
+
+Entwurf: https://claude.ai/artifact/NRdHwPf41w31KskVHqqUuu
+
+- Der große Sonnenbogen oben bleibt. Der helle Sand-Kopf fällt weg, „Dein Tag“ liegt auf Glas mit dem langsamen Goldlicht im Hintergrund.
+- Der Tag ist eine goldene Zeitleiste: Uhrzeit links, goldener Punkt auf der Linie, rechts klein die Art (Training, Essen, Schlaf …). Vorbei ist blass und abgehakt, die Linie „Jetzt“ leuchtet auf der Zeitleiste.
+- Mahlzeiten stehen jetzt mit ihrer Uhrzeit in der Zeitleiste (wie im Sonnenbogen), Training mit Uhrzeit sortiert sich ein.
+- Ohne Einträge steht in der Countdown-Karte „Plan deinen Tag · Noch nichts eingetragen“ statt „Für heute ist alles geschafft“.

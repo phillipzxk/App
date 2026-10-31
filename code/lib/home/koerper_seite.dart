@@ -23,6 +23,26 @@ extension _Koerper on _HomePageState {
     );
   }
 
+  /// Under the Körper ring: what the number is and how it moved, the
+  /// values of the three parts are in the bar below.
+  String _koerperZeile() {
+    final heute = <int>[], gestern = <int>[];
+    for (final b in _teile) {
+      final (w, d) = _wert(b);
+      if (w == null) continue;
+      heute.add(w);
+      if (d != null) gestern.add(w - d);
+    }
+    if (heute.isEmpty) return 'Heute noch kein Wert, erst nach dem Check-in';
+    int schnitt(List<int> l) => (l.reduce((a, b) => a + b) / l.length).round();
+    if (gestern.length != heute.length) return 'Schnitt aus allen drei';
+    final d = schnitt(heute) - schnitt(gestern);
+    final diff = d == 0
+        ? 'gleich wie gestern'
+        : '${d > 0 ? '+' : '−'}${d.abs()} zu gestern';
+    return 'Schnitt aus allen drei · $diff';
+  }
+
   String _subZeile(Bereich b) {
     final (w, d) = _wert(b);
     if (w == null) return 'Heute noch kein Wert, erst nach dem Check-in';
@@ -33,6 +53,25 @@ extension _Koerper on _HomePageState {
         : '${d > 0 ? '+' : '−'}${d.abs()} zu gestern';
     return diff.isEmpty ? '$w von 10' : diff;
   }
+
+  /// "Plan anlegen" opens the plan straight away, without the page in
+  /// between (Rundgang 2026-10-31).
+  Widget _planAnlegen(BuildContext _) => TrainingPlanEditor(
+    plan: _plan,
+    sportarten: _training.sportarten,
+    schwerpunkt: _schwerpunkt,
+    startTag: widget.clock().weekday - 1,
+    onFertig: (r) async {
+      await widget.feed.saveTraining(
+        _training.copyWith(sportarten: r.sportarten),
+      );
+      if (r.schwerpunkt case final sp?) {
+        await widget.feed.saveSchwerpunkt(sp);
+      }
+      await widget.feed.savePlan(r.plan);
+      await _reload();
+    },
+  );
 
   String _coach(Bereich b, String sonst) {
     final g = _heute?.gruende[b.name]?.trim() ?? '';
@@ -180,7 +219,7 @@ extension _Koerper on _HomePageState {
       icon: Icons.fitness_center,
       wert: _wert(b).$1,
       woche: _woche7(b),
-      sub: _subZeile(b),
+      sub: _koerperZeile(),
       seiten: [
         BSeite(
           name: 'Heute',
@@ -207,7 +246,8 @@ extension _Koerper on _HomePageState {
               },
               hot: einheit?.status == EinheitStatus.fertig ? 'geschafft' : null,
               knopf: frei ? null : 'Trainings-Modus',
-              feld: heute,
+              feld: _plan.isEmpty ? null : heute,
+              seite: _plan.isEmpty ? _planAnlegen : null,
             ),
             BKachel(
               id: 't-modus',
@@ -282,7 +322,8 @@ extension _Koerper on _HomePageState {
               unter: _plan.isEmpty
                   ? 'einmal festlegen, dann läuft er'
                   : '${alle.length} Übungen · läuft von selbst',
-              feld: planF,
+              feld: _plan.isEmpty ? null : planF,
+              seite: _plan.isEmpty ? _planAnlegen : null,
             ),
             BKachel(
               id: 't-sport',
@@ -371,7 +412,7 @@ extension _Koerper on _HomePageState {
       icon: Icons.restaurant,
       wert: _wert(b).$1,
       woche: _woche7(b),
-      sub: _subZeile(b),
+      sub: _koerperZeile(),
       seiten: [
         BSeite(
           name: 'Heute',
@@ -593,7 +634,7 @@ extension _Koerper on _HomePageState {
       icon: Icons.bedtime,
       wert: _wert(b).$1,
       woche: _woche7(b),
-      sub: _subZeile(b),
+      sub: _koerperZeile(),
       seiten: [
         BSeite(
           name: 'Morgen',

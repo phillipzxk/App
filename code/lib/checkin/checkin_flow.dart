@@ -613,7 +613,10 @@ class _CheckInReplyState extends State<CheckInReply>
           ),
         ),
         const SizedBox(height: 12),
-        GoldText('Dein Tag', style: CoachStyle.question.copyWith(fontSize: 26)),
+        GoldText(
+          'Dein Coach heute',
+          style: CoachStyle.question.copyWith(fontSize: 26),
+        ),
         const SizedBox(height: 16),
         AnimatedBuilder(
           animation: _flug,

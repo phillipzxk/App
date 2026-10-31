@@ -369,10 +369,15 @@ class _SonnenbogenState extends State<Sonnenbogen>
       final n = _sortiert.where((p) => p.minute > _jetzt).firstOrNull;
       if (n == null) {
         gross = formatUhrzeit(_jetzt.floor() % 1440);
+        final leer = widget.punkte.every(
+          (p) => p.id == 'aufstehen' || p.id == 'bett',
+        );
         t1 = widget.ohneZeit != null
             ? 'Heute noch: ${widget.ohneZeit}'
+            : leer
+            ? 'Plan deinen Tag'
             : 'Für heute ist alles geschafft';
-        t2 = null;
+        t2 = leer && widget.ohneZeit == null ? 'Noch nichts eingetragen' : null;
       } else {
         final sek = ((n.minute - _jetzt) * 60).round().clamp(0, 86400);
         final h = sek ~/ 3600, m = sek % 3600 ~/ 60, s = sek % 60;

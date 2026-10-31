@@ -109,7 +109,7 @@ void main() {
     );
     await tester.tap(find.byKey(const ValueKey('termin-eintragen')));
     await tester.pumpAndSettle();
-    expect(find.text('NÄCHSTE TERMINE'), findsOneWidget);
+    expect(find.text('Nächste Termine'), findsOneWidget);
     expect(find.text('Mittwoch Zahnarzt 9:15'), findsOneWidget);
 
     final meals = find.byKey(const ValueKey('mahlzeiten'));

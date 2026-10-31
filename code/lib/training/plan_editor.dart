@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../feed/feed_data.dart';
+import '../bereiche/glas.dart';
 import '../home/feed_widgets.dart';
 import '../ui/coach_style.dart';
 import 'training_data.dart';
@@ -21,7 +22,16 @@ class TrainingPlanEditor extends StatefulWidget {
     required this.plan,
     this.sportarten = const [],
     this.schwerpunkt,
+    this.onFertig,
+    this.startTag,
   });
+
+  /// The day shown first under the week strip (0 = Monday), today if null.
+  final int? startTag;
+
+  /// Saves the plan before the page closes, when it is opened straight
+  /// from a tile ("Plan anlegen") instead of from the Training page.
+  final Future<void> Function(PlanErgebnis ergebnis)? onFertig;
 
   final TrainingPlan plan;
   final List<String> sportarten;
@@ -42,6 +52,28 @@ class _TrainingPlanEditorState extends State<TrainingPlanEditor> {
   late Schwerpunkt? _schwerpunkt = widget.schwerpunkt;
   (int, int)? _offen;
 
+  /// The day shown under the week strip: today when the page opens.
+  late int _tag = widget.startTag ?? DateTime.now().weekday - 1;
+
+  @override
+  void initState() {
+    super.initState();
+    for (final c in _namen) {
+      c.addListener(() => setState(() {}));
+    }
+  }
+
+  /// Training on this day: a name that is not a rest day, or exercises.
+  bool _trainiert(int i) {
+    final n = _namen[i].text.trim().toLowerCase();
+    final ruhe =
+        n.isEmpty ||
+        n.startsWith('ruhe') ||
+        n.startsWith('frei') ||
+        n.startsWith('pause');
+    return !ruhe || _uebungen[i].isNotEmpty;
+  }
+
   @override
   void dispose() {
     for (final c in _namen) {
@@ -50,22 +82,27 @@ class _TrainingPlanEditorState extends State<TrainingPlanEditor> {
     super.dispose();
   }
 
-  void _speichern() {
-    Navigator.of(context).pop<PlanErgebnis>((
-      plan: TrainingPlan.aus(
-        [for (final c in _namen) c.text],
-        [
-          for (final d in _uebungen)
-            [
-              for (final u in d)
-                if (u.name.trim().isNotEmpty) u.copyWith(name: u.name.trim()),
-            ],
-        ],
-      ),
-      sportarten: _sportarten,
-      schwerpunkt: _schwerpunkt,
-    ));
+  Future<void> _speichern() async {
+    final r = _ergebnis();
+    final fertig = widget.onFertig;
+    if (fertig != null) await fertig(r);
+    if (mounted) Navigator.of(context).pop<PlanErgebnis>(r);
   }
+
+  PlanErgebnis _ergebnis() => (
+    plan: TrainingPlan.aus(
+      [for (final c in _namen) c.text],
+      [
+        for (final d in _uebungen)
+          [
+            for (final u in d)
+              if (u.name.trim().isNotEmpty) u.copyWith(name: u.name.trim()),
+          ],
+      ],
+    ),
+    sportarten: _sportarten,
+    schwerpunkt: _schwerpunkt,
+  );
 
   Future<void> _eigeneSportart() async {
     final c = TextEditingController();
@@ -106,13 +143,14 @@ class _TrainingPlanEditorState extends State<TrainingPlanEditor> {
     return EditorPage(
       title: 'Dein Trainingsplan',
       intro:
-          'Einmal festlegen, dann läuft alles von selbst weiter. Gib jedem Tag '
-          'einen Namen, gern mit Uhrzeit wie „Push 17:30“, und trag die '
-          'Übungen ein. Tippe auf eine Übung für Sätze, Wiederholungen, '
-          'Gewicht und mehr. Lass einen Tag leer, wenn er frei ist.',
+          'Einmal festlegen, dann läuft alles von selbst weiter. Tippe einen '
+          'Tag an, gib ihm einen Namen, gern mit Uhrzeit wie „Push 17:30“, '
+          'und trag die Übungen ein. Lass einen Tag leer, wenn er frei ist.',
+      glas: true,
       onSave: _speichern,
       children: [
-        TKarte(
+        GlasBox(
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -169,17 +207,45 @@ class _TrainingPlanEditorState extends State<TrainingPlanEditor> {
             ],
           ),
         ),
-        for (var i = 0; i < 7; i++) _tag(i),
+        const SizedBox(height: 18),
+        const TLabel('Deine Woche'),
+        const SizedBox(height: 8),
+        _wochenLeiste(),
+        const SizedBox(height: 12),
+        _tagKarte(_tag),
       ],
     );
   }
 
-  Widget _tag(int i) => TKarte(
+  /// Mo to So: training days glow gold, the chosen day is framed.
+  Widget _wochenLeiste() => Row(
+    children: [
+      for (var i = 0; i < 7; i++) ...[
+        if (i > 0) const SizedBox(width: 6),
+        Expanded(
+          child: _TagKnopf(
+            key: ValueKey('plan-wochentag-$i'),
+            kurz: wochentage[i].substring(0, 2),
+            training: _trainiert(i),
+            gewaehlt: i == _tag,
+            onTap: () => setState(() {
+              _tag = i;
+              _offen = null;
+            }),
+          ),
+        ),
+      ],
+    ],
+  );
+
+  Widget _tagKarte(int i) => GlasBox(
     key: ValueKey('plan-tag-edit-$i'),
+    art: _trainiert(i) ? GlasArt.gold : GlasArt.normal,
+    padding: const EdgeInsets.all(16),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(wochentage[i], style: tTitel),
+        Text(wochentage[i], style: Glas.tLabel),
         const SizedBox(height: 8),
         EditorField(
           key: ValueKey('plan-name-$i'),
@@ -227,19 +293,32 @@ class _TrainingPlanEditorState extends State<TrainingPlanEditor> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A140E),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: offen ? CoachStyle.goldLight : const Color(0xFF3A2E21),
-          ),
+          color: const Color(0x14FFECDC),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: offen ? Glas.goldEdge : Glas.edge),
         ),
         child: Row(
           children: [
+            Container(
+              width: 22,
+              height: 22,
+              alignment: Alignment.center,
+              margin: const EdgeInsets.only(right: 10),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Glas.goldEdge),
+              ),
+              child: Text(
+                '${j + 1}',
+                style: Glas.tLabel.copyWith(fontSize: 11),
+              ),
+            ),
             Expanded(
               child: Text(
                 u.name.isEmpty ? 'Neue Übung' : u.name,
-                style: tText.copyWith(
-                  color: u.name.isEmpty ? CoachStyle.inkSoft : CoachStyle.ink,
+                style: Glas.tText.copyWith(
+                  fontSize: 14,
+                  color: u.name.isEmpty ? Glas.soft : Glas.text,
                 ),
               ),
             ),
@@ -248,10 +327,7 @@ class _TrainingPlanEditorState extends State<TrainingPlanEditor> {
                 offen ? u.kurz : '${u.kurz} ›',
                 textAlign: TextAlign.right,
                 overflow: TextOverflow.ellipsis,
-                style: tSoft.copyWith(
-                  fontSize: 11.5,
-                  color: CoachStyle.inkSoft,
-                ),
+                style: Glas.tSoft.copyWith(fontSize: 11.5),
               ),
             ),
           ],
@@ -742,4 +818,65 @@ class _MithoererState extends State<_Mithoerer> {
 
   @override
   Widget build(BuildContext context) => widget.child;
+}
+
+/// One day in the week strip.
+class _TagKnopf extends StatelessWidget {
+  const _TagKnopf({
+    super.key,
+    required this.kurz,
+    required this.training,
+    required this.gewaehlt,
+    required this.onTap,
+  });
+
+  final String kurz;
+  final bool training;
+  final bool gewaehlt;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(14),
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      height: 54,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        gradient: training ? Glas.goldFill : Glas.fill,
+        border: Border.all(
+          color: gewaehlt
+              ? CoachStyle.goldLight
+              : (training ? Glas.goldEdge : Glas.edge),
+          width: gewaehlt ? 1.6 : 1,
+        ),
+        boxShadow: training
+            ? const [BoxShadow(color: Color(0x40E0BF7E), blurRadius: 12)]
+            : null,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            kurz,
+            style: Glas.tText.copyWith(
+              fontSize: 13,
+              color: training ? Glas.text : Glas.soft,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: training ? CoachStyle.goldGradient : null,
+              color: training ? null : const Color(0x33FFECDC),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
