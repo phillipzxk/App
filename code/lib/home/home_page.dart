@@ -1637,7 +1637,7 @@ class _HomePageState extends State<HomePage> {
             await _reload();
           },
           onAsk: _ask(Bereich.training),
-          // The progress photo lives with training (Frame Kit included).
+          // The progress photo lives with training.
           extra: [
             const GroupLabel('Fortschrittsfoto'),
             FutureMeCard(

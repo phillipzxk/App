@@ -127,17 +127,6 @@ void main() {
     expect(find.textContaining('Nächstes Foto'), findsOneWidget);
   });
 
-  test('kit code check and kit poses', () {
-    expect(kitCodeGueltig('FRAME-7K2Q9'), isTrue);
-    expect(kitCodeGueltig('abc'), isFalse);
-    expect(posenMitKit(['Vorne', 'Bizeps']), [
-      'Vorne',
-      'Seite',
-      'Hinten',
-      'Bizeps',
-    ]);
-  });
-
   Future<MemoryFeedStore> openApp(WidgetTester tester) async {
     final diary = MemoryDiaryStore()..checkIns.add(checkInOn(fixedNow));
     final feed = MemoryFeedStore()..fotoEinstellungen = _e(fixedNow.weekday);
@@ -166,7 +155,7 @@ void main() {
     expect(find.text('Foto · Woche 1'), findsOneWidget);
   });
 
-  testWidgets('without kit the photo screen shows the kit line', (
+  testWidgets('the photo screen is a simple photo without the kit', (
     tester,
   ) async {
     await openApp(tester);
@@ -177,47 +166,10 @@ void main() {
     await scrollTo(tester, find.byKey(const ValueKey('zukunft-karte')));
     await tester.tap(find.byKey(const ValueKey('zukunft-karte')));
     await tester.pumpAndSettle();
+    expect(find.textContaining('Frame Kit'), findsNothing);
     await tester.tap(find.byKey(const ValueKey('seite-foto')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('kit-zeile')), findsOneWidget);
-  });
-
-  testWidgets('kit code unlocks the kit and preselects three poses', (
-    tester,
-  ) async {
-    final feed = await openApp(tester);
-    await openTab(tester, 'Training');
-    // The photo lives behind the Körper ring.
-    await tester.tap(find.byKey(const ValueKey('bereich-ring')));
-    await tester.pumpAndSettle();
-    await scrollTo(tester, find.byKey(const ValueKey('zukunft-karte')));
-    await tester.tap(find.byKey(const ValueKey('zukunft-karte')));
-    await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('kit-code')),
-      200,
-    );
-    await tester.ensureVisible(find.byKey(const ValueKey('kit-code')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('kit-code')));
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byKey(const ValueKey('kit-code-feld')),
-      'FRAME-7K2Q9',
-    );
-    await tester.tap(find.byKey(const ValueKey('kit-code-ok')));
-    await tester.pumpAndSettle();
-
-    expect(feed.kitAktiv, isTrue);
-    expect(feed.fotoEinstellungen!.posen, kitPosen);
-
-    await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('seite-foto')),
-      -200,
-    );
-    await tester.tap(find.byKey(const ValueKey('seite-foto')));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('kit-zeile')), findsNothing);
-    expect(find.byKey(const ValueKey('aufnehmen-Hinten')), findsOneWidget);
+    expect(find.textContaining('Frame Kit'), findsNothing);
+    expect(find.byKey(const ValueKey('aufnehmen-Vorne')), findsOneWidget);
   });
 }

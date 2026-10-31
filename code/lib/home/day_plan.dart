@@ -67,7 +67,7 @@ class DayPlanCard extends StatelessWidget {
   final VoidCallback? onOpenTraining;
 
   /// On the photo day (or its catch-up day) e.g. "Foto · Woche 7": a fixed
-  /// morning slot that is never moved (see Umsetzung/Foto-Kit.md).
+  /// morning slot that is never moved (see Umsetzung/Dein zukünftiges Ich.md).
   final String? foto;
   final VoidCallback? onOpenFoto;
 
@@ -182,7 +182,7 @@ extension on DayPlanCard {
             art: 'Foto',
             dark: true,
             titel: foto!,
-            text: 'Mit dem Frame Kit 30 Sekunden.',
+            text: 'Dauert 30 Sekunden.',
             onTap: onOpenFoto,
             vorbei: v,
           ),

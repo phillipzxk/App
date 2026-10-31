@@ -1,11 +1,15 @@
 ---
 title: Foto-Kit (Framework by Groundset)
-tags: [umsetzung, foto, foto-kit, start-up, entschieden]
+tags: [umsetzung, foto, foto-kit, start-up, gestrichen]
+status: gestrichen
 erstellt: 2026-10-17
-aktualisiert: 2026-10-17
+aktualisiert: 2026-10-31
 ---
 
 # Foto-Kit „Framework (by Groundset)“ mit der App verbinden
+
+> [!warning] Gestrichen am 2026-10-31
+> Phillip: Das Frame Kit wird es nicht geben, weil er ein anderes Start-up gründet. Alles zum Kit (Code, Kit-Posen, Kit-Zeile, Kit-Karte) ist aus der App entfernt. Es bleibt nur das einfache Fortschrittsfoto, und das System zum Fotografieren bleibt wie beschlossen (fester Fototag, Nachholen am nächsten Tag, Umriss des letzten Fotos, Auslösen von selbst in der Handy-Version, Vergleich mit Schieberegler, Zeitraffer). Siehe [[Dein zukünftiges Ich]]. Der Rest dieser Notiz ist nur noch Archiv.
 
 Phillips Start-up-Produkt zum Fotografieren: Matte mit Fußmarken, zwei Markern (ArUco) und Graufeld, Abstandsband 1,5 m, Stativ mit LED-Licht, Handyhalter, Tasche. Verkauf laut Wartelisten-Seite als **Framework Mat (29 €)** und **Framework Kit (59 €)**, beide mit App-Code. Fester Rhythmus „Frame Sunday“. Quelle: Phillips Produktskizze vom 15.10.2026 (App-Teile als Auszug im Projektordner `foto-kit/Produktskizze-App-Teile.md`). Gehört zu [[Dein zukünftiges Ich]].
 
