@@ -41,7 +41,7 @@ Phillip: „wenn keine sachen verloren gehen … alles noch da unbedingt so mach
 | Coach-Karte (Text/Stichpunkte, Jubel, Affe) | oben auf Heute, unverändert |
 | Fokus der Woche, Reality Check, Fokus-Wahl | oben auf Heute, unverändert |
 | Dein Tag (Termine, Mahlzeiten, Bettzeit, Foto-Zeile) | Feld „Heute dran“ unter Fokus = kleiner Sonnenbogen mit allem von heute → tippen öffnet Dein Tag |
-| Fortschrittsfoto inkl. Frame Kit | am Fototag goldener Chip oben; immer auf der Training-Seite |
+| Fortschrittsfoto (Frame Kit seit 2026-10-31 gestrichen) | am Fototag goldener Chip oben; immer auf der Training-Seite |
 | Neues Muster | oben auf Heute, wenn höchstens 2 Tage alt; immer auf der Mindset-Seite (mit „Alle Muster“) |
 | Supplements | Kachel in Ernährung (Antippen → Ernährung-Seite zum Abhaken) |
 | Spross / Tage am Stück | Baum über der Bodenlinie; Blätter wachsen mit den Tagen am Stück, Wurzeln mit „Heute geschafft“, Funken beim Jubel |

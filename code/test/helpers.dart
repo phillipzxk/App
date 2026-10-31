@@ -130,13 +130,6 @@ class MemoryFeedStore implements FeedStore {
   Future<void> saveMahlzeiten(int n) async => mahlzeiten = n;
 
   FotoEinstellungen? fotoEinstellungen;
-  bool kitAktiv = false;
-
-  @override
-  Future<bool> loadKitAktiv() async => kitAktiv;
-
-  @override
-  Future<void> saveKitAktiv(bool aktiv) async => kitAktiv = aktiv;
 
   final wochenFotos = <WochenFoto>[];
 

@@ -66,11 +66,6 @@ abstract class FeedStore {
   /// Adds the week's entry, replacing one for the same photo day.
   Future<void> saveWochenFoto(WochenFoto foto);
 
-  /// True once the code from the Frame Kit was entered (see
-  /// Umsetzung/Foto-Kit.md).
-  Future<bool> loadKitAktiv();
-  Future<void> saveKitAktiv(bool aktiv);
-
   /// The supplement routine, empty until set.
   Future<List<Supplement>> loadSupplements();
   Future<void> saveSupplements(List<Supplement> list);
@@ -159,7 +154,6 @@ class LocalFeedStore implements FeedStore {
   static const _schwerpunktKey = 'schwerpunkt';
   static const _fotoEinstellungenKey = 'foto_einstellungen';
   static const _wochenFotosKey = 'wochen_fotos';
-  static const _kitKey = 'frame_kit';
   static const _supplementsKey = 'supplements';
   static const _genommenKey = 'supplements_genommen';
   static const _musterKey = 'muster';
@@ -303,12 +297,6 @@ class LocalFeedStore implements FeedStore {
       ..add(foto);
     await _write(_wochenFotosKey, [for (final f in all) f.toJson()]);
   }
-
-  @override
-  Future<bool> loadKitAktiv() async => await _read(_kitKey) == true;
-
-  @override
-  Future<void> saveKitAktiv(bool aktiv) => _write(_kitKey, aktiv);
 
   @override
   Future<List<Supplement>> loadSupplements() async {

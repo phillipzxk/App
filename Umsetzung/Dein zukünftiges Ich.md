@@ -30,7 +30,7 @@ Herzstück aus Phillips Notiz „App-Fortschritt“ (Idee vom 14.10.2026, Abschr
 
 ## Offen
 
-- Verbindung zum Foto-Kit: **am 2026-10-17 ausgearbeitet**, siehe [[Foto-Kit]]. Dabei geändert: Über der Kamera liegt jetzt der Umriss des **letzten** Fotos, nicht des ersten; dazu kommen Schieberegler, Zeitraffer und Teilen.
+- Verbindung zum Foto-Kit: am 2026-10-17 ausgearbeitet, **am 2026-10-31 gestrichen** (Phillip gründet ein anderes Start-up, das Kit kommt nicht). Es bleibt das einfache Foto mit dem beschlossenen System, siehe [[Foto-Kit]] (Archiv). Dabei geändert: Über der Kamera liegt jetzt der Umriss des **letzten** Fotos, nicht des ersten; dazu kommen Schieberegler, Zeitraffer und Teilen.
 
 ## Stand im Code (2026-10-16)
 
