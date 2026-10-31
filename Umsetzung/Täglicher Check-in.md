@@ -82,3 +82,7 @@ flowchart LR
 
 - Startseite mit Gewichtsanalyse: [[Main Feed]]
 - Offene Punkte: [[Offene Fragen]]
+
+## 2026-10-31
+
+Die Seite mit der Coach-Antwort nach dem Check-in heißt „Dein Coach heute“ (vorher „Dein Tag“, wie der Tagesplan).

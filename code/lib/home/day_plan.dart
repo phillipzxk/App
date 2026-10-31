@@ -4,6 +4,7 @@ import '../feed/feed_data.dart';
 import '../feed/kcal.dart';
 import '../planner/planner_data.dart';
 import '../sleep/schlafzeiten.dart';
+import '../bereiche/glas.dart';
 import '../ui/coach_style.dart';
 import 'feed_widgets.dart';
 
@@ -30,7 +31,12 @@ class DayPlanCard extends StatelessWidget {
     this.routineAb,
     this.onOpenSchlaf,
     this.aufstehen,
+    this.mahlzeitZeiten = const [],
   });
+
+  /// Today's meals with their planned time (minute, name), placed by the
+  /// coach like on the sun arc. Empty until the number of meals is set.
+  final List<(int, String)> mahlzeitZeiten;
 
   /// Today's wake-up time in minutes, null until set.
   final int? aufstehen;
@@ -88,33 +94,33 @@ class DayPlanCard extends StatelessWidget {
         ...termineAm(termine, start.add(Duration(days: i))),
     ];
     final meals = mahlzeiten;
-    return FeedCard(
-      title: 'Dein Tag',
-      darkHead: true,
-      icon: Icons.calendar_today_outlined,
-      trailing: const Tag('passt sich an'),
-      children: [
-        _TerminField(onAdd: onAddTermin),
-        const SizedBox(height: 12),
-        _MealsLine(
-          mahlzeiten: meals,
-          kcalZiel: kcalZiel,
-          onTap: () => _pickMahlzeiten(context),
-        ),
-        const SizedBox(height: 12),
-        ..._zeitstrahl(heute, meals),
-        if (demnaechst.isNotEmpty) ...[
-          const SizedBox(height: 14),
-          const Text('NÄCHSTE TERMINE', style: CoachStyle.label),
-          const SizedBox(height: 4),
-          for (final t in demnaechst)
-            _UpcomingRow(
-              key: ObjectKey(t),
-              termin: t,
-              onRemove: () => onRemoveTermin(t),
-            ),
+    return GlasBox(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _TerminField(onAdd: onAddTermin),
+          const SizedBox(height: 10),
+          _MealsLine(
+            mahlzeiten: meals,
+            kcalZiel: kcalZiel,
+            onTap: () => _pickMahlzeiten(context),
+          ),
+          const SizedBox(height: 10),
+          ..._zeitstrahl(heute, meals),
+          if (demnaechst.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Text('Nächste Termine', style: Glas.tLabel),
+            const SizedBox(height: 4),
+            for (final t in demnaechst)
+              _UpcomingRow(
+                key: ObjectKey(t),
+                termin: t,
+                onRemove: () => onRemoveTermin(t),
+              ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
@@ -128,7 +134,7 @@ extension on DayPlanCard {
         zeit: '–',
         art: 'Schlaf',
         titel: 'Bettzeit',
-        text: 'Trag ein, wann du aufstehst ›',
+        text: 'Trag ein, wann du aufstehst',
         last: true,
         onTap: onOpenSchlaf,
       );
@@ -156,11 +162,13 @@ extension on DayPlanCard {
 }
 
 extension on DayPlanCard {
-  /// Rows in time order with a glowing "Jetzt" line between done and next.
-  /// Rows without a time (training and meals until the coach plans them)
-  /// come after the timed ones, bedtime is always last.
+  /// Rows in time order on a gold time line with a glowing "Jetzt" line
+  /// between done and next. Rows without a time come after the timed ones,
+  /// bedtime is always last.
   List<Widget> _zeitstrahl(List<Termin> heute, int? meals) {
     final jetzt = today.hour * 60 + today.minute;
+    final trZeit = trainingZeit(training);
+    final frei = training.trim().isEmpty;
     final zeilen = <(int?, Widget Function(bool vorbei))>[
       if (aufstehen != null)
         (
@@ -180,7 +188,7 @@ extension on DayPlanCard {
             key: const ValueKey('tag-foto'),
             zeit: 'früh',
             art: 'Foto',
-            dark: true,
+            hell: true,
             titel: foto!,
             text: 'Dauert 30 Sekunden.',
             onTap: onOpenFoto,
@@ -197,6 +205,39 @@ extension on DayPlanCard {
             titel: t.text,
             onRemove: () => onRemoveTermin(t),
             vorbei: v,
+          ),
+        ),
+      for (final (m, name) in mahlzeitZeiten)
+        (
+          m,
+          (v) => _PlanRow(
+            key: ValueKey('tag-essen-$m'),
+            zeit: formatUhrzeit(m),
+            art: 'Essen',
+            titel: name,
+            vorbei: v,
+          ),
+        ),
+      (
+        frei ? null : trZeit,
+        (v) => _PlanRow(
+          key: const ValueKey('tag-training'),
+          zeit: trZeit == null || frei ? '–' : formatUhrzeit(trZeit),
+          art: 'Training',
+          hell: true,
+          titel: frei ? 'Heute frei' : shortDay(training),
+          text: frei ? null : 'Übungen in deinem Plan',
+          onTap: onOpenTraining,
+          vorbei: v,
+        ),
+      ),
+      if (mahlzeitZeiten.isEmpty)
+        (
+          null,
+          (v) => _PlanRow(
+            zeit: '–',
+            art: 'Essen',
+            titel: meals == null ? 'Mahlzeiten' : '$meals Mahlzeiten',
           ),
         ),
     ];
@@ -225,27 +266,6 @@ extension on DayPlanCard {
     for (final (_, bau) in ohneZeit) {
       out.add(bau(false));
     }
-    out.add(
-      _PlanRow(
-        key: const ValueKey('tag-training'),
-        zeit: switch (trainingZeit(training)) {
-          final z? => formatUhrzeit(z),
-          null => '–',
-        },
-        art: 'Training',
-        dark: true,
-        titel: training.trim().isEmpty ? 'Heute frei' : shortDay(training),
-        text: training.trim().isEmpty ? null : 'Übungen in deinem Plan',
-        onTap: onOpenTraining,
-      ),
-    );
-    out.add(
-      _PlanRow(
-        zeit: '–',
-        art: 'Essen',
-        titel: meals == null ? 'Mahlzeiten' : '$meals Mahlzeiten',
-      ),
-    );
     out.add(_bettRow());
     return out;
   }
@@ -260,7 +280,8 @@ class _JetztLinie extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     key: const ValueKey('tag-jetzt'),
-    padding: const EdgeInsets.symmetric(vertical: 6),
+    // The dot sits on the gold time line (after the 46 px time column).
+    padding: const EdgeInsets.fromLTRB(47, 6, 0, 6),
     child: Row(
       children: [
         Container(
@@ -274,7 +295,7 @@ class _JetztLinie extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 13),
         Text(
           'JETZT $zeit',
           style: CoachStyle.goldLabel.copyWith(
@@ -328,6 +349,10 @@ class _TerminFieldState extends State<_TerminField> {
 
   @override
   Widget build(BuildContext context) {
+    final rand = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: const BorderSide(color: Glas.edge),
+    );
     return Row(
       children: [
         Expanded(
@@ -336,45 +361,52 @@ class _TerminFieldState extends State<_TerminField> {
             controller: _controller,
             textInputAction: TextInputAction.done,
             onSubmitted: (_) => _submit(),
-            style: CoachStyle.body.copyWith(fontSize: 15),
+            cursorColor: CoachStyle.gold,
+            style: Glas.tText.copyWith(fontWeight: FontWeight.w500),
             decoration: InputDecoration(
               hintText: 'z. B. Zahnarzt Do 17 Uhr',
+              hintStyle: Glas.tSoft.copyWith(fontSize: 14),
               isDense: true,
               filled: true,
-              fillColor: CoachStyle.page,
+              fillColor: const Color(0x14FFECDC),
               contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 12,
+                horizontal: 14,
+                vertical: 13,
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: CoachStyle.line),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: CoachStyle.line),
+              border: rand,
+              enabledBorder: rand,
+              focusedBorder: rand.copyWith(
+                borderSide: const BorderSide(color: Glas.goldEdge),
               ),
             ),
           ),
         ),
         const SizedBox(width: 8),
-        FilledButton(
-          key: const ValueKey('termin-eintragen'),
-          style: FilledButton.styleFrom(
-            backgroundColor: CoachStyle.beige,
-            foregroundColor: CoachStyle.goldInk,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            textStyle: const TextStyle(
-              fontFamily: 'Sora',
-              fontWeight: FontWeight.w600,
-              fontSize: 13,
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: CoachStyle.goldGradient,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              key: const ValueKey('termin-eintragen'),
+              borderRadius: BorderRadius.circular(14),
+              onTap: _submit,
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+                child: Text(
+                  'Eintragen',
+                  style: TextStyle(
+                    fontFamily: 'Sora',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    color: CoachStyle.goldInk,
+                  ),
+                ),
+              ),
             ),
           ),
-          onPressed: _submit,
-          child: const Text('Eintragen'),
         ),
       ],
     );
@@ -402,25 +434,28 @@ class _MealsLine extends StatelessWidget {
       if (kcalZiel != null) 'kcal-Ziel ${formatKcal(kcalZiel!)}',
     ];
     return Material(
-      color: CoachStyle.card,
-      borderRadius: BorderRadius.circular(10),
+      color: const Color(0x0DFFECDC),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: const BorderSide(color: Glas.edge),
+      ),
       child: InkWell(
         key: const ValueKey('mahlzeiten'),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(14),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           child: Row(
             children: [
               Expanded(
                 child: Text(
                   parts.join(' · '),
-                  style: CoachStyle.body.copyWith(fontSize: 13.5),
+                  style: Glas.tSoft.copyWith(fontSize: 13),
                 ),
               ),
               Text(
                 mahlzeiten == null ? 'Festlegen' : 'Ändern',
-                style: CoachStyle.goldLabel.copyWith(letterSpacing: 0),
+                style: Glas.tLabel.copyWith(fontSize: 12.5),
               ),
             ],
           ),
@@ -430,7 +465,8 @@ class _MealsLine extends StatelessWidget {
   }
 }
 
-/// One line of the day plan: time, a small kind label, title and text.
+/// One stop on the gold time line: time, title, text and a small kind
+/// label on the right. Done stops are dimmed and ticked.
 class _PlanRow extends StatelessWidget {
   const _PlanRow({
     super.key,
@@ -438,7 +474,7 @@ class _PlanRow extends StatelessWidget {
     required this.art,
     required this.titel,
     this.text,
-    this.dark = false,
+    this.hell = false,
     this.last = false,
     this.onRemove,
     this.onTap,
@@ -451,113 +487,139 @@ class _PlanRow extends StatelessWidget {
   final String art;
   final String titel;
   final String? text;
-  final bool dark;
+
+  /// Stands out with a gold dot (training, photo).
+  final bool hell;
   final bool last;
   final VoidCallback? onRemove;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final row = Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        border: last
-            ? null
-            : const Border(bottom: BorderSide(color: CoachStyle.line)),
-      ),
+    final row = IntrinsicHeight(
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SizedBox(
-            width: 50,
-            child: Text(
-              zeit,
-              style: CoachStyle.cardTitle.copyWith(
-                fontSize: 13,
-                fontFeatures: const [FontFeature.tabularFigures()],
+            width: 46,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Text(
+                zeit,
+                style: Glas.tLabel.copyWith(
+                  fontSize: 13,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
               ),
             ),
           ),
+          _Spur(hell: hell, vorbei: vorbei, last: last),
+          const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    _Kind(art, dark: dark),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        titel,
-                        style: CoachStyle.body.copyWith(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(titel, style: Glas.tText.copyWith(fontSize: 14.5)),
+                  if (text != null) ...[
+                    const SizedBox(height: 3),
+                    Text(text!, style: Glas.tSoft.copyWith(fontSize: 12.5)),
                   ],
-                ),
-                if (text != null) ...[
-                  const SizedBox(height: 4),
-                  HintText(text!),
                 ],
-              ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 8, top: 13),
+            child: Text(
+              art.toUpperCase(),
+              style: Glas.tSoft.copyWith(
+                fontSize: 9.5,
+                letterSpacing: 1.2,
+                color: hell ? Glas.label : Glas.soft.withValues(alpha: .7),
+              ),
             ),
           ),
           if (vorbei)
             const Padding(
-              padding: EdgeInsets.only(left: 6, top: 2),
-              child: Text('✓', style: TextStyle(color: CoachStyle.gold)),
+              padding: EdgeInsets.only(left: 6, top: 11),
+              child: Icon(Icons.check, size: 16, color: CoachStyle.gold),
             ),
           if (onRemove != null)
             IconButton(
               tooltip: 'Termin löschen',
               visualDensity: VisualDensity.compact,
-              icon: const Icon(
-                Icons.close,
-                size: 18,
-                color: CoachStyle.inkSoft,
-              ),
+              icon: const Icon(Icons.close, size: 17, color: Glas.soft),
               onPressed: onRemove,
             ),
           if (onTap != null)
             const Padding(
-              padding: EdgeInsets.only(left: 6, top: 2),
-              child: Text(
-                '›',
-                style: TextStyle(color: CoachStyle.gold, fontSize: 20),
-              ),
+              padding: EdgeInsets.only(left: 4, top: 10),
+              child: Icon(Icons.chevron_right, size: 20, color: Glas.label),
             ),
         ],
       ),
     );
-    final sichtbar = vorbei ? Opacity(opacity: .5, child: row) : row;
+    final sichtbar = vorbei ? Opacity(opacity: .45, child: row) : row;
     if (onTap == null) return sichtbar;
-    return InkWell(onTap: onTap, child: sichtbar);
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: sichtbar,
+    );
   }
 }
 
-class _Kind extends StatelessWidget {
-  const _Kind(this.text, {this.dark = false});
+/// The piece of the gold time line next to one stop: a thin line and a dot.
+class _Spur extends StatelessWidget {
+  const _Spur({required this.hell, required this.vorbei, required this.last});
 
-  final String text;
-  final bool dark;
+  final bool hell;
+  final bool vorbei;
+  final bool last;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-    decoration: BoxDecoration(
-      color: dark ? CoachStyle.beige : null,
-      borderRadius: BorderRadius.circular(99),
-      border: Border.all(color: dark ? CoachStyle.beige : CoachStyle.line),
-    ),
-    child: Text(
-      text.toUpperCase(),
-      style: CoachStyle.label.copyWith(
-        fontSize: 10,
-        letterSpacing: 0.8,
-        color: dark ? CoachStyle.goldInk : CoachStyle.inkSoft,
-      ),
+  Widget build(BuildContext context) => SizedBox(
+    width: 14,
+    child: Stack(
+      alignment: Alignment.topCenter,
+      children: [
+        Positioned(
+          top: 0,
+          bottom: last ? null : 0,
+          height: last ? 18 : null,
+          child: Container(
+            width: 1.5,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  CoachStyle.gold.withValues(alpha: .55),
+                  CoachStyle.gold.withValues(alpha: .25),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 14,
+          child: Container(
+            width: hell ? 11 : 9,
+            height: hell ? 11 : 9,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: vorbei || hell ? CoachStyle.goldGradient : null,
+              color: vorbei || hell ? null : const Color(0xFF1A130E),
+              border: Border.all(color: CoachStyle.gold, width: 1.3),
+              boxShadow: hell && !vorbei
+                  ? const [BoxShadow(color: Color(0x88E0BF7E), blurRadius: 8)]
+                  : null,
+            ),
+          ),
+        ),
+      ],
     ),
   );
 }
@@ -581,18 +643,21 @@ class _UpcomingRow extends StatelessWidget {
       children: [
         SizedBox(
           width: 110,
-          child: Text(when, style: CoachStyle.body.copyWith(fontSize: 13.5)),
+          child: Text(when, style: Glas.tLabel.copyWith(fontSize: 13)),
         ),
         Expanded(
           child: Text(
             termin.text,
-            style: CoachStyle.body.copyWith(fontSize: 13.5),
+            style: Glas.tText.copyWith(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
         IconButton(
           tooltip: 'Termin löschen',
           visualDensity: VisualDensity.compact,
-          icon: const Icon(Icons.close, size: 16, color: CoachStyle.inkSoft),
+          icon: const Icon(Icons.close, size: 16, color: Glas.soft),
           onPressed: onRemove,
         ),
       ],

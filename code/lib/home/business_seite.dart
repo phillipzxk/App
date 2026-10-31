@@ -135,7 +135,7 @@ extension _Business on _HomePageState {
       BSeite(
         name: 'Woche',
         coach: h == null
-            ? '${anrede}welche eine Aktion bewegt diese Woche am meisten?'
+            ? '${name.isEmpty ? 'W' : '${anrede}w'}elche Aktion bringt dich diese Woche am weitesten?'
             : '${anrede}diese Woche zählt ein Hebel: ${h.text}.'
                   '${h.punkte.isEmpty ? '' : ' ${h.erledigt} von ${h.punkte.length} geschafft.'}',
         kacheln: [
@@ -424,7 +424,7 @@ extension _Business on _HomePageState {
 
     return BereichSeite(
       key: const ValueKey('business-seite'),
-      name: 'Business',
+      name: 'Business & Beruf',
       wert: wert,
       teile: [
         Unterbereich(

@@ -230,13 +230,6 @@ class TodayTab extends StatelessWidget {
             gross: true,
             lebensziele: lebensziele,
           ),
-          TextButton(
-            onPressed: onRestartOnboarding,
-            child: const Text(
-              'Fragebogen neu starten',
-              style: TextStyle(color: CoachStyle.nightMuted),
-            ),
-          ),
         ],
       ),
     );

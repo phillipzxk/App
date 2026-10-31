@@ -27,3 +27,7 @@ Aufteilung (Vorschlag Claude):
 - Energie heute ist von Körper › Schlaf hierher gezogen.
 - Produktivitäts-Wert, Regel von Claude: die eine Sache geschafft, Minuten im Fokus (50 sind voll) und der handyfreie Morgen.
 - Bildschirmzeit trägt man bis zur Handy-Version selbst ein. Apps sperren geht erst in der Handy-Version.
+
+## Rundgang 2026-10-31
+
+- Der Reiter „Gewohnheiten“ heißt kurz „Routinen“ (passte nicht in den Knopf). Die Überschrift heißt wie auf der Startseite „Produktivität & Fokus“, die Zeile ohne Wert kürzer: „Leg heute deinen Fokus fest“.

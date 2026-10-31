@@ -67,3 +67,8 @@ Gebaut nach Phillips „Perfekt“ zu Entwurf 2:
 - Alles wird auf dem Gerät gespeichert (Plan, jede Einheit, Vorschläge, Form-Bilder). Ein Server-Backup mit Konto kommt mit der Handy-Version, siehe [[Release-Plan]].
 - In der Vorschau (Browser) werden vom Video 4 Standbilder gespeichert. Das ganze Video und die Kamera mit goldenem Rahmen kommen mit der Handy-Version.
 - Alte Pläne (nur Text) werden automatisch in Übungen umgewandelt.
+
+## Plan im Glas-Look (beschlossen 2026-10-31, Phillip „ja“)
+
+- Der Plan-Editor ist dunkles Glas. Statt sieben Kästen untereinander gibt es die Wochenleiste Mo bis So: Tag antippen, darunter Name und Übungen dieses Tages. Tage mit Training leuchten gold, beim Öffnen ist der heutige Tag gewählt.
+- Ohne Plan öffnet „Plan anlegen“ (Kachel „Heute“ und „Dein Plan“ bei Körper › Training) direkt den Plan, ohne Zwischenseite. Speichern führt zurück zu Körper.

@@ -200,13 +200,13 @@ extension _Mindset on _HomePageState {
       coach:
           'Deine eigenen Worte vom Anfang. Ich hole sie raus, wenn es zäh '
           'wird.',
-      inhalt: (_) => [
+      inhalt: (c) => [
         Block(
           art: GlasArt.gold,
           children: [
             Text(
               widget.profile.warum.isEmpty
-                  ? 'Noch kein Warum. Du kannst das Onboarding neu machen.'
+                  ? 'Noch kein Warum. Du kannst den Fragebogen unten neu machen.'
                   : '„${widget.profile.warum}“',
               style: CoachStyle.question.copyWith(
                 fontSize: 19,
@@ -218,6 +218,20 @@ extension _Mindset on _HomePageState {
               CoachZeile(s),
             ],
           ],
+        ),
+        // Moved here from the bottom of Heute (Rundgang 2026-10-31).
+        Center(
+          child: TextButton(
+            key: const ValueKey('fragebogen-neu'),
+            onPressed: () {
+              Navigator.of(c).popUntil((r) => r.isFirst);
+              widget.onRestartOnboarding();
+            },
+            child: Text(
+              'Fragebogen neu machen',
+              style: Glas.tSoft.copyWith(fontSize: 13),
+            ),
+          ),
         ),
       ],
     );

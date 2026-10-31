@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../bereiche/glas.dart';
 import '../feed/feed_data.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
@@ -594,6 +595,7 @@ class EditorPage extends StatelessWidget {
     required this.intro,
     required this.children,
     required this.onSave,
+    this.glas = false,
   });
 
   final String title;
@@ -601,9 +603,14 @@ class EditorPage extends StatelessWidget {
   final List<Widget> children;
   final VoidCallback onSave;
 
+  /// Dark glass look (e.g. the training plan).
+  final bool glas;
+
   @override
   Widget build(BuildContext context) {
     return CoachPage(
+      dark: glas,
+      glas: glas,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -611,16 +618,28 @@ class EditorPage extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: IconButton(
               tooltip: 'Zurück',
-              icon: const Icon(Icons.arrow_back, color: CoachStyle.ink),
+              icon: Icon(
+                Icons.arrow_back,
+                color: glas ? CoachStyle.goldLight : CoachStyle.ink,
+              ),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ),
           Expanded(
             child: ListView(
               children: [
-                Text(title, style: CoachStyle.question),
+                if (glas)
+                  GoldSchrift(
+                    title,
+                    style: CoachStyle.question.copyWith(fontSize: 28),
+                  )
+                else
+                  Text(title, style: CoachStyle.question),
                 const SizedBox(height: 8),
-                HintText(intro),
+                if (glas)
+                  Text(intro, style: Glas.tSoft.copyWith(fontSize: 13.5))
+                else
+                  HintText(intro),
                 const SizedBox(height: 20),
                 ...children,
               ],

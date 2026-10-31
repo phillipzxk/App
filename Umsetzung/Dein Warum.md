@@ -36,3 +36,7 @@ Phillip hat den Entwurf am 25.10.2026 mit „Ja“ freigegeben: https://claude.a
 ## Reparatur 2026-10-31
 
 Beim Rundgang stand in der Karte wörtlich „Was ist dein wahrer Grund?:“ mitten im Zitat. Jetzt zeigt die Karte die eigenen Worte aus dem Feld, und nur wenn das Feld leer ist, die angetippten Antworten.
+
+## Fragebogen neu machen (2026-10-31)
+
+„Fragebogen neu starten“ ist von der Startseite weg. Der Link „Fragebogen neu machen“ steht jetzt unten auf der Seite „Dein Warum“ (Mindset › Langfristig).
