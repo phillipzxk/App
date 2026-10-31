@@ -32,3 +32,7 @@ Phillip hat den Entwurf am 25.10.2026 mit „Ja“ freigegeben: https://claude.a
 - Der Coach antwortet mit einem Satz (höchstens 22 Wörter) oder mit nichts, wenn es ein normaler Tag ist. Ein einzelner mittlerer Tag zählt nicht.
 - Das Ergebnis wird für den Tag gespeichert (`warum_heute`), damit der Coach nicht mehrmals gefragt wird.
 - Ohne Antwort auf Frage 2 gibt es keine Karte.
+
+## Reparatur 2026-10-31
+
+Beim Rundgang stand in der Karte wörtlich „Was ist dein wahrer Grund?:“ mitten im Zitat. Jetzt zeigt die Karte die eigenen Worte aus dem Feld, und nur wenn das Feld leer ist, die angetippten Antworten.

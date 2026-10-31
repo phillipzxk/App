@@ -22,6 +22,10 @@ Teil von [[Datenmodell]].
 | Training | Onboarding-Frage 4, Ausgangssituation Training (neu seit 2026-10-11) |
 | Ernährung | Onboarding-Frage 5, Ausgangssituation Ernährung (neu seit 2026-10-11) |
 | Schlaf & Energie | Onboarding-Frage 6, Ausgangssituation Schlaf & Energie (neu seit 2026-10-11) |
+| Körper | Onboarding-Frage 4 seit 2026-10-31: Schlaf, Ernährung, Training zusammen (`koerper`) |
+| Produktivität | Onboarding-Frage 5 seit 2026-10-31 (`produktiv`) |
+| Business | Onboarding-Frage 6 seit 2026-10-31 (`business`) |
+| Persönlichkeit | Onboarding-Frage 7 seit 2026-10-31 (`persoenlich`) |
 | Zusammenfassung | „So sehe ich dich gerade“, von der KI aus den sechs Antworten (neu seit 2026-10-11) |
 
 Alle Onboarding-Felder sind Freitext, die Fragen stehen in [[Onboarding-Fragebogen]]. Die Felder `ausgangssituation` und `onboarding_notiz` vom 2026-10-10 sind damit ersetzt.

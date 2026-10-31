@@ -797,5 +797,9 @@ Map<String, Object> profileJson(UserProfile p) => {
   'training': p.training,
   'ernaehrung': p.ernaehrung,
   'schlafEnergie': p.schlafEnergie,
+  'koerper': p.koerper,
+  'produktiv': p.produktiv,
+  'business': p.business,
+  'persoenlich': p.persoenlich,
   'zusammenfassung': p.zusammenfassung,
 };

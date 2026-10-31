@@ -92,7 +92,7 @@ async function ask(env: Env, prompt: string, bilder: string[] = []): Promise<str
     .trim();
 }
 
-const AREAS = ["training", "ernaehrung", "schlaf", "mindset"] as const;
+const AREAS = ["training", "ernaehrung", "schlaf", "produktiv", "business", "persoenlich", "mindset"] as const;
 
 /// Keeps only well-formed scores 1-10 and short reasons from the model's JSON.
 export function parseWerte(raw: string): Record<string, { wert: number; grund: string }> {

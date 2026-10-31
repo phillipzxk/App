@@ -1096,7 +1096,7 @@ class _HomePageState extends State<HomePage> {
           today.day - (today.weekday - 1),
         );
         final n = _durchgezogen.where((e) => !e.datum.isBefore(mo)).length;
-        final warum = widget.profile.motivation.trim();
+        final warum = widget.profile.warum;
         kacheln = [
           Kachel(titel: 'Durchgezogen', wert: '$n Mal', unter: 'seit Montag'),
           Kachel(
@@ -1167,20 +1167,17 @@ class _HomePageState extends State<HomePage> {
     final heute = dayKey(today);
     final p = _produktiv.d;
     final pWoche = [
-      for (var i = 6; i >= 0; i--)
-        produktivWert(p, dayKey(today.subtract(Duration(days: i)))),
+      for (var i = 6; i >= 0; i--) _pw(today.subtract(Duration(days: i))),
     ];
     final pf = p.fokusAm(heute);
     final bz = _business.d;
     final bWoche = [
-      for (var i = 6; i >= 0; i--)
-        businessWert(bz, today.subtract(Duration(days: i))),
+      for (var i = 6; i >= 0; i--) _bw(today.subtract(Duration(days: i))),
     ];
     final h = bz.hebelIn(dayKey(montagVon(today)));
     final pe = _persoenlich.d;
     final peWoche = [
-      for (var i = 6; i >= 0; i--)
-        persoenlichWert(pe, dayKey(today.subtract(Duration(days: i)))),
+      for (var i = 6; i >= 0; i--) _pew(today.subtract(Duration(days: i))),
     ];
     final (mw, md) = _wert(Bereich.mindset);
     final steine = _mindset.d.offeneSteine;
@@ -1253,6 +1250,34 @@ class _HomePageState extends State<HomePage> {
       ),
     ];
   }
+
+  /// Values of the three newer areas: check-in rating and page actions
+  /// together (see [mitCheckIn]).
+  int? _pw(DateTime t) => mitCheckIn(
+    produktivWert(_produktiv.d, dayKey(t)),
+    _checkIns,
+    'produktiv',
+    t,
+  );
+
+  int? _bw(DateTime t) =>
+      mitCheckIn(businessWert(_business.d, t), _checkIns, 'business', t);
+
+  int? _pew(DateTime t) => mitCheckIn(
+    persoenlichWert(_persoenlich.d, dayKey(t)),
+    _checkIns,
+    'persoenlich',
+    t,
+  );
+
+  /// The last [n] days of [wert], oldest first.
+  List<int?> _verlauf(
+    int? Function(DateTime) wert,
+    DateTime heute, [
+    int n = 30,
+  ]) => [
+    for (var i = n - 1; i >= 0; i--) wert(heute.subtract(Duration(days: i))),
+  ];
 
   /// "Deine Lebensziele" at the end of the tap root.
   Widget _lebenszieleKarte() {
@@ -1729,7 +1754,7 @@ class _HomePageState extends State<HomePage> {
         await widget.store.saveCheckIn(c.withStichpunkte(p));
         await _reload();
       },
-      warum: widget.profile.motivation,
+      warum: widget.profile.warum,
       warumSatz: _warumSatz,
       muster: sichtbareMuster(_muster).firstOrNull,
       musterNeu: _neuesMuster != null,

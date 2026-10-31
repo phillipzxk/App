@@ -70,11 +70,10 @@ extension _Persoenlich on _HomePageState {
     final d = _persoenlich.d;
     final jetzt = widget.clock();
     final heute = dayKey(jetzt);
-    final gestern = dayKey(jetzt.subtract(const Duration(days: 1)));
     final name = widget.profile.name.trim();
     final anrede = name.isEmpty ? '' : '$name, ';
-    final wert = persoenlichWert(d, heute);
-    final wertGestern = persoenlichWert(d, gestern);
+    final wert = _pew(jetzt);
+    final wertGestern = _pew(jetzt.subtract(const Duration(days: 1)));
     final morgens = morgensErledigt(d, heute);
     final offen = morgensOffen(d, heute);
     final stueck = pflegeAmStueck(d, jetzt);
@@ -93,7 +92,7 @@ extension _Persoenlich on _HomePageState {
     ];
     final umgesetzt = d.umsetzen.where((x) => x.erledigt != null).length;
     final fotos = _wochenFotos.where((w) => w.bilder.isNotEmpty).length;
-    final verlauf = persoenlichVerlauf(d, jetzt);
+    final verlauf = _verlauf(_pew, jetzt);
     final da = [for (final v in verlauf) ?v];
     final schnitt = da.isEmpty
         ? null
@@ -127,9 +126,7 @@ extension _Persoenlich on _HomePageState {
                   style: Glas.tSoft.copyWith(fontSize: 13.5),
                 )
               else
-                Linie30(
-                  werte: persoenlichVerlauf(_persoenlich.d, widget.clock()),
-                ),
+                Linie30(werte: _verlauf(_pew, widget.clock())),
             ],
           ),
         ),
@@ -454,7 +451,7 @@ extension _Persoenlich on _HomePageState {
           wert: wert,
           woche: [
             for (var i = 6; i >= 0; i--)
-              persoenlichWert(d, dayKey(jetzt.subtract(Duration(days: i)))),
+              _pew(jetzt.subtract(Duration(days: i))),
           ],
           sub: sub(),
           seiten: seiten,

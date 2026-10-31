@@ -8,6 +8,18 @@ status: programmiert, KI fehlt noch
 
 # Täglicher Check-in
 
+## Überarbeitung 2026-10-31: 5 Karten wie auf der Startseite
+
+Entwurf https://claude.ai/artifact/By4G16wHao2nUDGrHeoMPm, Phillip „ja“ (8 Antworten sind okay). Eine Glas-Karte pro Bereich der Startseite, Ring oben „x von 5“, sonst wie bisher (immer eine Karte offen, goldener Haken, freiwillig „Was war heute besonders?“):
+
+- **Körper:** drei Zeilen Training, Ernährung, Schlaf mit den bisherigen Antworten.
+- **Produktivität & Fokus:** Energie (Hoch · Mittel · Niedrig, wie am 28.10. hierher verschoben) und Fokus (Die eine Sache geschafft · Viel am Handy · Aufgeschoben · Bewusst frei).
+- **Business & Beruf:** Wichtigen Schritt gemacht · Nur Kleinkram · Etwas aufgeschoben · Heute frei.
+- **Persönlichkeit:** Pflege und gelernt · Nur Pflege · Nur gelernt · Heute nichts davon.
+- **Mindset:** wie bisher.
+
+Gespeichert zusätzlich `fokus`, `business`, `persoenlich` (siehe [[Check-ins]]). Der Coach bewertet danach alle Bereiche, siehe [[Bereichs-Werte]].
+
 ## Überarbeitung 2026-10-18
 
 Phillip hat den Check-in mit dem echten Coach getestet: Für den täglichen Gebrauch ist er zu lang und zu komplex. Beschluss (Phillip, 2026-10-18): **Variante B**, alles auf einem Bildschirm. Pro Bereich eine schnelle Antwort zum Antippen, darunter ein freiwilliges Feld „Was war heute besonders?“ (ca. 30 Sekunden). Antworten pro Zeile (Phillip „ja programmier erstmal so“, 2026-10-18), je Zeile eine antippen, alle Zeilen nötig:
