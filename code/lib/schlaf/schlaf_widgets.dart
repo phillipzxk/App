@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 import '../checkin/checkin.dart';
 import '../data/user_profile.dart';
+import '../health/health_dienst.dart';
+import '../health/health_logik.dart';
 import '../sleep/schlafzeiten.dart';
 import '../training/training_widgets.dart';
 import '../ui/coach_style.dart';
@@ -49,7 +51,15 @@ class SchlafUmfeld {
     this.weckzeit,
     this.mahlzeiten = const [],
     this.termine = const [],
+    this.health,
+    this.onHealthVerbunden,
   });
+
+  /// Apple Health (vault Umsetzung/Apple Health.md), null without.
+  final HealthDienst? health;
+
+  /// After connecting: read right away.
+  final VoidCallback? onHealthVerbunden;
 
   final SchlafStand stand;
   final UserProfile profile;
@@ -92,6 +102,7 @@ class SchlafUmfeld {
       'Training heute ${formatUhrzeit(training! % 1440)}${trainingName == null ? '' : ' ($trainingName)'}.',
     tagText(),
     schlafKontext(d, jetzt()),
+    ...healthZeilen(d.healthAm(heute)),
     for (final m in sichtbareSchlafMuster(d)) 'Erkanntes Muster: ${m.text}',
   ].where((x) => x.trim().isNotEmpty).join('\n');
 }

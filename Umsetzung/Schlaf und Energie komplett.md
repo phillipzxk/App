@@ -33,7 +33,7 @@ Entwurf 2 (6 Ansichten, mit Himmel und Licht-Modus): https://claude.ai/artifact/
 ## Stand im Code
 
 - Ordner `code/lib/schlaf/`: Daten (`schlaf_data.dart`), Rechnen (`schlaf_logik.dart`: Schlafwert, Mond, Energie-Kurve, Sonnenaufgang, Tag ohne Coach), Himmel/Mond/Kurve (`schlaf_widgets.dart`), Aufwachen + Sonnenlicht + Licht-Modus (`aufwachen.dart`), Wecker (`wecker_seite.dart`), Abend-Journal + Runterfahren + Ruhezustand (`abend.dart`), Muster + Dein Tag vom Coach (`muster_tag.dart`).
-- Schlaf-Seite (`code/lib/home/sleep_tab.dart`): „Wie hast du geschlafen?“ bis zum Eintrag, dann Schlafwert + Mond, Energie heute mit Rückmeldung, Erkannt bei dir, 4 Kacheln (Wecker, Heute ins Bett, Abend-Journal, Dein Tag), letzte Nächte, Basis wie bisher, „Mehr Daten“ (Handy-Version).
+- Schlaf-Seite (`code/lib/home/sleep_tab.dart`): „Wie hast du geschlafen?“ bis zum Eintrag, dann Schlafwert + Mond, Energie heute mit Rückmeldung, Erkannt bei dir, 4 Kacheln (Wecker, Heute ins Bett, Abend-Journal, Dein Tag), letzte Nächte, Basis wie bisher, „Mehr Daten“ (Handy-Version, siehe [[Apple Health]]).
 - Coach: Worker-Route `/schlaf` (morgen, energie, muster, tag). Muster frühestens ab 14 Morgen, höchstens einmal pro Woche. Energie-Satz einmal pro Tag.
 - Übernommener Tag vom Coach erscheint im Sonnenbogen von „Dein Tag“ (neue Punkte, Stern-Symbol). Die 3 „besser“ von gestern stehen in „Dein Tag“.
 - Nach „Gute Nacht“ zeigt die App den Ruhezustand bis zur Weckzeit; ist die App zur Weckzeit offen, öffnet sich der Wecker-Bildschirm. Echter Wecker, Ton und Gesundheitsdaten kommen mit der Handy-Version.

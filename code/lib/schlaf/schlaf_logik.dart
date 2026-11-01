@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import '../checkin/checkin.dart';
 import '../sleep/schlafzeiten.dart';
+import '../health/health_daten.dart';
 import 'schlaf_data.dart';
 
 /// What the user can tap after waking up.
@@ -52,20 +53,43 @@ double? geschlafen({
   return (min / 15).round() * 15 / 60;
 }
 
-/// The sleep score 1..100 and its four parts, from what the user entered.
-/// Later the phone version adds health data (vault: "alles was möglich").
+/// Body recovery 1..100 from resting pulse and heart rate variability
+/// against the user's own 30-day average; null without measurements.
+int? koerperErholung(HealthTag? h) {
+  if (h == null) return null;
+  final teile = <double>[
+    if ((h.ruhepuls, h.ruhepulsSchnitt) case (final p?, final s?) when s > 0)
+      (75 + (s - p) * 5).clamp(5, 100).toDouble(),
+    if ((h.hrv, h.hrvSchnitt) case (final v?, final s?) when s > 0)
+      (75 + (v / s - 1) * 120).clamp(5, 100).toDouble(),
+  ];
+  if (teile.isEmpty) return null;
+  return (teile.reduce((a, b) => a + b) / teile.length).round();
+}
+
+/// The sleep score 1..100 and its four parts, from what the user entered
+/// and, when connected, what Apple Health measured (vault Umsetzung/Apple
+/// Health.md). The user's own taps always count first: a wake-up tag
+/// beats the measured wake times, the Aufwach-Himmel stays half of
+/// "Erholung".
 ({int wert, Map<String, int> teile}) schlafwert({
   required double stunden,
   required double brauch,
   required int himmel,
   required List<String> tags,
   int? abweichung,
+  HealthTag? health,
 }) {
   final verhaeltnis = stunden / brauch;
   final laenge = verhaeltnis >= 1
       ? (100 - (verhaeltnis - 1) * 60).clamp(80, 100).round()
       : (verhaeltnis * 100 - (1 - verhaeltnis) * 60).clamp(5, 100).round();
+  final nacht = health?.nacht;
+  const wachTags = ['Einmal wach', 'Öfter wach', 'Lange wach gelegen'];
   var durch = 100;
+  if (nacht != null && !tags.any(wachTags.contains)) {
+    durch -= nacht.wachMal * 6 + (math.max(0, nacht.wachMinuten - 5) ~/ 2);
+  }
   if (tags.contains('Einmal wach')) durch -= 20;
   if (tags.contains('Öfter wach')) durch -= 45;
   if (tags.contains('Lange wach gelegen')) durch -= 25;
@@ -75,7 +99,10 @@ double? geschlafen({
   final rhythmus = abweichung == null
       ? 80
       : (100 - math.max(0, abweichung.abs() - 15) * 0.8).clamp(30, 100).round();
-  final erholung = himmel.clamp(1, 100);
+  final koerper = koerperErholung(health);
+  final erholung = koerper == null
+      ? himmel.clamp(1, 100)
+      : ((himmel + koerper) / 2).round().clamp(1, 100);
   final wert =
       (0.35 * laenge + 0.30 * erholung + 0.20 * durch + 0.15 * rhythmus)
           .round()
@@ -91,9 +118,24 @@ double? geschlafen({
   );
 }
 
-/// The short words next to each part.
-String teilText(String teil, Morgen m) => switch (teil) {
+/// The short words next to each part; with measurements from Apple
+/// Health ([h]) the measured values.
+String teilText(String teil, Morgen m, [HealthTag? h]) => switch (teil) {
   'laenge' => formatDauer(m.stunden),
+  'erholung' when h != null && (h.ruhepuls != null || h.hrv != null) => [
+    if (h.ruhepuls != null) 'Puls ${h.ruhepuls}',
+    if (h.hrv != null) 'HRV ${h.hrv}',
+  ].join(' · '),
+  'durchschlafen'
+      when h?.nacht != null &&
+          !m.tags.any(
+            (t) => const [
+              'Einmal wach',
+              'Öfter wach',
+              'Lange wach gelegen',
+            ].contains(t),
+          ) =>
+    h!.nacht!.wachMal == 0 ? 'durch' : '${h.nacht!.wachMal} × wach',
   'erholung' => switch (m.himmel) {
     < 25 => 'schwer',
     < 50 => 'zäh',

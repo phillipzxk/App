@@ -30,7 +30,12 @@ class CheckInFlow extends StatefulWidget {
     required this.today,
     required this.onFinished,
     this.vorgemerkt = const {},
+    this.messwerte,
   });
+
+  /// What Apple Health measured, for the coach's reply (vault
+  /// Umsetzung/Apple Health.md). Asked when the check-in is sent.
+  final Future<String> Function()? messwerte;
 
   /// Answers already picked when the check-in opens, e.g. "Gut trainiert"
   /// after a logged session (vault Umsetzung/Training eintragen.md).
@@ -69,6 +74,8 @@ class _CheckInFlowState extends State<CheckInFlow> {
   bool get _complete => checkInRows.every((r) => _picked[r.topic] != null);
 
   Future<void> _send() async {
+    setState(() => _phase = _Phase.reading);
+    final messwerte = await widget.messwerte?.call() ?? '';
     var checkIn = CheckIn(
       datum: DateTime(widget.today.year, widget.today.month, widget.today.day),
       training: _picked['Training']!,
@@ -80,8 +87,8 @@ class _CheckInFlowState extends State<CheckInFlow> {
       persoenlich: _picked['Persönlichkeit']!,
       mindset: _picked['Mindset']!,
       notiz: _note.text.trim(),
+      messwerte: messwerte,
     );
-    setState(() => _phase = _Phase.reading);
     final recent = await widget.store.loadCheckIns();
     // Reply and area scores are asked at the same time.
     final replyFuture = widget.evaluator.reply(widget.profile, checkIn, recent);

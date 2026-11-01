@@ -80,9 +80,12 @@ import '../persoenlich/persoenlich_seiten.dart';
 
 import '../erinnerungen/erinnerung_dienst.dart';
 import '../erinnerungen/erinnerung_plan.dart';
+import '../health/health_dienst.dart';
+import '../health/health_logik.dart';
 
 part 'koerper_seite.dart';
 part 'erinnerungen_home.dart';
+part 'health_home.dart';
 part 'mindset_seite.dart';
 part 'produktiv_seite.dart';
 part 'business_seite.dart';
@@ -103,7 +106,11 @@ class HomePage extends StatefulWidget {
     this.onKonto,
     this.erinnerungen,
     this.erinnerungenNeu,
+    this.health,
   });
+
+  /// Apple Health (vault Umsetzung/Apple Health); null in tests.
+  final HealthDienst? health;
 
   /// Reminders on the phone (vault Umsetzung/Erinnerungen); null in tests.
   final ErinnerungDienst? erinnerungen;
@@ -128,6 +135,10 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool _loaded = false;
   Timer? _planTimer;
+  DateTime? _healthZuletzt;
+  late final AppLifecycleListener _healthLeben = AppLifecycleListener(
+    onResume: () => _healthHolen(sofort: true),
+  );
   final _stand = ValueNotifier<int>(0);
   List<CheckIn> _checkIns = const [];
   List<WeightEntry> _weights = const [];
@@ -204,6 +215,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     _heuteScroll.dispose();
+    _healthLeben.dispose();
     _erinnerungenAus();
     _essen.removeListener(_essenGeaendert);
     _essen.dispose();
@@ -226,6 +238,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _reload();
     _erinnerungenAn();
+    if (widget.health != null) _healthLeben;
   }
 
   /// Pages opened from Heute (coach, focus) rebuild with every change too.
@@ -304,6 +317,7 @@ class _HomePageState extends State<HomePage> {
     _pruefeDurchgezogen(checkIns, durchgezogen);
     _pruefeWarum(checkIns, warumHeute?.tag);
     if (!_fokusVersucht) _holeFokusVorschlaege();
+    unawaited(_healthHolen());
   }
 
   bool get _fokusLaeuft {
@@ -831,6 +845,8 @@ class _HomePageState extends State<HomePage> {
         for (final t in termineAm(_termine, jetzt))
           if (parseUhrzeit(t.zeit ?? '') case final m?) (m, t.text),
       ],
+      health: widget.health,
+      onHealthVerbunden: () => _healthHolen(sofort: true),
     );
   }
 
@@ -1810,6 +1826,10 @@ class _HomePageState extends State<HomePage> {
       wurzeln: _fokusLaeuft ? _fokus!.anzahlGeschafft : 0,
       jubel: _jubel,
       jubelTick: _jubelTick,
+      samen: _samenHeute,
+      onSamenFertig: _samenFertig,
+      healthFelder: healthFelder(_schlaf.d, dayKey(today)),
+      onHealthKnopf: _healthKnopf,
       scroll: _heuteScroll,
       onRestartOnboarding: widget.onRestartOnboarding,
       onKonto: widget.onKonto,

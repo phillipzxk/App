@@ -1,4 +1,5 @@
 import '../checkin/checkin.dart';
+import '../health/health_daten.dart';
 
 /// Everything the Schlaf & Energie page keeps (vault Umsetzung/Schlaf und
 /// Energie komplett.md, Phillip 2026-10-27). Stored on the device.
@@ -287,6 +288,10 @@ class SchlafDaten {
     this.ablauf,
     this.energieSatz,
     this.ruheBis,
+    this.health = const [],
+    this.samenTag,
+    this.uebernommen = const [],
+    this.gewichtUebernommen,
   });
 
   final List<Morgen> morgen;
@@ -310,6 +315,34 @@ class SchlafDaten {
 
   /// After "Gute Nacht": dark rest mode until this time.
   final DateTime? ruheBis;
+
+  /// What Apple Health measured, the last 14 days (vault Umsetzung/Apple
+  /// Health.md).
+  final List<HealthTag> health;
+
+  /// Last day the measured values fell into the coach card as seeds.
+  final String? samenTag;
+
+  /// Watch workouts already taken over or put away (ids).
+  final List<String> uebernommen;
+
+  /// Time of the last weight taken over from the scale.
+  final String? gewichtUebernommen;
+
+  HealthTag? healthAm(String tag) {
+    for (final h in health.reversed) {
+      if (h.tag == tag) return h;
+    }
+    return null;
+  }
+
+  SchlafDaten mitHealth(HealthTag h) => copyWith(
+    health: [
+      for (final x in health)
+        if (x.tag != h.tag) x,
+      h,
+    ].reversed.take(14).toList().reversed.toList(),
+  );
 
   Morgen? morgenAm(String tag) {
     for (final m in morgen.reversed) {
@@ -369,6 +402,10 @@ class SchlafDaten {
     ({String tag, String satz})? energieSatz,
     DateTime? ruheBis,
     bool ruheAus = false,
+    List<HealthTag>? health,
+    String? samenTag,
+    List<String>? uebernommen,
+    String? gewichtUebernommen,
   }) => SchlafDaten(
     morgen: morgen ?? this.morgen,
     journal: journal ?? this.journal,
@@ -381,6 +418,10 @@ class SchlafDaten {
     ablauf: ablauf ?? this.ablauf,
     energieSatz: energieSatz ?? this.energieSatz,
     ruheBis: ruheAus ? null : (ruheBis ?? this.ruheBis),
+    health: health ?? this.health,
+    samenTag: samenTag ?? this.samenTag,
+    uebernommen: uebernommen ?? this.uebernommen,
+    gewichtUebernommen: gewichtUebernommen ?? this.gewichtUebernommen,
   );
 
   Map<String, dynamic> toJson() => {
@@ -397,6 +438,10 @@ class SchlafDaten {
     if (energieSatz != null)
       'energie_satz': {'tag': energieSatz!.tag, 'satz': energieSatz!.satz},
     if (ruheBis != null) 'ruhe_bis': ruheBis!.toIso8601String(),
+    'health': [for (final h in health) h.toJson()],
+    'samen_tag': ?samenTag,
+    'uebernommen': uebernommen,
+    'gewicht_uebernommen': ?gewichtUebernommen,
   };
 
   factory SchlafDaten.fromJson(Map<String, dynamic> j) {
@@ -436,6 +481,13 @@ class SchlafDaten {
       ruheBis: j['ruhe_bis'] == null
           ? null
           : DateTime.parse(j['ruhe_bis'] as String),
+      health: [
+        for (final x in j['health'] as List? ?? const [])
+          HealthTag.fromJson(x as Map<String, dynamic>),
+      ],
+      samenTag: j['samen_tag'] as String?,
+      uebernommen: _strings(j['uebernommen']),
+      gewichtUebernommen: j['gewicht_uebernommen'] as String?,
     );
   }
 

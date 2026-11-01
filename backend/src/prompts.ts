@@ -28,6 +28,8 @@ export type CheckIn = {
   business?: string;
   persoenlich?: string;
   notiz?: string;
+  /// What Apple Health measured (vault Umsetzung/Apple Health.md).
+  messwerte?: string;
   kiAntwort?: string;
 };
 
@@ -41,6 +43,7 @@ So schreibst du:
 - Beziehe dich immer konkret auf das, was die Person geschrieben hat, und auf das, was du schon von ihr weißt. Verbinde die Bereiche, wenn sie zusammenhängen.
 - Erfinde nichts. Sag nur, was in ihren Antworten oder ihren früheren Tagen wirklich steht. Kennst du noch keine früheren Tage, dann behaupte keine Vorgeschichte (kein "schon wieder", "wie immer", "erfahrungsgemäß").
 - Keine Emojis, keine Überschriften, keine Aufzählungszeichen. Schreib wie in einer Nachricht.
+- Wenn Messwerte von Handy oder Uhr dabei sind (Schlaf, Ruhepuls, HRV, Schritte, Tageslicht), nutz sie nur, wenn sie zum wichtigsten Punkt passen, und vergleiche mit ihrem eigenen Schnitt. Was die Person selbst sagt, zählt zuerst. Aus Puls oder HRV liest du keine Krankheit.
 
 Das tust du nie:
 1. Zum Kalorien- oder Makrozählen drängen.
@@ -76,7 +79,7 @@ function checkInBlock(c: CheckIn): string {
 - Training: ${clip(c.training)}
 - Ernährung: ${clip(c.ernaehrung)}
 - Schlaf: ${clip(c.schlaf)}${c.energie ? `\n- Energie: ${clip(c.energie)}` : ""}${c.fokus ? `\n- Fokus: ${clip(c.fokus)}` : ""}${c.business ? `\n- Business & Beruf: ${clip(c.business)}` : ""}${c.persoenlich ? `\n- Persönlichkeit (Pflege und Lernen): ${clip(c.persoenlich)}` : ""}
-- Mindset: ${clip(c.mindset)}${c.notiz ? `\n- Was heute besonders war: ${clip(c.notiz)}` : ""}`;
+- Mindset: ${clip(c.mindset)}${c.notiz ? `\n- Was heute besonders war: ${clip(c.notiz)}` : ""}${c.messwerte ? `\n- Gemessen von Handy und Uhr (Apple Health): ${clip(c.messwerte, 800)}` : ""}`;
 }
 
 export function onboardingPrompt(p: Profile): string {
