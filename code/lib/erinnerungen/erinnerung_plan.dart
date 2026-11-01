@@ -193,7 +193,10 @@ List<Erinnerung> _tag(ErinnerungsLage l, DateTime tag, bool heute) {
   DateTime um(int minuten) =>
       DateTime(tag.year, tag.month, tag.day).add(Duration(minutes: minuten));
   final z = l.schlafzeiten;
-  final aufstehen = z.aufstehenAm(tag);
+  // An early appointment moves getting up (as in "Deine Schlafzeiten").
+  final vortag = DateTime(tag.year, tag.month, tag.day - 1);
+  final aufstehen =
+      bettzeitFuer(z, vortag, l.termine)?.aufstehen ?? z.aufstehenAm(tag);
   final morgenFrueh = aufstehen ?? 8 * 60;
   final liste = <Erinnerung>[];
 

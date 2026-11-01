@@ -10,6 +10,7 @@ import '../ui/coach_widgets.dart';
 import 'schlaf_data.dart';
 import 'schlaf_logik.dart';
 import 'schlaf_widgets.dart';
+import 'wecker_aufgabe.dart';
 
 /// The alarm as it rings: a warm sunrise, the time, and the task that
 /// switches it off. Rings for real only in the phone version; here it is
@@ -33,9 +34,12 @@ class _WeckerKlingeltState extends State<WeckerKlingelt> {
     MaterialPageRoute<void>(builder: (_) => AufwachSeite(umfeld: u)),
   );
 
+  /// "Licht an" instead of the sky photo while it is still dark.
+  String get _art => aufgabeHeute(u.d.wecker.aufgabe, u.jetzt());
+
   Future<void> _aufgabe() async {
-    switch (u.d.wecker.aufgabe) {
-      case 'foto':
+    switch (_art) {
+      case 'foto' || 'licht':
         final bild = await fotoAufnahme();
         if (!mounted) return;
         if (bild == null) {
@@ -43,6 +47,16 @@ class _WeckerKlingeltState extends State<WeckerKlingelt> {
             () =>
                 _fehler = 'Kein Foto. Geh ans Fenster und versuch es nochmal.',
           );
+          return;
+        }
+        if (_art == 'licht' && !await hellPruefen(bild)) {
+          if (mounted) {
+            setState(
+              () => _fehler =
+                  'Noch zu dunkel. Mach das große Licht an und versuch es '
+                  'nochmal.',
+            );
+          }
           return;
         }
         _aus();
@@ -57,13 +71,17 @@ class _WeckerKlingeltState extends State<WeckerKlingelt> {
   @override
   Widget build(BuildContext context) {
     final w = u.d.wecker;
-    final text = switch (w.aufgabe) {
+    final text = switch (_art) {
+      'licht' =>
+        'Draußen ist es noch dunkel. Zum Ausschalten: Mach das große Licht an '
+            'und fotografier den hellen Raum.',
       'foto' =>
         'Zum Ausschalten: Geh ans Fenster und mach ein Foto vom Himmel.',
       'schritte' => 'Zum Ausschalten: 30 Schritte gehen.',
       _ => 'Zum Ausschalten: Sag kurz, wie du aufgewacht bist.',
     };
-    final knopf = switch (w.aufgabe) {
+    final knopf = switch (_art) {
+      'licht' => 'Hellen Raum fotografieren',
       'foto' => 'Himmel fotografieren',
       'schritte' =>
         _schritte == 0 ? 'Los gehen' : 'Schritt ${_schritte + 1} von 30',

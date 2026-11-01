@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:alarm_kit/alarm_kit.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show Color;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,6 +46,33 @@ abstract class ErinnerungDienst {
 
   Future<ErinnerungEinstellungen> ladeEinstellungen();
   Future<void> speichereEinstellungen(ErinnerungEinstellungen e);
+
+  /// Sets the real alarm (iOS 26, AlarmKit) for [zeit]; null removes it.
+  /// False where there is no real alarm: then the alarm stays a reminder.
+  Future<bool> weckerStellen(DateTime? zeit, {required bool schlummern});
+
+  /// Since when the alarm's task is waiting ("Aufstehen" was tapped), or
+  /// null. Older than 45 minutes counts as done.
+  Future<DateTime?> weckerAufgabeOffen();
+
+  /// The task is done: no second ringing.
+  Future<void> weckerAufgabeErledigt();
+}
+
+/// Written by the alarm's buttons in Swift (AppDelegate.swift).
+const weckerAufgabeKey = 'wecker_aufgabe_seit';
+
+/// The same ids as in AppDelegate.swift.
+abstract final class WeckerIds {
+  static const wecker = '0E1D5A3C-6B2F-4C7E-9A11-6F3B2D8C4A01';
+  static const schlummern = '0E1D5A3C-6B2F-4C7E-9A11-6F3B2D8C4A02';
+  static const nachklingeln = '0E1D5A3C-6B2F-4C7E-9A11-6F3B2D8C4A03';
+}
+
+DateTime? _offenSeit(String? roh, DateTime jetzt) {
+  final t = roh == null ? null : DateTime.tryParse(roh)?.toLocal();
+  if (t == null || jetzt.difference(t).inMinutes > 45) return null;
+  return t;
 }
 
 const _einstellungenKey = 'erinnerungen_einstellungen';
@@ -78,6 +107,22 @@ class StilleErinnerungen implements ErinnerungDienst {
   @override
   Future<void> speichereEinstellungen(ErinnerungEinstellungen e) async =>
       _e = e;
+
+  /// For tests: where the alarm was set, and the waiting task.
+  DateTime? wecker;
+  DateTime? aufgabeSeit;
+
+  @override
+  Future<bool> weckerStellen(DateTime? zeit, {required bool schlummern}) async {
+    wecker = zeit;
+    return false;
+  }
+
+  @override
+  Future<DateTime?> weckerAufgabeOffen() async => aufgabeSeit;
+
+  @override
+  Future<void> weckerAufgabeErledigt() async => aufgabeSeit = null;
 }
 
 /// The real reminders on iPhone and Android.
@@ -228,6 +273,101 @@ class HandyErinnerungen implements ErinnerungDienst {
   Future<void> speichereEinstellungen(ErinnerungEinstellungen e) async {
     final p = await SharedPreferences.getInstance();
     await p.setString(_einstellungenKey, jsonEncode(e.toJson()));
+  }
+
+  static const _gold = Color(0xFFE0BF7E);
+  final _kit = AlarmKit.instance;
+
+  Future<bool> _weckerDa() async {
+    try {
+      if (!await _kit.isSupported()) return false;
+      var a = await _kit.authorizationState();
+      if (a == AlarmAuthorization.notDetermined) {
+        a = await _kit.requestAuthorization();
+      }
+      return a == AlarmAuthorization.authorized;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> weckerStellen(DateTime? zeit, {required bool schlummern}) async {
+    if (!await _weckerDa()) return false;
+    try {
+      if (zeit == null) {
+        for (final id in [WeckerIds.wecker, WeckerIds.schlummern]) {
+          try {
+            await _kit.cancel(id);
+          } catch (_) {}
+        }
+        return true;
+      }
+      // Rings at the wake-up time; "5 Min" rings once more (in Swift),
+      // "Aufstehen" opens the task.
+      await _kit.scheduleAlarm(
+        id: WeckerIds.wecker,
+        schedule: AlarmSchedule.fixed(zeit),
+        tint: _gold,
+        metadataKind: 'wecker',
+        stopIntent: 'aufstehen',
+        secondaryIntent: schlummern ? 'schlummern' : null,
+        presentation: AlarmPresentation(
+          alert: AlarmAlert(
+            title: 'Guten Morgen',
+            stopButton: const AlarmButton(
+              text: 'Aufstehen',
+              systemImageName: 'sun.max.fill',
+            ),
+            secondaryButton: schlummern
+                ? const AlarmButton(
+                    text: '5 Min',
+                    systemImageName: 'moon.zzz.fill',
+                  )
+                : null,
+            secondaryBehavior: schlummern
+                ? AlarmSecondaryBehavior.custom
+                : null,
+          ),
+        ),
+      );
+      // In case nothing is tapped: rings once more after 10 minutes.
+      await _kit.scheduleAlarm(
+        id: WeckerIds.schlummern,
+        schedule: AlarmSchedule.fixed(zeit.add(const Duration(minutes: 10))),
+        tint: _gold,
+        metadataKind: 'wecker',
+        stopIntent: 'aufstehen',
+        presentation: const AlarmPresentation(
+          alert: AlarmAlert(
+            title: 'Guten Morgen',
+            stopButton: AlarmButton(
+              text: 'Aufstehen',
+              systemImageName: 'sun.max.fill',
+            ),
+          ),
+        ),
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  @override
+  Future<DateTime?> weckerAufgabeOffen() async {
+    final p = await SharedPreferences.getInstance();
+    await p.reload();
+    return _offenSeit(p.getString(weckerAufgabeKey), DateTime.now());
+  }
+
+  @override
+  Future<void> weckerAufgabeErledigt() async {
+    final p = await SharedPreferences.getInstance();
+    await p.remove(weckerAufgabeKey);
+    try {
+      if (await _kit.isSupported()) await _kit.cancel(WeckerIds.nachklingeln);
+    } catch (_) {}
   }
 }
 
