@@ -19,10 +19,14 @@ class PageHeader extends StatelessWidget {
     required this.title,
     this.brand = false,
     this.icon,
+    this.trailing,
   });
 
   final String label;
   final String title;
+
+  /// Small button top right next to the logo (e.g. "Konto und Sicherung").
+  final Widget? trailing;
 
   /// "Heute": logo above, open on the dark page instead of a dark block.
   final bool brand;
@@ -41,11 +45,13 @@ class PageHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (brand) ...[
-          const Row(
+          Row(
             children: [
-              LogoMark(size: 26, ground: CoachStyle.cream),
-              SizedBox(width: 6),
-              Wordmark(fontSize: 11, ground: CoachStyle.cream),
+              const LogoMark(size: 26, ground: CoachStyle.cream),
+              const SizedBox(width: 6),
+              const Wordmark(fontSize: 11, ground: CoachStyle.cream),
+              const Spacer(),
+              ?trailing,
             ],
           ),
           const SizedBox(height: 16),

@@ -56,6 +56,20 @@ class UserProfile {
     return zeilen.isEmpty ? '' : zeilen.first.split('; ').join('. ');
   }
 
+  /// The goal in the user's own sentence (field of question 1), otherwise
+  /// the first tapped answer. E.g. on "Gesichert" after the account.
+  String get zielSatz {
+    final zeilen = [
+      for (final z in ziel.split('\n'))
+        if (z.trim().isNotEmpty) z.trim(),
+    ];
+    for (final z in zeilen) {
+      final m = RegExp(r'^[^:;]{3,60}:\s*(.+)$').firstMatch(z);
+      if (m != null) return m.group(1)!.trim();
+    }
+    return zeilen.isEmpty ? '' : zeilen.first.split('; ').first;
+  }
+
   UserProfile copyWith({
     String? name,
     String? ziel,

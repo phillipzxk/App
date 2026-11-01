@@ -152,16 +152,26 @@ class GlasIcon extends StatelessWidget {
 
 /// Text painted with the gold gradient.
 class GoldSchrift extends StatelessWidget {
-  const GoldSchrift(this.text, {super.key, required this.style});
+  const GoldSchrift(
+    this.text, {
+    super.key,
+    required this.style,
+    this.textAlign,
+  });
 
   final String text;
   final TextStyle style;
+  final TextAlign? textAlign;
 
   @override
   Widget build(BuildContext context) => ShaderMask(
     blendMode: BlendMode.srcIn,
     shaderCallback: (r) => CoachStyle.goldTextGradient.createShader(r),
-    child: Text(text, style: style.copyWith(color: Colors.white)),
+    child: Text(
+      text,
+      textAlign: textAlign,
+      style: style.copyWith(color: Colors.white),
+    ),
   );
 }
 

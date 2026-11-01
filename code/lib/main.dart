@@ -13,6 +13,12 @@ import 'data/user_profile.dart';
 import 'feed/feed_coach.dart';
 import 'feed/feed_store.dart';
 import 'home/home_page.dart';
+import 'konto/konto_daten.dart';
+import 'konto/konto_dienst.dart';
+import 'konto/konto_einstellungen.dart';
+import 'konto/konto_flow.dart';
+import 'konto/konto_web.dart';
+import 'konto/sicherung.dart';
 import 'onboarding/onboarding_evaluator.dart';
 import 'onboarding/onboarding_flow.dart';
 import 'ui/coach_style.dart';
@@ -31,6 +37,17 @@ void main() {
       checkInEvaluator: coach ?? const NoCheckInEvaluator(),
       feedCoach: coach ?? const NoFeedCoach(),
       splash: const Duration(milliseconds: 1500),
+      kontoDienst: supabaseUrl.isEmpty
+          ? VorschauKontoDienst()
+          : SupabaseKontoDienst(
+              url: supabaseUrl,
+              key: supabaseKey,
+              anbieter: {
+                for (final a in supabaseAnbieter.split(','))
+                  ?Anmeldeart.values.asNameMap()[a.trim()],
+              },
+            ),
+      kontoStore: LocalKontoStore(),
     ),
   );
 }
@@ -46,7 +63,14 @@ class CoachApp extends StatelessWidget {
     this.feedCoach = const NoFeedCoach(),
     this.clock = DateTime.now,
     this.splash = Duration.zero,
+    this.kontoDienst,
+    this.kontoStore,
   });
+
+  /// Account and backup (vault Umsetzung/Konto und Sicherung). Null in
+  /// tests that don't care: then there is no account step.
+  final KontoDienst? kontoDienst;
+  final KontoStore? kontoStore;
 
   final ProfileStore store;
   final DiaryStore diary;
@@ -99,6 +123,39 @@ class _StartGateState extends State<StartGate> {
   Map<String, String> _vorgemerkt = const {};
   late bool _splashing = widget.app.splash > Duration.zero;
   Timer? _splashTimer;
+  Konto? _konto;
+  bool _schonKonto = false;
+  DateTime? _letzteSicherung;
+  late final AppLifecycleListener _leben = AppLifecycleListener(
+    onHide: () => _sichern(sofort: true),
+  );
+
+  KontoDienst? get _dienst => widget.app.kontoDienst;
+  late final KontoStore _kontoStore =
+      widget.app.kontoStore ?? MemoryKontoStore();
+  late final Sicherung? _sicherung = _dienst == null
+      ? null
+      : Sicherung(
+          dienst: _dienst!,
+          store: _kontoStore,
+          clock: widget.app.clock,
+        );
+
+  /// Backs up in the background: on app start, after the check-in and when
+  /// the app goes to the background. At most every 2 minutes unless [sofort].
+  Future<void> _sichern({bool sofort = false}) async {
+    final s = _sicherung;
+    if (s == null || _konto == null) return;
+    final jetzt = widget.app.clock();
+    final l = _letzteSicherung;
+    if (!sofort && l != null && jetzt.difference(l).inMinutes < 2) return;
+    _letzteSicherung = jetzt;
+    try {
+      await s.sichern();
+    } catch (_) {
+      // Offline or the session ran out: the next try runs later.
+    }
+  }
 
   @override
   void initState() {
@@ -115,10 +172,27 @@ class _StartGateState extends State<StartGate> {
   @override
   void dispose() {
     _splashTimer?.cancel();
+    _leben.dispose();
     super.dispose();
   }
 
   Future<void> _load() async {
+    var konto = await _kontoStore.loadKonto();
+    // Back from Apple or Google: the session is in the address.
+    final d = _dienst;
+    final adresse = aktuelleAdresse();
+    if (d != null &&
+        adresse != null &&
+        adresse.fragment.contains('access_token')) {
+      final k = await d.ausAdresse(adresse);
+      adresseAufraeumen();
+      if (k != null) {
+        konto = k;
+        await _kontoStore.saveKonto(k);
+        final p = await widget.app.store.load();
+        if (!p.isOnboarded) await _sicherung?.wiederherstellen();
+      }
+    }
     final profile = await widget.app.store.load();
     final checkIns = await widget.app.diary.loadCheckIns();
     final today = dayKey(widget.app.clock());
@@ -128,9 +202,30 @@ class _StartGateState extends State<StartGate> {
     setState(() {
       _vorgemerkt = {'Training': ?vorgemerkt};
       _profile = profile;
+      _konto = konto;
       _checkedInToday = checkIns.any((c) => dayKey(c.datum) == today);
     });
+    if (profile.isOnboarded) unawaited(_sichern());
   }
+
+  Future<void> _kontoOeffnen(BuildContext context) =>
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => KontoEinstellungen(
+            dienst: _dienst!,
+            store: _kontoStore,
+            sicherung: _sicherung!,
+            name: _profile?.name ?? '',
+            clock: widget.app.clock,
+            onAbgemeldet: () => setState(() => _konto = null),
+            onGeloescht: () => setState(() {
+              _konto = null;
+              _profile = const UserProfile();
+              _checkedInToday = false;
+            }),
+          ),
+        ),
+      );
 
   Future<void> _restartOnboarding() async {
     await widget.app.store.clear();
@@ -141,11 +236,41 @@ class _StartGateState extends State<StartGate> {
   Widget build(BuildContext context) {
     final profile = _profile;
     if (profile == null || _splashing) return const SplashScreen();
+    final dienst = _dienst;
     if (!profile.isOnboarded) {
+      if (_schonKonto && dienst != null) {
+        return KontoFlow(
+          key: const ValueKey('konto-zurueck-flow'),
+          dienst: dienst,
+          store: _kontoStore,
+          sicherung: _sicherung!,
+          zurueck: true,
+          onAbbrechen: () => setState(() => _schonKonto = false),
+          onFertig: (_) {
+            _schonKonto = false;
+            _load();
+          },
+        );
+      }
       return OnboardingFlow(
         store: widget.app.store,
         evaluator: widget.app.evaluator,
         onFinished: (p) => setState(() => _profile = p),
+        onSchonKonto: dienst == null
+            ? null
+            : () => setState(() => _schonKonto = true),
+      );
+    }
+    // Account right after the questionnaire, before the first check-in.
+    if (dienst != null && _konto == null) {
+      return KontoFlow(
+        key: const ValueKey('konto-flow'),
+        dienst: dienst,
+        store: _kontoStore,
+        sicherung: _sicherung!,
+        name: profile.name,
+        ziel: profile.zielSatz,
+        onFertig: (_) => _load(),
       );
     }
     if (!_checkedInToday) {
@@ -155,7 +280,10 @@ class _StartGateState extends State<StartGate> {
         evaluator: widget.app.checkInEvaluator,
         today: widget.app.clock(),
         vorgemerkt: _vorgemerkt,
-        onFinished: (_) => setState(() => _checkedInToday = true),
+        onFinished: (_) {
+          setState(() => _checkedInToday = true);
+          _sichern(sofort: true);
+        },
       );
     }
     return HomePage(
@@ -165,6 +293,7 @@ class _StartGateState extends State<StartGate> {
       coach: widget.app.feedCoach,
       clock: widget.app.clock,
       onRestartOnboarding: _restartOnboarding,
+      onKonto: dienst == null ? null : () => _kontoOeffnen(context),
     );
   }
 }
