@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../checkin/checkin.dart';
@@ -76,7 +78,11 @@ import '../persoenlich/persoenlich_data.dart';
 import '../persoenlich/persoenlich_logik.dart';
 import '../persoenlich/persoenlich_seiten.dart';
 
+import '../erinnerungen/erinnerung_dienst.dart';
+import '../erinnerungen/erinnerung_plan.dart';
+
 part 'koerper_seite.dart';
+part 'erinnerungen_home.dart';
 part 'mindset_seite.dart';
 part 'produktiv_seite.dart';
 part 'business_seite.dart';
@@ -95,7 +101,15 @@ class HomePage extends StatefulWidget {
     required this.clock,
     required this.onRestartOnboarding,
     this.onKonto,
+    this.erinnerungen,
+    this.erinnerungenNeu,
   });
+
+  /// Reminders on the phone (vault Umsetzung/Erinnerungen); null in tests.
+  final ErinnerungDienst? erinnerungen;
+
+  /// Ticks when the reminder settings changed.
+  final Listenable? erinnerungenNeu;
 
   /// Opens "Konto und Sicherung"; null without an account (tests).
   final VoidCallback? onKonto;
@@ -113,6 +127,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool _loaded = false;
+  Timer? _planTimer;
   final _stand = ValueNotifier<int>(0);
   List<CheckIn> _checkIns = const [];
   List<WeightEntry> _weights = const [];
@@ -189,6 +204,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     _heuteScroll.dispose();
+    _erinnerungenAus();
     _essen.removeListener(_essenGeaendert);
     _essen.dispose();
     _schlaf.removeListener(_essenGeaendert);
@@ -209,6 +225,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _reload();
+    _erinnerungenAn();
   }
 
   /// Pages opened from Heute (coach, focus) rebuild with every change too.
@@ -216,6 +233,7 @@ class _HomePageState extends State<HomePage> {
   void setState(VoidCallback fn) {
     super.setState(fn);
     _stand.value++;
+    _erinnerungenSpaeter();
   }
 
   Future<void> _reload() async {
