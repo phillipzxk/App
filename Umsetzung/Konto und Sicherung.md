@@ -40,5 +40,14 @@ Entwurf 1 war Phillip zu schlicht. In Entwurf 2:
 - Gesichert wird automatisch beim Öffnen, nach dem Check-in, wenn die App in den Hintergrund geht (höchstens alle 2 Minuten) und mit „Jetzt sichern“. Zwei Dateien: Daten, und Fotos/Videos (abschaltbar).
 - Einstellungen öffnen sich über den runden Knopf mit dem Anfangsbuchstaben oben rechts auf Heute.
 - Server-Vorlage: `backend/supabase/schema.sql` (privater Speicher „sicherungen“, jeder sieht nur seinen eigenen Ordner, Konto-Löschen).
-- Vorschau läuft noch ohne Server: jeder 6-stellige Code geht, nichts verlässt das Gerät.
-- Noch offen: Supabase einrichten und echt testen (neuer Thread mit Phillips Supabase-Zugang), Google-Anmeldung einrichten, Apple-Entwicklerkonto, Texte für Datenschutz und Impressum, Abo kommt mit den Stores.
+- Noch offen: Google-Anmeldung einrichten, Apple-Entwicklerkonto, Texte für Datenschutz und Impressum, Abo kommt mit den Stores.
+
+## Server eingerichtet (2026-11-01)
+
+- Supabase-Projekt **„Groundset App“**, Region **Frankfurt** (eu-central-1). Das zuerst angelegte Projekt „Groundset“ lag in Irland und wird nicht benutzt (Phillip: „Neu in Frankfurt anlegen“).
+- `backend/supabase/schema.sql` ist ausgeführt: privater Speicher „sicherungen“, jeder sieht nur seinen eigenen Ordner, Konto löschen.
+- Anmeldung per E-Mail: **6-stelliger Code, 10 Minuten gültig**. Mail „Dein Groundset-Code“ auf Deutsch im dunklen Groundset-Look.
+- Mails gehen über **Resend** (kostenlos, 3.000 Mails im Monat), Absender vorerst `onboarding@resend.dev`. Damit kommen Mails nur an Phillips eigene Adresse an. Für die Beta: eigene Domain bei Resend bestätigen und Absender umstellen.
+- Die Vorschau https://groundset-vorschau.pzschernack4.workers.dev spricht jetzt mit dem echten Server: Code kommt per Mail, Daten werden in Frankfurt gesichert.
+- Echt getestet: Code anfordern, anmelden, beide Dateien sichern und überschreiben, zurückholen, Sitzung erneuern, fremde Ordner gesperrt, ohne Anmeldung gesperrt, Dateien und Konto löschen. Alles hat geklappt.
+- Vorschau bauen: wie bisher, zusätzlich `--dart-define=SUPABASE_URL=https://iuivlfkfjffltxfvtoqk.supabase.co --dart-define=SUPABASE_ANON_KEY=…` (öffentlicher Schlüssel, steht im Supabase-Dashboard unter API).
