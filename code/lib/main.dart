@@ -11,6 +11,7 @@ import 'data/diary_store.dart';
 import 'data/profile_store.dart';
 import 'data/user_profile.dart';
 import 'feed/feed_coach.dart';
+import 'erinnerungen/erinnerung_dienst.dart';
 import 'feed/feed_store.dart';
 import 'home/home_page.dart';
 import 'konto/konto_daten.dart';
@@ -48,6 +49,7 @@ void main() {
               },
             ),
       kontoStore: LocalKontoStore(),
+      erinnerungen: erinnerungenFuerPlattform(),
     ),
   );
 }
@@ -65,7 +67,11 @@ class CoachApp extends StatelessWidget {
     this.splash = Duration.zero,
     this.kontoDienst,
     this.kontoStore,
+    this.erinnerungen,
   });
+
+  /// Reminders on the phone (vault Umsetzung/Erinnerungen). Null in tests.
+  final ErinnerungDienst? erinnerungen;
 
   /// Account and backup (vault Umsetzung/Konto und Sicherung). Null in
   /// tests that don't care: then there is no account step.
@@ -125,6 +131,7 @@ class _StartGateState extends State<StartGate> {
   Timer? _splashTimer;
   Konto? _konto;
   bool _schonKonto = false;
+  final _erinnerungenNeu = ValueNotifier<int>(0);
   DateTime? _letzteSicherung;
   late final AppLifecycleListener _leben = AppLifecycleListener(
     onHide: () => _sichern(sofort: true),
@@ -173,6 +180,7 @@ class _StartGateState extends State<StartGate> {
   void dispose() {
     _splashTimer?.cancel();
     _leben.dispose();
+    _erinnerungenNeu.dispose();
     super.dispose();
   }
 
@@ -217,6 +225,8 @@ class _StartGateState extends State<StartGate> {
             sicherung: _sicherung!,
             name: _profile?.name ?? '',
             clock: widget.app.clock,
+            erinnerungen: widget.app.erinnerungen,
+            onErinnerungen: () => _erinnerungenNeu.value++,
             onAbgemeldet: () => setState(() => _konto = null),
             onGeloescht: () => setState(() {
               _konto = null;
@@ -294,6 +304,8 @@ class _StartGateState extends State<StartGate> {
       clock: widget.app.clock,
       onRestartOnboarding: _restartOnboarding,
       onKonto: dienst == null ? null : () => _kontoOeffnen(context),
+      erinnerungen: widget.app.erinnerungen,
+      erinnerungenNeu: _erinnerungenNeu,
     );
   }
 }

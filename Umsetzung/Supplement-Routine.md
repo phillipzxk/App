@@ -30,7 +30,7 @@ Idee von Phillip (2026-10-16): Auf der Seite Ernährung im [[Main Feed]] legt je
 - Eingabe: Zeilen mit Uhrzeit, Was, Menge. Kurze Uhrzeiten wie „8“ oder „8.30“ werden zu 08:00 und 08:30.
 - „Heute“ (seit 19.10.2026): Feld nur, solange etwas offen ist, z. B. „Supplements · 2 offen, nächste 21:30 Magnesium ›“. Früher: kleines Feld nach der Coach-Antwort, immer sichtbar. Ohne Routine: „Supplements · Routine festlegen ›“. Mit Routine: „Supplements · 2 offen, nächste 21:30 Magnesium ›“ oder „heute alles genommen“. Tippen öffnet die Seite Ernährung.
 - Gespeichert wird nur auf dem Handy; Häkchen gelten für den jeweiligen Tag.
-- Fehlt noch: Erinnerungen (Handy-Version).
+- Erinnerungen gebaut 2026-11-01, siehe [[Erinnerungen]].
 
 ## Hinweis
 

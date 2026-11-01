@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../bereiche/glas.dart';
+import '../erinnerungen/erinnerung_dienst.dart';
+import '../erinnerungen/erinnerung_plan.dart';
 import '../ui/coach_style.dart';
 import 'konto_daten.dart';
 import 'konto_dienst.dart';
@@ -21,7 +23,15 @@ class KontoEinstellungen extends StatefulWidget {
     required this.onAbgemeldet,
     required this.onGeloescht,
     this.clock = DateTime.now,
+    this.erinnerungen,
+    this.onErinnerungen,
   });
+
+  /// Reminders (vault Umsetzung/Erinnerungen): one switch per kind.
+  final ErinnerungDienst? erinnerungen;
+
+  /// Called after a switch changed, so the reminders are planned again.
+  final VoidCallback? onErinnerungen;
 
   final KontoDienst dienst;
   final KontoStore store;
@@ -51,6 +61,7 @@ class _KontoEinstellungenState extends State<KontoEinstellungen>
   SicherungsInhalt _inhalt = const SicherungsInhalt();
   bool _sichert = false;
   String? _meldung;
+  ErinnerungEinstellungen? _erinnerungen;
 
   @override
   void initState() {
@@ -69,8 +80,10 @@ class _KontoEinstellungenState extends State<KontoEinstellungen>
     final k = await widget.store.loadKonto();
     final s = await widget.store.loadStand();
     final i = await widget.sicherung.inhalt();
+    final e = await widget.erinnerungen?.ladeEinstellungen();
     if (mounted) {
       setState(() {
+        _erinnerungen = e;
         _konto = k;
         _stand = s;
         _inhalt = i;
@@ -96,6 +109,12 @@ class _KontoEinstellungenState extends State<KontoEinstellungen>
       }
     }
     if (mounted) setState(() => _sichert = false);
+  }
+
+  Future<void> _erinnerung(ErinnerungEinstellungen neu) async {
+    setState(() => _erinnerungen = neu);
+    await widget.erinnerungen?.speichereEinstellungen(neu);
+    widget.onErinnerungen?.call();
   }
 
   Future<void> _schalter(SicherungsStand neu) async {
@@ -449,6 +468,30 @@ class _KontoEinstellungenState extends State<KontoEinstellungen>
               ),
             ),
           ]),
+          if (_erinnerungen case final e?)
+            gruppe(.35, 'Erinnerungen', [
+              for (final a in ErinnerungArt.values)
+                _Zeile(
+                  titel: a.titel,
+                  unter: a.wann,
+                  schalter: _GoldSchalter(
+                    key: ValueKey('erinnerung-${a.name}'),
+                    an: e.an(a),
+                    onChanged: (v) => _erinnerung(e.mit(a, v)),
+                  ),
+                ),
+              _Zeile(
+                titel: 'Höchstens 5 am Tag',
+                unter:
+                    'Termine und Wecker zählen nicht mit. Von „Gute Nacht“ '
+                    'bis zum Wecker ist immer Ruhe.',
+                schalter: _GoldSchalter(
+                  key: const ValueKey('erinnerung-grenze'),
+                  an: e.grenze,
+                  onChanged: (v) => _erinnerung(e.mitGrenze(v)),
+                ),
+              ),
+            ]),
           gruppe(.4, 'Deine Daten', [
             _Zeile(
               key: const ValueKey('daten-herunterladen'),
