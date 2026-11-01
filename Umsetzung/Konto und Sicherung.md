@@ -31,4 +31,14 @@ Entwurf 1 war Phillip zu schlicht. In Entwurf 2:
 - Die App speichert weiter zuerst auf dem Handy und lädt Neues im Hintergrund hoch, sobald Netz da ist. Fotos und Videos verschlüsselt.
 - Pflicht für die Stores: Konto löschen in der App (Apple), Daten herunterladen (DSGVO), Datenschutz und Impressum.
 - Für Apple-Anmeldung und App Store braucht Phillip ein Apple-Entwicklerkonto (99 € im Jahr).
-- Server-Anbieter: wird als Nächstes zusammen gewählt.
+- Server-Anbieter: **Supabase, Server in Frankfurt** (Phillip 2026-11-01). Projekt „groundset“ angelegt.
+
+## Stand im Code (2026-11-01)
+
+- Ordner `code/lib/konto/`: Anmeldung (Apple, Google, E-Mail-Code), Sicherung, Bildschirme, Einstellungen.
+- Ablauf: Fragebogen → „So sehe ich dich gerade“ → Konto → erster Check-in. Unter dem ersten Fragebogen-Schritt „Ich habe schon ein Konto“: anmelden und alles zurückholen („Phillip, alles ist wieder da.“).
+- Gesichert wird automatisch beim Öffnen, nach dem Check-in, wenn die App in den Hintergrund geht (höchstens alle 2 Minuten) und mit „Jetzt sichern“. Zwei Dateien: Daten, und Fotos/Videos (abschaltbar).
+- Einstellungen öffnen sich über den runden Knopf mit dem Anfangsbuchstaben oben rechts auf Heute.
+- Server-Vorlage: `backend/supabase/schema.sql` (privater Speicher „sicherungen“, jeder sieht nur seinen eigenen Ordner, Konto-Löschen).
+- Vorschau läuft noch ohne Server: jeder 6-stellige Code geht, nichts verlässt das Gerät.
+- Noch offen: Supabase einrichten und echt testen (neuer Thread mit Phillips Supabase-Zugang), Google-Anmeldung einrichten, Apple-Entwicklerkonto, Texte für Datenschutz und Impressum, Abo kommt mit den Stores.

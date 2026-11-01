@@ -94,7 +94,11 @@ class HomePage extends StatefulWidget {
     required this.coach,
     required this.clock,
     required this.onRestartOnboarding,
+    this.onKonto,
   });
+
+  /// Opens "Konto und Sicherung"; null without an account (tests).
+  final VoidCallback? onKonto;
 
   final UserProfile profile;
   final DiaryStore store;
@@ -1790,6 +1794,7 @@ class _HomePageState extends State<HomePage> {
       jubelTick: _jubelTick,
       scroll: _heuteScroll,
       onRestartOnboarding: widget.onRestartOnboarding,
+      onKonto: widget.onKonto,
     );
     final ruhe = _schlaf.d.ruheBis;
     if (_loaded && ruhe != null && ruhe.isAfter(today)) {

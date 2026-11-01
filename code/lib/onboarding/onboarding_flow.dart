@@ -23,11 +23,15 @@ class OnboardingFlow extends StatefulWidget {
     required this.store,
     required this.evaluator,
     required this.onFinished,
+    this.onSchonKonto,
   });
 
   final ProfileStore store;
   final OnboardingEvaluator evaluator;
   final ValueChanged<UserProfile> onFinished;
+
+  /// "Ich habe schon ein Konto" on the first screen (new phone).
+  final VoidCallback? onSchonKonto;
 
   @override
   State<OnboardingFlow> createState() => _OnboardingFlowState();
@@ -130,6 +134,19 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
               ? null
               : () => setState(() => _phase = _Phase.questions),
         ),
+        if (widget.onSchonKonto case final schon?) ...[
+          const SizedBox(height: 6),
+          Center(
+            child: TextButton(
+              key: const ValueKey('schon-konto'),
+              onPressed: schon,
+              child: Text(
+                'Ich habe schon ein Konto',
+                style: Glas.tLabel.copyWith(fontSize: 14),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

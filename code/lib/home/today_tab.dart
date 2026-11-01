@@ -71,7 +71,11 @@ class TodayTab extends StatelessWidget {
     this.jubelTick = 0,
     this.scroll,
     required this.onRestartOnboarding,
+    this.onKonto,
   });
+
+  /// Opens "Konto und Sicherung" from the small button top right.
+  final VoidCallback? onKonto;
 
   final String name;
   final String date;
@@ -153,6 +157,12 @@ class TodayTab extends StatelessWidget {
                   label: date,
                   title: name.isEmpty ? 'Heute' : 'Heute, $name',
                   brand: true,
+                  trailing: onKonto == null
+                      ? null
+                      : KontoKnopfKlein(
+                          initiale: name.isEmpty ? '' : name[0].toUpperCase(),
+                          onTap: onKonto!,
+                        ),
                 ),
                 if (c != null) ...[
                   CoachKarte(
@@ -234,6 +244,59 @@ class TodayTab extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Round glass button with the first letter of the name, top right on
+/// Heute: opens "Konto und Sicherung".
+class KontoKnopfKlein extends StatelessWidget {
+  const KontoKnopfKlein({
+    super.key,
+    required this.initiale,
+    required this.onTap,
+  });
+
+  final String initiale;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: 'Konto und Sicherung',
+    excludeSemantics: true,
+    child: GestureDetector(
+      key: const ValueKey('konto-oeffnen'),
+      onTap: onTap,
+      child: Container(
+        width: 34,
+        height: 34,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0x26FFE8BE), Color(0x0AE0BF7E)],
+          ),
+          border: Border.all(color: const Color(0x99E0BF7E)),
+        ),
+        child: initiale.isEmpty
+            ? const Icon(
+                Icons.person_outline,
+                size: 18,
+                color: Color(0xFFE6C98F),
+              )
+            : Text(
+                initiale,
+                style: const TextStyle(
+                  fontFamily: 'Sora',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: Color(0xFFE6C98F),
+                ),
+              ),
+      ),
+    ),
+  );
 }
 
 /// A gold-edged dark field on Heute; tapping gives its centre on screen.
