@@ -22,7 +22,7 @@ Entwurf 1 war Phillip zu schlicht. In Entwurf 2:
 
 - **Start:** echtes Groundset-Logo baut sich auf (Boden, Wurzeln, Trieb, Blätter), „Bau dein Fundament fürs Leben.“, ein Satz darunter. Knöpfe: Apple (gold), Google (Glas), E-Mail-Code. „Kein Passwort. Deine Daten gehören dir.“
 - **E-Mail:** kleiner Brief fliegt los, die 6 Code-Felder füllen sich golden, „Stimmt, du bist drin“, geht automatisch weiter. Coach-Satz zum Code.
-- **Gesichert:** Logo wächst, Wurzeln leuchten, goldener Ring und Funken. „Phillip, dein Fundament steht.“, darunter das eigene Ziel aus dem Fragebogen und ein Coach-Satz, Knopf „Zum ersten Check-in“.
+- **Gesichert:** Logo wächst, Wurzeln leuchten, goldener Ring und Funken. „Phillip, dein Fundament steht.“, darunter das eigene Ziel aus dem Fragebogen und der Coach-Satz „Alles, was du mir erzählt hast, ist jetzt sicher. Ab heute wächst dein Fundament jeden Tag ein Stück.“, Knopf „Zum ersten Check-in“.
 - **Einstellungen „Konto und Sicherung“:** Status (zuletzt gesichert, Größe, was alles, „Jetzt sichern“), Konto (Name, E-Mail, Anmeldeart), Abo ansehen und kündigen, angemeldete Geräte, Fotos und Videos sichern, nur im WLAN hochladen, Meine Daten herunterladen, Datenschutz, Impressum, Abmelden, Konto und alle Daten löschen.
 - Hintergrund überall ruhig mit einem warmen, atmenden Licht, alles auf Glas.
 
