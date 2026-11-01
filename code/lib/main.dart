@@ -12,7 +12,10 @@ import 'data/profile_store.dart';
 import 'data/user_profile.dart';
 import 'feed/feed_coach.dart';
 import 'erinnerungen/erinnerung_dienst.dart';
+import 'feed/feed_data.dart';
 import 'feed/feed_store.dart';
+import 'schlaf/wecker_aufgabe.dart';
+import 'training/training_data.dart' show istTrainingstag;
 import 'home/home_page.dart';
 import 'konto/konto_daten.dart';
 import 'konto/konto_dienst.dart';
@@ -135,7 +138,37 @@ class _StartGateState extends State<StartGate> {
   DateTime? _letzteSicherung;
   late final AppLifecycleListener _leben = AppLifecycleListener(
     onHide: () => _sichern(sofort: true),
+    onResume: _pruefeWecker,
   );
+
+  /// After the real alarm's "Aufstehen": the task comes first.
+  ({DateTime seit, String aufgabe, String? heute})? _weckerAufgabe;
+
+  Future<void> _pruefeWecker() async {
+    final d = widget.app.erinnerungen;
+    if (d == null) return;
+    final seit = await d.weckerAufgabeOffen();
+    if (seit == null) {
+      if (_weckerAufgabe != null && mounted) {
+        setState(() => _weckerAufgabe = null);
+      }
+      return;
+    }
+    final schlaf = await widget.app.feed.loadSchlaf();
+    final plan = await widget.app.feed.loadPlan();
+    final tag = plan.forDay(widget.app.clock()).trim();
+    final heute = tag.isNotEmpty && istTrainingstag(tag)
+        ? 'Heute: ${dayName(tag)}.'
+        : null;
+    if (!mounted) return;
+    setState(
+      () => _weckerAufgabe = (
+        seit: seit,
+        aufgabe: schlaf.wecker.aufgabe,
+        heute: heute,
+      ),
+    );
+  }
 
   KontoDienst? get _dienst => widget.app.kontoDienst;
   late final KontoStore _kontoStore =
@@ -214,6 +247,7 @@ class _StartGateState extends State<StartGate> {
       _checkedInToday = checkIns.any((c) => dayKey(c.datum) == today);
     });
     if (profile.isOnboarded) unawaited(_sichern());
+    unawaited(_pruefeWecker());
   }
 
   Future<void> _kontoOeffnen(BuildContext context) =>
@@ -281,6 +315,20 @@ class _StartGateState extends State<StartGate> {
         name: profile.name,
         ziel: profile.zielSatz,
         onFertig: (_) => _load(),
+      );
+    }
+    final wecker = _weckerAufgabe;
+    if (wecker != null) {
+      return WeckerAufgabe(
+        name: profile.name.trim(),
+        aufgabe: wecker.aufgabe,
+        geklingelt: wecker.seit,
+        heute: wecker.heute,
+        clock: widget.app.clock,
+        onFertig: () async {
+          await widget.app.erinnerungen?.weckerAufgabeErledigt();
+          if (mounted) setState(() => _weckerAufgabe = null);
+        },
       );
     }
     if (!_checkedInToday) {

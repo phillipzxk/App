@@ -33,27 +33,42 @@ extension _Erinnerungen on _HomePageState {
     final e = await d.ladeEinstellungen();
     if (!mounted) return;
     final jetzt = widget.clock();
-    await d.planen(
-      planeErinnerungen(
-        ErinnerungsLage(
-          jetzt: jetzt,
-          name: widget.profile.name.trim(),
-          einstellungen: e,
-          schlafzeiten: _schlafzeiten,
-          termine: _termine,
-          plan: _plan,
-          training: _training,
-          supplements: _supplements,
-          genommenHeute: _genommen,
-          checkinHeute: _checkIns.any((c) => dayKey(c.datum) == dayKey(jetzt)),
-          fokus: _fokus,
-          fotoEinstellungen: _fotoEinstellungen,
-          wochenFotos: _wochenFotos,
-          routine: _routine,
-          ruheBis: _schlaf.d.ruheBis,
-        ),
+    var liste = planeErinnerungen(
+      ErinnerungsLage(
+        jetzt: jetzt,
+        name: widget.profile.name.trim(),
+        einstellungen: e,
+        schlafzeiten: _schlafzeiten,
+        termine: _termine,
+        plan: _plan,
+        training: _training,
+        supplements: _supplements,
+        genommenHeute: _genommen,
+        checkinHeute: _checkIns.any((c) => dayKey(c.datum) == dayKey(jetzt)),
+        fokus: _fokus,
+        fotoEinstellungen: _fotoEinstellungen,
+        wochenFotos: _wochenFotos,
+        routine: _routine,
+        ruheBis: _schlaf.d.ruheBis,
       ),
     );
+    // The next alarm as a real alarm where the iPhone allows it
+    // (vault Umsetzung/Echter Wecker); otherwise it stays a reminder.
+    final wecker = [
+      for (final x in liste)
+        if (x.art == ErinnerungArt.wecker) x,
+    ];
+    final echt = await d.weckerStellen(
+      wecker.isEmpty ? null : wecker.first.zeit,
+      schlummern: _schlaf.d.wecker.schlummern,
+    );
+    if (echt) {
+      liste = [
+        for (final x in liste)
+          if (x.art != ErinnerungArt.wecker) x,
+      ];
+    }
+    await d.planen(liste);
   }
 
   Future<void> _getippt() async {

@@ -38,3 +38,4 @@ Entwurf 2 (6 Ansichten, mit Himmel und Licht-Modus): https://claude.ai/artifact/
 - Übernommener Tag vom Coach erscheint im Sonnenbogen von „Dein Tag“ (neue Punkte, Stern-Symbol). Die 3 „besser“ von gestern stehen in „Dein Tag“.
 - Nach „Gute Nacht“ zeigt die App den Ruhezustand bis zur Weckzeit; ist die App zur Weckzeit offen, öffnet sich der Wecker-Bildschirm. Echter Wecker, Ton und Gesundheitsdaten kommen mit der Handy-Version.
 - Alles wird auf dem Gerät gespeichert (Schlüssel `schlaf_daten`).
+- Echter Wecker auf dem iPhone (2026-11-01): siehe [[Echter Wecker]].
