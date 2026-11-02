@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../ernaehrung/ernaehrung_coach.dart' show fotoAufnahme;
+import '../health/health_daten.dart';
+import '../health/health_logik.dart';
+import '../health/nacht_wurzel.dart';
 import '../sleep/schlafzeiten.dart';
 import '../training/training_widgets.dart';
 import '../ui/coach_style.dart';
@@ -262,8 +265,12 @@ class _AufwachSeiteState extends State<AufwachSeite> {
 
   Journal? get _gestern => u.d.journalAm(SchlafDaten.gestern(u.jetzt()));
 
+  /// What Apple Health measured last night, if connected.
+  HealthTag? get _health => u.d.healthAm(u.heute);
+
   double get _stunden =>
       _stundenEigen ??
+      _health?.nacht?.stunden ??
       geschlafen(
         guteNacht: _gestern?.guteNacht,
         bettPlan: u.bett,
@@ -281,6 +288,12 @@ class _AufwachSeiteState extends State<AufwachSeite> {
       if (m > 720) m -= 1440;
       if (m < -720) m += 1440;
       abw = m;
+    } else if (_health?.nacht case final n? when u.bett != null) {
+      // Measured falling asleep, against the planned bedtime.
+      var m = n.start.hour * 60 + n.start.minute - u.bett!;
+      if (m > 720) m -= 1440;
+      if (m < -720) m += 1440;
+      abw = m;
     }
     final s = schlafwert(
       stunden: _stunden,
@@ -288,6 +301,7 @@ class _AufwachSeiteState extends State<AufwachSeite> {
       himmel: _himmel,
       tags: _tags.toList(),
       abweichung: abw,
+      health: _health,
     );
     final m = Morgen(
       tag: u.heute,
@@ -504,6 +518,10 @@ class _AufwachSeiteState extends State<AufwachSeite> {
             ),
             const SizedBox(height: 4),
             const Text('Schlafwert von 100', style: tSoft),
+            if (_health?.nacht case final n?) ...[
+              const SizedBox(height: 10),
+              NachtWurzel(nacht: n, hoehe: 180),
+            ],
             const SizedBox(height: 10),
             if (m.satz != null)
               CoachZeile(text: m.satz!)
@@ -517,7 +535,7 @@ class _AufwachSeiteState extends State<AufwachSeite> {
               TeilZeile(
                 name: t.value,
                 wert: m.teile[t.key] ?? 0,
-                text: teilText(t.key, m),
+                text: teilText(t.key, m, _health),
               ),
           ],
         ),
@@ -576,8 +594,42 @@ class _SonnenlichtKarteState extends State<SonnenlichtKarte> {
     setState(() {});
   }
 
+  /// Minutes in daylight today as the watch measured them, if connected.
+  int? get _gemessen =>
+      widget.umfeld.d.healthAm(widget.umfeld.heute)?.tageslicht;
+
   @override
-  Widget build(BuildContext context) => TKarte(
+  Widget build(BuildContext context) {
+    final g = _gemessen;
+    if (g != null && g >= tageslichtZiel) {
+      return TKarte(
+        key: const ValueKey('sonnenlicht'),
+        gold: true,
+        child: Row(
+          children: [
+            const Icon(Icons.wb_sunny, color: CoachStyle.goldLight, size: 28),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const TLabel('Sonnenlicht geschafft'),
+                  Text(
+                    'Deine Uhr hat heute schon $g Minuten Tageslicht gemessen.',
+                    key: const ValueKey('sonnenlicht-gemessen'),
+                    style: tText,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return _karte(g);
+  }
+
+  Widget _karte(int? gemessen) => TKarte(
     key: const ValueKey('sonnenlicht'),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -609,6 +661,14 @@ class _SonnenlichtKarteState extends State<SonnenlichtKarte> {
               : (_t != null ? 'Läuft … draußen?' : 'Draußen, Start'),
           onPressed: _t != null || _rest == 0 ? null : _start,
         ),
+        if (gemessen != null && gemessen > 0) ...[
+          const SizedBox(height: 6),
+          Text(
+            'Deine Uhr hat heute $gemessen von $tageslichtZiel Minuten gemessen.',
+            textAlign: TextAlign.center,
+            style: tSoft,
+          ),
+        ],
         const SizedBox(height: 6),
         const Text(
           'Auch bei Wolken ist es draußen viel heller als drinnen. Nicht direkt '

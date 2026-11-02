@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../checkin/checkin.dart';
 import '../checkin/checkin_flow.dart';
+import '../health/health_heute.dart';
+import '../health/health_logik.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import '../feed/muster.dart';
@@ -72,10 +74,21 @@ class TodayTab extends StatelessWidget {
     this.scroll,
     required this.onRestartOnboarding,
     this.onKonto,
+    this.samen = const [],
+    this.onSamenFertig,
+    this.healthFelder = const [],
+    this.onHealthKnopf,
   });
 
   /// Opens "Konto und Sicherung" from the small button top right.
   final VoidCallback? onKonto;
+
+  /// Measured values that fall into the coach card once today, and the
+  /// fields under it (vault Umsetzung/Apple Health.md).
+  final List<String> samen;
+  final VoidCallback? onSamenFertig;
+  final List<HealthFeld> healthFelder;
+  final ValueChanged<HealthFeld>? onHealthKnopf;
 
   final String name;
   final String date;
@@ -165,17 +178,37 @@ class TodayTab extends StatelessWidget {
                         ),
                 ),
                 if (c != null) ...[
-                  CoachKarte(
-                    text: c.kiAntwort.isNotEmpty ? c.kiAntwort : noReplyYet,
-                    umschaltbar: c.kiAntwort.isNotEmpty,
-                    stichpunkte: c.stichpunkte,
-                    ansicht: coachAnsicht,
-                    onAnsicht: onCoachAnsicht,
-                    onStichpunkte: () => onStichpunkte(c),
-                    jubel: jubel,
-                    jubelTick: jubelTick,
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      CoachKarte(
+                        text: c.kiAntwort.isNotEmpty ? c.kiAntwort : noReplyYet,
+                        umschaltbar: c.kiAntwort.isNotEmpty,
+                        stichpunkte: c.stichpunkte,
+                        ansicht: coachAnsicht,
+                        onAnsicht: onCoachAnsicht,
+                        onStichpunkte: () => onStichpunkte(c),
+                        jubel: jubel,
+                        jubelTick: jubelTick,
+                      ),
+                      if (samen.isNotEmpty)
+                        Positioned.fill(
+                          child: SamenRegen(
+                            key: const ValueKey('samen-regen'),
+                            samen: samen,
+                            onFertig: onSamenFertig,
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 10),
+                  if (healthFelder.isNotEmpty && onHealthKnopf != null) ...[
+                    HealthFelderListe(
+                      felder: healthFelder,
+                      onKnopf: onHealthKnopf!,
+                    ),
+                    const SizedBox(height: 2),
+                  ],
                   if (warum.trim().isNotEmpty &&
                       (warumSatz ?? '').trim().isNotEmpty) ...[
                     WarumKarte(warum: warum.trim(), satz: warumSatz!.trim()),

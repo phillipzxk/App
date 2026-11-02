@@ -17,6 +17,8 @@ import 'feed/feed_store.dart';
 import 'schlaf/wecker_aufgabe.dart';
 import 'training/training_data.dart' show istTrainingstag;
 import 'home/home_page.dart';
+import 'health/health_dienst.dart';
+import 'health/health_logik.dart';
 import 'konto/konto_daten.dart';
 import 'konto/konto_dienst.dart';
 import 'konto/konto_einstellungen.dart';
@@ -53,6 +55,7 @@ void main() {
             ),
       kontoStore: LocalKontoStore(),
       erinnerungen: erinnerungenFuerPlattform(),
+      health: healthFuerPlattform(),
     ),
   );
 }
@@ -71,7 +74,11 @@ class CoachApp extends StatelessWidget {
     this.kontoDienst,
     this.kontoStore,
     this.erinnerungen,
+    this.health,
   });
+
+  /// Apple Health (vault Umsetzung/Apple Health). Null in tests.
+  final HealthDienst? health;
 
   /// Reminders on the phone (vault Umsetzung/Erinnerungen). Null in tests.
   final ErinnerungDienst? erinnerungen;
@@ -250,6 +257,17 @@ class _StartGateState extends State<StartGate> {
     unawaited(_pruefeWecker());
   }
 
+  /// Reads Apple Health for the check-in and keeps it for Heute.
+  Future<String> _messwerte() async {
+    final dienst = widget.app.health;
+    if (dienst == null) return '';
+    final schlaf = await widget.app.feed.loadSchlaf();
+    final neu = await healthHolen(dienst, schlaf, widget.app.clock());
+    if (neu == null) return '';
+    await widget.app.feed.saveSchlaf(neu);
+    return messwerteText(neu.healthAm(dayKey(widget.app.clock())));
+  }
+
   Future<void> _kontoOeffnen(BuildContext context) =>
       Navigator.of(context).push(
         MaterialPageRoute<void>(
@@ -261,6 +279,7 @@ class _StartGateState extends State<StartGate> {
             clock: widget.app.clock,
             erinnerungen: widget.app.erinnerungen,
             onErinnerungen: () => _erinnerungenNeu.value++,
+            health: widget.app.health,
             onAbgemeldet: () => setState(() => _konto = null),
             onGeloescht: () => setState(() {
               _konto = null;
@@ -338,6 +357,7 @@ class _StartGateState extends State<StartGate> {
         evaluator: widget.app.checkInEvaluator,
         today: widget.app.clock(),
         vorgemerkt: _vorgemerkt,
+        messwerte: widget.app.health == null ? null : _messwerte,
         onFinished: (_) {
           setState(() => _checkedInToday = true);
           _sichern(sofort: true);
@@ -354,6 +374,7 @@ class _StartGateState extends State<StartGate> {
       onKonto: dienst == null ? null : () => _kontoOeffnen(context),
       erinnerungen: widget.app.erinnerungen,
       erinnerungenNeu: _erinnerungenNeu,
+      health: widget.app.health,
     );
   }
 }

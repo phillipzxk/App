@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../feed/feed_data.dart';
+import '../health/health_verbinden.dart';
+import '../health/nacht_wurzel.dart';
 import '../schlaf/abend.dart';
 import '../schlaf/aufwachen.dart';
 import '../schlaf/muster_tag.dart';
@@ -127,6 +129,8 @@ class _SleepTabState extends State<SleepTab> {
         ),
         const AreaChart(bereich: Bereich.schlaf),
       ],
+      if (zeig('wert') && d.healthAm(u.heute)?.nacht != null)
+        NachtKarte(nacht: d.healthAm(u.heute)!.nacht!),
       if (!zeig('wert'))
         const SizedBox.shrink()
       else if (heute == null)
@@ -216,7 +220,7 @@ class _SleepTabState extends State<SleepTab> {
                 TeilZeile(
                   name: t.value,
                   wert: heute.teile[t.key] ?? 0,
-                  text: teilText(t.key, heute),
+                  text: teilText(t.key, heute, d.healthAm(u.heute)),
                 ),
               const SizedBox(height: 8),
               CoachZeile(text: heute.satz ?? mondSatz(fuell ?? .5)),
@@ -477,64 +481,24 @@ class _SleepTabState extends State<SleepTab> {
           onAdd: widget.onAddSleep,
         ),
       if (zeig('daten'))
-        TKarte(
-          key: const ValueKey('mehr-daten'),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const TLabel('Mehr Daten für deinen Schlafwert'),
-              const SizedBox(height: 6),
-              for (final o in const [
-                ('Apple Health', 'Schlafphasen, Puls, Herzratenvariabilität'),
-                ('Google Health Connect', 'für Android-Handys und Uhren'),
-                (
-                  'Deine Uhr oder dein Ring',
-                  'zum Beispiel Apple Watch, Garmin, Oura',
-                ),
-              ])
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(o.$1, style: tText),
-                            Text(o.$2, style: tSoft),
-                          ],
+        FutureBuilder<bool>(
+          future: u.health?.verbunden() ?? Future.value(false),
+          builder: (context, snap) => MehrDatenKarte(
+            moeglich: u.health?.moeglich ?? false,
+            verbunden: snap.data ?? false,
+            onApple: u.health == null || !u.health!.moeglich
+                ? null
+                : () async {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => HealthVerbindenSeite(
+                          dienst: u.health!,
+                          onVerbunden: u.onHealthVerbunden,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: const Color(0xFF4A3B2A)),
-                        ),
-                        child: const Text(
-                          'Handy-Version',
-                          style: TextStyle(
-                            fontFamily: 'Figtree',
-                            fontSize: 10.5,
-                            color: CoachStyle.beigeLabel,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: 4),
-              const Text(
-                'Bis dahin kommt der Schlafwert aus allem, was du angibst: '
-                'Aufwach-Himmel, was nachts war, Schlafzeiten, Bettzeit '
-                'eingehalten, Abend-Journal, Check-in.',
-                style: tSoft,
-              ),
-            ],
+                    );
+                    if (mounted) setState(() {});
+                  },
           ),
         ),
     ];
@@ -1015,4 +979,113 @@ class _RoutineEditorState extends State<RoutineEditor> {
       ],
     );
   }
+}
+
+/// "Mehr Daten für deinen Schlafwert": Apple Health to connect (vault
+/// Umsetzung/Apple Health.md); watches and rings come through it.
+class MehrDatenKarte extends StatelessWidget {
+  const MehrDatenKarte({
+    super.key,
+    required this.moeglich,
+    required this.verbunden,
+    this.onApple,
+  });
+
+  final bool moeglich;
+  final bool verbunden;
+  final VoidCallback? onApple;
+
+  @override
+  Widget build(BuildContext context) {
+    final apple = verbunden
+        ? 'Verbunden'
+        : moeglich
+        ? 'Verbinden'
+        : 'Auf dem iPhone';
+    return TKarte(
+      key: const ValueKey('mehr-daten'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const TLabel('Mehr Daten für deinen Schlafwert'),
+          const SizedBox(height: 6),
+          _zeile(
+            'Apple Health',
+            'Schlaf, Puls, HRV, Trainings, Gewicht, Schritte, Tageslicht',
+            apple,
+            gold: moeglich,
+            key: const ValueKey('apple-health'),
+            onTap: onApple,
+          ),
+          _zeile(
+            'Deine Uhr oder dein Ring',
+            'Apple Watch, Garmin, Oura und andere kommen über Apple Health',
+            verbunden ? 'Verbunden' : 'über Health',
+          ),
+          _zeile(
+            'Google Health Connect',
+            'für Android-Handys und Uhren',
+            'Android-Version',
+          ),
+          const SizedBox(height: 4),
+          Text(
+            verbunden
+                ? 'Dein Schlafwert nutzt jetzt, was dein Handy misst. Was du '
+                      'selbst einträgst, zählt immer zuerst.'
+                : 'Bis dahin kommt der Schlafwert aus allem, was du angibst: '
+                      'Aufwach-Himmel, was nachts war, Schlafzeiten, Bettzeit '
+                      'eingehalten, Abend-Journal, Check-in.',
+            style: tSoft,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _zeile(
+    String titel,
+    String text,
+    String marke, {
+    bool gold = false,
+    Key? key,
+    VoidCallback? onTap,
+  }) => InkWell(
+    key: key,
+    onTap: onTap,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(titel, style: tText),
+                Text(text, style: tSoft),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: gold ? const Color(0x24F3D79A) : null,
+              border: Border.all(
+                color: gold ? const Color(0x73F3D79A) : const Color(0xFF4A3B2A),
+              ),
+            ),
+            child: Text(
+              marke,
+              style: TextStyle(
+                fontFamily: 'Figtree',
+                fontSize: 10.5,
+                color: gold ? const Color(0xFFF3D79A) : CoachStyle.beigeLabel,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }

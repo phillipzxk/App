@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../bereiche/glas.dart';
 import '../erinnerungen/erinnerung_dienst.dart';
 import '../erinnerungen/erinnerung_plan.dart';
+import '../health/health_dienst.dart';
+import '../health/health_verbinden.dart';
 import '../ui/coach_style.dart';
 import 'konto_daten.dart';
 import 'konto_dienst.dart';
@@ -25,7 +27,11 @@ class KontoEinstellungen extends StatefulWidget {
     this.clock = DateTime.now,
     this.erinnerungen,
     this.onErinnerungen,
+    this.health,
   });
+
+  /// Apple Health to connect (vault Umsetzung/Apple Health); null without.
+  final HealthDienst? health;
 
   /// Reminders (vault Umsetzung/Erinnerungen): one switch per kind.
   final ErinnerungDienst? erinnerungen;
@@ -489,6 +495,22 @@ class _KontoEinstellungenState extends State<KontoEinstellungen>
                   key: const ValueKey('erinnerung-grenze'),
                   an: e.grenze,
                   onChanged: (v) => _erinnerung(e.mitGrenze(v)),
+                ),
+              ),
+            ]),
+          if (widget.health case final h? when h.moeglich)
+            gruppe(.38, 'Apple Health', [
+              _Zeile(
+                key: const ValueKey('konto-health'),
+                titel: 'Apple Health',
+                unter:
+                    'Schlaf, Puls, HRV, Trainings, Gewicht, Schritte und '
+                    'Tageslicht. Groundset liest nur.',
+                pfeil: true,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => HealthVerbindenSeite(dienst: h),
+                  ),
                 ),
               ),
             ]),

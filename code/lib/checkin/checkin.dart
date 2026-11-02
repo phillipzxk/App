@@ -14,6 +14,7 @@ class CheckIn {
     this.business = '',
     this.persoenlich = '',
     this.notiz = '',
+    this.messwerte = '',
     this.kiAntwort = '',
     this.werte = const {},
     this.gruende = const {},
@@ -36,6 +37,10 @@ class CheckIn {
 
   /// Optional "Was war heute besonders?".
   final String notiz;
+
+  /// What Apple Health measured, in sentences for the coach (vault
+  /// Umsetzung/Apple Health.md). Empty without.
+  final String messwerte;
 
   /// The AI reply to the whole day; empty until the AI is connected.
   final String kiAntwort;
@@ -61,6 +66,7 @@ class CheckIn {
     'business': business,
     'persoenlich': persoenlich,
     'notiz': notiz,
+    if (messwerte.isNotEmpty) 'messwerte': messwerte,
     'ki_antwort': kiAntwort,
     'werte': werte,
     'gruende': gruende,
@@ -93,6 +99,7 @@ class CheckIn {
     business: business,
     persoenlich: persoenlich,
     notiz: notiz,
+    messwerte: messwerte,
     kiAntwort: kiAntwort ?? this.kiAntwort,
     werte: werte ?? this.werte,
     gruende: gruende ?? this.gruende,
@@ -110,6 +117,7 @@ class CheckIn {
     business: json['business'] as String? ?? '',
     persoenlich: json['persoenlich'] as String? ?? '',
     notiz: json['notiz'] as String? ?? '',
+    messwerte: json['messwerte'] as String? ?? '',
     kiAntwort: json['ki_antwort'] as String? ?? '',
     werte: {
       for (final e in ((json['werte'] as Map?) ?? const {}).entries)
