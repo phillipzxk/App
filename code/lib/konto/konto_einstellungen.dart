@@ -28,10 +28,17 @@ class KontoEinstellungen extends StatefulWidget {
     this.erinnerungen,
     this.onErinnerungen,
     this.health,
+    this.abo,
+    this.onAbo,
   });
 
   /// Apple Health to connect (vault Umsetzung/Apple Health); null without.
   final HealthDienst? health;
+
+  /// Where the Abo stands ("Gratis · Tag 3 von 7") and how to open the
+  /// Abo screen (vault Umsetzung/Abo.md).
+  final String? abo;
+  final VoidCallback? onAbo;
 
   /// Reminders (vault Umsetzung/Erinnerungen): one switch per kind.
   final ErinnerungDienst? erinnerungen;
@@ -439,12 +446,15 @@ class _KontoEinstellungenState extends State<KontoEinstellungen>
               unter: k?.email.isNotEmpty == true ? k!.email : null,
               hinten: k?.art.label ?? '',
             ),
-            const _Zeile(
+            _Zeile(
+              key: const ValueKey('abo-zeile'),
               titel: 'Abo',
               unter:
                   'Kündigen und ändern geht über den App Store bzw. Google '
                   'Play.',
-              hinten: 'Beta: kostenlos',
+              hinten: widget.abo ?? 'Beta: kostenlos',
+              pfeil: widget.onAbo != null,
+              onTap: widget.onAbo,
             ),
             _Zeile(
               key: const ValueKey('geraete'),

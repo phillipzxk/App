@@ -1,3 +1,5 @@
+import '../abo/abo_heute.dart';
+
 import 'package:flutter/material.dart';
 
 import '../checkin/checkin.dart';
@@ -78,7 +80,15 @@ class TodayTab extends StatelessWidget {
     this.onSamenFertig,
     this.healthFelder = const [],
     this.onHealthKnopf,
+    this.aboTag,
+    this.coachStill = false,
+    this.onAbo,
   });
+
+  /// Free week counter, grey coach without Abo (vault Umsetzung/Abo.md).
+  final int? aboTag;
+  final bool coachStill;
+  final VoidCallback? onAbo;
 
   /// Opens "Konto und Sicherung" from the small button top right.
   final VoidCallback? onKonto;
@@ -170,26 +180,42 @@ class TodayTab extends StatelessWidget {
                   label: date,
                   title: name.isEmpty ? 'Heute' : 'Heute, $name',
                   brand: true,
-                  trailing: onKonto == null
+                  trailing: onKonto == null && aboTag == null
                       ? null
-                      : KontoKnopfKlein(
-                          initiale: name.isEmpty ? '' : name[0].toUpperCase(),
-                          onTap: onKonto!,
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (aboTag != null) AboZaehler(tag: aboTag!),
+                            if (aboTag != null && onKonto != null)
+                              const SizedBox(width: 8),
+                            if (onKonto != null)
+                              KontoKnopfKlein(
+                                initiale: name.isEmpty
+                                    ? ''
+                                    : name[0].toUpperCase(),
+                                onTap: onKonto!,
+                              ),
+                          ],
                         ),
                 ),
                 if (c != null) ...[
                   Stack(
                     clipBehavior: Clip.none,
                     children: [
-                      CoachKarte(
-                        text: c.kiAntwort.isNotEmpty ? c.kiAntwort : noReplyYet,
-                        umschaltbar: c.kiAntwort.isNotEmpty,
-                        stichpunkte: c.stichpunkte,
-                        ansicht: coachAnsicht,
-                        onAnsicht: onCoachAnsicht,
-                        onStichpunkte: () => onStichpunkte(c),
-                        jubel: jubel,
-                        jubelTick: jubelTick,
+                      _Still(
+                        an: coachStill,
+                        child: CoachKarte(
+                          text: c.kiAntwort.isNotEmpty
+                              ? c.kiAntwort
+                              : noReplyYet,
+                          umschaltbar: c.kiAntwort.isNotEmpty,
+                          stichpunkte: c.stichpunkte,
+                          ansicht: coachAnsicht,
+                          onAnsicht: onCoachAnsicht,
+                          onStichpunkte: () => onStichpunkte(c),
+                          jubel: jubel,
+                          jubelTick: jubelTick,
+                        ),
                       ),
                       if (samen.isNotEmpty)
                         Positioned.fill(
@@ -202,6 +228,14 @@ class TodayTab extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 10),
+                  if (aboTag == 6) ...[
+                    const MorgenKarte(),
+                    const SizedBox(height: 10),
+                  ],
+                  if (coachStill && onAbo != null) ...[
+                    CoachEinschaltenFeld(onTap: onAbo!),
+                    const SizedBox(height: 10),
+                  ],
                   if (healthFelder.isNotEmpty && onHealthKnopf != null) ...[
                     HealthFelderListe(
                       felder: healthFelder,
@@ -281,6 +315,30 @@ class TodayTab extends StatelessWidget {
 
 /// Round glass button with the first letter of the name, top right on
 /// Heute: opens "Konto und Sicherung".
+/// Without Abo the coach card is quiet and grey (vault Umsetzung/Abo.md).
+class _Still extends StatelessWidget {
+  const _Still({required this.an, required this.child});
+  final bool an;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => an
+      ? Opacity(
+          key: const ValueKey('coach-still'),
+          opacity: .55,
+          child: ColorFiltered(
+            colorFilter: const ColorFilter.matrix([
+              .33, .59, .11, 0, 0, //
+              .33, .59, .11, 0, 0, //
+              .33, .59, .11, 0, 0, //
+              0, 0, 0, 1, 0,
+            ]),
+            child: child,
+          ),
+        )
+      : child;
+}
+
 class KontoKnopfKlein extends StatelessWidget {
   const KontoKnopfKlein({
     super.key,

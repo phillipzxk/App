@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../abo/abo_logik.dart';
 import '../checkin/checkin.dart';
 import '../checkin/checkin_evaluator.dart';
 import '../data/user_profile.dart';
@@ -44,7 +45,8 @@ class RemoteCoach
         SchlafCoach,
         MindsetCoach,
         BusinessCoach,
-        PersoenlichCoach {
+        PersoenlichCoach,
+        WochenCoach {
   RemoteCoach({required this.baseUrl, required this.token, http.Client? client})
     : _client = client ?? http.Client();
 
@@ -52,7 +54,12 @@ class RemoteCoach
   final String token;
   final http.Client _client;
 
+  /// Without Abo the coach stays silent (vault Umsetzung/Abo.md): the app
+  /// sets this, and every other route then answers null.
+  bool Function(String pfad)? erlaubt;
+
   Future<Map?> _postJson(String path, Map<String, Object> body) async {
+    if (erlaubt?.call(path) == false) return null;
     try {
       final response = await _client
           .post(
@@ -70,6 +77,7 @@ class RemoteCoach
   }
 
   Future<String?> _post(String path, Map<String, Object> body) async {
+    if (erlaubt?.call(path) == false) return null;
     try {
       final response = await _client
           .post(
@@ -85,6 +93,19 @@ class RemoteCoach
       return null;
     }
   }
+
+  @override
+  Future<String?> wochenRueckblick(
+    UserProfile profile,
+    List<CheckIn> woche, {
+    String muster = '',
+    bool erste = false,
+  }) => _post('/woche', {
+    'profile': profileJson(profile),
+    'woche': [for (final c in woche) c.toJson()],
+    'muster': muster,
+    'erste': erste,
+  });
 
   @override
   Future<String?> summarize(UserProfile answers) =>

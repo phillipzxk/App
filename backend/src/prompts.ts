@@ -328,6 +328,28 @@ oder
 {"satz": "..."}`;
 }
 
+/// "Was ich über dich gelernt habe" (vault Umsetzung/Abo.md): the coach's
+/// look back at a whole week. Day 7 of the free week shows it on the Abo
+/// screen; without Abo it is the Sunday "Wochen-Satz".
+export function wochePrompt(p: Profile, woche: CheckIn[], muster: string, erste: boolean): string {
+  const tage = woche.slice(-7).map(checkInBlock).join("\n\n");
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Ihre Check-ins dieser Woche:
+<nutzer>
+${tage || "keine"}
+</nutzer>
+${muster.trim() ? `\nMuster, das du schon erkannt hast: ${muster.trim()}\n` : ""}
+${erste ? "Das war ihre erste Woche mit dir. Sag ihr, was du in diesen 7 Tagen über sie gelernt hast." : "Schau auf ihre Woche zurück."}
+
+Schreib 2 bis 3 kurze Sätze (zusammen höchstens 45 Wörter), sprich sie mit Vornamen an. Erster Satz: was sie diese Woche konkret geschafft hat, mit einer Zahl aus ihren Check-ins. Zweiter Satz: woran es bei ihr wirklich hängt, mit dem Zusammenhang zwischen zwei Bereichen. Dritter Satz (optional): wo ihr nächste Woche ansetzt. Direkt und ehrlich wie ein Trainer, der sie kennt. Keine Floskeln, keine Emojis, kein Moralisieren, keine Fragen, nichts Medizinisches.
+
+Antworte nur mit JSON, ohne weiteren Text:
+{"text": "..."}`;
+}
+
 // Training logging (vault Umsetzung/Training eintragen.md, Phillip
 // 2026-10-26). Each part answers with JSON only.
 
