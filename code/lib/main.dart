@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'abo/abo_ablauf.dart';
+import 'abo/abo_daten.dart';
+import 'abo/abo_logik.dart';
 import 'checkin/checkin.dart';
 import 'checkin/checkin_evaluator.dart';
 import 'checkin/checkin_flow.dart';
@@ -54,6 +57,8 @@ void main() {
               },
             ),
       kontoStore: LocalKontoStore(),
+      aboStore: LocalAboStore(),
+      aboKauf: const VorschauKauf(),
       erinnerungen: erinnerungenFuerPlattform(),
       health: healthFuerPlattform(),
     ),
@@ -75,7 +80,13 @@ class CoachApp extends StatelessWidget {
     this.kontoStore,
     this.erinnerungen,
     this.health,
+    this.aboStore,
+    this.aboKauf = const VorschauKauf(),
   });
+
+  /// Free week and Abo (vault Umsetzung/Abo). Null in tests: kept in memory.
+  final AboStore? aboStore;
+  final AboKauf aboKauf;
 
   /// Apple Health (vault Umsetzung/Apple Health). Null in tests.
   final HealthDienst? health;
@@ -178,6 +189,84 @@ class _StartGateState extends State<StartGate> {
   }
 
   KontoDienst? get _dienst => widget.app.kontoDienst;
+
+  // Free week and Abo (vault Umsetzung/Abo.md).
+  late final AboStore _aboStore = widget.app.aboStore ?? MemoryAboStore();
+  AboStand _abo = const AboStand();
+  late final CheckInEvaluator _aboEvaluator = AboEvaluator(
+    inner: widget.app.checkInEvaluator,
+    stand: () => _abo,
+    clock: widget.app.clock,
+    woche: _wochenCoach,
+  );
+  WochenCoach? get _wochenCoach {
+    final c = widget.app.feedCoach;
+    return c is WochenCoach ? c as WochenCoach : null;
+  }
+
+  Future<void> _aboSpeichern(AboStand neu) async {
+    await _aboStore.save(neu);
+    if (mounted) setState(() => _abo = neu);
+  }
+
+  Future<WochenBild> _wochenBild() async {
+    final checkIns = await widget.app.diary.loadCheckIns();
+    return WochenBild.aus(
+      jetzt: widget.app.clock(),
+      checkIns: checkIns,
+      fokus: await widget.app.feed.loadFokus(),
+      durch: await widget.app.feed.loadDurchgezogen(),
+      muster: await widget.app.feed.loadMuster(),
+    );
+  }
+
+  Future<String?> _wochenText(WochenBild b) async {
+    final w = _wochenCoach;
+    final p = _profile;
+    if (w == null || p == null) return null;
+    final checkIns = await widget.app.diary.loadCheckIns();
+    return w.wochenRueckblick(
+      p,
+      letzteSieben(checkIns, widget.app.clock()),
+      muster: b.muster ?? '',
+      erste: true,
+    );
+  }
+
+  AboAblauf _aboAblauf({required VoidCallback fertig, VoidCallback? zurueck}) =>
+      AboAblauf(
+        name: _profile?.name ?? '',
+        laden: _wochenBild,
+        text: _wochenText,
+        kauf: widget.app.aboKauf,
+        stand: _abo,
+        onStand: _aboSpeichern,
+        onFertig: fertig,
+        onZurueck: zurueck,
+        clock: widget.app.clock,
+      );
+
+  bool _aboFertig = false;
+  bool _aboImGang = false;
+
+  Future<void> _aboOeffnen(BuildContext context) => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (c) => _aboAblauf(
+        fertig: () => Navigator.of(c).pop(),
+        zurueck: () => Navigator.of(c).pop(),
+      ),
+    ),
+  );
+
+  String _aboText() {
+    final jetzt = widget.app.clock();
+    final p = _abo.plan;
+    if (p != null) return '${p.label} aktiv';
+    if (_abo.ohneAbo) return 'Ohne Abo';
+    final t = _abo.gratisTag(jetzt);
+    return t == null ? 'Gratis-Woche' : 'Gratis · Tag ${t > 7 ? 7 : t} von 7';
+  }
+
   late final KontoStore _kontoStore =
       widget.app.kontoStore ?? MemoryKontoStore();
   late final Sicherung? _sicherung = _dienst == null
@@ -207,6 +296,16 @@ class _StartGateState extends State<StartGate> {
   @override
   void initState() {
     super.initState();
+    // Without Abo the coach answers only what stays free.
+    for (final c in {
+      widget.app.feedCoach,
+      widget.app.checkInEvaluator,
+      widget.app.evaluator,
+    }) {
+      if (c is RemoteCoach) {
+        c.erlaubt = (pfad) => pfadErlaubt(pfad, _abo, widget.app.clock());
+      }
+    }
     if (_splashing) {
       _splashTimer = Timer(
         widget.app.splash,
@@ -242,6 +341,11 @@ class _StartGateState extends State<StartGate> {
       }
     }
     final profile = await widget.app.store.load();
+    var abo = await _aboStore.load();
+    if (profile.isOnboarded && abo.gratisSeit == null) {
+      abo = abo.gestartet(widget.app.clock());
+      await _aboStore.save(abo);
+    }
     final checkIns = await widget.app.diary.loadCheckIns();
     final today = dayKey(widget.app.clock());
     final training = await widget.app.feed.loadTraining();
@@ -251,6 +355,7 @@ class _StartGateState extends State<StartGate> {
       _vorgemerkt = {'Training': ?vorgemerkt};
       _profile = profile;
       _konto = konto;
+      _abo = abo;
       _checkedInToday = checkIns.any((c) => dayKey(c.datum) == today);
     });
     if (profile.isOnboarded) unawaited(_sichern());
@@ -280,6 +385,8 @@ class _StartGateState extends State<StartGate> {
             erinnerungen: widget.app.erinnerungen,
             onErinnerungen: () => _erinnerungenNeu.value++,
             health: widget.app.health,
+            abo: _aboText(),
+            onAbo: () => _aboOeffnen(context),
             onAbgemeldet: () => setState(() => _konto = null),
             onGeloescht: () => setState(() {
               _konto = null;
@@ -354,7 +461,7 @@ class _StartGateState extends State<StartGate> {
       return CheckInFlow(
         profile: profile,
         store: widget.app.diary,
-        evaluator: widget.app.checkInEvaluator,
+        evaluator: _aboEvaluator,
         today: widget.app.clock(),
         vorgemerkt: _vorgemerkt,
         messwerte: widget.app.health == null ? null : _messwerte,
@@ -364,8 +471,23 @@ class _StartGateState extends State<StartGate> {
         },
       );
     }
+    final jetzt = widget.app.clock();
+    if (!_aboFertig && (_aboImGang || _abo.zeigeAbo(jetzt))) {
+      // Stays up after buying, for the thank-you screen.
+      _aboImGang = true;
+      return _aboAblauf(
+        fertig: () => setState(() {
+          _aboFertig = true;
+          _aboImGang = false;
+        }),
+      );
+    }
+    final still = !_abo.coachAn(jetzt) && !_abo.wochenSatzTag(jetzt);
     return HomePage(
       profile: profile,
+      aboTag: _abo.zaehlerTag(jetzt),
+      coachStill: still,
+      onAbo: () => _aboOeffnen(context),
       store: widget.app.diary,
       feed: widget.app.feed,
       coach: widget.app.feedCoach,

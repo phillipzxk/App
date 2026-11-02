@@ -107,7 +107,17 @@ class HomePage extends StatefulWidget {
     this.erinnerungen,
     this.erinnerungenNeu,
     this.health,
+    this.aboTag,
+    this.coachStill = false,
+    this.onAbo,
   });
+
+  /// Free week (vault Umsetzung/Abo): its day for the counter, null after
+  /// it. [coachStill]: without Abo the coach card is grey from Monday to
+  /// Saturday; [onAbo] opens the Abo screen.
+  final int? aboTag;
+  final bool coachStill;
+  final VoidCallback? onAbo;
 
   /// Apple Health (vault Umsetzung/Apple Health); null in tests.
   final HealthDienst? health;
@@ -1833,6 +1843,9 @@ class _HomePageState extends State<HomePage> {
       scroll: _heuteScroll,
       onRestartOnboarding: widget.onRestartOnboarding,
       onKonto: widget.onKonto,
+      aboTag: widget.aboTag,
+      coachStill: widget.coachStill,
+      onAbo: widget.onAbo,
     );
     final ruhe = _schlaf.d.ruheBis;
     if (_loaded && ruhe != null && ruhe.isAfter(today)) {

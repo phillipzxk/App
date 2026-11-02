@@ -14,6 +14,7 @@ import {
   stichpunktePrompt,
   durchgezogenPrompt,
   warumPrompt,
+  wochePrompt,
   tagesformPrompt,
   vorschlagPrompt,
   stagnationPrompt,
@@ -201,6 +202,18 @@ export function parsePunkte(raw: string): string[] {
 }
 
 /// The coach's sentence for "Dein Warum", or null on a normal day.
+export function parseText(raw: string): string | null {
+  const start = raw.indexOf("{");
+  const end = raw.lastIndexOf("}");
+  if (start < 0 || end <= start) return null;
+  try {
+    const t = (JSON.parse(raw.slice(start, end + 1)) as { text?: unknown }).text;
+    return typeof t === "string" && t.trim() ? t.trim().slice(0, 420) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function parseSatz(raw: string): string | null {
   const start = raw.indexOf("{");
   const end = raw.lastIndexOf("}");
@@ -736,6 +749,16 @@ export default {
         if (!String(profile.motivation ?? "").trim()) return json({ satz: null });
         try {
           return json({ satz: parseSatz(await ask(env, warumPrompt(profile, today, recent))) });
+        } catch (e) {
+          console.error(e);
+          return json({ error: "coach unavailable" }, 502);
+        }
+      }
+      case "/woche": {
+        const woche = Array.isArray(body.woche) ? (body.woche as CheckIn[]) : [];
+        const muster = typeof body.muster === "string" ? body.muster : "";
+        try {
+          return json({ text: parseText(await ask(env, wochePrompt(profile, woche, muster, body.erste === true))) });
         } catch (e) {
           console.error(e);
           return json({ error: "coach unavailable" }, 502);
