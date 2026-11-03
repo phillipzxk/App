@@ -1,11 +1,11 @@
 {
-    "name": "coach_app",
-    "short_name": "coach_app",
+    "name": "Groundset",
+    "short_name": "Groundset",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#110E0B",
+    "theme_color": "#110E0B",
+    "description": "Dein Coach für Training, Essen, Schlaf und Kopf.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
