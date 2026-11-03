@@ -42,6 +42,6 @@ Animationen: Felder gleiten federnd herein, Baum zieht beim Scrollen langsamer m
 - Ordner `code/lib/abo/`.
 - Die Gratis-Woche beginnt mit dem ersten Tag in der App nach dem Update.
 - Der Abo-Bildschirm kommt an Tag 7 nach dem Check-in.
-- Ohne Abo sperrt die App alle KI-Anfragen außer Bereichs-Werten, Mustern und dem Wochen-Satz. Die Bereichs-Werte bleiben, damit Heute und das Wurzelwerk nicht leer sind. Das ist Claudes Vorschlag und mit Phillip noch zu prüfen.
+- Ohne Abo sperrt die App alle KI-Anfragen außer Bereichs-Werten, Mustern und dem Wochen-Satz. Die Bereichs-Werte bleiben, damit Heute und das Wurzelwerk nicht leer sind, samt dem kurzen Satz „Warum gerade hier“. Von Phillip bestätigt am 2026-11-03 („passt“).
 - Neue Worker-Route `/woche` für die Wochen-Zusammenfassung und den Sonntags-Satz.
 - Kaufen ist in der Vorschau nur gespielt. Echte Bezahlung über Apple (StoreKit) kommt, sobald Phillip das Apple-Entwicklerkonto hat. In den Einstellungen unter „Abo“ kann man den Abo-Bildschirm zum Ansehen öffnen und das Abo in der Vorschau wieder zurücksetzen.
