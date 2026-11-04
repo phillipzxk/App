@@ -9,6 +9,8 @@ import '../sleep/schlafzeiten.dart';
 import '../training/training_widgets.dart';
 import '../ui/coach_style.dart';
 import 'schlaf_logik.dart';
+import 'schritt_weg.dart';
+import 'schritt_zaehler.dart';
 
 /// The task of the morning: the chosen one, but "Licht an" instead of the
 /// sky photo while it is still dark (Phillip 2026-11-01).
@@ -60,6 +62,10 @@ class WeckerAufgabe extends StatefulWidget {
     this.heute,
     this.clock = DateTime.now,
     this.pruefen = hellPruefen,
+    this.schritte = 30,
+    this.zaehler = const KeinZaehler(),
+    this.wahl,
+    this.onMorgen,
   });
 
   final String name;
@@ -76,14 +82,23 @@ class WeckerAufgabe extends StatefulWidget {
   final DateTime Function() clock;
   final HellPruefung pruefen;
 
+  /// How many steps for the step task.
+  final int schritte;
+  final SchrittZaehler zaehler;
+  final SchrittWahlStore? wahl;
+
+  /// The morning for the coach, e.g. "Heute Morgen: 30 Schritte in 41
+  /// Sekunden, 2 Minuten nach dem Wecker."
+  final ValueChanged<String>? onMorgen;
+
   @override
   State<WeckerAufgabe> createState() => _WeckerAufgabeState();
 }
 
 class _WeckerAufgabeState extends State<WeckerAufgabe> {
   late final String _aufgabe = aufgabeHeute(widget.aufgabe, widget.clock());
-  int _schritte = 0;
   String? _fehler;
+  String? _schritteSatz;
   bool _prueft = false;
   DateTime? _wach;
 
@@ -113,17 +128,34 @@ class _WeckerAufgabeState extends State<WeckerAufgabe> {
           }
         }
         _geschafft();
-      case 'schritte':
-        setState(() => _schritte++);
-        if (_schritte >= 30) _geschafft();
       default:
         _geschafft();
     }
   }
 
+  void _schritteFertig(int n, Duration dauer) {
+    final jetzt = widget.clock();
+    widget.onMorgen?.call(
+      morgenSatz(n, dauer, jetzt.difference(widget.geklingelt).inMinutes),
+    );
+    setState(() {
+      _schritteSatz = schritteSatz(n, dauer);
+      _wach = jetzt;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final wach = _wach;
+    if (_aufgabe == 'schritte' && wach == null) {
+      return SchrittWeg(
+        ziel: widget.schritte,
+        zaehler: widget.zaehler,
+        wahl: widget.wahl,
+        clock: widget.clock,
+        onFertig: _schritteFertig,
+      );
+    }
     return Scaffold(
       body: DecoratedBox(
         decoration: BoxDecoration(
@@ -162,11 +194,6 @@ class _WeckerAufgabeState extends State<WeckerAufgabe> {
         'Geh ans Fenster und mach ein Foto vom Himmel. Dann ist dein Morgen '
             'offiziell gestartet.',
         'Himmel fotografieren',
-      ),
-      'schritte' => (
-        '30 Schritte',
-        'Steh auf und geh 30 Schritte. Tipp bei jedem Schritt.',
-        _schritte == 0 ? 'Los gehen' : 'Schritt ${_schritte + 1} von 30',
       ),
       _ => (
         'Wie bist du aufgewacht?',
@@ -266,6 +293,24 @@ class _WeckerAufgabeState extends State<WeckerAufgabe> {
           textAlign: TextAlign.center,
           style: tText.copyWith(color: Colors.white),
         ),
+        if (_schritteSatz != null) ...[
+          const SizedBox(height: 12),
+          Container(
+            key: const ValueKey('wecker-schritte-satz'),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+            decoration: BoxDecoration(
+              color: const Color(0x8CFFFFFF),
+              borderRadius: BorderRadius.circular(99),
+            ),
+            child: Text(
+              _schritteSatz!,
+              style: tText.copyWith(
+                color: CoachStyle.goldInk,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
         const SizedBox(height: 24),
         SizedBox(
           width: 280,

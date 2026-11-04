@@ -30,8 +30,8 @@ class WeckerSeite extends StatelessWidget {
     (
       'schritte',
       Icons.directions_walk,
-      '30 Schritte gehen',
-      'Die App zählt mit, bis du in Bewegung bist.',
+      'Schritte gehen',
+      'Das iPhone zählt mit, bis du in Bewegung bist.',
     ),
   ];
 
@@ -117,10 +117,41 @@ class WeckerSeite extends StatelessWidget {
               child: _Aufgabe(
                 key: ValueKey('aufgabe-${a.$1}'),
                 icon: a.$2,
-                titel: a.$3,
+                titel: a.$1 == 'schritte'
+                    ? '${w.schritte} Schritte gehen'
+                    : a.$3,
                 text: a.$4,
                 an: w.aufgabe == a.$1,
                 onTap: () => setze(w.copyWith(aufgabe: a.$1)),
+              ),
+            ),
+          if (w.aufgabe == 'schritte')
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Expanded(child: Text('Wie viele?', style: tSoft)),
+                  for (final n in Wecker.schritteWahl)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: ChoiceChip(
+                        key: ValueKey('schritte-$n'),
+                        label: Text('$n'),
+                        selected: w.schritte == n,
+                        showCheckmark: false,
+                        selectedColor: CoachStyle.gold,
+                        backgroundColor: CoachStyle.card,
+                        side: const BorderSide(color: CoachStyle.line),
+                        labelStyle: TextStyle(
+                          color: w.schritte == n
+                              ? CoachStyle.goldInk
+                              : CoachStyle.ink,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        onSelected: (_) => setze(w.copyWith(schritte: n)),
+                      ),
+                    ),
+                ],
               ),
             ),
           const SizedBox(height: 6),

@@ -79,7 +79,7 @@ function checkInBlock(c: CheckIn): string {
 - Training: ${clip(c.training)}
 - Ernährung: ${clip(c.ernaehrung)}
 - Schlaf: ${clip(c.schlaf)}${c.energie ? `\n- Energie: ${clip(c.energie)}` : ""}${c.fokus ? `\n- Fokus: ${clip(c.fokus)}` : ""}${c.business ? `\n- Business & Beruf: ${clip(c.business)}` : ""}${c.persoenlich ? `\n- Persönlichkeit (Pflege und Lernen): ${clip(c.persoenlich)}` : ""}
-- Mindset: ${clip(c.mindset)}${c.notiz ? `\n- Was heute besonders war: ${clip(c.notiz)}` : ""}${c.messwerte ? `\n- Gemessen von Handy und Uhr (Apple Health): ${clip(c.messwerte, 800)}` : ""}`;
+- Mindset: ${clip(c.mindset)}${c.notiz ? `\n- Was heute besonders war: ${clip(c.notiz)}` : ""}${c.messwerte ? `\n- Gemessen von Handy und Uhr (Apple Health, Wecker): ${clip(c.messwerte, 800)}` : ""}`;
 }
 
 export function onboardingPrompt(p: Profile): string {

@@ -308,10 +308,15 @@ void main() {
       expect(feed.schlaf.wecker.klang, 'Regen');
       expect(feed.schlaf.wecker.schlummern, isFalse);
 
+      await tippe(tester, 'schritte-20');
+      expect(feed.schlaf.wecker.schritte, 20);
+
       await tippe(tester, 'wecker-testen');
       expect(find.byKey(const ValueKey('wecker-schlummern')), findsNothing);
-      for (var i = 0; i < 30; i++) {
-        await tester.tap(find.byKey(const ValueKey('wecker-aufgabe')));
+      await tester.tap(find.byKey(const ValueKey('wecker-aufgabe')));
+      await tester.pumpAndSettle();
+      for (var i = 0; i < 20; i++) {
+        await tester.tap(find.byKey(const ValueKey('schritte-tipp')));
         await tester.pump();
       }
       await tester.pumpAndSettle();

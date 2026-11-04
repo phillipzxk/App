@@ -34,3 +34,20 @@ Entwurf 1: https://claude.ai/artifact/RXnj4ewgZMFePxvPxsJrE5 (ein Morgen: Sonnen
 
 - Echt testen geht erst auf Phillips iPhone (Apple-Entwicklerkonto, TestFlight).
 - Eigene Weckertöne (Vögel, Gong, Regen, Gitarre) als Tondateien; bis dahin der Standard-Weckton von Apple.
+
+## Schritte echt zählen (2026-11-04)
+
+Phillip hat den Entwurf https://claude.ai/artifact/AFZQvGVQsiGgvKPZZC9umn am 2026-11-04 freigegeben („jo“).
+
+- **Zählen:** Das iPhone zählt die Schritte selbst (CoreMotion, `CMPedometer`), nur solange die Aufgabe offen ist, und es wird nur die Zahl gespeichert.
+- **Beim ersten Mal:** Die App fragt „Darf ich deine Schritte zählen?“ mit „Erlauben“ oder „Lieber tippen“. Danach fragt das iPhone einmal nach „Bewegung und Fitness“.
+- **Ohne Erlaubnis, im Browser oder wenn das Zählen nicht klappt:** Man tippt bei jedem Schritt. Beim Zählen gibt es außerdem den Knopf „Zählt nicht? Dann tippen“.
+- **Bild:** Jeder Schritt setzt einen goldenen Fußabdruck auf einen Weg zur Sonne. Der Himmel wird heller, und am Ziel geht die Sonne auf.
+- **Anzahl:** 20, 30 oder 50, wählbar auf der Wecker-Seite. Standard ist 30. Das war Claudes Vorschlag, mit dem Entwurf freigegeben.
+- **Nach dem Aufstehen:** Auf dem Bildschirm „Du bist wach“ steht zusätzlich „30 Schritte in 41 Sekunden“. Der Coach bekommt im Check-in „Heute Morgen: 30 Schritte in 41 Sekunden, 2 Minuten nach dem Wecker.“ und sieht so, wie schnell man morgens in Gang kommt. Das war ebenfalls Claudes Vorschlag.
+
+**Stand im Code:**
+- `code/lib/schlaf/schritt_zaehler.dart` für Zähler, Wahl und Sätze
+- `code/lib/schlaf/schritt_weg.dart` für den Bildschirm
+- `GroundsetSchritte` in `AppDelegate.swift` (EventChannel `groundset/schritte`)
+- `NSMotionUsageDescription` in `Info.plist`
