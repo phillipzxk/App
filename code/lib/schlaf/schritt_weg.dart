@@ -1,16 +1,20 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
+import '../konto/konto_ui.dart' show bewegungAn;
 import '../training/training_widgets.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
+import 'morgen_szene.dart';
 import 'schritt_zaehler.dart';
 
 /// The step task of the alarm (vault Umsetzung/Echter Wecker, "Schritte
-/// echt zählen", Entwurf 1): every step sets a gold footprint on a path to
-/// the sun, the sky gets lighter, at the goal the sun rises.
+/// echt zählen", Entwurf 3): a morning scene in the app colours, every step
+/// sets a shoe print on the hill and pulls the sun higher, a gold ring
+/// fills around the count, at the goal the sun breaks through.
 class SchrittWeg extends StatefulWidget {
   const SchrittWeg({
     super.key,
@@ -38,8 +42,7 @@ class SchrittWeg extends StatefulWidget {
 
 enum _Modus { laedt, frage, zaehlen, tippen }
 
-class _SchrittWegState extends State<SchrittWeg>
-    with SingleTickerProviderStateMixin {
+class _SchrittWegState extends State<SchrittWeg> with TickerProviderStateMixin {
   _Modus _modus = _Modus.laedt;
   int _n = 0;
   DateTime? _start;
@@ -51,9 +54,16 @@ class _SchrittWegState extends State<SchrittWeg>
     duration: const Duration(milliseconds: 1200),
   );
 
+  /// The footprints walking on the question card.
+  late final AnimationController _fuesse = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2400),
+  );
+
   @override
   void initState() {
     super.initState();
+    if (bewegungAn) _fuesse.repeat();
     _waehle();
   }
 
@@ -124,6 +134,7 @@ class _SchrittWegState extends State<SchrittWeg>
   void dispose() {
     _abo?.cancel();
     _sonne.dispose();
+    _fuesse.dispose();
     super.dispose();
   }
 
@@ -132,31 +143,33 @@ class _SchrittWegState extends State<SchrittWeg>
     final rest = widget.ziel - _n;
     if (_n == 0) {
       return _modus == _Modus.zaehlen
-          ? 'Steh auf. Das Handy kannst du in der Hand halten oder einstecken.'
+          ? 'Steh auf. Handy in die Hand oder in die Tasche.'
           : 'Steh auf und tipp bei jedem Schritt.';
     }
     if (rest <= 3) return 'Noch $rest.';
     if (rest <= 10) return 'Noch $rest. Die Sonne kommt.';
-    if (_n * 2 >= widget.ziel) return 'Mehr als die Hälfte.';
-    return 'Gut, weiter so.';
+    if (_n * 3 >= widget.ziel) return 'Ein Drittel geschafft. Weiter so.';
+    return 'Gut, du bist auf den Beinen.';
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
     key: const ValueKey('schritt-weg'),
+    backgroundColor: CoachStyle.page,
     body: AnimatedBuilder(
       animation: _sonne,
-      builder: (_, child) => CustomPaint(
-        painter: _WegMaler(
-          n: _n,
-          ziel: widget.ziel,
-          auf: Curves.easeOut.transform(_sonne.value),
+      builder: (_, child) => MorgenSzene(
+        schritte: _n,
+        ziel: widget.ziel,
+        durch: Curves.easeOut.transform(_sonne.value),
+        trieb: Curves.easeOut.transform(
+          ((_sonne.value - .3) / .7).clamp(0.0, 1.0),
         ),
         child: child,
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(22, 24, 22, 20),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
           child: switch (_modus) {
             _Modus.laedt => const SizedBox.expand(),
             _Modus.frage => _frage(),
@@ -170,62 +183,73 @@ class _SchrittWegState extends State<SchrittWeg>
   Widget _frage() => Column(
     mainAxisAlignment: MainAxisAlignment.end,
     children: [
-      Container(
-        key: const ValueKey('schritte-frage'),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: const Color(0xB81E1812),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: const Color(0x4DF3D79A)),
+      TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: const Duration(milliseconds: 900),
+        curve: Curves.easeOutCubic,
+        builder: (_, t, child) => Opacity(
+          opacity: t,
+          child: Transform.translate(
+            offset: Offset(0, 40 * (1 - t)),
+            child: child,
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.directions_walk,
-              color: CoachStyle.goldLight,
-              size: 30,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Darf ich deine Schritte zählen?',
-              style: tTitel.copyWith(fontSize: 21),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Damit der Wecker merkt, dass du wirklich aufgestanden bist. Ich '
-              'zähle nur, solange diese Aufgabe offen ist, und speichere nur '
-              'die Zahl.',
-              style: tText,
-            ),
-            const SizedBox(height: 16),
-            _GoldKnopf(
-              key: const ValueKey('schritte-erlauben'),
-              text: 'Erlauben',
-              onTap: () => _antwort(true),
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                key: const ValueKey('schritte-tippen'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: CoachStyle.ink,
-                  side: const BorderSide(color: Color(0x4DF3D79A)),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: const StadiumBorder(),
+        child: _Glas(
+          key: const ValueKey('schritte-frage'),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                height: 40,
+                width: double.infinity,
+                child: AnimatedBuilder(
+                  animation: _fuesse,
+                  builder: (_, _) =>
+                      CustomPaint(painter: _GehendeFuesse(_fuesse.value)),
                 ),
-                onPressed: () => _antwort(false),
-                child: const Text('Lieber tippen'),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Danach fragt das iPhone einmal nach „Bewegung und Fitness“.',
-              style: tSoft.copyWith(fontSize: 12),
-            ),
-          ],
+              const SizedBox(height: 10),
+              GoldText(
+                'Darf ich deine Schritte zählen?',
+                style: tTitel.copyWith(fontSize: 21, height: 1.22),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Dann merkt der Wecker, dass du wirklich aufgestanden bist. '
+                'Ich zähle nur, solange die Aufgabe offen ist, und speichere '
+                'nur die Zahl.',
+                style: tText,
+              ),
+              const SizedBox(height: 16),
+              GoldKnopf(
+                key: const ValueKey('schritte-erlauben'),
+                text: 'Erlauben',
+                onTap: () => _antwort(true),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  key: const ValueKey('schritte-tippen'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: CoachStyle.ink,
+                    side: const BorderSide(color: Color(0x47F3D79A)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: const StadiumBorder(),
+                    textStyle: tTitel.copyWith(fontSize: 14.5),
+                  ),
+                  onPressed: () => _antwort(false),
+                  child: const Text('Lieber tippen'),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Danach fragt das iPhone einmal nach „Bewegung und Fitness“.',
+                style: tSoft.copyWith(fontSize: 11.5),
+              ),
+            ],
+          ),
         ),
       ),
     ],
@@ -233,26 +257,35 @@ class _SchrittWegState extends State<SchrittWeg>
 
   Widget _gehen() => Column(
     children: [
-      const SizedBox(height: 40),
-      GoldText(
-        '$_n',
-        key: const ValueKey('schritte-zahl'),
-        style: tTitel.copyWith(
-          fontSize: 72,
-          fontFeatures: const [FontFeature.tabularFigures()],
-        ),
-      ),
-      Text('von ${widget.ziel} Schritten', style: tSoft),
+      const SizedBox(height: 34),
+      _Ring(n: _n, ziel: widget.ziel),
       const Spacer(),
-      Text(
-        _hinweis ?? _satz,
-        key: const ValueKey('schritte-satz'),
-        textAlign: TextAlign.center,
-        style: tText.copyWith(color: CoachStyle.ink),
+      AnimatedSwitcher(
+        duration: const Duration(milliseconds: 350),
+        transitionBuilder: (c, a) => FadeTransition(
+          opacity: a,
+          child: SlideTransition(
+            position: Tween(
+              begin: const Offset(0, .3),
+              end: Offset.zero,
+            ).animate(a),
+            child: c,
+          ),
+        ),
+        child: Text(
+          _hinweis ?? _satz,
+          key: ValueKey(_hinweis ?? _satz),
+          textAlign: TextAlign.center,
+          style: tTitel.copyWith(
+            fontSize: 15,
+            fontWeight: FontWeight.w400,
+            height: 1.4,
+          ),
+        ),
       ),
       const SizedBox(height: 14),
       if (_modus == _Modus.tippen)
-        _GoldKnopf(
+        GoldKnopf(
           key: const ValueKey('schritte-tipp'),
           text: 'Schritt',
           onTap: _fertig ? null : _tipp,
@@ -268,129 +301,255 @@ class _SchrittWegState extends State<SchrittWeg>
         ),
       const SizedBox(height: 8),
       Text(
-        'Ist die Aufgabe nach 3 Minuten nicht erledigt, klingelt der Wecker '
-        'noch einmal.',
+        'Nicht erledigt nach 3 Minuten? Dann klingelt er noch einmal.',
         textAlign: TextAlign.center,
-        style: tSoft.copyWith(fontSize: 12),
+        style: tSoft.copyWith(fontSize: 11.5),
       ),
     ],
   );
 }
 
-class _GoldKnopf extends StatelessWidget {
-  const _GoldKnopf({super.key, required this.text, required this.onTap});
-  final String text;
-  final VoidCallback? onTap;
+/// The count in a gold ring that fills with every step; the number hops.
+class _Ring extends StatelessWidget {
+  const _Ring({required this.n, required this.ziel});
+  final int n;
+  final int ziel;
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    width: double.infinity,
-    child: FilledButton(
-      style: FilledButton.styleFrom(
-        backgroundColor: CoachStyle.gold,
-        foregroundColor: CoachStyle.goldInk,
-        padding: const EdgeInsets.symmetric(vertical: 15),
-        shape: const StadiumBorder(),
+    width: 160,
+    height: 160,
+    child: TweenAnimationBuilder<double>(
+      tween: Tween(end: ziel == 0 ? 0 : n / ziel),
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.easeOutBack,
+      builder: (_, wert, child) =>
+          CustomPaint(painter: _RingMaler(wert), child: child),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TweenAnimationBuilder<double>(
+              key: ValueKey(n),
+              tween: Tween(begin: n == 0 ? 1 : 1.18, end: 1),
+              duration: const Duration(milliseconds: 260),
+              curve: Curves.easeOutBack,
+              builder: (_, s, child) => Transform.scale(scale: s, child: child),
+              child: GoldText(
+                '$n',
+                key: const ValueKey('schritte-zahl'),
+                style: tTitel.copyWith(
+                  fontSize: 58,
+                  fontWeight: FontWeight.w700,
+                  height: 1,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'von $ziel',
+              style: tSoft.copyWith(color: const Color(0xB8EFE5D2)),
+            ),
+          ],
+        ),
       ),
-      onPressed: onTap,
-      child: Text(text),
     ),
   );
 }
 
-/// Sky, sun and the path of footprints.
-class _WegMaler extends CustomPainter {
-  _WegMaler({required this.n, required this.ziel, required this.auf});
-  final int n;
-  final int ziel;
-
-  /// The sunrise at the end, 0 to 1.
-  final double auf;
-
-  Offset _punkt(double t, Size s) => Offset(
-    s.width * (.5 + .18 * math.sin(t * math.pi * 2.2) * (1 - t * .5)),
-    s.height * (.86 - .62 * t),
-  );
+class _RingMaler extends CustomPainter {
+  _RingMaler(this.wert);
+  final double wert;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final p = ziel == 0 ? 0.0 : n / ziel;
-    final himmel = Rect.fromLTWH(0, 0, size.width, size.height);
-    canvas.drawRect(
-      himmel,
+    final m = size.center(Offset.zero);
+    final r = size.shortestSide / 2 - 6;
+    canvas
+      ..drawCircle(m, r, Paint()..color = const Color(0x590C090E))
+      ..drawCircle(
+        m,
+        r,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 5
+          ..color = const Color(0x24EFE5D2),
+      );
+    if (wert <= 0) return;
+    final bogen = Rect.fromCircle(center: m, radius: r);
+    canvas.drawArc(
+      bogen,
+      -math.pi / 2,
+      math.pi * 2 * wert.clamp(0.0, 1.0),
+      false,
       Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color.lerp(const Color(0xFF1B1530), const Color(0xFF3B5A8A), p)!,
-            Color.lerp(const Color(0xFF4A2B3A), const Color(0xFFD99A68), p)!,
-            Color.lerp(const Color(0xFF2A1A14), const Color(0xFF784628), p)!,
-          ],
-          stops: const [0, .62, 1],
-        ).createShader(himmel),
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 5
+        ..strokeCap = StrokeCap.round
+        ..shader = const SweepGradient(
+          startAngle: -math.pi / 2,
+          endAngle: math.pi * 1.5,
+          colors: [Color(0xFFC99A52), Color(0xFFFFF0C8), Color(0xFFC99A52)],
+        ).createShader(bogen),
     );
-    // The sun: brighter with every step, rises at the end.
-    final sonne = Offset(size.width / 2, size.height * (.30 + .22 * (1 - auf)));
-    final r = size.width * .11;
-    canvas.drawCircle(
-      sonne,
-      r * 3,
-      Paint()
-        ..shader = RadialGradient(
-          colors: [
-            const Color(0xFFFFECBE).withValues(alpha: .35 + .5 * auf),
-            const Color(0x00FFECBE),
-          ],
-        ).createShader(Rect.fromCircle(center: sonne, radius: r * 3)),
-    );
-    canvas.drawCircle(
-      sonne,
-      r * (.6 + .4 * p),
-      Paint()..color = const Color(0xFFFFF0CD).withValues(alpha: .25 + .75 * p),
-    );
-    // The path as faint dots, then one footprint per step.
-    final punkt = Paint()..color = const Color(0x2EEFE5D2);
-    for (var i = 0; i < ziel; i++) {
-      canvas.drawCircle(_punkt(i / math.max(1, ziel - 1), size), 2, punkt);
-    }
-    for (var i = 0; i < n; i++) {
-      final t = i / math.max(1, ziel - 1);
-      final a = _punkt(t, size);
-      final b = _punkt(math.min(1, t + .01), size);
-      final winkel = math.atan2(b.dy - a.dy, b.dx - a.dx) + math.pi / 2;
-      final seite = i.isOdd ? 1.0 : -1.0;
-      final neu = i == n - 1;
-      final s = 1.6 * (1 - .35 * t);
+  }
+
+  @override
+  bool shouldRepaint(_RingMaler old) => old.wert != wert;
+}
+
+/// Six gold footprints that appear one after another, like walking.
+class _GehendeFuesse extends CustomPainter {
+  _GehendeFuesse(this.t);
+  final double t;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (var i = 0; i < 6; i++) {
+      final phase = (t - i * .125) % 1;
+      final a = phase < .12
+          ? phase / .12
+          : phase < .7
+          ? 1 - (phase - .12) / .58 * .2
+          : math.max(0, .8 - (phase - .7) / .3 * .8);
+      if (a <= 0) continue;
+      final o = Offset(10 + i * 26, i.isOdd ? 10 : 26);
+      final s = .7 + .3 * math.min(1, phase / .12);
+      final fuss = Paint()
+        ..color = CoachStyle.goldLight.withValues(alpha: a.toDouble());
       canvas
         ..save()
-        ..translate(
-          a.dx + seite * 7 * math.cos(winkel),
-          a.dy + seite * 7 * math.sin(winkel),
-        )
-        ..rotate(winkel);
-      final fuss = Paint()
-        ..color = neu ? const Color(0xFFF6DC9C) : const Color(0xD9E0BF7E);
-      if (neu) {
-        canvas.drawCircle(
-          Offset.zero,
-          12 * s,
-          Paint()
-            ..color = const Color(0x55F6DC9C)
-            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
-        );
-      }
-      canvas
+        ..translate(o.dx, o.dy)
+        ..rotate(math.pi / 2)
+        ..scale(s)
         ..drawOval(
-          Rect.fromCenter(center: Offset.zero, width: 6.4 * s, height: 11 * s),
+          Rect.fromCenter(center: const Offset(0, -2.5), width: 7, height: 9),
           fuss,
         )
-        ..drawCircle(Offset(0, -7.6 * s), 2 * s, fuss)
+        ..drawOval(
+          Rect.fromCenter(center: const Offset(0, 5), width: 5.4, height: 5.6),
+          fuss,
+        )
         ..restore();
     }
   }
 
   @override
-  bool shouldRepaint(_WegMaler old) =>
-      old.n != n || old.auf != auf || old.ziel != ziel;
+  bool shouldRepaint(_GehendeFuesse old) => old.t != t;
+}
+
+/// A glass card in the app colours.
+class _Glas extends StatelessWidget {
+  const _Glas({super.key, required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => ClipRRect(
+    borderRadius: BorderRadius.circular(24),
+    child: BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+        decoration: BoxDecoration(
+          color: const Color(0x9918130E),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0x47F3D79A)),
+        ),
+        child: child,
+      ),
+    ),
+  );
+}
+
+/// The main gold button with a soft shine running over it.
+class GoldKnopf extends StatefulWidget {
+  const GoldKnopf({super.key, required this.text, required this.onTap});
+  final String text;
+  final VoidCallback? onTap;
+
+  @override
+  State<GoldKnopf> createState() => _GoldKnopfState();
+}
+
+class _GoldKnopfState extends State<GoldKnopf>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _glanz = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 3600),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    if (bewegungAn) _glanz.repeat();
+  }
+
+  @override
+  void dispose() {
+    _glanz.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: double.infinity,
+    child: Material(
+      color: Colors.transparent,
+      shape: const StadiumBorder(),
+      clipBehavior: Clip.antiAlias,
+      child: Ink(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: widget.onTap == null
+                ? const [Color(0xFF8A7A5E), Color(0xFF6E5F46)]
+                : const [
+                    Color(0xFFF6DC9C),
+                    Color(0xFFE0BF7E),
+                    Color(0xFFB8904C),
+                  ],
+          ),
+        ),
+        child: InkWell(
+          onTap: widget.onTap,
+          child: AnimatedBuilder(
+            animation: _glanz,
+            builder: (_, child) {
+              final x = _glanz.value < .6
+                  ? -1.4
+                  : -1.4 + (_glanz.value - .6) / .4 * 2.8;
+              return Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment(x - .4, -.3),
+                    end: Alignment(x + .4, .3),
+                    colors: const [
+                      Color(0x00FFFFFF),
+                      Color(0x80FFFFFF),
+                      Color(0x00FFFFFF),
+                    ],
+                  ),
+                ),
+                child: child,
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              child: Center(
+                child: Text(
+                  widget.text,
+                  style: tTitel.copyWith(
+                    fontSize: 14.5,
+                    color: CoachStyle.goldInk,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }

@@ -1,13 +1,17 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
 import '../ernaehrung/ernaehrung_coach.dart' show fotoAufnahme;
 import '../sleep/schlafzeiten.dart';
+import '../konto/konto_ui.dart' show bewegungAn;
 import '../training/training_widgets.dart';
+import '../ui/coach_widgets.dart';
 import '../ui/coach_style.dart';
+import 'morgen_szene.dart';
 import 'schlaf_logik.dart';
 import 'schritt_weg.dart';
 import 'schritt_zaehler.dart';
@@ -156,24 +160,26 @@ class _WeckerAufgabeState extends State<WeckerAufgabe> {
         onFertig: _schritteFertig,
       );
     }
+    if (wach != null) {
+      return _WachSeite(
+        name: widget.name,
+        geklingelt: widget.geklingelt,
+        wach: wach,
+        heute: widget.heute,
+        licht: _aufgabe == 'licht',
+        schritte: _aufgabe == 'schritte' ? widget.schritte : 0,
+        schritteSatz: _schritteSatz,
+        onFertig: widget.onFertig,
+      );
+    }
     return Scaffold(
-      body: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: wach != null
-                ? const [Color(0xFF5B84AD), Color(0xFFF2D39A)]
-                : _aufgabe == 'licht'
-                ? const [Color(0xFF0E0C14), Color(0xFF2B2438)]
-                : const [Color(0xFF2B2B44), Color(0xFF6D7FA0)],
-          ),
-        ),
+      backgroundColor: CoachStyle.page,
+      body: MorgenSzene(
         child: SafeArea(
           child: Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
-              child: wach == null ? _aufgabeKarte() : _wachKarte(wach),
+              child: _aufgabeKarte(),
             ),
           ),
         ),
@@ -259,74 +265,256 @@ class _WeckerAufgabeState extends State<WeckerAufgabe> {
       ),
     );
   }
+}
 
-  Widget _wachKarte(DateTime wach) {
-    final spaeter = wach.difference(widget.geklingelt).inMinutes;
-    final zeit = formatUhrzeit(wach.hour * 60 + wach.minute);
-    final nach = spaeter <= 0
+/// "Du bist wach" in the morning scene (Entwurf 3): the sun breaks through,
+/// a sprout grows, the lines come in one after another and the coach types
+/// one short sentence about the day.
+class _WachSeite extends StatefulWidget {
+  const _WachSeite({
+    required this.name,
+    required this.geklingelt,
+    required this.wach,
+    required this.heute,
+    required this.licht,
+    required this.schritte,
+    required this.schritteSatz,
+    required this.onFertig,
+  });
+
+  final String name;
+  final DateTime geklingelt;
+  final DateTime wach;
+  final String? heute;
+  final bool licht;
+  final int schritte;
+  final String? schritteSatz;
+  final VoidCallback onFertig;
+
+  @override
+  State<_WachSeite> createState() => _WachSeiteState();
+}
+
+class _WachSeiteState extends State<_WachSeite>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 3200),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    bewegungAn ? _c.forward() : _c.value = 1;
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  int get _spaeter => widget.wach.difference(widget.geklingelt).inMinutes;
+
+  /// The coach's line: honest about the start, then today, then light.
+  String get _coach => [
+    _spaeter <= 2
+        ? 'Starker Start.'
+        : _spaeter <= 10
+        ? 'Gut, du bist auf.'
+        : 'Spät, aber du bist auf. Das zählt.',
+    ?widget.heute,
+    widget.licht
+        ? 'Lass das Licht an, dann der Check-in.'
+        : 'Jetzt kurz ans Licht, dann der Check-in.',
+  ].join(' ');
+
+  double _ab(double von, double dauer) =>
+      ((_c.value * 3.2 - von) / dauer).clamp(0.0, 1.0);
+
+  Widget _rein(double von, Widget kind) {
+    final t = Curves.easeOutCubic.transform(_ab(von, .7));
+    return Opacity(
+      opacity: t,
+      child: Transform.translate(offset: Offset(0, 14 * (1 - t)), child: kind),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final zeit = formatUhrzeit(widget.wach.hour * 60 + widget.wach.minute);
+    final nach = _spaeter <= 0
         ? 'direkt nach dem Wecker'
-        : spaeter == 1
+        : _spaeter == 1
         ? '1 Minute nach dem Wecker'
-        : '$spaeter Minuten nach dem Wecker';
-    return Column(
-      key: const ValueKey('wecker-wach'),
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Icon(Icons.check_circle_outline, size: 60, color: Colors.white),
-        const SizedBox(height: 10),
-        Text(
-          widget.name.isEmpty
-              ? 'Du bist wach.'
-              : 'Du bist wach, ${widget.name}.',
-          textAlign: TextAlign.center,
-          style: tTitel.copyWith(fontSize: 24, color: Colors.white),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          [
-            '$zeit aufgestanden, $nach.',
-            ?widget.heute,
-            _aufgabe == 'licht'
-                ? 'Lass das Licht an, dann der Check-in.'
-                : 'Jetzt kurz ans Licht, dann der Check-in.',
-          ].join(' '),
-          textAlign: TextAlign.center,
-          style: tText.copyWith(color: Colors.white),
-        ),
-        if (_schritteSatz != null) ...[
-          const SizedBox(height: 12),
-          Container(
-            key: const ValueKey('wecker-schritte-satz'),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-            decoration: BoxDecoration(
-              color: const Color(0x8CFFFFFF),
-              borderRadius: BorderRadius.circular(99),
-            ),
-            child: Text(
-              _schritteSatz!,
-              style: tText.copyWith(
-                color: CoachStyle.goldInk,
-                fontWeight: FontWeight.w600,
+        : '$_spaeter Minuten nach dem Wecker';
+    return Scaffold(
+      backgroundColor: CoachStyle.page,
+      body: AnimatedBuilder(
+        animation: _c,
+        builder: (_, _) {
+          final coach = _coach;
+          final getippt = (coach.length * _ab(1.6, 1.4)).round();
+          return MorgenSzene(
+            schritte: widget.schritte,
+            ziel: math.max(1, widget.schritte),
+            durch: widget.schritte > 0
+                ? 1
+                : Curves.easeOut.transform(_ab(0, 1.2)),
+            trieb: Curves.easeOut.transform(_ab(.4, 1.4)),
+            child: DecoratedBox(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0x00000000),
+                    Color(0x8C0D0B08),
+                    Color(0x330D0B08),
+                  ],
+                  stops: [.38, .62, 1],
+                ),
+              ),
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                  child: Column(
+                    key: const ValueKey('wecker-wach'),
+                    children: [
+                      const Spacer(flex: 5),
+                      _rein(
+                        .2,
+                        GoldText(
+                          widget.name.isEmpty
+                              ? 'Du bist wach.'
+                              : 'Du bist wach, ${widget.name}.',
+                          style: tTitel.copyWith(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w700,
+                            height: 1.2,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      _rein(
+                        .45,
+                        Text(
+                          '$zeit aufgestanden, $nach.',
+                          textAlign: TextAlign.center,
+                          style: tText.copyWith(fontSize: 14),
+                        ),
+                      ),
+                      if (widget.schritteSatz != null) ...[
+                        const SizedBox(height: 12),
+                        _rein(
+                          .7,
+                          Container(
+                            key: const ValueKey('wecker-schritte-satz'),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 7,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0x8C120F0B),
+                              borderRadius: BorderRadius.circular(99),
+                              border: Border.all(
+                                color: const Color(0x73E0BF7E),
+                              ),
+                            ),
+                            child: Text(
+                              widget.schritteSatz!,
+                              style: tText.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 14),
+                      _rein(
+                        1.1,
+                        Container(
+                          key: const ValueKey('wecker-coach'),
+                          constraints: const BoxConstraints(maxWidth: 320),
+                          padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xB818140F),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: const Color(0x38E0BF7E)),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 30,
+                                height: 30,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Color(0xFFF6DC9C),
+                                      Color(0xFFC99A52),
+                                    ],
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.spa_outlined,
+                                  size: 16,
+                                  color: CoachStyle.goldInk,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                // The rest stays invisible so the card
+                                // keeps its height while the coach types.
+                                child: Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: coach.substring(0, getippt),
+                                      ),
+                                      TextSpan(
+                                        text: coach.substring(getippt),
+                                        style: const TextStyle(
+                                          color: Color(0x00000000),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  style: tText,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const Spacer(flex: 2),
+                      _rein(
+                        1.6,
+                        SizedBox(
+                          width: 300,
+                          child: FilledButton(
+                            key: const ValueKey('wecker-weiter'),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: CoachStyle.goldLight,
+                              foregroundColor: CoachStyle.goldInk,
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              shape: const StadiumBorder(),
+                              textStyle: tTitel.copyWith(fontSize: 14.5),
+                            ),
+                            onPressed: widget.onFertig,
+                            child: const Text('Weiter zum Check-in'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
-        ],
-        const SizedBox(height: 24),
-        SizedBox(
-          width: 280,
-          child: FilledButton(
-            key: const ValueKey('wecker-weiter'),
-            style: FilledButton.styleFrom(
-              backgroundColor: CoachStyle.gold,
-              foregroundColor: CoachStyle.goldInk,
-              padding: const EdgeInsets.symmetric(vertical: 15),
-              shape: const StadiumBorder(),
-            ),
-            onPressed: widget.onFertig,
-            child: const Text('Weiter zum Check-in'),
-          ),
-        ),
-      ],
+          );
+        },
+      ),
     );
   }
 }
