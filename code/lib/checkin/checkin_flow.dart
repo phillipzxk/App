@@ -83,7 +83,7 @@ class _CheckInFlowState extends State<CheckInFlow> {
       schlaf: _picked['Schlaf']!,
       energie: _picked['Energie']!,
       fokus: _picked['Fokus']!,
-      persoenlich: _picked['Persönlichkeit']!,
+      persoenlich: _picked['Ausstrahlung']!,
       mindset: _picked['Mindset']!,
       notiz: _note.text.trim(),
       messwerte: messwerte,

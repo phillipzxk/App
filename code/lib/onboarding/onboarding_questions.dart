@@ -167,7 +167,7 @@ final List<OnboardingQuestion> onboardingQuestions = [
     apply: (p, a) => p.copyWith(business: a),
   ),
   OnboardingQuestion(
-    topic: 'Persönlichkeit',
+    topic: 'Ausstrahlung',
     question: 'Woran willst du an dir selbst arbeiten?',
     options: const [
       'Ich fühle mich mit meinem Aussehen nicht wohl',

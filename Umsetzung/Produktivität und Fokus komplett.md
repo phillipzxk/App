@@ -37,7 +37,7 @@ Aufteilung (Vorschlag Claude):
 
 Phillip: „Okay ja machen wir so“. Business & Beruf ist kein eigener Bereich mehr (siehe [[Business und Beruf komplett]]). Dieser Bereich heißt jetzt **Fokus & Arbeit** und hat 5 Seiten: Heute, **Ziele**, Handy, Rhythmus, Routinen.
 
-- **Ziele:** Hebel der Woche (groß, gold), Dein Weg zum Ziel (Meilensteine als Äste), Skill-Leiter. Gilt für Job, Studium, Schule oder eigene Firma. Der Coach-Satz oben fragt nach der einen Aktion, die dich diese Woche bei der Arbeit am weitesten bringt.
+- **Ziele:** Hebel der Woche (groß, gold) und Dein Weg zum Ziel (Meilensteine als Äste). Die Skill-Leiter ist raus, weil es „Dein Skill“ schon unter Ausstrahlung › Wissen gibt (Phillip „Okay gut“ 2026-11-04). Gilt für Job, Studium, Schule oder eigene Firma. Der Coach-Satz oben fragt nach der einen Aktion, die dich diese Woche bei der Arbeit am weitesten bringt.
 - Auf Heute zeigt die Wurzel „Fokus & Arbeit“ zusätzlich den Hebel, zum Beispiel „Hebel 1 von 3“.
 - Der Wert des Bereichs bleibt wie bisher (Fokus, Fokus-Minuten, handyfreier Morgen und Check-in).
 - Im Coach heißt der Bereich „Fokus & Arbeit“. Business wird nicht mehr bewertet.

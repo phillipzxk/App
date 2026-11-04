@@ -72,7 +72,6 @@ extension _Produktiv on _HomePageState {
     final astText = ast == null ? null : bz.meilensteine[ast].text;
     final astAnt = astText == null ? null : astAnteil(astText, bz, jetzt);
     final erreicht = bz.meilensteine.where((m) => m.an).length;
-    final sk = bz.skill;
     final verlauf = _verlauf(_pw, jetzt);
     final da = [for (final v in verlauf) ?v];
     final schnitt = da.isEmpty
@@ -298,6 +297,7 @@ extension _Produktiv on _HomePageState {
             id: 'b-baum',
             titel: 'Dein Weg zum Ziel',
             icon: Icons.park_outlined,
+            groesse: KachelGroesse.mittel,
             hot: erreicht == 0
                 ? null
                 : '$erreicht ${erreicht == 1 ? 'Ast' : 'Äste'}',
@@ -319,28 +319,6 @@ extension _Produktiv on _HomePageState {
               'Jeder Meilenstein ist ein Ast, egal ob Prüfung, Beförderung '
                   'oder erste Kunden. So siehst du, wie du vorankommst.',
               (u) => BaumSeite(u: u),
-            ),
-          ),
-          BKachel(
-            id: 'b-skill',
-            titel: 'Skill-Leiter',
-            icon: Icons.stairs_outlined,
-            text: sk?.name ?? 'Welcher Skill?',
-            bild: sk == null
-                ? null
-                : SizedBox(
-                    width: 90,
-                    child: Striche(n: sk.erreicht, von: sk.stufen.length),
-                  ),
-            unter: sk == null
-                ? '7 Stufen, eine nach der anderen'
-                : 'Stufe ${sk.erreicht} von ${sk.stufen.length}',
-            feld: _bFeld(
-              'Skill-Leiter',
-              Icons.stairs_outlined,
-              'Ein Skill für die Arbeit, Stufe für Stufe, jede baut auf der '
-                  'letzten auf.',
-              (u) => SkillSeite(u: u),
             ),
           ),
         ],

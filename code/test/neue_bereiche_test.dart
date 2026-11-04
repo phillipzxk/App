@@ -210,21 +210,7 @@ void main() {
       expect(feed.business.hebel.single.erledigt, 1);
     });
 
-    testWidgets('Fokus & Arbeit: skill ladder from the coach', (tester) async {
-      final (feed, _) = await _start(tester);
-      await openBereich(tester, 'produktiv');
-      await openKachel(tester, 'b-skill');
-      await tester.enterText(
-        find.byKey(const ValueKey('skill-feld')),
-        'Verkaufen',
-      );
-      await _tippe(tester, 'skill-start');
-      expect(feed.business.skill!.stufen, hasLength(7));
-      await _tippe(tester, 'skill-weiter');
-      expect(feed.business.skill!.erreicht, 1);
-    });
-
-    testWidgets('Persönlichkeit: care ticks and the course opens lesson 2 '
+    testWidgets('Ausstrahlung: care ticks and the course opens lesson 2 '
         'after the right answer', (tester) async {
       final (feed, coach) = await _start(tester);
       await openBereich(tester, 'persoenlich');
@@ -251,7 +237,7 @@ void main() {
       expect(feed.persoenlich.kurs!.erreicht, 1);
     });
 
-    testWidgets('Persönlichkeit: small things and the library', (tester) async {
+    testWidgets('Ausstrahlung: small things and the library', (tester) async {
       final (feed, _) = await _start(tester);
       await openBereich(tester, 'persoenlich');
       await openKachel(tester, 'pe-kleine');

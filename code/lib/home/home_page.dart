@@ -1256,7 +1256,7 @@ class _HomePageState extends State<HomePage> {
       ),
       WurzelBereich(
         id: 'persoenlich',
-        name: 'Persönlichkeit',
+        name: 'Ausstrahlung',
         icon: Icons.person_outline,
         wert: diff(peWoche).$1,
         diff: diff(peWoche).$2,

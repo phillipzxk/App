@@ -33,7 +33,7 @@ export type CheckIn = {
   kiAntwort?: string;
 };
 
-export const COACH_STYLE = `Du bist der Coach in der App Groundset. Du begleitest Menschen, die ihr Leben verbessern wollen, in vier Bereichen: Körper (Training, Ernährung, Schlaf), Fokus & Arbeit (Energie, Fokus und ihre Ziele bei der Arbeit, egal ob Job, Studium, Schule oder eigene Firma), Persönlichkeit (Aussehen, Pflege, Auftreten, Lernen) und Mindset. Du schreibst auf Deutsch und duzt.
+export const COACH_STYLE = `Du bist der Coach in der App Groundset. Du begleitest Menschen, die ihr Leben verbessern wollen, in vier Bereichen: Körper (Training, Ernährung, Schlaf), Fokus & Arbeit (Energie, Fokus und ihre Ziele bei der Arbeit, egal ob Job, Studium, Schule oder eigene Firma), Ausstrahlung (Aussehen, Pflege, Auftreten, Stimme, Lernen) und Mindset. Du schreibst auf Deutsch und duzt.
 
 So schreibst du:
 - Direkt und ehrlich, wie ein Trainer, der die Person kennt.
@@ -66,7 +66,7 @@ export function profileBlock(p: Profile): string {
 Vorname: ${clip(p.name, 60)}
 Ziel und was sie dafür verändern will: ${clip(p.ziel)}
 Warum sie es gerade jetzt angeht: ${clip(p.motivation)}
-Wie jemand, der sie gut kennt, sie beschreiben würde (und ihre Stärke): ${clip(p.level)}${zeile("Körper: wo es bei Schlaf, Ernährung oder Training hakt (und was schon klappt)", p.koerper)}${zeile("Probleme beim Training (und was ihr leicht fällt)", p.training)}${zeile("Probleme mit der Ernährung (und was sie schon weiß oder angepasst hat)", p.ernaehrung)}${zeile("Probleme mit Schlaf und Energie (und wann sie sich fit fühlt)", p.schlafEnergie)}${zeile("Fokus: was ihren Fokus frisst (und wann sie am klarsten ist)", p.produktiv)}${zeile("Arbeit: wo sie bei der Arbeit steht (und was sie gerade macht: Job, Studium, Schule oder eigene Firma)", p.business)}${zeile("Persönlichkeit: woran sie an sich arbeiten will (und was sie lernen will)", p.persoenlich)}
+Wie jemand, der sie gut kennt, sie beschreiben würde (und ihre Stärke): ${clip(p.level)}${zeile("Körper: wo es bei Schlaf, Ernährung oder Training hakt (und was schon klappt)", p.koerper)}${zeile("Probleme beim Training (und was ihr leicht fällt)", p.training)}${zeile("Probleme mit der Ernährung (und was sie schon weiß oder angepasst hat)", p.ernaehrung)}${zeile("Probleme mit Schlaf und Energie (und wann sie sich fit fühlt)", p.schlafEnergie)}${zeile("Fokus: was ihren Fokus frisst (und wann sie am klarsten ist)", p.produktiv)}${zeile("Arbeit: wo sie bei der Arbeit steht (und was sie gerade macht: Job, Studium, Schule oder eigene Firma)", p.business)}${zeile("Ausstrahlung: woran sie an sich arbeiten will (und was sie lernen will)", p.persoenlich)}
 </nutzer>`;
 }
 
@@ -78,7 +78,7 @@ function checkInBlock(c: CheckIn): string {
   return `Tag ${clip(c.datum, 10)}${tag}:
 - Training: ${clip(c.training)}
 - Ernährung: ${clip(c.ernaehrung)}
-- Schlaf: ${clip(c.schlaf)}${c.energie ? `\n- Energie: ${clip(c.energie)}` : ""}${c.fokus ? `\n- Fokus: ${clip(c.fokus)}` : ""}${c.business ? `\n- Arbeit: ${clip(c.business)}` : ""}${c.persoenlich ? `\n- Persönlichkeit (Pflege und Lernen): ${clip(c.persoenlich)}` : ""}
+- Schlaf: ${clip(c.schlaf)}${c.energie ? `\n- Energie: ${clip(c.energie)}` : ""}${c.fokus ? `\n- Fokus: ${clip(c.fokus)}` : ""}${c.business ? `\n- Arbeit: ${clip(c.business)}` : ""}${c.persoenlich ? `\n- Ausstrahlung (Pflege und Lernen): ${clip(c.persoenlich)}` : ""}
 - Mindset: ${clip(c.mindset)}${c.notiz ? `\n- Was heute besonders war: ${clip(c.notiz)}` : ""}${c.messwerte ? `\n- Gemessen von Handy und Uhr (Apple Health, Wecker): ${clip(c.messwerte, 800)}` : ""}`;
 }
 
@@ -113,7 +113,7 @@ const AREA: Record<string, string> = {
   ernaehrung: "Ernährung",
   schlaf: "Schlaf",
   produktiv: "Fokus & Arbeit",
-  persoenlich: "Persönlichkeit",
+  persoenlich: "Ausstrahlung",
   mindset: "Mindset",
 };
 
@@ -148,7 +148,7 @@ ${earlier ? `Ihre letzten Tage:\n<nutzer>\n${earlier}\n</nutzer>\n\n` : ""}Ihr C
 ${checkInBlock(today)}
 </nutzer>
 
-Bewerte heute jeden Bereich mit einer ganzen Zahl von 1 bis 10. 10 heißt: läuft super, du musst kaum etwas sagen. 1 heißt: hier hängt es gerade stark. Energie, Fokus und Fortschritt bei der Arbeit zählen zu Fokus & Arbeit ("produktiv"), Pflege und Lernen sind Persönlichkeit ("persoenlich"). Ein bewusst freier Tag ist kein schlechter Tag. Beziehe die letzten Tage mit ein, aber der heutige Tag zählt am meisten. Erfinde keine Vorgeschichte, die nicht in ihren Tagen steht.
+Bewerte heute jeden Bereich mit einer ganzen Zahl von 1 bis 10. 10 heißt: läuft super, du musst kaum etwas sagen. 1 heißt: hier hängt es gerade stark. Energie, Fokus und Fortschritt bei der Arbeit zählen zu Fokus & Arbeit ("produktiv"), Pflege und Lernen sind Ausstrahlung ("persoenlich"). Ein bewusst freier Tag ist kein schlechter Tag. Beziehe die letzten Tage mit ein, aber der heutige Tag zählt am meisten. Erfinde keine Vorgeschichte, die nicht in ihren Tagen steht.
 
 Schreib zu jedem Bereich genau einen kurzen Satz (höchstens 20 Wörter), warum der Wert gerade da steht. Nenne einen konkreten Zusammenhang, wenn es einen gibt, zum Beispiel mit den letzten Tagen oder einem anderen Bereich. Keine Tipps, keine Floskeln, nicht den Wert wiederholen.
 
@@ -184,7 +184,7 @@ Ihre Check-ins, ältester zuerst:
 ${tage}
 </nutzer>
 ${alt ? `\nMuster, die du ihr schon gezeigt hast:\n<nutzer>\n${alt}\n</nutzer>\n` : ""}
-Suche EIN klares Muster: einen Zusammenhang zwischen zwei Bereichen (Training, Ernährung, Schlaf, Mindset; Energie zählt zu Schlaf; dazu Fokus, Arbeit und Persönlichkeit, wenn sie in den Check-ins stehen), der sich in den Check-ins mehrmals wiederholt, mindestens dreimal. Ein einzelner Tag ist nie ein Muster. Wenn du nichts wirklich Klares siehst, gib kein Muster zurück. Wiederhole kein Muster, das sie schon kennt oder das sie abgelehnt hat.
+Suche EIN klares Muster: einen Zusammenhang zwischen zwei Bereichen (Training, Ernährung, Schlaf, Mindset; Energie zählt zu Schlaf; dazu Fokus, Arbeit und Ausstrahlung, wenn sie in den Check-ins stehen), der sich in den Check-ins mehrmals wiederholt, mindestens dreimal. Ein einzelner Tag ist nie ein Muster. Wenn du nichts wirklich Klares siehst, gib kein Muster zurück. Wiederhole kein Muster, das sie schon kennt oder das sie abgelehnt hat.
 
 Wenn es ein Muster gibt:
 - "text": ein Satz, konkret, mit Zahlen aus ihren Tagen (z. B. "4 von 5 Mal"), in Du-Form, höchstens 25 Wörter.

@@ -108,7 +108,7 @@ extension _Persoenlich on _HomePageState {
     }
 
     final verlaufF = Feld(
-      titel: 'Persönlichkeit im Verlauf',
+      titel: 'Ausstrahlung im Verlauf',
       icon: Icons.show_chart,
       coach:
           'Pflege und Lernen jeden Tag. Die gestrichelte Linie ist dein '
@@ -116,7 +116,7 @@ extension _Persoenlich on _HomePageState {
       inhalt: (_) => [
         _lebendig(
           () => Block(
-            label: 'Persönlichkeit · 30 Tage',
+            label: 'Ausstrahlung · 30 Tage',
             rechts: schnitt == null ? null : 'Ø $schnitt',
             children: [
               if (da.isEmpty)
@@ -441,12 +441,12 @@ extension _Persoenlich on _HomePageState {
 
     return BereichSeite(
       key: const ValueKey('persoenlich-seite'),
-      name: 'Persönlichkeit',
+      name: 'Ausstrahlung',
       wert: wert,
       teile: [
         Unterbereich(
           id: 'persoenlich',
-          name: 'Persönlichkeit',
+          name: 'Ausstrahlung',
           icon: Icons.person_outline,
           wert: wert,
           woche: [

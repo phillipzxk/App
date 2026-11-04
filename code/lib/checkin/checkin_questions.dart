@@ -74,11 +74,11 @@ const List<CheckInCard> checkInCards = [
     ],
   ),
   CheckInCard(
-    name: 'Persönlichkeit',
+    name: 'Ausstrahlung',
     icon: Icons.person_outline,
     question: 'Hast du in dich investiert?',
     rows: [
-      CheckInRow('Persönlichkeit', [
+      CheckInRow('Ausstrahlung', [
         'Pflege und gelernt',
         'Nur Pflege',
         'Nur gelernt',
