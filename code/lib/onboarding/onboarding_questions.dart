@@ -64,7 +64,8 @@ const keineProbleme = 'Gerade keine größeren Probleme';
 /// Umsetzung/Onboarding-Fragebogen.md): Ziel, Motivation and Stand as decided
 /// on 2026-10-18, then one question per area of the home page since
 /// 2026-10-31 (Körper with sleep, nutrition and training together,
-/// Produktivität & Fokus, Business & Beruf, Persönlichkeit; Mindset lives in
+/// Fokus & Arbeit (two questions: focus, and where you stand at work),
+/// Persönlichkeit; Mindset lives in
 /// Motivation and Stand).
 final List<OnboardingQuestion> onboardingQuestions = [
   OnboardingQuestion(
@@ -78,7 +79,7 @@ final List<OnboardingQuestion> onboardingQuestions = [
       'Mental stärker werden und Dinge durchziehen',
     ],
     fieldLabel: 'Dein Ziel in einem Satz',
-    fieldHint: 'z. B. In einem Jahr fit und mein eigenes Business',
+    fieldHint: 'z. B. In einem Jahr fit und im Job einen Schritt weiter',
     fieldRequired: true,
     apply: (p, a) => p.copyWith(ziel: a),
   ),
@@ -151,17 +152,17 @@ final List<OnboardingQuestion> onboardingQuestions = [
     apply: (p, a) => p.copyWith(produktiv: a),
   ),
   OnboardingQuestion(
-    topic: 'Business',
-    question: 'Wo stehst du gerade beruflich?',
+    topic: 'Arbeit',
+    question: 'Wo stehst du gerade bei der Arbeit?',
     options: const [
       'Ich weiß nicht, wo ich anfangen soll',
       'Ich habe Ideen, setze aber nichts um',
+      'Ich komme im Job oder Studium nicht weiter',
       'Ich verdiene weniger, als ich will',
-      'Ich komme im Job nicht weiter',
       keineProbleme,
     ],
-    fieldLabel: 'Was machst du gerade beruflich?',
-    fieldHint: 'z. B. Angestellt, nebenbei ein Online-Shop',
+    fieldLabel: 'Was machst du gerade? Job, Studium, Schule oder eigene Firma',
+    fieldHint: 'z. B. Angestellt im Vertrieb, nebenbei ein Online-Shop',
     coach: 'Daraus mache ich deinen ersten Hebel der Woche.',
     apply: (p, a) => p.copyWith(business: a),
   ),

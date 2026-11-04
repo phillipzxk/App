@@ -279,7 +279,7 @@ class _HebelSeiteState extends _Seite<HebelSeite> {
         ],
       ),
       Block(
-        label: 'Woche im Business',
+        label: 'Deine Woche',
         children: [
           Text(
             'Am Ende der Woche schaut der Reality Check, ob der Hebel '

@@ -14,7 +14,7 @@ Entwurf https://claude.ai/artifact/By4G16wHao2nUDGrHeoMPm, Phillip „ja“ (8 A
 
 - **Körper:** drei Zeilen Training, Ernährung, Schlaf mit den bisherigen Antworten.
 - **Produktivität & Fokus:** Energie (Hoch · Mittel · Niedrig, wie am 28.10. hierher verschoben) und Fokus (Die eine Sache geschafft · Viel am Handy · Aufgeschoben · Bewusst frei).
-- **Business & Beruf:** Wichtigen Schritt gemacht · Nur Kleinkram · Etwas aufgeschoben · Heute frei.
+- ~~**Business & Beruf:** Wichtigen Schritt gemacht · Nur Kleinkram · Etwas aufgeschoben · Heute frei.~~ Gestrichen 2026-11-04 mit dem Bereich Business. Die Karte „Produktivität & Fokus“ heißt jetzt „Fokus & Arbeit“. Jetzt 4 Karten und 7 Taps.
 - **Persönlichkeit:** Pflege und gelernt · Nur Pflege · Nur gelernt · Heute nichts davon.
 - **Mindset:** wie bisher.
 

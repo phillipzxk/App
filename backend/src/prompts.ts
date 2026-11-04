@@ -33,7 +33,7 @@ export type CheckIn = {
   kiAntwort?: string;
 };
 
-export const COACH_STYLE = `Du bist der Coach in der App Groundset. Du begleitest Menschen, die ihr Leben verbessern wollen, in fünf Bereichen: Körper (Training, Ernährung, Schlaf), Produktivität & Fokus (dazu gehört die Energie), Business & Beruf, Persönlichkeit (Aussehen, Pflege, Auftreten, Lernen) und Mindset. Du schreibst auf Deutsch und duzt.
+export const COACH_STYLE = `Du bist der Coach in der App Groundset. Du begleitest Menschen, die ihr Leben verbessern wollen, in vier Bereichen: Körper (Training, Ernährung, Schlaf), Fokus & Arbeit (Energie, Fokus und ihre Ziele bei der Arbeit, egal ob Job, Studium, Schule oder eigene Firma), Persönlichkeit (Aussehen, Pflege, Auftreten, Lernen) und Mindset. Du schreibst auf Deutsch und duzt.
 
 So schreibst du:
 - Direkt und ehrlich, wie ein Trainer, der die Person kennt.
@@ -66,7 +66,7 @@ export function profileBlock(p: Profile): string {
 Vorname: ${clip(p.name, 60)}
 Ziel und was sie dafür verändern will: ${clip(p.ziel)}
 Warum sie es gerade jetzt angeht: ${clip(p.motivation)}
-Wie jemand, der sie gut kennt, sie beschreiben würde (und ihre Stärke): ${clip(p.level)}${zeile("Körper: wo es bei Schlaf, Ernährung oder Training hakt (und was schon klappt)", p.koerper)}${zeile("Probleme beim Training (und was ihr leicht fällt)", p.training)}${zeile("Probleme mit der Ernährung (und was sie schon weiß oder angepasst hat)", p.ernaehrung)}${zeile("Probleme mit Schlaf und Energie (und wann sie sich fit fühlt)", p.schlafEnergie)}${zeile("Produktivität & Fokus: was ihren Fokus frisst (und wann sie am klarsten ist)", p.produktiv)}${zeile("Business & Beruf: wo sie beruflich steht (und was sie gerade macht)", p.business)}${zeile("Persönlichkeit: woran sie an sich arbeiten will (und was sie lernen will)", p.persoenlich)}
+Wie jemand, der sie gut kennt, sie beschreiben würde (und ihre Stärke): ${clip(p.level)}${zeile("Körper: wo es bei Schlaf, Ernährung oder Training hakt (und was schon klappt)", p.koerper)}${zeile("Probleme beim Training (und was ihr leicht fällt)", p.training)}${zeile("Probleme mit der Ernährung (und was sie schon weiß oder angepasst hat)", p.ernaehrung)}${zeile("Probleme mit Schlaf und Energie (und wann sie sich fit fühlt)", p.schlafEnergie)}${zeile("Fokus: was ihren Fokus frisst (und wann sie am klarsten ist)", p.produktiv)}${zeile("Arbeit: wo sie bei der Arbeit steht (und was sie gerade macht: Job, Studium, Schule oder eigene Firma)", p.business)}${zeile("Persönlichkeit: woran sie an sich arbeiten will (und was sie lernen will)", p.persoenlich)}
 </nutzer>`;
 }
 
@@ -78,7 +78,7 @@ function checkInBlock(c: CheckIn): string {
   return `Tag ${clip(c.datum, 10)}${tag}:
 - Training: ${clip(c.training)}
 - Ernährung: ${clip(c.ernaehrung)}
-- Schlaf: ${clip(c.schlaf)}${c.energie ? `\n- Energie: ${clip(c.energie)}` : ""}${c.fokus ? `\n- Fokus: ${clip(c.fokus)}` : ""}${c.business ? `\n- Business & Beruf: ${clip(c.business)}` : ""}${c.persoenlich ? `\n- Persönlichkeit (Pflege und Lernen): ${clip(c.persoenlich)}` : ""}
+- Schlaf: ${clip(c.schlaf)}${c.energie ? `\n- Energie: ${clip(c.energie)}` : ""}${c.fokus ? `\n- Fokus: ${clip(c.fokus)}` : ""}${c.business ? `\n- Arbeit: ${clip(c.business)}` : ""}${c.persoenlich ? `\n- Persönlichkeit (Pflege und Lernen): ${clip(c.persoenlich)}` : ""}
 - Mindset: ${clip(c.mindset)}${c.notiz ? `\n- Was heute besonders war: ${clip(c.notiz)}` : ""}${c.messwerte ? `\n- Gemessen von Handy und Uhr (Apple Health, Wecker): ${clip(c.messwerte, 800)}` : ""}`;
 }
 
@@ -112,8 +112,7 @@ const AREA: Record<string, string> = {
   training: "Training",
   ernaehrung: "Ernährung",
   schlaf: "Schlaf",
-  produktiv: "Produktivität & Fokus",
-  business: "Business & Beruf",
+  produktiv: "Fokus & Arbeit",
   persoenlich: "Persönlichkeit",
   mindset: "Mindset",
 };
@@ -149,12 +148,12 @@ ${earlier ? `Ihre letzten Tage:\n<nutzer>\n${earlier}\n</nutzer>\n\n` : ""}Ihr C
 ${checkInBlock(today)}
 </nutzer>
 
-Bewerte heute jeden Bereich mit einer ganzen Zahl von 1 bis 10. 10 heißt: läuft super, du musst kaum etwas sagen. 1 heißt: hier hängt es gerade stark. Energie und Fokus zählen zu Produktivität ("produktiv"), Business & Beruf ist "business", Pflege und Lernen sind Persönlichkeit ("persoenlich"). Ein bewusst freier Tag ist kein schlechter Tag. Beziehe die letzten Tage mit ein, aber der heutige Tag zählt am meisten. Erfinde keine Vorgeschichte, die nicht in ihren Tagen steht.
+Bewerte heute jeden Bereich mit einer ganzen Zahl von 1 bis 10. 10 heißt: läuft super, du musst kaum etwas sagen. 1 heißt: hier hängt es gerade stark. Energie, Fokus und Fortschritt bei der Arbeit zählen zu Fokus & Arbeit ("produktiv"), Pflege und Lernen sind Persönlichkeit ("persoenlich"). Ein bewusst freier Tag ist kein schlechter Tag. Beziehe die letzten Tage mit ein, aber der heutige Tag zählt am meisten. Erfinde keine Vorgeschichte, die nicht in ihren Tagen steht.
 
 Schreib zu jedem Bereich genau einen kurzen Satz (höchstens 20 Wörter), warum der Wert gerade da steht. Nenne einen konkreten Zusammenhang, wenn es einen gibt, zum Beispiel mit den letzten Tagen oder einem anderen Bereich. Keine Tipps, keine Floskeln, nicht den Wert wiederholen.
 
 Antworte nur mit diesem JSON, ohne weiteren Text:
-{"training":{"wert":7,"grund":"..."},"ernaehrung":{"wert":5,"grund":"..."},"schlaf":{"wert":4,"grund":"..."},"produktiv":{"wert":6,"grund":"..."},"business":{"wert":5,"grund":"..."},"persoenlich":{"wert":6,"grund":"..."},"mindset":{"wert":8,"grund":"..."}}`;
+{"training":{"wert":7,"grund":"..."},"ernaehrung":{"wert":5,"grund":"..."},"schlaf":{"wert":4,"grund":"..."},"produktiv":{"wert":6,"grund":"..."},"persoenlich":{"wert":6,"grund":"..."},"mindset":{"wert":8,"grund":"..."}}`;
 }
 
 export type BisherMuster = { text?: string; abgelehnt?: boolean };
@@ -185,7 +184,7 @@ Ihre Check-ins, ältester zuerst:
 ${tage}
 </nutzer>
 ${alt ? `\nMuster, die du ihr schon gezeigt hast:\n<nutzer>\n${alt}\n</nutzer>\n` : ""}
-Suche EIN klares Muster: einen Zusammenhang zwischen zwei Bereichen (Training, Ernährung, Schlaf, Mindset; Energie zählt zu Schlaf; dazu Fokus, Business und Persönlichkeit, wenn sie in den Check-ins stehen), der sich in den Check-ins mehrmals wiederholt, mindestens dreimal. Ein einzelner Tag ist nie ein Muster. Wenn du nichts wirklich Klares siehst, gib kein Muster zurück. Wiederhole kein Muster, das sie schon kennt oder das sie abgelehnt hat.
+Suche EIN klares Muster: einen Zusammenhang zwischen zwei Bereichen (Training, Ernährung, Schlaf, Mindset; Energie zählt zu Schlaf; dazu Fokus, Arbeit und Persönlichkeit, wenn sie in den Check-ins stehen), der sich in den Check-ins mehrmals wiederholt, mindestens dreimal. Ein einzelner Tag ist nie ein Muster. Wenn du nichts wirklich Klares siehst, gib kein Muster zurück. Wiederhole kein Muster, das sie schon kennt oder das sie abgelehnt hat.
 
 Wenn es ein Muster gibt:
 - "text": ein Satz, konkret, mit Zahlen aus ihren Tagen (z. B. "4 von 5 Mal"), in Du-Form, höchstens 25 Wörter.
@@ -753,31 +752,31 @@ ${JSON_ONLY}
 {"satz": "..."}`;
 }
 
-// --- Business & Beruf (vault Umsetzung/Business und Beruf komplett.md) ---
+// --- Ziele bei der Arbeit (früher Business & Beruf; seit 2026-11-04 Teil von Fokus & Arbeit) ---
 
 function businessRahmen(p: Profile, kontext: string): string {
   return `Das weißt du von der Person:
 
 ${profileBlock(p)}
 
-Ihr Business- und Berufs-Bereich (aus ihren eigenen Angaben):
+Ihre Ziele bei der Arbeit (aus ihren eigenen Angaben):
 <nutzer>
 ${clip(kontext, 4000)}
 </nutzer>
 
-Du bist hier ihr Business-Coach: direkt, konkret, mit Zahlen aus ihren Angaben, keine 0815-Tipps, keine Rechts- oder Steuerberatung (dafür: frag einen Steuerberater). Ziel ist, dass sie dich immer weniger braucht.`;
+Du bist hier ihr Coach für die Arbeit. Das kann ein Job, ein Studium, die Schule oder eine eigene Firma sein, richte dich nach ihren Angaben. Sei direkt und konkret, mit Zahlen aus ihren Angaben, wo es sie gibt, keine 0815-Tipps, keine Rechts- oder Steuerberatung (dafür: frag einen Steuerberater). Ziel ist, dass sie dich immer weniger braucht.`;
 }
 
 const s = (v: unknown, max = 300) => clip(String(v ?? ""), max);
 
-/// One prompt per part of the Business page; null when the input is empty.
+/// One prompt per part of the work goals (old Business page); null when the input is empty.
 export function businessPrompt(p: Profile, art: string, b: Record<string, unknown>): string | null {
   const r = businessRahmen(p, String(b.kontext ?? ""));
   switch (art) {
     case "hebel":
       return `${r}
 
-Schlag ihr den einen Hebel für diese Woche vor: die eine Aktion, die ihr Business diese Woche am meisten bewegt. "hebel" höchstens 12 Wörter. "punkte": 2 bis 4 einzelne Schritte zum Abhaken (je höchstens 8 Wörter). "tipps": genau 3 Tipps, auf die man allein nicht kommt, je "titel" (kurz, fett) und "text" (ein Satz).
+Schlag ihr den einen Hebel für diese Woche vor: die eine Aktion, die sie diese Woche bei der Arbeit (Job, Studium, Schule oder eigene Firma) am weitesten bringt. "hebel" höchstens 12 Wörter. "punkte": 2 bis 4 einzelne Schritte zum Abhaken (je höchstens 8 Wörter). "tipps": genau 3 Tipps, auf die man allein nicht kommt, je "titel" (kurz, fett) und "text" (ein Satz).
 
 ${JSON_ONLY}
 {"hebel": "...", "punkte": ["..."], "tipps": [{"titel": "...", "text": "..."}]}`;
@@ -880,7 +879,7 @@ ${JSON_ONLY}
     case "meilensteine":
       return `${r}
 
-Schlag genau 3 nächste Meilensteine für ihren Business-Baum vor, die auf den erreichten aufbauen. Je höchstens 6 Wörter, messbar, z. B. "3.000 € im Monat" oder "Erster fester Partner".
+Schlag genau 3 nächste Meilensteine auf dem Weg zu ihrem Ziel bei der Arbeit vor, die auf den erreichten aufbauen. Je höchstens 6 Wörter, messbar, passend zu ihrer Lage, z. B. "Prüfung mit 2,0 bestanden", "Gespräch über Beförderung" oder "3.000 € im Monat".
 
 ${JSON_ONLY}
 {"vorschlaege": ["...", "...", "..."]}`;
@@ -889,7 +888,7 @@ ${JSON_ONLY}
       return `${r}
 
 Sie will diesen Skill aufbauen: <skill>${s(b.skill, 80)}</skill>
-Bau eine Leiter aus genau 7 Stufen, jede baut auf der letzten auf, von leicht bis schwer. Je "titel" (höchstens 6 Wörter) und "text" (die Aufgabe für eine Woche in einem Satz, konkret für ihr Business).
+Bau eine Leiter aus genau 7 Stufen, jede baut auf der letzten auf, von leicht bis schwer. Je "titel" (höchstens 6 Wörter) und "text" (die Aufgabe für eine Woche in einem Satz, konkret für ihre Arbeit).
 
 ${JSON_ONLY}
 {"stufen": [{"titel": "...", "text": "..."}]}`;

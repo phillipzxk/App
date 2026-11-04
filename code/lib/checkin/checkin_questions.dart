@@ -28,11 +28,11 @@ class CheckInCard {
   final List<CheckInRow> rows;
 }
 
-/// The five cards, one per area like on the home page (Phillip 2026-10-31,
+/// The four cards, one per area like on the home page (Phillip 2026-10-31,
 /// vault Umsetzung/Täglicher Check-in.md): Körper with training, nutrition
-/// and sleep as before, Produktivität & Fokus with energy (moved there on
-/// 2026-10-28) and focus, Business & Beruf, Persönlichkeit and Mindset.
-/// 8 taps in all.
+/// and sleep as before, Fokus & Arbeit with energy (moved there on
+/// 2026-10-28) and focus, Persönlichkeit and Mindset. Business & Beruf was
+/// dropped on 2026-11-04. 7 taps in all.
 const List<CheckInCard> checkInCards = [
   CheckInCard(
     name: 'Körper',
@@ -60,7 +60,7 @@ const List<CheckInCard> checkInCards = [
     ],
   ),
   CheckInCard(
-    name: 'Produktivität & Fokus',
+    name: 'Fokus & Arbeit',
     icon: Icons.bolt,
     question: 'Energie und Fokus',
     rows: [
@@ -71,19 +71,6 @@ const List<CheckInCard> checkInCards = [
         'Aufgeschoben',
         'Bewusst frei',
       ], label: 'Fokus'),
-    ],
-  ),
-  CheckInCard(
-    name: 'Business & Beruf',
-    icon: Icons.work_outline,
-    question: 'Bist du vorangekommen?',
-    rows: [
-      CheckInRow('Business', [
-        'Wichtigen Schritt gemacht',
-        'Nur Kleinkram',
-        'Etwas aufgeschoben',
-        'Heute frei',
-      ]),
     ],
   ),
   CheckInCard(

@@ -243,14 +243,9 @@ class Abendantwort {
   );
 }
 
-/// The five big areas of the Lebensrad, in this order.
-const radBereiche = [
-  'Körper',
-  'Produktivität',
-  'Business',
-  'Persönlichkeit',
-  'Mindset',
-];
+/// The four big areas of the Lebensrad, in this order (Business dropped
+/// 2026-11-04).
+const radBereiche = ['Körper', 'Fokus & Arbeit', 'Persönlichkeit', 'Mindset'];
 
 /// One Lebensrad, filled every 3 months: each area 1..10.
 class Lebensrad {

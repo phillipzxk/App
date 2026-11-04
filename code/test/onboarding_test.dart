@@ -78,7 +78,7 @@ void main() {
         'Und was klappt bei Schlaf, Essen oder Training schon gut?: '
             'Antwort 4',
         'Wann bist du am klarsten im Kopf?: Antwort 5',
-        'Was machst du gerade beruflich?: Antwort 6',
+        'Was machst du gerade? Job, Studium, Schule oder eigene Firma: Antwort 6',
         'Was willst du gerade lernen?: Antwort 7',
       ],
     );

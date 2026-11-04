@@ -131,7 +131,7 @@ void main() {
   testWidgets('send only works once every row is tapped', (tester) async {
     final diary = MemoryDiaryStore();
     await openApp(tester, diary);
-    for (final row in checkInRows.take(7)) {
+    for (final row in checkInRows.take(6)) {
       await tapText(tester, row.options.last);
     }
     await tester.tap(find.text('Absenden'));
@@ -144,7 +144,7 @@ void main() {
     expect(diary.checkIns.single.mindset, 'Kaum Motivation');
     expect(diary.checkIns.single.energie, 'Niedrig');
     expect(diary.checkIns.single.fokus, 'Bewusst frei');
-    expect(diary.checkIns.single.business, 'Heute frei');
+    expect(diary.checkIns.single.business, '');
     expect(diary.checkIns.single.persoenlich, 'Heute nichts davon');
   });
 
