@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSMotionUsageDescription</key>
+	<string>Groundset zählt deine Schritte nur, solange die Wecker-Aufgabe offen ist, damit der Wecker merkt, dass du wirklich aufgestanden bist.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Groundset liest Schlaf, Ruhepuls, Herzfrequenzvariabilität, Trainings, Gewicht, Schritte und Tageslicht, damit dein Schlafwert genauer wird und dein Coach deinen Tag versteht. Groundset schreibt nichts in Health.</string>
 	<key>NSAlarmKitUsageDescription</key>

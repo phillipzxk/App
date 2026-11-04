@@ -13,6 +13,8 @@ import '../ui/coach_widgets.dart';
 import 'schlaf_data.dart';
 import 'schlaf_logik.dart';
 import 'schlaf_widgets.dart';
+import 'schritt_weg.dart';
+import 'schritt_zaehler.dart';
 import 'wecker_aufgabe.dart';
 
 /// The alarm as it rings: a warm sunrise, the time, and the task that
@@ -28,7 +30,6 @@ class WeckerKlingelt extends StatefulWidget {
 
 class _WeckerKlingeltState extends State<WeckerKlingelt> {
   bool _geschlummert = false;
-  int _schritte = 0;
   String? _fehler;
 
   SchlafUmfeld get u => widget.umfeld;
@@ -64,8 +65,18 @@ class _WeckerKlingeltState extends State<WeckerKlingelt> {
         }
         _aus();
       case 'schritte':
-        setState(() => _schritte++);
-        if (_schritte >= 30) _aus();
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (c) => SchrittWeg(
+              ziel: u.d.wecker.schritte,
+              zaehler: schrittZaehlerFuerPlattform(),
+              wahl: const LocalSchrittWahl(),
+              clock: u.jetzt,
+              onFertig: (_, _) => Navigator.of(c).pop(),
+            ),
+          ),
+        );
+        if (mounted) _aus();
       default:
         _aus();
     }
@@ -80,14 +91,13 @@ class _WeckerKlingeltState extends State<WeckerKlingelt> {
             'und fotografier den hellen Raum.',
       'foto' =>
         'Zum Ausschalten: Geh ans Fenster und mach ein Foto vom Himmel.',
-      'schritte' => 'Zum Ausschalten: 30 Schritte gehen.',
+      'schritte' => 'Zum Ausschalten: ${w.schritte} Schritte gehen.',
       _ => 'Zum Ausschalten: Sag kurz, wie du aufgewacht bist.',
     };
     final knopf = switch (_art) {
       'licht' => 'Hellen Raum fotografieren',
       'foto' => 'Himmel fotografieren',
-      'schritte' =>
-        _schritte == 0 ? 'Los gehen' : 'Schritt ${_schritte + 1} von 30',
+      'schritte' => 'Los gehen',
       _ => 'Aufwach-Himmel',
     };
     return Scaffold(

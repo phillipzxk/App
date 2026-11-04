@@ -1,5 +1,6 @@
 import AlarmKit
 import AppIntents
+import CoreMotion
 import Flutter
 import HealthKit
 import SwiftUI
@@ -33,6 +34,9 @@ import alarm_kit
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
     if let r = engineBridge.pluginRegistry.registrar(forPlugin: "GroundsetHealth") {
       GroundsetHealth.shared.register(messenger: r.messenger())
+    }
+    if let r = engineBridge.pluginRegistry.registrar(forPlugin: "GroundsetSchritte") {
+      GroundsetSchritte.shared.register(messenger: r.messenger())
     }
   }
 }
@@ -347,5 +351,50 @@ final class GroundsetHealth {
     case .mixedCardio: return "Cardio"
     default: return "Training"
     }
+  }
+}
+
+// MARK: - Steps for the alarm task (vault Umsetzung/Echter Wecker)
+
+/// Counts steps with CMPedometer for lib/schlaf/schritt_zaehler.dart while
+/// the task is open. Sends only the number of steps since the start.
+final class GroundsetSchritte: NSObject, FlutterStreamHandler {
+  static let shared = GroundsetSchritte()
+  private let pedometer = CMPedometer()
+  private var channel: FlutterEventChannel?
+
+  func register(messenger: FlutterBinaryMessenger) {
+    let c = FlutterEventChannel(name: "groundset/schritte", binaryMessenger: messenger)
+    c.setStreamHandler(self)
+    channel = c
+  }
+
+  func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink)
+    -> FlutterError?
+  {
+    guard CMPedometer.isStepCountingAvailable() else {
+      return FlutterError(code: "kein_zaehler", message: "Kein Schrittzähler", details: nil)
+    }
+    if CMPedometer.authorizationStatus() == .denied
+      || CMPedometer.authorizationStatus() == .restricted
+    {
+      return FlutterError(code: "nicht_erlaubt", message: "Nicht erlaubt", details: nil)
+    }
+    events(0)
+    pedometer.startUpdates(from: Date()) { data, error in
+      DispatchQueue.main.async {
+        if let error = error {
+          events(FlutterError(code: "fehler", message: error.localizedDescription, details: nil))
+          return
+        }
+        events(data?.numberOfSteps.intValue ?? 0)
+      }
+    }
+    return nil
+  }
+
+  func onCancel(withArguments arguments: Any?) -> FlutterError? {
+    pedometer.stopUpdates()
+    return nil
   }
 }

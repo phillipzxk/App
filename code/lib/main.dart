@@ -23,6 +23,7 @@ import 'home/home_page.dart';
 import 'health/health_dienst.dart';
 import 'health/health_logik.dart';
 import 'konto/konto_daten.dart';
+import 'schlaf/schritt_zaehler.dart';
 import 'konto/konto_dienst.dart';
 import 'konto/konto_einstellungen.dart';
 import 'konto/konto_flow.dart';
@@ -61,6 +62,8 @@ void main() {
       aboKauf: const VorschauKauf(),
       erinnerungen: erinnerungenFuerPlattform(),
       health: healthFuerPlattform(),
+      schritte: schrittZaehlerFuerPlattform(),
+      schrittWahl: const LocalSchrittWahl(),
     ),
   );
 }
@@ -82,7 +85,13 @@ class CoachApp extends StatelessWidget {
     this.health,
     this.aboStore,
     this.aboKauf = const VorschauKauf(),
+    this.schritte = const KeinZaehler(),
+    this.schrittWahl,
   });
+
+  /// Real steps for the alarm task (vault Umsetzung/Echter Wecker).
+  final SchrittZaehler schritte;
+  final SchrittWahlStore? schrittWahl;
 
   /// Free week and Abo (vault Umsetzung/Abo). Null in tests: kept in memory.
   final AboStore? aboStore;
@@ -160,7 +169,11 @@ class _StartGateState extends State<StartGate> {
   );
 
   /// After the real alarm's "Aufstehen": the task comes first.
-  ({DateTime seit, String aufgabe, String? heute})? _weckerAufgabe;
+  ({DateTime seit, String aufgabe, int schritte, String? heute})?
+  _weckerAufgabe;
+
+  /// The morning from the step task, for the coach in today's check-in.
+  String? _morgen;
 
   Future<void> _pruefeWecker() async {
     final d = widget.app.erinnerungen;
@@ -183,6 +196,7 @@ class _StartGateState extends State<StartGate> {
       () => _weckerAufgabe = (
         seit: seit,
         aufgabe: schlaf.wecker.aufgabe,
+        schritte: schlaf.wecker.schritte,
         heute: heute,
       ),
     );
@@ -364,13 +378,17 @@ class _StartGateState extends State<StartGate> {
 
   /// Reads Apple Health for the check-in and keeps it for Heute.
   Future<String> _messwerte() async {
+    final morgen = _morgen ?? '';
     final dienst = widget.app.health;
-    if (dienst == null) return '';
+    if (dienst == null) return morgen;
     final schlaf = await widget.app.feed.loadSchlaf();
     final neu = await healthHolen(dienst, schlaf, widget.app.clock());
-    if (neu == null) return '';
+    if (neu == null) return morgen;
     await widget.app.feed.saveSchlaf(neu);
-    return messwerteText(neu.healthAm(dayKey(widget.app.clock())));
+    return [
+      messwerteText(neu.healthAm(dayKey(widget.app.clock()))),
+      morgen,
+    ].where((t) => t.isNotEmpty).join(' ');
   }
 
   Future<void> _kontoOeffnen(BuildContext context) =>
@@ -451,6 +469,10 @@ class _StartGateState extends State<StartGate> {
         geklingelt: wecker.seit,
         heute: wecker.heute,
         clock: widget.app.clock,
+        schritte: wecker.schritte,
+        zaehler: widget.app.schritte,
+        wahl: widget.app.schrittWahl,
+        onMorgen: (m) => _morgen = m,
         onFertig: () async {
           await widget.app.erinnerungen?.weckerAufgabeErledigt();
           if (mounted) setState(() => _weckerAufgabe = null);
@@ -464,7 +486,7 @@ class _StartGateState extends State<StartGate> {
         evaluator: _aboEvaluator,
         today: widget.app.clock(),
         vorgemerkt: _vorgemerkt,
-        messwerte: widget.app.health == null ? null : _messwerte,
+        messwerte: _messwerte,
         onFinished: (_) {
           setState(() => _checkedInToday = true);
           _sichern(sofort: true);

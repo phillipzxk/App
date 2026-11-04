@@ -34,3 +34,22 @@ Entwurf 1: https://claude.ai/artifact/RXnj4ewgZMFePxvPxsJrE5 (ein Morgen: Sonnen
 
 - Echt testen geht erst auf Phillips iPhone (Apple-Entwicklerkonto, TestFlight).
 - Eigene Weckertöne (Vögel, Gong, Regen, Gitarre) als Tondateien; bis dahin der Standard-Weckton von Apple.
+
+## Schritte echt zählen (2026-11-04)
+
+Phillip hat den Entwurf https://claude.ai/artifact/AFZQvGVQsiGgvKPZZC9umn am 2026-11-04 freigegeben („jo“).
+
+- **Zählen:** Das iPhone zählt die Schritte selbst (CoreMotion, `CMPedometer`), nur solange die Aufgabe offen ist, und es wird nur die Zahl gespeichert.
+- **Beim ersten Mal:** Die App fragt „Darf ich deine Schritte zählen?“ mit „Erlauben“ oder „Lieber tippen“. Danach fragt das iPhone einmal nach „Bewegung und Fitness“.
+- **Ohne Erlaubnis, im Browser oder wenn das Zählen nicht klappt:** Man tippt bei jedem Schritt. Beim Zählen gibt es außerdem den Knopf „Zählt nicht? Dann tippen“.
+- **Bild (Entwurf 3, freigegeben 2026-11-04 „top“):** Phillip wollte es zuerst besser designt und animiert (Entwurf 2), dann realistischer und in den Farben der App (Entwurf 3). Jetzt ist es eine Morgen-Szene in App-Farben: fast schwarz, dunkles Braun, Sand und Gold. Es gibt Hügel hintereinander mit Nebel, Gras im Wind und goldene Wurzeln unter der Bodenlinie wie im Logo. Jeder Schritt setzt einen Schuhabdruck mit kleiner Lichtwelle auf den Hügel und holt die Sonne ein Stück höher. Die Sterne verblassen, und ein goldener Ring um die Zahl füllt sich, wobei die Zahl kurz hüpft. Am Ziel bricht die Sonne mit Strahlen und Funken durch, und ein goldener Trieb wächst.
+- **Du bist wach (alle Aufgaben):** Der Bildschirm bleibt in der gleichen Szene, dunkel mit goldenem Licht. Die Zeilen kommen nacheinander rein. Darunter tippt der Coach einen kurzen Satz zum Tag, zum Beispiel „Starker Start. Heute: Push 17:30. Jetzt kurz ans Licht, dann der Check-in.“ Das war Claudes Vorschlag und wurde mit Entwurf 3 freigegeben. Auch die Aufgaben Foto, Licht an und Frage haben jetzt die Nacht-Szene als Hintergrund.
+- **Anzahl:** 20, 30 oder 50, wählbar auf der Wecker-Seite. Standard ist 30. Das war Claudes Vorschlag, mit dem Entwurf freigegeben.
+- **Nach dem Aufstehen:** Auf dem Bildschirm „Du bist wach“ steht zusätzlich „30 Schritte in 41 Sekunden“. Der Coach bekommt im Check-in „Heute Morgen: 30 Schritte in 41 Sekunden, 2 Minuten nach dem Wecker.“ und sieht so, wie schnell man morgens in Gang kommt. Das war ebenfalls Claudes Vorschlag.
+
+**Stand im Code:**
+- `code/lib/schlaf/schritt_zaehler.dart` für Zähler, Wahl und Sätze
+- `code/lib/schlaf/schritt_weg.dart` für den Bildschirm
+- `code/lib/schlaf/morgen_szene.dart` für die Szene (auch auf dem Bildschirm „Du bist wach“)
+- `GroundsetSchritte` in `AppDelegate.swift` (EventChannel `groundset/schritte`)
+- `NSMotionUsageDescription` in `Info.plist`

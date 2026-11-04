@@ -128,6 +128,7 @@ class Wecker {
     this.klang = 'Vögel',
     this.schlummern = true,
     this.aufgabe = 'foto',
+    this.schritte = 30,
   });
 
   /// Screen turns warm bright 10 minutes before.
@@ -137,8 +138,13 @@ class Wecker {
   /// At most once, 5 minutes.
   final bool schlummern;
 
-  /// foto (sky photo), frage (Aufwach-Himmel) or schritte (30 steps).
+  /// foto (sky photo), frage (Aufwach-Himmel) or schritte (steps).
   final String aufgabe;
+
+  /// How many steps switch it off: 20, 30 or 50.
+  final int schritte;
+
+  static const schritteWahl = [20, 30, 50];
 
   static const klaenge = ['Vögel', 'Gong', 'Regen', 'Leise Gitarre'];
 
@@ -147,11 +153,13 @@ class Wecker {
     String? klang,
     bool? schlummern,
     String? aufgabe,
+    int? schritte,
   }) => Wecker(
     sonne: sonne ?? this.sonne,
     klang: klang ?? this.klang,
     schlummern: schlummern ?? this.schlummern,
     aufgabe: aufgabe ?? this.aufgabe,
+    schritte: schritte ?? this.schritte,
   );
 
   Map<String, dynamic> toJson() => {
@@ -159,6 +167,7 @@ class Wecker {
     'klang': klang,
     'schlummern': schlummern,
     'aufgabe': aufgabe,
+    'schritte': schritte,
   };
 
   factory Wecker.fromJson(Map<String, dynamic> j) => Wecker(
@@ -166,6 +175,7 @@ class Wecker {
     klang: j['klang'] as String? ?? 'Vögel',
     schlummern: j['schlummern'] as bool? ?? true,
     aufgabe: j['aufgabe'] as String? ?? 'foto',
+    schritte: (j['schritte'] as num?)?.toInt() ?? 30,
   );
 }
 
