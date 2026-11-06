@@ -1,7 +1,7 @@
 ---
 tags: [umsetzung, ernährung]
 status: entwurf
-stand: 2026-10-27
+stand: 2026-11-06
 ---
 
 # Ernährung komplett
@@ -46,3 +46,23 @@ Entwurf 1 (7 Ansichten) und Entwurf 2 (8 Ansichten, mit A bis E) unter https://c
 - Das kcal-Ziel enthält die Änderung aus dem Gewichts-Check (rückgängig machbar).
 - Alles wird auf dem Gerät gespeichert. Fotos vom Teller werden nach 7 Tagen entfernt, damit der Speicher klein bleibt (die Hinweise bleiben). Server-Backup kommt mit der Handy-Version.
 - Ohne Coach (offline) gibt es feste Antworten und 3 eingebaute Rettungsgerichte.
+
+## Aufgeräumt (2026-11-06)
+
+Phillip: „okay so machen wirs“ (Doppeltes zusammenlegen), dann „trinken mybe noch“ und „ja“. Entwurf: https://claude.ai/artifact/7p85EMSw7ZH5ANVLpx29nq
+
+Es fällt keine Funktion weg. Statt 12 Kacheln auf 4 Seiten jetzt 8 Kacheln auf 3 Seiten:
+
+- **Heute:** „Dein Essen heute“ (Energie-Kurve und Teller in einer Karte), **Foto** (ein Knopf für Teller und Kühlschrank, der Coach erkennt, was es ist; ist er unsicher, tippt man „Mein Essen“ oder „Mein Kühlschrank“), Heißhunger, **Trinken** (neu).
+- **Gerichte:** Kochbuch mit Filtern Alle · Basis · Rettung (Basis- und Rettungsgerichte sind keine eigenen Kacheln mehr), Einkaufsliste.
+- **Ziel:** „kcal & Gewicht“ in einer Karte (Gewichts-Check bleibt darin), Supplements.
+
+### Trinken
+- Glas, das sich mit jedem Tippen füllt (1 Glas = 250 ml), „Eins zurück“.
+- Ziel: 35 ml pro kg, an Trainingstagen + 0,5 l, auf 0,25 l gerundet (ohne Gewicht 2 l bzw. 2,5 l).
+- Kaffee und Alkohol mit je einem Zähler. Kaffee nach 14 Uhr und Alkohol bekommen einen kurzen Coach-Satz zum Schlaf.
+- Der Coach sieht Wasser, Kaffee und Alkohol (Tag und letzte 7 Tage) und kann es mit Schlaf und Energie verbinden.
+
+### Stand im Code
+- `code/lib/ernaehrung/trinken_seite.dart`, `foto_seite.dart`; `TrinkTag` + `wasserZiel` in `ernaehrung_data.dart`.
+- Worker-Route `/ernaehrung` mit `art: foto_art` (Teller oder Kühlschrank).

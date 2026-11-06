@@ -24,6 +24,7 @@ import {
   zusammenhangPrompt,
   heisshungerPrompt,
   tellerPrompt,
+  fotoArtPrompt,
   kuehlschrankPrompt,
   rettungPrompt,
   gewichtPrompt,
@@ -319,6 +320,12 @@ export async function ernaehrung(env: Env, body: Record<string, unknown>, profil
         groesse_text: text(d.groesse_text, 200),
         tipp: text(d.tipp, 300),
       };
+    }
+    case "foto_art": {
+      const b = bild(body.bild);
+      if (!b.length) return null;
+      const d = parseObjekt(await ask(env, fotoArtPrompt(), b));
+      return { art: d.art === "teller" || d.art === "kuehlschrank" ? d.art : null };
     }
     case "kuehlschrank": {
       const zutaten = Array.isArray(body.zutaten) ? body.zutaten.map((z) => text(z, 60)).filter(Boolean).join(", ") : "";

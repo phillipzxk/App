@@ -6,6 +6,7 @@ import '../checkin/checkin.dart';
 import '../data/diary_store.dart';
 import '../data/user_profile.dart';
 import '../ernaehrung/ernaehrung_coach.dart';
+import '../ernaehrung/ernaehrung_data.dart';
 import '../ernaehrung/ernaehrung_logik.dart';
 import '../ernaehrung/ernaehrung_stand.dart';
 import '../feed/durchgezogen.dart';
@@ -54,8 +55,8 @@ import '../bereiche/glas.dart';
 import '../ernaehrung/einkaufsliste.dart';
 import '../ernaehrung/heisshunger_seite.dart';
 import '../ernaehrung/kochbuch.dart';
-import '../ernaehrung/kuehlschrank.dart';
-import '../ernaehrung/teller_foto.dart';
+import '../ernaehrung/foto_seite.dart';
+import '../ernaehrung/trinken_seite.dart';
 import '../schlaf/aufwachen.dart';
 import '../schlaf/muster_tag.dart';
 import '../schlaf/wecker_seite.dart';
@@ -900,6 +901,7 @@ class _HomePageState extends State<HomePage> {
     tagText: _essenTagText,
     musterText: _essenMusterText,
     training: _tagRahmen.training,
+    kg: _weights.isEmpty ? null : _weights.last.kg,
   );
 
   String _essenTagText() {
@@ -915,6 +917,7 @@ class _HomePageState extends State<HomePage> {
       if (ziel != null) 'kcal-Ziel (nur Orientierung): $ziel',
       for (final m in _mahlzeitSlots)
         '${m.name} ${m.uhrzeit}: ${eintraege[m.id]?.gegessen == true ? 'gegessen${eintraege[m.id]!.gefuehl == null ? '' : ', ${eintraege[m.id]!.gefuehl}'}' : 'noch offen'}',
+      _trinkZeile(_essen.d.trinkTag(dayKey(jetzt))),
     ].join('\n');
   }
 
@@ -928,8 +931,16 @@ class _HomePageState extends State<HomePage> {
           'Check-in ${dayKey(c.datum)}: ${c.ernaehrung}',
       for (final e in _sleep.reversed.take(7))
         'Schlaf ${dayKey(e.datum)}: ${e.stunden} h',
+      for (final t in d.trinken.entries.toList().reversed.take(7))
+        'Trinken ${t.key}: ${_trinkZeile(t.value)}',
     ].join('\n');
   }
+
+  static String _trinkZeile(TrinkTag t) => [
+    'Wasser ${literText(t.liter)} l',
+    'Kaffee ${t.kaffee.length}${t.kaffee.isEmpty ? '' : ' (letzter ${formatUhrzeit(t.kaffee.last)})'}',
+    'Alkohol ${t.alkohol}',
+  ].join(', ');
 
   static const _icons = {
     Bereich.training: Icons.fitness_center,

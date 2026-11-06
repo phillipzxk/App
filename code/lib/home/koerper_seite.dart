@@ -405,6 +405,7 @@ extension _Koerper on _HomePageState {
     final ziel = _kcalZiel;
     final next = naechsteOffene(_supplements, _genommen, today);
     final suppOffen = _supplements.length - gen;
+    final trink = d.trinkTag(dayKey(today));
     Widget seite(Widget Function() bau) => _lebendig(bau);
     return Unterbereich(
       id: b.name,
@@ -426,8 +427,8 @@ extension _Koerper on _HomePageState {
           ),
           kacheln: [
             BKachel(
-              id: 'e-kurve',
-              titel: 'Energie-Kurve',
+              id: 'e-essen',
+              titel: 'Dein Essen heute',
               icon: Icons.show_chart,
               groesse: KachelGroesse.mittel,
               gold: true,
@@ -437,31 +438,24 @@ extension _Koerper on _HomePageState {
               unter: slots.isEmpty
                   ? 'wie oft du am Tag isst'
                   : naechste.isEmpty
-                  ? 'alle Mahlzeiten gegessen'
+                  ? 'alles gegessen, Teller voll'
                   : 'nächste: ${naechste.first.name} ${naechste.first.uhrzeit}',
               feld: _feld(
                 b,
-                'energie',
-                'Energie-Kurve',
+                'energie,teller',
+                'Dein Essen heute',
                 Icons.show_chart,
-                'Deine Mahlzeiten liegen auf der Kurve. Ziehst du eine, '
-                    'ändert sich die Kurve.',
+                'Oben deine Mahlzeiten auf der Energie-Kurve, darunter füllt '
+                    'sich dein Teller. Gezählt wird nichts.',
               ),
             ),
             BKachel(
-              id: 'e-teller',
-              titel: 'Teller',
-              icon: Icons.donut_large,
-              text: slots.isEmpty ? 'Noch leer' : 'Dein Teller heute',
-              unter: 'füllt sich ohne Zählen',
-              feld: _feld(
-                b,
-                'teller',
-                'Dein Teller heute',
-                Icons.donut_large,
-                'Füllt sich mit jeder Mahlzeit. Abends sage ich dir, was '
-                    'gefehlt hat.',
-              ),
+              id: 'e-foto',
+              titel: 'Foto',
+              icon: Icons.photo_camera_outlined,
+              text: 'Teller oder Kühlschrank',
+              unter: 'ich erkenne, was es ist',
+              seite: (_) => seite(() => FotoSeite(umfeld: u)),
             ),
             BKachel(
               id: 'e-heiss',
@@ -471,13 +465,25 @@ extension _Koerper on _HomePageState {
               unter: 'ein Schritt für jetzt',
               seite: (_) => seite(() => HeisshungerSeite(umfeld: u)),
             ),
+            BKachel(
+              id: 'e-trinken',
+              titel: 'Trinken',
+              icon: Icons.local_drink_outlined,
+              groesse: KachelGroesse.mittel,
+              wert: '${literText(trink.liter)} l',
+              unter:
+                  'von ${literText(wasserZiel(u.kg, training: u.training != null))} l'
+                  '${trink.kaffee.isEmpty ? '' : ' · Kaffee ${trink.kaffee.length}'}'
+                  '${trink.alkohol == 0 ? '' : ' · Alkohol ${trink.alkohol}'}',
+              seite: (_) => seite(() => TrinkenSeite(umfeld: u)),
+            ),
           ],
         ),
         BSeite(
           name: 'Gerichte',
           coach:
               'Jedes gekochte und bewertete Gericht wird ein Blatt in '
-              'deinem Kochbuch.',
+              'deinem Kochbuch. Die Einkaufsliste kommt aus deinen Gerichten.',
           kacheln: [
             BKachel(
               id: 'e-koch',
@@ -486,65 +492,17 @@ extension _Koerper on _HomePageState {
               groesse: KachelGroesse.hoch,
               gold: true,
               wert: '$blaetter',
-              unter: blaetter == 1
-                  ? 'Blatt'
-                  : 'Blätter, Basis- und '
-                        'Rettungsgerichte',
+              unter:
+                  '${blaetter == 1 ? 'Blatt' : 'Blätter'} · Basis und Rettung',
               seite: (_) => seite(() => KochbuchSeite(umfeld: u)),
             ),
-            BKachel(
-              id: 'e-rettung',
-              titel: 'Rettung',
-              icon: Icons.shield_outlined,
-              text: 'Gegen deine Muster',
-              unter: 'für schwierige Tage',
-              seite: (_) => seite(() => KochbuchSeite(umfeld: u)),
-            ),
-            BKachel(
-              id: 'e-kuehl',
-              titel: 'Kühlschrank',
-              icon: Icons.kitchen_outlined,
-              text: 'Foto machen',
-              unter: 'ich baue ein Gericht',
-              seite: (_) => seite(() => KuehlschrankSeite(umfeld: u)),
-            ),
-          ],
-        ),
-        BSeite(
-          name: 'Planen',
-          coach:
-              'Aus deinen Gerichten der Woche steht die Einkaufsliste '
-              'schon da.',
-          kacheln: [
             BKachel(
               id: 'e-einkauf',
               titel: 'Einkaufsliste',
               icon: Icons.shopping_cart_outlined,
-              groesse: KachelGroesse.mittel,
-              gold: true,
               wert: offen == 0 ? 'Leer' : '$offen offen',
               unter: 'aus deinen Gerichten, sortiert',
               seite: (_) => seite(() => EinkaufslisteSeite(umfeld: u)),
-            ),
-            BKachel(
-              id: 'e-basis',
-              titel: 'Basis-Gerichte',
-              icon: Icons.soup_kitchen_outlined,
-              text: 'Die du immer kannst',
-              unter: 'im Kochbuch',
-              seite: (_) => seite(() => KochbuchSeite(umfeld: u)),
-            ),
-            BKachel(
-              id: 'e-foto',
-              titel: 'Teller-Foto',
-              icon: Icons.photo_camera_outlined,
-              text: naechste.isEmpty ? 'Alles gegessen' : naechste.first.name,
-              unter: 'grob, ohne Zahlen',
-              seite: naechste.isEmpty
-                  ? null
-                  : (_) => seite(
-                      () => TellerFotoSeite(umfeld: u, slot: naechste.first),
-                    ),
             ),
           ],
         ),
@@ -553,38 +511,24 @@ extension _Koerper on _HomePageState {
           coach: 'Das kcal-Ziel ist nur Orientierung. Gezählt wird nichts.',
           kacheln: [
             BKachel(
-              id: 'e-kcal',
-              titel: 'kcal-Ziel',
-              icon: Icons.speed,
+              id: 'e-ziel',
+              titel: 'kcal & Gewicht',
+              icon: Icons.monitor_weight_outlined,
               groesse: KachelGroesse.mittel,
               gold: true,
-              wert: ziel == null ? 'Einrichten' : '$ziel',
+              wert: ziel == null ? 'Einrichten' : '$ziel kcal',
               unter: ziel == null
                   ? 'aus Größe, Alter, Aktivität und Ziel'
-                  : 'kcal am Tag · nur zur Orientierung',
+                  : _weights.isEmpty
+                  ? 'Gewicht noch eintragen'
+                  : '${_HomePageState._komma(_weights.last.kg)} kg · Wochenschnitt zählt',
               feld: _feld(
                 b,
-                'kcal',
-                'kcal-Ziel',
-                Icons.speed,
+                'kcal,gewicht',
+                'kcal & Gewicht',
+                Icons.monitor_weight_outlined,
                 'Bewegt sich dein Gewicht 3 Wochen nicht passend zum Ziel, '
                     'frage ich dich zuerst.',
-              ),
-            ),
-            BKachel(
-              id: 'e-gewicht',
-              titel: 'Gewicht',
-              icon: Icons.monitor_weight_outlined,
-              text: _weights.isEmpty
-                  ? 'Eintragen'
-                  : '${_HomePageState._komma(_weights.last.kg)} kg',
-              unter: 'Wochenschnitt zählt',
-              feld: _feld(
-                b,
-                'gewicht',
-                'Gewicht',
-                Icons.monitor_weight_outlined,
-                'Wochenschnitt statt Tageswert.',
               ),
             ),
             BKachel(

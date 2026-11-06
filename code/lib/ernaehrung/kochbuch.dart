@@ -74,6 +74,9 @@ class KochbuchSeite extends StatefulWidget {
   const KochbuchSeite({super.key, required this.umfeld});
   final EssenUmfeld umfeld;
 
+  /// The filters on top of the Kochbuch.
+  static const filter = ['Alle', 'Basis', 'Rettung'];
+
   @override
   State<KochbuchSeite> createState() => _KochbuchSeiteState();
 }
@@ -81,6 +84,7 @@ class KochbuchSeite extends StatefulWidget {
 class _KochbuchSeiteState extends State<KochbuchSeite> {
   final _name = TextEditingController();
   bool _laedt = false;
+  String _filter = 'Alle';
 
   EssenUmfeld get u => widget.umfeld;
 
@@ -134,6 +138,8 @@ class _KochbuchSeiteState extends State<KochbuchSeite> {
         spaetesTraining: (u.training ?? 0) >= 17 * 60,
       );
       final rest = math.max(0, variantenAb - blaetter);
+      final zeigRettung = _filter != 'Basis';
+      final zeigBasis = _filter != 'Rettung';
       return [
         TKarte(
           key: const ValueKey('kochbuch-blaetter'),
@@ -165,7 +171,20 @@ class _KochbuchSeiteState extends State<KochbuchSeite> {
             ],
           ),
         ),
-        if (heute != null)
+        Wrap(
+          spacing: 6,
+          children: [
+            for (final f in KochbuchSeite.filter)
+              TChip(
+                f,
+                key: ValueKey('kochbuch-filter-$f'),
+                an: _filter == f,
+                onTap: () => setState(() => _filter = f),
+              ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        if (heute != null && zeigRettung)
           TKarte(
             child: CoachZeile(
               text:
@@ -178,88 +197,95 @@ class _KochbuchSeiteState extends State<KochbuchSeite> {
               ),
             ),
           ),
-        TKarte(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const TLabel('Deine Rettungsgerichte'),
-              const SizedBox(height: 3),
-              const Text(
-                'Vom Coach, jedes gegen ein Muster von dir.',
-                style: tSoft,
-              ),
-              if (_laedt)
-                const Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Center(
-                    child: CircularProgressIndicator(color: CoachStyle.gold),
+        if (zeigRettung)
+          TKarte(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const TLabel('Deine Rettungsgerichte'),
+                const SizedBox(height: 3),
+                const Text(
+                  'Vom Coach, jedes gegen ein Muster von dir.',
+                  style: tSoft,
+                ),
+                if (_laedt)
+                  const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Center(
+                      child: CircularProgressIndicator(color: CoachStyle.gold),
+                    ),
                   ),
-                ),
-              for (final g in rettung)
-                _GerichtZeile(
-                  key: ValueKey('rettung-${g.id}'),
-                  g: g,
-                  gesamt: kochenGesamt(d),
-                  onTap: g.freiAb == null
-                      ? () => zeigeSeite(
-                          context,
-                          GerichtSeite(umfeld: u, id: g.id),
-                        )
-                      : null,
-                ),
-              if (!_laedt)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: TLink(
-                    'Noch ein Vorschlag',
-                    key: const ValueKey('rettung-mehr'),
-                    onTap: () => _holen(1),
+                for (final g in rettung)
+                  _GerichtZeile(
+                    key: ValueKey('rettung-${g.id}'),
+                    g: g,
+                    gesamt: kochenGesamt(d),
+                    onTap: g.freiAb == null
+                        ? () => zeigeSeite(
+                            context,
+                            GerichtSeite(umfeld: u, id: g.id),
+                          )
+                        : null,
                   ),
-                ),
-            ],
+                if (!_laedt)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: TLink(
+                      'Noch ein Vorschlag',
+                      key: const ValueKey('rettung-mehr'),
+                      onTap: () => _holen(1),
+                    ),
+                  ),
+              ],
+            ),
           ),
-        ),
-        TKarte(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const TLabel('Deine eigenen'),
-              for (final g in eigene)
-                _GerichtZeile(
-                  key: ValueKey('gericht-${g.id}'),
-                  g: g,
-                  gesamt: kochenGesamt(d),
-                  onTap: () =>
-                      zeigeSeite(context, GerichtSeite(umfeld: u, id: g.id)),
+        if (zeigBasis)
+          TKarte(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const TLabel('Deine Basis-Gerichte'),
+                const SizedBox(height: 3),
+                const Text(
+                  'Die du immer kannst, auch an vollen Tagen.',
+                  style: tSoft,
                 ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      key: const ValueKey('gericht-neu-name'),
-                      controller: _name,
-                      style: tText,
-                      decoration: _feld(
-                        'Eigenes Gericht, z. B. Thunfisch-Salat',
+                for (final g in eigene)
+                  _GerichtZeile(
+                    key: ValueKey('gericht-${g.id}'),
+                    g: g,
+                    gesamt: kochenGesamt(d),
+                    onTap: () =>
+                        zeigeSeite(context, GerichtSeite(umfeld: u, id: g.id)),
+                  ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        key: const ValueKey('gericht-neu-name'),
+                        controller: _name,
+                        style: tText,
+                        decoration: _feld(
+                          'Eigenes Gericht, z. B. Thunfisch-Salat',
+                        ),
+                        onSubmitted: (_) => _dazu(),
                       ),
-                      onSubmitted: (_) => _dazu(),
                     ),
-                  ),
-                  const SizedBox(width: 6),
-                  SizedBox(
-                    width: 96,
-                    child: TGhost(
-                      'Dazu',
-                      key: const ValueKey('gericht-neu-dazu'),
-                      onTap: _dazu,
+                    const SizedBox(width: 6),
+                    SizedBox(
+                      width: 96,
+                      child: TGhost(
+                        'Dazu',
+                        key: const ValueKey('gericht-neu-dazu'),
+                        onTap: _dazu,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
       ];
     },
   );

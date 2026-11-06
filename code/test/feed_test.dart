@@ -205,7 +205,7 @@ void main() {
     tester,
   ) async {
     final (diary, feed) = await _openFeed(tester);
-    await openTab(tester, 'Ernährung', 'e-kcal');
+    await openTab(tester, 'Ernährung', 'e-ziel');
     await tester.tap(find.text('kcal-Ziel einrichten'));
     await tester.pumpAndSettle();
 
@@ -253,7 +253,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await openTab(tester, 'Ernährung', 'e-kcal');
+    await openTab(tester, 'Ernährung', 'e-ziel');
     // (900 + 1125 - 150 + 5) * 1.55 = 2914
     expect(find.textContaining('2.900'), findsOneWidget);
   });

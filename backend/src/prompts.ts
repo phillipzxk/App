@@ -542,6 +542,17 @@ ${JSON_ONLY}
 {"eiweiss": 2, "gemuese": 3, "groesse": 3, "eiweiss_text": "...", "gemuese_text": "...", "groesse_text": "...", "tipp": "..."}`;
 }
 
+/// What a food photo shows, so one Foto button can open the right page.
+export function fotoArtPrompt(): string {
+  return `Du siehst ein Foto aus einer Ernährungs-App. Was zeigt es?
+"teller": eine fertige Mahlzeit oder ein Snack auf Teller, in Schüssel oder Box.
+"kuehlschrank": ein Kühlschrank, Vorratsschrank, Einkauf oder rohe Zutaten, aus denen noch gekocht wird.
+Bist du dir nicht sicher oder ist kein Essen zu sehen: null.
+
+${JSON_ONLY}
+{"art": "teller"}`;
+}
+
 /// A dish from what is in the fridge (photo or a list of ingredients).
 export function kuehlschrankPrompt(p: Profile, kontext: string, zutaten: string): string {
   return `Das weißt du von der Person:
