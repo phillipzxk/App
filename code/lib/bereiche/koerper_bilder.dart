@@ -2,9 +2,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+part 'bereich_bilder.dart';
+
 /// The pictures of the Körper pages (draft "Körper als Bilder" 4,
 /// Phillip "So übernehmen" 2026-11-07): every page is one big picture on
-/// deep black with glowing gold, each part keeps one quiet tone of its own.
+/// dark brown with glowing gold (Phillip 2026-11-07: "ins Braun"), each part keeps one quiet tone of its own.
 /// All pictures are drawn on a 302 x 360 board and scaled to the screen.
 
 /// Wraps a part of a picture so a tap opens the page behind tile [id].
@@ -15,7 +17,7 @@ const bildBreite = 302.0, bildHoehe = 360.0;
 const _ink = Color(0xFFF4EEE4);
 const _soft = Color(0xFF9E937F);
 const _leise = Color(0xFF6F6658);
-const _dunkel = Color(0xFF0B0B0B);
+const _dunkel = Color(0xFF150F0A);
 const _rand = Color(0x24FFF0D7);
 const _goldHell = Color(0xFFF5DFAE);
 const _goldInk = Color(0xFF1A130B);
@@ -41,7 +43,7 @@ Shader _goldR(Offset m, double r) => const RadialGradient(
 Shader _dunkelR(Offset m, double r) => const RadialGradient(
   center: Alignment(-.24, -.36),
   radius: .9,
-  colors: [Color(0xFF262422), Color(0xFF0C0C0B)],
+  colors: [Color(0xFF33291D), Color(0xFF130E09)],
 ).createShader(Rect.fromCircle(center: m, radius: r));
 
 /// Scales what [male] draws around [m] (pop-in animation).
@@ -334,7 +336,7 @@ class _HeuteMaler extends _Maler {
         const Rect.fromLTWH(10, 108, 282, 8),
         const Radius.circular(4),
       ),
-      Paint()..color = const Color(0xFF3A3836),
+      Paint()..color = const Color(0xFF43372A),
     );
     c.drawRRect(
       RRect.fromRectAndRadius(
@@ -592,8 +594,8 @@ class _WocheMaler extends _Maler {
           zeile,
           Paint()
             ..color = training
-                ? const Color(0xFF121211)
-                : const Color(0xFF0A0A0A),
+                ? const Color(0xFF1C150E)
+                : const Color(0xFF150F0A),
         );
         c.drawRRect(
           zeile,
@@ -678,7 +680,7 @@ class _WocheMaler extends _Maler {
           c.drawCircle(
             Offset(268.5, cy - 2),
             4.4,
-            Paint()..color = const Color(0xFF0A0A0A),
+            Paint()..color = const Color(0xFF150F0A),
           );
         }
       });
@@ -1035,7 +1037,7 @@ class _EssenMaler extends _Maler {
         if (gegessen) {
           c.drawCircle(p, 12, Paint()..shader = _goldR(p, 12));
         } else {
-          c.drawCircle(p, 12, Paint()..color = const Color(0xFF141413));
+          c.drawCircle(p, 12, Paint()..color = const Color(0xFF1C150E));
           c.drawCircle(p, 12, _strich(tonErnaehrung, 1.4));
         }
         c.drawCircle(
@@ -1234,7 +1236,7 @@ class _KuecheMaler extends _Maler {
         if (g.voll) {
           c.drawPath(blatt, Paint()..shader = _goldLinear(blatt.getBounds()));
         } else {
-          c.drawPath(blatt, Paint()..color = const Color(0xFF121211));
+          c.drawPath(blatt, Paint()..color = const Color(0xFF1C150E));
           c.drawPath(blatt, _strich(tonErnaehrung, 1.4));
         }
         c.drawPath(
@@ -1288,7 +1290,7 @@ class _KuecheMaler extends _Maler {
           ..quadraticBezierTo(x - 9, 62, x, 52)
           ..quadraticBezierTo(x + 9, 62, x, 72)
           ..close();
-        c.drawPath(k, Paint()..color = const Color(0xFF121211));
+        c.drawPath(k, Paint()..color = const Color(0xFF1C150E));
         c.drawPath(k, _strich(tonErnaehrung, 1.4));
         _text(
           c,
@@ -1690,7 +1692,7 @@ class _MorgenMaler extends _Maler {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Color(0xFF050505),
+            Color(0xFF140F0A),
             Color(0xFF15110A),
             Color(0xFF7A5C2C),
             Color(0xFFE3BC74),
@@ -1728,7 +1730,7 @@ class _MorgenMaler extends _Maler {
       ..lineTo(302, 360)
       ..lineTo(0, 360)
       ..close();
-    c.drawPath(berg, Paint()..color = const Color(0xFF080808));
+    c.drawPath(berg, Paint()..color = const Color(0xFF130E09));
     _text(
       c,
       'WIE BIST DU AUFGEWACHT?',
@@ -2019,7 +2021,7 @@ class _AbendMaler extends _Maler {
         ..shader = const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFF050506), Color(0xFF17150F)],
+          colors: [Color(0xFF130E09), Color(0xFF1E170F)],
         ).createShader(fenster.outerRect),
     );
     final kerzen = k.take(3).toList();
@@ -2036,7 +2038,7 @@ class _AbendMaler extends _Maler {
     c.drawCircle(
       const Offset(238, 41),
       11,
-      Paint()..color = const Color(0xFF0A0A0B),
+      Paint()..color = const Color(0xFF130E09),
     );
     if (brennen > 0) {
       c.drawOval(
@@ -2161,7 +2163,7 @@ class _AbendMaler extends _Maler {
       const Rect.fromLTWH(16, 208, 270, 14),
       const Radius.circular(7),
     );
-    c.drawRRect(bank, Paint()..color = const Color(0xFF2A2826));
+    c.drawRRect(bank, Paint()..color = const Color(0xFF382D21));
     c.drawRRect(
       RRect.fromRectAndRadius(
         const Rect.fromLTWH(16, 208, 270, 3),

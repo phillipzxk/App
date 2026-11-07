@@ -67,6 +67,7 @@ import '../mindset/berg.dart';
 import '../mindset/dranbleiben.dart';
 import '../mindset/langfristig.dart';
 import '../mindset/mindset_coach.dart';
+import '../mindset/mindset_data.dart' show radBereiche;
 import '../mindset/mindset_logik.dart';
 import '../mindset/mindset_ui.dart';
 import '../mindset/ruhe.dart';

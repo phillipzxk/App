@@ -236,6 +236,13 @@ extension _Mindset on _HomePageState {
       ],
     );
 
+    // For the pictures (draft "Bereiche als Bilder" 3).
+    final woche = dayKey(montagVon(heute));
+    final gelebt = d.werte.where((x) => (x.noten[woche] ?? 0) >= 4).length;
+    final radMitte = rad == null
+        ? ''
+        : rad.schnitt.toStringAsFixed(1).replaceAll('.', ',');
+
     String coachHeute() {
       if (offen.isNotEmpty) {
         final s = offen.first;
@@ -256,6 +263,35 @@ extension _Mindset on _HomePageState {
       BSeite(
         name: 'Heute',
         coach: coachHeute(),
+        bild: BBild(
+          bau: (tipp, v, t) => BergBild(
+            steine: [
+              for (final x in offen.take(3))
+                (
+                  titel: x.titel,
+                  seit: tageSeit(x.seit, heute) == 0
+                      ? 'seit heute'
+                      : seitText(x.seit, heute),
+                ),
+            ],
+            gehalten: w.gehalten,
+            vorgenommen: w.vorgenommen,
+            tipp: tipp,
+            v: v,
+            t: t,
+          ),
+          zahlen: [
+            BZahl('${offen.length}', 'Steine', ziel: 'm-berg'),
+            BZahl(
+              w.vorgenommen == 0 ? '–' : '${w.gehalten}/${w.vorgenommen}',
+              'Wort gehalten',
+              ziel: 'm-wort',
+            ),
+            const BZahl('3 min', 'Ruhe', ziel: 'm-ruhe-seite'),
+          ],
+          knopf: ('2 Minuten starten', 'm-berg'),
+          knopf2: (Icons.self_improvement, 'm-ruhe'),
+        ),
         kacheln: [
           BKachel(
             id: 'm-berg',
@@ -288,6 +324,13 @@ extension _Mindset on _HomePageState {
             onKnopf: () => starteRuhe(context, _mindsetUmfeld),
             feld: ruheF,
           ),
+          // The Ruhe page itself, for the numbers under the pictures.
+          BKachel(
+            id: 'm-ruhe-seite',
+            titel: 'Ruhe-Knopf',
+            icon: Icons.self_improvement,
+            feld: ruheF,
+          ),
         ],
       ),
       BSeite(
@@ -302,6 +345,27 @@ extension _Mindset on _HomePageState {
                 if (stufe.eigene > 0)
                   '${stufe.eigene} erste Schritte kamen von dir.',
               ].join(' '),
+        bild: BBild(
+          bau: (tipp, v, t) => DranBild(
+            ausreden: [for (final a in aus.take(3)) (text: a.text, n: a.n)],
+            stufe: stufe.stufe,
+            durch: durch,
+            tipp: tipp,
+            v: v,
+            t: t,
+          ),
+          zahlen: [
+            BZahl('$durch', 'durchgezogen', ziel: 'm-durch'),
+            BZahl('${stufe.stufe}/5', 'Stufe', ziel: 'm-stufe'),
+            BZahl(
+              aus.isEmpty ? '–' : aus.first.text,
+              'häufigste Ausrede',
+              ziel: 'm-aus',
+            ),
+          ],
+          knopf: ('Durchgezogen eintragen', 'm-durch'),
+          knopf2: (Icons.insights, 'm-muster'),
+        ),
         kacheln: [
           BKachel(
             id: 'm-durch',
@@ -356,6 +420,36 @@ extension _Mindset on _HomePageState {
             : werteSchnittW >= 4
             ? 'Diese Woche hast du gut nach deinen Werten gelebt.'
             : 'Bei deinen Werten ist diese Woche noch Luft. Was hat gefehlt?',
+        bild: BBild(
+          bau: (tipp, v, t) => RuheBild(
+            frage: abendFrage(d, heute),
+            werte: [
+              for (final x in d.werte.take(3))
+                (
+                  name: x.name,
+                  wert: x.noten[woche] == null ? null : x.noten[woche]! / 5,
+                ),
+            ],
+            tipp: tipp,
+            v: v,
+            t: t,
+          ),
+          zahlen: [
+            BZahl(
+              d.werte.isEmpty ? '–' : '$gelebt/${d.werte.length}',
+              'Werte gelebt',
+              ziel: 'm-werte',
+            ),
+            const BZahl('3 min', 'Ruhe-Knopf', ziel: 'm-ruhe-seite'),
+            BZahl(
+              abendHeute(d, heute) == null ? '1' : '0',
+              'Frage heute',
+              ziel: 'm-abend',
+            ),
+          ],
+          knopf: ('Ruhe-Knopf', 'm-ruhe'),
+          knopf2: (Icons.edit_outlined, 'm-sorgen'),
+        ),
         kacheln: [
           BKachel(
             id: 'm-werte',
@@ -394,6 +488,33 @@ extension _Mindset on _HomePageState {
       BSeite(
         name: 'Langfristig',
         coach: radSatz(d) ?? 'Füll dein Lebensrad aus. Dann sehe ich, wo am meisten zu holen ist.',
+        bild: BBild(
+          bau: (tipp, v, t) => LangBild(
+            rad: [for (final b in radBereiche) (name: b, wert: rad?.werte[b])],
+            mitte: radMitte,
+            briefText: brief != null
+                ? 'öffnet in ${brief.tageBis(heute)} Tagen'
+                : offeneBriefeN > 0
+                ? 'dein Brief ist offen'
+                : 'Schreib dir',
+            versiegelt: brief != null,
+            ziele: [for (final z in d.ziele) z.text],
+            tipp: tipp,
+            v: v,
+            t: t,
+          ),
+          zahlen: [
+            BZahl(rad == null ? '–' : radMitte, 'Lebensrad', ziel: 'm-rad'),
+            BZahl(
+              brief == null ? '–' : '${brief.tageBis(heute)}',
+              'Tage bis Brief',
+              ziel: 'm-brief',
+            ),
+            BZahl('${d.ziele.length}', 'Lebensziele', ziel: 'm-ziele'),
+          ],
+          knopf: ('Dein Warum', 'm-warum'),
+          knopf2: (Icons.edit_outlined, 'm-brief'),
+        ),
         kacheln: [
           BKachel(
             id: 'm-rad',

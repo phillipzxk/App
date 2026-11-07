@@ -122,3 +122,7 @@ Phillip: das Braun und Seiten mit nur einer Linie seien „sehr kacke“, manche
 - Schlaf Abend: größeres Fenster, größere Kerzen, brennende Kerzen machen das Fenster warm; Zähler „dankbar 0/3“ und „morgen besser 0/3“; unten Punkte und „Noch N Schritte bis Gute Nacht“.
 
 Code: `code/lib/bereiche/koerper_bilder.dart` (die 9 Bilder), `BBild`/`BZahl` und `_BildSeiteView` in `bereich_seite.dart`, Daten in `code/lib/home/koerper_seite.dart`. `kachel_bilder.dart` ist entfernt.
+
+## Zurück ins dunkle Braun (2026-11-07)
+
+Phillip zu Entwurf 3 der anderen Bereiche: „Das ist perfekt die farbe“, „ja ins braun wechseln aufjedenfall“. Körper bekommt dasselbe dunkle Braun wie [[Bereiche als Bilder]]: Grund von oben #2A2016 über #1A140E nach #0F0C09 mit leichtem Goldlicht, Bildfläche #211910 nach #140F0A, dunkle Scheiben #33291D nach #130E09, Schiene #43372A, Zeilen #1C150E, Fensterbank #382D21. Bilder und Inhalte bleiben genau wie in Entwurf 4.

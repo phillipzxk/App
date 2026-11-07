@@ -542,154 +542,182 @@ class _BereichSeiteState extends State<BereichSeite>
   Widget _bildLayout(BuildContext context) {
     final seiten = t.seiten;
     return Scaffold(
-      backgroundColor: const Color(0xFF050505),
-      // Deep black with a soft gold light from the top, no brown (draft
-      // "Körper als Bilder" 4).
+      backgroundColor: const Color(0xFF0F0C09),
+      // Dark brown with a soft gold light from the top (draft "Bereiche
+      // als Bilder" 3, Phillip "ins Braun" 2026-11-07).
       body: DecoratedBox(
         decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment(0, -1.1),
-            radius: 1.1,
-            colors: [Color(0xFF221D12), Color(0xFF050505)],
-            stops: [0, .72],
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF2A2016), Color(0xFF1A140E), Color(0xFF0F0C09)],
+            stops: [0, .45, 1],
           ),
         ),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
-            child: SafeArea(
-              bottom: false,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                    child: Row(
-                      children: [
-                        GestureDetector(
-                          key: const ValueKey('bereich-zurueck'),
-                          onTap: () => Navigator.of(context).maybePop(),
-                          child: Container(
-                            width: 36,
-                            height: 36,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: const Color(0x0DFFF0D7),
-                              border: Border.all(color: Glas.edge),
-                            ),
-                            child: const Icon(
-                              Icons.chevron_left,
-                              size: 22,
-                              color: CoachStyle.goldLight,
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment(0, -1.1),
+              radius: 1.1,
+              colors: [Color(0x26C9A25C), Color(0x00C9A25C)],
+              stops: [0, .72],
+            ),
+          ),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: SafeArea(
+                bottom: false,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            key: const ValueKey('bereich-zurueck'),
+                            onTap: () => Navigator.of(context).maybePop(),
+                            child: Container(
+                              width: 36,
+                              height: 36,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0x0DFFF0D7),
+                                border: Border.all(color: Glas.edge),
+                              ),
+                              child: const Icon(
+                                Icons.chevron_left,
+                                size: 22,
+                                color: CoachStyle.goldLight,
+                              ),
                             ),
                           ),
-                        ),
-                        if (widget.teile.length > 1) ...[
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _TeilPillen(
-                              teile: widget.teile,
-                              aktiv: _teil,
-                              onTap: _zuTeil,
+                          if (widget.teile.length > 1) ...[
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _TeilPillen(
+                                teile: widget.teile,
+                                aktiv: _teil,
+                                onTap: _zuTeil,
+                              ),
                             ),
-                          ),
+                          ],
+                          // One part only: where you came from, small
+                          // (draft "Bereiche als Bilder" 3).
+                          if (widget.teile.length == 1) ...[
+                            const SizedBox(width: 10),
+                            Text(
+                              widget.zurueck,
+                              style: Glas.tLabel.copyWith(
+                                fontSize: 12.5,
+                                color: Glas.label,
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(22, 14, 14, 0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.name,
-                                style: Glas.tLabel.copyWith(
-                                  fontSize: 12,
-                                  letterSpacing: .4,
-                                  color: CoachStyle.goldLight,
-                                ),
-                              ),
-                              AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 300),
-                                child: Text(
-                                  t.name,
-                                  key: ValueKey('titel-${t.id}'),
-                                  maxLines: 1,
-                                  style: CoachStyle.title.copyWith(
-                                    fontSize: 27,
-                                    color: Glas.text,
-                                    letterSpacing: -0.6,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        GestureDetector(
-                          key: const ValueKey('bereich-ring'),
-                          onTap: widget.verlauf == null
-                              ? null
-                              : () => oeffneFeld(
-                                  context,
-                                  _ringKey,
-                                  widget.verlauf!,
-                                  widget.name,
-                                ),
-                          child: KeyedSubtree(
-                            key: _ringKey,
-                            child: WertRing(
-                              key: ValueKey('ring-${t.id}'),
-                              wert: t.wert,
-                              size: 40,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 380),
-                      child: _SegmentLeiste(
-                        key: ValueKey('seg-${t.id}'),
-                        namen: [for (final s in seiten) s.name],
-                        aktiv: _seite,
-                        onTap: _zuSeite,
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: PageView(
-                      key: ValueKey('pages-${t.id}'),
-                      controller: _pages,
-                      onPageChanged: (i) => setState(() => _seite = i),
-                      children: [
-                        for (final (i, s) in seiten.indexed)
-                          _BildSeiteView(
-                            key: ValueKey('bild-${t.id}-$i'),
-                            seite: s,
-                            bereich: t.name,
-                            sichtbar: i == _seite,
-                            coachKey: i == _seite ? _coachKey : null,
-                            onCoach: widget.frag == null
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(22, 14, 14, 0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.teile.length == 1
+                                      ? 'Bereich'
+                                      : widget.name,
+                                  style: Glas.tLabel.copyWith(
+                                    fontSize: widget.teile.length == 1
+                                        ? 11
+                                        : 12,
+                                    letterSpacing: .4,
+                                    color: widget.teile.length == 1
+                                        ? Glas.label
+                                        : CoachStyle.goldLight,
+                                  ),
+                                ),
+                                AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 300),
+                                  child: Text(
+                                    t.name,
+                                    key: ValueKey('titel-${t.id}'),
+                                    maxLines: 1,
+                                    style: CoachStyle.title.copyWith(
+                                      fontSize: 27,
+                                      color: Glas.text,
+                                      letterSpacing: -0.6,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          GestureDetector(
+                            key: const ValueKey('bereich-ring'),
+                            onTap: widget.verlauf == null
                                 ? null
                                 : () => oeffneFeld(
                                     context,
-                                    _coachKey,
-                                    widget.frag!(t),
-                                    t.name,
+                                    _ringKey,
+                                    widget.verlauf!,
+                                    widget.name,
                                   ),
+                            child: KeyedSubtree(
+                              key: _ringKey,
+                              child: WertRing(
+                                key: ValueKey('ring-${t.id}'),
+                                wert: t.wert,
+                                size: 40,
+                              ),
+                            ),
                           ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 380),
+                        child: _SegmentLeiste(
+                          key: ValueKey('seg-${t.id}'),
+                          namen: [for (final s in seiten) s.name],
+                          aktiv: _seite,
+                          onTap: _zuSeite,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: PageView(
+                        key: ValueKey('pages-${t.id}'),
+                        controller: _pages,
+                        onPageChanged: (i) => setState(() => _seite = i),
+                        children: [
+                          for (final (i, s) in seiten.indexed)
+                            _BildSeiteView(
+                              key: ValueKey('bild-${t.id}-$i'),
+                              seite: s,
+                              bereich: t.name,
+                              sichtbar: i == _seite,
+                              coachKey: i == _seite ? _coachKey : null,
+                              onCoach: widget.frag == null
+                                  ? null
+                                  : () => oeffneFeld(
+                                      context,
+                                      _coachKey,
+                                      widget.frag!(t),
+                                      t.name,
+                                    ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -2001,24 +2029,33 @@ class _BildSeiteViewState extends State<_BildSeiteView>
         ClipRRect(
           borderRadius: BorderRadius.circular(32),
           child: DecoratedBox(
-            // Deep black with a faint gold light (draft "Körper als
-            // Bilder" 4).
+            // Dark brown with a faint gold light (draft "Bereiche als
+            // Bilder" 3, Phillip "ins Braun" 2026-11-07).
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(32),
-              gradient: const RadialGradient(
-                center: Alignment(0, -.2),
-                radius: .8,
-                colors: [Color(0xFF19160F), Color(0xFF080808)],
+              gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF211910), Color(0xFF140F0A)],
               ),
               border: Border.all(color: Glas.edge),
             ),
-            child: AspectRatio(
-              aspectRatio: bildBreite / bildHoehe,
-              child: FittedBox(
-                child: AnimatedBuilder(
-                  animation: Listenable.merge([_ein, _zeit]),
-                  builder: (context, _) =>
-                      b.bau(_tipp, _ein.value, _zeit.value * 60),
+            child: DecoratedBox(
+              decoration: const BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment(0, -.2),
+                  radius: .75,
+                  colors: [Color(0x17C9A25C), Color(0x00C9A25C)],
+                ),
+              ),
+              child: AspectRatio(
+                aspectRatio: bildBreite / bildHoehe,
+                child: FittedBox(
+                  child: AnimatedBuilder(
+                    animation: Listenable.merge([_ein, _zeit]),
+                    builder: (context, _) =>
+                        b.bau(_tipp, _ein.value, _zeit.value * 60),
+                  ),
                 ),
               ),
             ),
