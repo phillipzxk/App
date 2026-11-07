@@ -348,10 +348,19 @@ Future<void> openTab(
   if (kachel != null) await openKachel(tester, kachel);
 }
 
+/// Tile [id]: a tile, or on a picture page a part of the picture, a
+/// button or a number that opens it.
+Finder kachelFinder(String id) {
+  for (final art in ['kachel', 'knopf', 'zahl']) {
+    final f = find.byKey(ValueKey('$art-$id'));
+    if (f.evaluate().isNotEmpty) return f;
+  }
+  return find.byKey(ValueKey('kachel-$id'));
+}
+
 /// Shows the page of an area that has tile [id] on it.
 Future<void> zeigeKachel(WidgetTester tester, String id) async {
-  final k = find.byKey(ValueKey('kachel-$id'));
-  if (k.evaluate().isNotEmpty) return;
+  if (kachelFinder(id).evaluate().isNotEmpty) return;
   final seiten = find.byWidgetPredicate(
     (w) =>
         w.key is ValueKey<String> &&
@@ -367,12 +376,12 @@ Future<void> zeigeKachel(WidgetTester tester, String id) async {
   for (var i = 0; i < n; i++) {
     await tester.tap(seiten.at(i));
     await tester.pumpAndSettle();
-    for (var j = 0; j < 4 && k.evaluate().isEmpty; j++) {
+    for (var j = 0; j < 4 && kachelFinder(id).evaluate().isEmpty; j++) {
       if (liste.evaluate().isEmpty) break;
       await tester.drag(liste.first, const Offset(0, -300));
       await tester.pumpAndSettle();
     }
-    if (k.evaluate().isNotEmpty) return;
+    if (kachelFinder(id).evaluate().isNotEmpty) return;
   }
   fail('Kachel $id nicht gefunden');
 }
@@ -380,7 +389,7 @@ Future<void> zeigeKachel(WidgetTester tester, String id) async {
 /// Opens tile [id] on the open area page.
 Future<void> openKachel(WidgetTester tester, String id) async {
   await zeigeKachel(tester, id);
-  final k = find.byKey(ValueKey('kachel-$id'));
+  final k = kachelFinder(id).first;
   await tester.ensureVisible(k);
   await tester.pumpAndSettle();
   await tester.tap(k);

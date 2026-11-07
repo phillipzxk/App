@@ -76,13 +76,13 @@ void main() {
     expect(find.text('Schlaf & Routine'), findsWidgets);
     expect(find.byKey(const ValueKey('kachel-s-himmel')), findsOneWidget);
 
-    // Switch to Training directly at the top, then to its Plan page.
+    // Switch to Training directly at the top, then to its Woche page.
     await tester.tap(find.byKey(const ValueKey('teil-training')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('kachel-t-heute')), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('seite-Plan')));
+    await tester.tap(find.byKey(const ValueKey('seite-Woche')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('kachel-t-plan')), findsOneWidget);
+    expect(find.byKey(const ValueKey('knopf-t-plan')), findsOneWidget);
 
     // Without a plan the tile opens the plan straight away; back goes to
     // Körper.

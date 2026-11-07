@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -52,8 +53,7 @@ import 'today_tab.dart';
 import 'training_tab.dart';
 import '../bereiche/bereich_seite.dart';
 import '../bereiche/glas.dart';
-import '../bereiche/kachel_bilder.dart';
-import '../bereiche/koerper_szene.dart';
+import '../bereiche/koerper_bilder.dart';
 import '../ernaehrung/einkaufsliste.dart';
 import '../ernaehrung/heisshunger_seite.dart';
 import '../ernaehrung/kochbuch.dart';
