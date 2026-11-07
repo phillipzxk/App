@@ -469,10 +469,16 @@ void main() {
         await tester.pump(const Duration(milliseconds: 100));
       }
       await tester.tap(find.byKey(const ValueKey('seite-Heute')));
-      for (var i = 0; i < 30; i++) {
+      for (var i = 0; i < 14; i++) {
         await tester.pump(const Duration(milliseconds: 100));
       }
       expect(find.byKey(const ValueKey('coach-fliegt')), findsOneWidget);
+      for (var i = 0; i < 12; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      // Landed: he now sits in his bubble at the tile.
+      expect(find.byKey(const ValueKey('coach-fliegt')), findsNothing);
+      expect(find.byKey(const ValueKey('bereich-coach')), findsWidgets);
       bewegungErzwingen = false;
     });
 

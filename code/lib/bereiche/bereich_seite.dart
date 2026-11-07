@@ -188,16 +188,16 @@ class _BereichSeiteState extends State<BereichSeite>
   final _stackKey = GlobalKey();
   final _zielKey = GlobalKey();
 
-  /// The coach's face flying from the coach card to today's tile.
+  /// The coach's face flying from the scene down to his speech bubble at
+  /// today's tile (draft "Körper, lebendig").
   late final AnimationController _flug = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 2300),
+    duration: const Duration(milliseconds: 2100),
   )..addListener(_flugTick);
   Rect? _flugVon, _flugNach;
 
-  /// The list was scrolled: the face would hang in the air, so it hides.
-  bool _versteckt = false;
-  bool get _angekommen => _flugNach != null && _flug.value >= 1;
+  /// The face sits in its bubble (at once without motion).
+  bool _da = true;
 
   /// Plays the spring-in of the tiles; restarted on every part switch.
   late final AnimationController _ein = AnimationController(
@@ -226,15 +226,22 @@ class _BereichSeiteState extends State<BereichSeite>
   void _starteFlug() {
     _flugVon = null;
     _flugNach = null;
-    _versteckt = false;
     _flug.value = 0;
-    if (!bewegungAn || t.seiten[_seite].zeigt == null) return;
-    _flug.forward(from: 0);
+    _da = !bewegungAn || t.szene == null;
+    if (_da) return;
+    _flug.forward(from: 0).whenComplete(() {
+      if (!mounted) return;
+      setState(() {
+        _da = true;
+        _flugVon = null;
+        _flugNach = null;
+      });
+    });
   }
 
   /// Once the tiles have sprung in, measure where the face flies.
   void _flugTick() {
-    if (_flug.value < .5 || _flugNach != null) return;
+    if (_flug.value < .45 || _flugNach != null) return;
     Rect? rect(GlobalKey k) {
       final box = k.currentContext?.findRenderObject() as RenderBox?;
       final bezug = _stackKey.currentContext?.findRenderObject() as RenderBox?;
@@ -246,15 +253,12 @@ class _BereichSeiteState extends State<BereichSeite>
     final von = rect(_avatarKey), ziel = rect(_zielKey);
     if (von == null || ziel == null) {
       _flug.stop();
+      setState(() => _da = true);
       return;
     }
     setState(() {
       _flugVon = von;
-      _flugNach = Rect.fromCenter(
-        center: Offset(ziel.right - 30, ziel.top + 28),
-        width: 44,
-        height: 44,
-      );
+      _flugNach = ziel;
     });
   }
 
@@ -282,6 +286,167 @@ class _BereichSeiteState extends State<BereichSeite>
   @override
   Widget build(BuildContext context) {
     final seiten = t.seiten;
+    final szene = t.szene != null;
+    final seiteJetzt = seiten[_seite];
+    final pages = PageView(
+      key: ValueKey('pages-${t.id}'),
+      controller: _pages,
+      onPageChanged: (i) {
+        setState(() => _seite = i);
+        _starteFlug();
+      },
+      children: [
+        for (final (i, s) in seiten.indexed)
+          _Bento(
+            seite: s,
+            ein: _ein,
+            bereich: t.name,
+            blase: !szene
+                ? null
+                : _CoachBlase(
+                    key: const ValueKey('bereich-coach'),
+                    text: s.coach,
+                    platzKey: i == _seite ? _zielKey : null,
+                    gesicht: i != _seite || _da,
+                    onTap: widget.frag == null
+                        ? null
+                        : () => oeffneFeld(
+                            context,
+                            _coachKey,
+                            widget.frag!(t),
+                            t.name,
+                          ),
+                    rahmenKey: i == _seite ? _coachKey : null,
+                  ),
+            hervor: i == _seite && _da && s.zeigt != null,
+          ),
+      ],
+    );
+    final zurueck = InkWell(
+      key: const ValueKey('bereich-zurueck'),
+      borderRadius: BorderRadius.circular(20),
+      onTap: () => Navigator.of(context).maybePop(),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Text(
+          '‹ ${widget.zurueck}',
+          style: Glas.tLabel.copyWith(
+            fontSize: 15,
+            color: CoachStyle.goldLight,
+          ),
+        ),
+      ),
+    );
+    final segment = AnimatedSwitcher(
+      duration: const Duration(milliseconds: 380),
+      child: _SegmentLeiste(
+        key: ValueKey('seg-${t.id}'),
+        namen: [for (final s in seiten) s.name],
+        aktiv: _seite,
+        onTap: _zuSeite,
+      ),
+    );
+    final Widget inhalt;
+    if (!szene) {
+      inhalt = SafeArea(
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Align(alignment: Alignment.centerLeft, child: zurueck),
+                  _kopf(),
+                  if (widget.teile.length > 1) ...[
+                    const SizedBox(height: 12),
+                    _TeilLeiste(
+                      teile: widget.teile,
+                      aktiv: _teil,
+                      onTap: _zuTeil,
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  segment,
+                  const SizedBox(height: 12),
+                  _coachKarte(seiteJetzt.coach),
+                ],
+              ),
+            ),
+            Expanded(child: pages),
+            _Punkte(anzahl: seiten.length, aktiv: _seite),
+            SizedBox(height: 10 + MediaQuery.paddingOf(context).bottom),
+          ],
+        ),
+      );
+    } else {
+      final oben = MediaQuery.paddingOf(context).top;
+      inhalt = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // The big living scene with back, name, value and the parts.
+          SizedBox(
+            height: 262 + oben,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: KoerperSzene(
+                    key: ValueKey('szene-${t.id}'),
+                    rahmenKey: _ringKey,
+                    art: t.szene!,
+                    titel: t.name,
+                    sub: t.sub,
+                    wert: t.wert,
+                    daten: t.szeneDaten,
+                    gross: true,
+                    obenFrei: oben + 34,
+                    ueber: widget.name,
+                    onTap: widget.verlauf == null
+                        ? null
+                        : () => oeffneFeld(
+                            context,
+                            _ringKey,
+                            widget.verlauf!,
+                            widget.name,
+                          ),
+                  ),
+                ),
+                Positioned(left: 16, top: oben + 4, child: zurueck),
+                // Where the coach sits before he flies down.
+                Positioned(
+                  left: 16,
+                  top: oben + 122,
+                  child: Opacity(
+                    opacity: _da ? 0 : 1,
+                    child: CoachAvatar(key: _avatarKey, size: 50),
+                  ),
+                ),
+                if (widget.teile.length > 1)
+                  Positioned(
+                    left: 16,
+                    right: 16,
+                    bottom: 8,
+                    child: _TeilPillen(
+                      teile: widget.teile,
+                      aktiv: _teil,
+                      onTap: _zuTeil,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+            child: segment,
+          ),
+          Expanded(child: pages),
+          _Punkte(anzahl: seiten.length, aktiv: _seite),
+          SizedBox(height: 10 + MediaQuery.paddingOf(context).bottom),
+        ],
+      );
+    }
     return Scaffold(
       backgroundColor: CoachStyle.night,
       body: Stack(
@@ -289,125 +454,24 @@ class _BereichSeiteState extends State<BereichSeite>
         children: [
           Positioned.fill(
             child: GlasHintergrund(
-              child: SafeArea(
-                bottom: false,
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 480),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: InkWell(
-                                  key: const ValueKey('bereich-zurueck'),
-                                  borderRadius: BorderRadius.circular(20),
-                                  onTap: () => Navigator.of(context).maybePop(),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 6,
-                                    ),
-                                    child: Text(
-                                      '‹ ${widget.zurueck}',
-                                      style: Glas.tLabel.copyWith(
-                                        fontSize: 15,
-                                        color: CoachStyle.goldLight,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              if (t.szene == null)
-                                _kopf()
-                              else
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 4),
-                                  child: KoerperSzene(
-                                    key: ValueKey('szene-${t.id}'),
-                                    art: t.szene!,
-                                    titel: widget.name,
-                                    sub: t.sub,
-                                    wert: t.wert,
-                                    daten: t.szeneDaten,
-                                    onTap: widget.verlauf == null
-                                        ? null
-                                        : () => oeffneFeld(
-                                            context,
-                                            _ringKey,
-                                            widget.verlauf!,
-                                            widget.name,
-                                          ),
-                                  ),
-                                ),
-                              if (widget.teile.length > 1) ...[
-                                const SizedBox(height: 12),
-                                _TeilLeiste(
-                                  teile: widget.teile,
-                                  aktiv: _teil,
-                                  onTap: _zuTeil,
-                                ),
-                              ],
-                              const SizedBox(height: 12),
-                              AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 380),
-                                child: _SegmentLeiste(
-                                  key: ValueKey('seg-${t.id}'),
-                                  namen: [for (final s in seiten) s.name],
-                                  aktiv: _seite,
-                                  onTap: _zuSeite,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              _coachKarte(seiten[_seite].coach),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: PageView(
-                            key: ValueKey('pages-${t.id}'),
-                            controller: _pages,
-                            onPageChanged: (i) {
-                              setState(() => _seite = i);
-                              _starteFlug();
-                            },
-                            children: [
-                              for (final (i, s) in seiten.indexed)
-                                _Bento(
-                                  seite: s,
-                                  ein: _ein,
-                                  bereich: t.name,
-                                  zielKey: i == _seite ? _zielKey : null,
-                                  hervor: i == _seite && _angekommen,
-                                ),
-                            ],
-                          ),
-                        ),
-                        _Punkte(anzahl: seiten.length, aktiv: _seite),
-                        SizedBox(
-                          height: 10 + MediaQuery.paddingOf(context).bottom,
-                        ),
-                      ],
-                    ),
-                  ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 480),
+                  child: inhalt,
                 ),
               ),
             ),
           ),
-          if (_flugVon != null && _flugNach != null && !_versteckt)
+          if (_flugVon != null && _flugNach != null && !_da)
             AnimatedBuilder(
               animation: _flug,
               builder: (context, _) {
                 final v = Curves.easeInOutCubic.transform(
-                  ((_flug.value - .5) / .5).clamp(0.0, 1.0),
+                  ((_flug.value - .45) / .55).clamp(0.0, 1.0),
                 );
                 final r = Rect.lerp(_flugVon, _flugNach, v)!;
                 // A small arc upwards on the way.
-                final hoch = math.sin(v * math.pi) * 40;
+                final hoch = math.sin(v * math.pi) * 46;
                 return Positioned(
                   left: r.left,
                   top: r.top - hoch,
@@ -421,7 +485,7 @@ class _BereichSeiteState extends State<BereichSeite>
                         boxShadow: [
                           BoxShadow(
                             color: const Color(0x66E0BF7E),
-                            blurRadius: 10 + 10 * v,
+                            blurRadius: 10 + 12 * v,
                           ),
                         ],
                       ),
@@ -493,7 +557,7 @@ class _BereichSeiteState extends State<BereichSeite>
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CoachAvatar(key: _avatarKey, size: 34),
+                const CoachAvatar(size: 34),
                 const SizedBox(width: 11),
                 Expanded(
                   child: AnimatedSwitcher(
@@ -804,7 +868,7 @@ class _Bento extends StatelessWidget {
     required this.seite,
     required this.ein,
     required this.bereich,
-    this.zielKey,
+    this.blase,
     this.hervor = false,
   });
 
@@ -812,15 +876,15 @@ class _Bento extends StatelessWidget {
   final Animation<double> ein;
   final String bereich;
 
-  /// Put on the tile the coach points at, to measure where he flies.
-  final GlobalKey? zielKey;
+  /// The coach's speech bubble, right above the tile he points at.
+  final Widget? blase;
 
   /// The coach has arrived: that tile glows.
   final bool hervor;
 
   Widget _kachel(BKachel k) {
     if (k.id != seite.zeigt) return KachelView(k, bereich);
-    return _Leuchten(key: zielKey, an: hervor, child: KachelView(k, bereich));
+    return _Leuchten(an: hervor, child: KachelView(k, bereich));
   }
 
   @override
@@ -841,7 +905,15 @@ class _Bento extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
       children: [
         for (final z in zeilen) ...[
-          if (z != zeilen.first) const SizedBox(height: 10),
+          if (blase != null &&
+              (seite.zeigt == null
+                  ? z == zeilen.first
+                  : z.any((k) => k.id == seite.zeigt))) ...[
+            if (z != zeilen.first) const SizedBox(height: 14),
+            blase!,
+            const SizedBox(height: 8),
+          ] else if (z != zeilen.first)
+            const SizedBox(height: 10),
           z.length == 1 && z.first.groesse != KachelGroesse.halb
               ? _Einflug(ein: ein, nr: n++, child: _kachel(z.first))
               : IntrinsicHeight(
@@ -901,7 +973,7 @@ class _ZaehltHoch extends StatelessWidget {
 
 /// The tile the coach points at: a gold glow fades in around it.
 class _Leuchten extends StatelessWidget {
-  const _Leuchten({super.key, required this.an, required this.child});
+  const _Leuchten({required this.an, required this.child});
   final bool an;
   final Widget child;
 
@@ -1009,7 +1081,11 @@ class _KachelViewState extends State<KachelView> {
               art: art,
               child: Stack(
                 children: [
-                  if (k.bild != null && k.groesse != KachelGroesse.halb)
+                  if (k.bild != null &&
+                      (k.groesse == KachelGroesse.hoch ||
+                          k.groesse == KachelGroesse.mittel))
+                    Positioned(right: 0, bottom: 0, child: k.bild!)
+                  else if (k.bild != null && k.groesse != KachelGroesse.halb)
                     Positioned(right: 0, top: 30, child: k.bild!),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1417,4 +1493,182 @@ class _AufbauState extends State<_Aufbau> with SingleTickerProviderStateMixin {
       child: widget.child,
     );
   }
+}
+
+/// The coach speaks right at the tile that matters (draft "Körper,
+/// lebendig"): a gold-edged bubble with his face at its end. The face
+/// flies in from the scene first; [gesicht] false keeps its place empty.
+class _CoachBlase extends StatelessWidget {
+  const _CoachBlase({
+    super.key,
+    required this.text,
+    required this.gesicht,
+    this.platzKey,
+    this.rahmenKey,
+    this.onTap,
+  });
+
+  final String text;
+  final bool gesicht;
+  final GlobalKey? platzKey, rahmenKey;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: KeyedSubtree(
+      key: rahmenKey,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(13, 10, 13, 11),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF2A2117), Color(0xFF17120D)],
+                ),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(18),
+                  topRight: Radius.circular(18),
+                  bottomLeft: Radius.circular(18),
+                  bottomRight: Radius.circular(5),
+                ),
+                border: Border.all(color: const Color(0x8CE0BF7E)),
+                boxShadow: Glas.shadow,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 360),
+                    child: Text(
+                      text,
+                      key: ValueKey(text),
+                      style: Glas.tText.copyWith(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        height: 1.36,
+                      ),
+                    ),
+                  ),
+                  if (onTap != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      'Frag mich ›',
+                      style: Glas.tLabel.copyWith(
+                        fontSize: 11.5,
+                        color: CoachStyle.goldLight,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          KeyedSubtree(
+            key: platzKey,
+            child: AnimatedOpacity(
+              opacity: gesicht ? 1 : 0,
+              duration: const Duration(milliseconds: 150),
+              child: Container(
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(color: Color(0x55E0BF7E), blurRadius: 16),
+                  ],
+                ),
+                child: const CoachAvatar(size: 46),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+/// Training · Ernährung · Schlaf as small glass pills at the bottom of the
+/// scene; the picked one is gold.
+class _TeilPillen extends StatelessWidget {
+  const _TeilPillen({
+    required this.teile,
+    required this.aktiv,
+    required this.onTap,
+  });
+
+  final List<Unterbereich> teile;
+  final int aktiv;
+  final ValueChanged<int> onTap;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      for (var i = 0; i < teile.length; i++) ...[
+        if (i > 0) const SizedBox(width: 6),
+        Expanded(
+          child: GestureDetector(
+            key: ValueKey('teil-${teile[i].id}'),
+            behavior: HitTestBehavior.opaque,
+            onTap: () => onTap(i),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 380),
+              curve: Curves.easeOutCubic,
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                gradient: i == aktiv
+                    ? const LinearGradient(
+                        colors: [Color(0xFFE9CC8E), Color(0xFFB98E47)],
+                      )
+                    : null,
+                color: i == aktiv ? null : const Color(0x8C120E0A),
+                border: Border.all(
+                  color: i == aktiv ? Colors.transparent : Glas.edge,
+                ),
+                boxShadow: i == aktiv
+                    ? const [
+                        BoxShadow(color: Color(0x55E0BF7E), blurRadius: 18),
+                      ]
+                    : null,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    teile[i].icon,
+                    size: 15,
+                    color: i == aktiv ? CoachStyle.goldInk : Glas.label,
+                  ),
+                  const SizedBox(width: 5),
+                  Expanded(
+                    child: Text(
+                      teile[i].name.split(' ').first,
+                      maxLines: 1,
+                      overflow: TextOverflow.fade,
+                      softWrap: false,
+                      style: Glas.tLabel.copyWith(
+                        fontSize: 12,
+                        color: i == aktiv ? CoachStyle.goldInk : Glas.soft,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    teile[i].wert == null ? '–' : '${teile[i].wert}',
+                    style: Glas.tLabel.copyWith(
+                      fontSize: 12,
+                      fontFamily: 'Sora',
+                      color: i == aktiv ? CoachStyle.goldInk : Glas.label,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    ],
+  );
 }

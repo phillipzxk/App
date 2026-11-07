@@ -46,7 +46,19 @@ class KoerperSzene extends StatefulWidget {
     required this.daten,
     this.onTap,
     this.rahmenKey,
+    this.gross = false,
+    this.obenFrei = 12,
+    this.ueber,
   });
+
+  /// Small line above the title (the area, e.g. "Körper").
+  final String? ueber;
+
+  /// Big: fills the whole top of the page, no frame, fades into the page.
+  final bool gross;
+
+  /// Room above the title (status bar and back link in big mode).
+  final double obenFrei;
 
   /// Marks the scene, so the Verlauf can grow out of it.
   final GlobalKey? rahmenKey;
@@ -97,18 +109,21 @@ class _KoerperSzeneState extends State<KoerperSzene>
   @override
   Widget build(BuildContext context) {
     final nacht = widget.art == SzeneArt.schlaf;
+    final mitte = widget.gross ? .6 : .7;
     return GestureDetector(
       key: const ValueKey('bereich-ring'),
       onTap: widget.onTap,
       child: ClipRRect(
         key: widget.rahmenKey,
-        borderRadius: BorderRadius.circular(Glas.radius),
+        borderRadius: BorderRadius.circular(widget.gross ? 0 : Glas.radius),
         child: Container(
-          height: 142,
-          decoration: BoxDecoration(
-            border: Border.all(color: nacht ? Glas.nightEdge : Glas.edge),
-            borderRadius: BorderRadius.circular(Glas.radius),
-          ),
+          height: widget.gross ? null : 142,
+          decoration: widget.gross
+              ? null
+              : BoxDecoration(
+                  border: Border.all(color: nacht ? Glas.nightEdge : Glas.edge),
+                  borderRadius: BorderRadius.circular(Glas.radius),
+                ),
           child: Stack(
             children: [
               Positioned.fill(
@@ -116,32 +131,61 @@ class _KoerperSzeneState extends State<KoerperSzene>
                   animation: Listenable.merge([_auf, _leben]),
                   builder: (context, _) => CustomPaint(
                     painter: switch (widget.art) {
-                      SzeneArt.training => _HantelMaler(_auf.value),
+                      SzeneArt.training => _HantelMaler(_auf.value, mitte),
                       SzeneArt.ernaehrung => _KurveMaler(
                         _auf.value,
                         _leben.value,
                         widget.daten,
+                        mitte,
                       ),
                       SzeneArt.schlaf => _NachtMaler(
                         _auf.value,
                         _leben.value,
                         widget.daten.mond,
+                        mitte,
                       ),
                     },
                   ),
                 ),
               ),
+              if (widget.gross)
+                const Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: 90,
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Color(0x000D0A07), CoachStyle.night],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               Positioned(
                 left: 16,
-                top: 12,
+                top: widget.obenFrei,
                 right: 110,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (widget.ueber != null)
+                      Text(
+                        widget.ueber!,
+                        style: Glas.tLabel.copyWith(
+                          fontSize: 11,
+                          letterSpacing: 1.6,
+                          color: CoachStyle.goldLight,
+                        ),
+                      ),
                     Text(
                       widget.titel,
                       style: CoachStyle.title.copyWith(
-                        fontSize: 26,
+                        fontSize: widget.gross ? 30 : 26,
                         color: Glas.text,
                         letterSpacing: -0.6,
                       ),
@@ -160,7 +204,7 @@ class _KoerperSzeneState extends State<KoerperSzene>
               ),
               Positioned(
                 right: 16,
-                top: 10,
+                top: widget.gross ? widget.obenFrei - 4 : 10,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -171,7 +215,9 @@ class _KoerperSzeneState extends State<KoerperSzene>
                       curve: Curves.easeOutCubic,
                       builder: (context, v, _) => GoldSchrift(
                         widget.wert == null ? '–' : '${v.round()}',
-                        style: Glas.tBig.copyWith(fontSize: 34),
+                        style: Glas.tBig.copyWith(
+                          fontSize: widget.gross ? 44 : 34,
+                        ),
                       ),
                     ),
                     Text('von 10', style: Glas.tSoft.copyWith(fontSize: 10.5)),
@@ -182,7 +228,7 @@ class _KoerperSzeneState extends State<KoerperSzene>
                 Positioned(
                   left: 0,
                   right: 0,
-                  bottom: 8,
+                  bottom: widget.gross ? 54 : 8,
                   child: Text(
                     widget.daten.zeile,
                     textAlign: TextAlign.center,
@@ -206,8 +252,8 @@ double _teil(double v, double von, double bis) =>
 /// Training: a bar, then the plates fly on from above one after the
 /// other and bounce, with a warm light behind.
 class _HantelMaler extends CustomPainter {
-  _HantelMaler(this.v);
-  final double v;
+  _HantelMaler(this.v, this.mitte);
+  final double v, mitte;
 
   @override
   void paint(Canvas c, Size s) {
@@ -221,7 +267,7 @@ class _HantelMaler extends CustomPainter {
           colors: [Color(0xFF3A2B19), Color(0xFF0D0A07)],
         ).createShader(Offset.zero & s),
     );
-    final mx = w / 2 + 10, y = h * .7;
+    final mx = w / 2 + 10, y = h * mitte;
     final bar = w * .52;
     // Shadow and bar.
     c.drawOval(
@@ -289,8 +335,8 @@ class _HantelMaler extends CustomPainter {
 /// Ernährung: the energy curve of the day draws itself, the meals drop on
 /// as points, a sun walks along to "now".
 class _KurveMaler extends CustomPainter {
-  _KurveMaler(this.v, this.l, this.d);
-  final double v, l;
+  _KurveMaler(this.v, this.l, this.d, this.mitte);
+  final double v, l, mitte;
   final SzeneDaten d;
 
   @override
@@ -307,7 +353,7 @@ class _KurveMaler extends CustomPainter {
     );
     double y(double x) {
       final t = x / w;
-      return h * .7 -
+      return h * mitte -
           h * .1 * math.sin(t * math.pi * 2.2 + .3) -
           h * .03 * math.sin(t * math.pi * 6 + l * math.pi * 2);
     }
@@ -382,8 +428,8 @@ class _KurveMaler extends CustomPainter {
 /// Schlaf: night sky with twinkling stars, a moon that fills up to the
 /// sleep score, dark hills.
 class _NachtMaler extends CustomPainter {
-  _NachtMaler(this.v, this.l, this.mond);
-  final double v, l, mond;
+  _NachtMaler(this.v, this.l, this.mond, this.mitte);
+  final double v, l, mond, mitte;
 
   static final _sterne = [
     for (var i = 0; i < 46; i++)
@@ -418,7 +464,7 @@ class _NachtMaler extends CustomPainter {
       );
     }
     // The moon, its shadow slides away up to the sleep score.
-    final m = Offset(w * .6, h * .62);
+    final m = Offset(w * .6, h * (mitte - .08));
     const r = 21.0;
     c.drawCircle(
       m,

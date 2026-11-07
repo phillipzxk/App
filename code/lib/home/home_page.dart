@@ -52,6 +52,7 @@ import 'today_tab.dart';
 import 'training_tab.dart';
 import '../bereiche/bereich_seite.dart';
 import '../bereiche/glas.dart';
+import '../bereiche/kachel_bilder.dart';
 import '../bereiche/koerper_szene.dart';
 import '../ernaehrung/einkaufsliste.dart';
 import '../ernaehrung/heisshunger_seite.dart';

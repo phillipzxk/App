@@ -255,6 +255,18 @@ extension _Koerper on _HomePageState {
                 _ => uebungen.take(3).join(' · '),
               },
               hot: einheit?.status == EinheitStatus.fertig ? 'geschafft' : null,
+              bild: _plan.isEmpty
+                  ? const HantelBild()
+                  : frei
+                  ? null
+                  : SatzReihe(
+                      fertig: einheit == null || einheit.uebungen.isEmpty
+                          ? [for (final _ in uebungen) false]
+                          : [
+                              for (final x in einheit.uebungen)
+                                x.fertige.isNotEmpty,
+                            ],
+                    ),
               knopf: frei ? null : 'Trainings-Modus',
               feld: _plan.isEmpty ? null : heute,
               seite: _plan.isEmpty ? _planAnlegen : null,
@@ -292,7 +304,7 @@ extension _Koerper on _HomePageState {
               gold: true,
               wert: geplant == 0 ? '$gemacht' : '$gemacht von $geplant',
               unter: 'Trainingstage diese Woche',
-              bild: _Wochenpunkte(woche),
+              bild: WochenPunkte(woche),
               feld: wocheF,
             ),
             BKachel(
@@ -460,6 +472,15 @@ extension _Koerper on _HomePageState {
           kacheln: [
             BKachel(
               id: 'e-essen',
+              bild: slots.isEmpty
+                  ? null
+                  : MiniKurve(
+                      mahlzeiten: [
+                        for (final m in slots)
+                          (tagPos(m.minute), eintraege[m.id]?.gegessen == true),
+                      ],
+                      jetzt: tagPos(minuteJetzt),
+                    ),
               titel: 'Dein Essen heute',
               icon: Icons.show_chart,
               groesse: KachelGroesse.mittel,
@@ -699,6 +720,7 @@ extension _Koerper on _HomePageState {
             ),
             BKachel(
               id: 's-naechte',
+              bild: naechte.isEmpty ? null : NachtBalken(stunden: naechte),
               titel: 'Nächte',
               icon: Icons.bar_chart,
               text: naechte.isEmpty
@@ -840,28 +862,3 @@ extension _Koerper on _HomePageState {
 }
 
 /// Mo..So as small dots: gold = trained, ring = planned.
-class _Wochenpunkte extends StatelessWidget {
-  const _Wochenpunkte(this.tage);
-  final List<bool?> tage;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      for (final t in tage)
-        Container(
-          width: 11,
-          height: 11,
-          margin: const EdgeInsets.only(left: 4),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: t == true ? CoachStyle.goldGradient : null,
-            color: t == true ? null : const Color(0x1FFFECC8),
-            border: t == false
-                ? Border.all(color: CoachStyle.goldLight, width: 1.2)
-                : null,
-          ),
-        ),
-    ],
-  );
-}

@@ -73,3 +73,9 @@ Phillip: Seiten bei Körper „zu langweilig vom Design“, er will Animationen,
 4. **Kacheln leben:** Zahlen zählen hoch, Trinken-Kachel zeigt das Glas, Kochbuch eine Ranke, an der pro Gericht ein Blatt wächst.
 
 Code: `code/lib/bereiche/koerper_szene.dart`, `code/lib/ui/coach_freude.dart`, Flug und Leuchten in `bereich_seite.dart` (`BSeite.zeigt`, `Unterbereich.szene`).
+
+### Umbau näher am Entwurf (2026-11-07, nach Phillips „ist das wirklich der stil“)
+- Die Szene füllt jetzt das ganze obere Drittel: Zurück, „Körper“ klein, der Name des Teils groß, Wert groß rechts, unten Pillen Training · Ernährung · Schlaf.
+- Die Coach-Karte fällt auf diesen Seiten weg. Der Coach spricht in einer Sprechblase direkt über der Kachel, die zählt (ohne Ziel über der ersten Kachel); „Frag mich ›“ steht in der Blase. Sein Gesicht fliegt aus der Szene in die Blase.
+- Lebende Bilder: Heute-Training = Felder pro Übung (gold wenn erledigt) bzw. leere Hantel ohne Plan, Woche = Punkte ploppen auf, Dein Essen heute = kleine Kurve mit Mahlzeiten und Sonne, Nächte = Balken wachsen, Trinken = Glas, Kochbuch = Ranke.
+- Code: `kachel_bilder.dart`; Szene `gross` in `koerper_szene.dart`; `_CoachBlase`, `_TeilPillen` in `bereich_seite.dart`.
