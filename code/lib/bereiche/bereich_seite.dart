@@ -542,8 +542,18 @@ class _BereichSeiteState extends State<BereichSeite>
   Widget _bildLayout(BuildContext context) {
     final seiten = t.seiten;
     return Scaffold(
-      backgroundColor: CoachStyle.night,
-      body: GlasHintergrund(
+      backgroundColor: const Color(0xFF050505),
+      // Deep black with a soft gold light from the top, no brown (draft
+      // "Körper als Bilder" 4).
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(0, -1.1),
+            radius: 1.1,
+            colors: [Color(0xFF221D12), Color(0xFF050505)],
+            stops: [0, .72],
+          ),
+        ),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 480),
@@ -1991,12 +2001,14 @@ class _BildSeiteViewState extends State<_BildSeiteView>
         ClipRRect(
           borderRadius: BorderRadius.circular(32),
           child: DecoratedBox(
+            // Deep black with a faint gold light (draft "Körper als
+            // Bilder" 4).
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(32),
               gradient: const RadialGradient(
-                center: Alignment(0, -.1),
-                radius: .9,
-                colors: [Color(0x1FC9A25C), Color(0x05FFF0D7)],
+                center: Alignment(0, -.2),
+                radius: .8,
+                colors: [Color(0xFF19160F), Color(0xFF080808)],
               ),
               border: Border.all(color: Glas.edge),
             ),
