@@ -5,7 +5,9 @@ import 'package:coach_app/data/user_profile.dart';
 import 'package:coach_app/ernaehrung/ernaehrung_coach.dart';
 import 'package:coach_app/ernaehrung/ernaehrung_data.dart';
 import 'package:coach_app/ernaehrung/ernaehrung_logik.dart';
+import 'package:coach_app/bereiche/koerper_szene.dart';
 import 'package:coach_app/ernaehrung/kochbuch.dart';
+import 'package:coach_app/konto/konto_ui.dart';
 import 'package:coach_app/feed/feed_coach.dart';
 import 'package:coach_app/feed/kcal.dart';
 import 'package:coach_app/main.dart';
@@ -427,6 +429,51 @@ void main() {
       await tester.tap(kaffee);
       await tester.pumpAndSettle();
       expect(feed.ernaehrung.trinkTag(dayKey(fixedNow)).kaffee, hasLength(1));
+    });
+
+    testWidgets('a living scene sits on top of the page', (tester) async {
+      await start(tester, mahlzeiten: 3);
+      tester.state<NavigatorState>(find.byType(Navigator).first).pop();
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('szene-ernaehrung')), findsOneWidget);
+      expect(find.byType(KoerperSzene), findsOneWidget);
+    });
+
+    testWidgets('Trinken: reaching the goal makes the coach cheer', (
+      tester,
+    ) async {
+      await start(tester, kachel: 'e-trinken');
+      final plus = find.byKey(const ValueKey('trinken-glas-plus'));
+      for (var i = 0; i < 7; i++) {
+        await tester.tap(plus);
+        await tester.pumpAndSettle();
+      }
+      expect(find.byKey(const ValueKey('coach-freut')), findsNothing);
+      await tester.tap(plus);
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(find.byKey(const ValueKey('coach-freut')), findsOneWidget);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('coach-freut')), findsNothing);
+    });
+
+    testWidgets('the coach flies to the tile that matters today', (
+      tester,
+    ) async {
+      await start(tester, mahlzeiten: 3);
+      tester.state<NavigatorState>(find.byType(Navigator).first).pop();
+      await tester.pumpAndSettle();
+      bewegungErzwingen = true;
+      addTearDown(() => bewegungErzwingen = false);
+      await tester.tap(find.byKey(const ValueKey('seite-Gerichte')));
+      for (var i = 0; i < 8; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      await tester.tap(find.byKey(const ValueKey('seite-Heute')));
+      for (var i = 0; i < 30; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(find.byKey(const ValueKey('coach-fliegt')), findsOneWidget);
+      bewegungErzwingen = false;
     });
 
     testWidgets('cookbook filter shows only basis or rescue dishes', (

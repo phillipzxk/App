@@ -52,11 +52,13 @@ import 'today_tab.dart';
 import 'training_tab.dart';
 import '../bereiche/bereich_seite.dart';
 import '../bereiche/glas.dart';
+import '../bereiche/koerper_szene.dart';
 import '../ernaehrung/einkaufsliste.dart';
 import '../ernaehrung/heisshunger_seite.dart';
 import '../ernaehrung/kochbuch.dart';
 import '../ernaehrung/foto_seite.dart';
 import '../ernaehrung/trinken_seite.dart';
+import '../ui/coach_freude.dart';
 import '../schlaf/aufwachen.dart';
 import '../schlaf/muster_tag.dart';
 import '../schlaf/wecker_seite.dart';
@@ -1738,6 +1740,10 @@ class _HomePageState extends State<HomePage> {
           onToggleSupplement: (s, an) async {
             await widget.feed.setGenommen(widget.clock(), s.id, an);
             await _reload();
+            final ids = {for (final x in _supplements) x.id};
+            if (an && mounted && ids.every(_genommen.contains)) {
+              coachFreut(context, 'Alle Supplements für heute genommen.');
+            }
           },
         );
       case Bereich.schlaf:

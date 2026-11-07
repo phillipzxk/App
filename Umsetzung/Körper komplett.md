@@ -59,3 +59,17 @@ Phillip 17:35: „nich mit einem alles zu ... Knopf sondern direkt clean modern 
 ## Rundgang 2026-10-31
 
 - Unter dem Körper-Ring steht „Schnitt aus allen drei · ±x zu gestern“ statt des Werts vom Training. Die Werte der drei Teile stehen in der Leiste darunter.
+
+## Körper, lebendig (2026-11-07)
+
+Phillip: Seiten bei Körper „zu langweilig vom Design“, er will Animationen, besondere Dinge und das Coach-Gesicht. Entwurf https://claude.ai/artifact/37RPRTygiLr4LnzzH5R68i, Phillip: „ja sehr gut so den Stil beibehalten!“ Der Stil gilt auch für spätere Seiten.
+
+1. **Szene oben** statt Ring: Training = Hantelscheiben fliegen auf die Stange; Ernährung = Energie-Kurve zeichnet sich, Mahlzeiten fallen als Punkte drauf, Sonne wandert bis „jetzt“; Schlaf = Nachthimmel mit funkelnden Sternen, Mond füllt sich bis zum Schlafwert. Wert des Teils zählt hoch, darunter eine Zeile (z. B. „Heute ins Bett um 22:45“). Tippen öffnet den Verlauf.
+2. **Coach zeigt:** Sein Gesicht springt aus der Coach-Karte und fliegt zu der einen Kachel, die heute zählt; sie leuchtet gold. Beim Scrollen verschwindet das Gesicht wieder.
+   - Training Heute → Heute-Kachel (wenn heute Training offen), Woche → Stagnations-Check (wenn fällig)
+   - Ernährung Heute → Trinken (ab 13 Uhr unter halbem Ziel) sonst Dein Essen heute; Ziel → Supplements (wenn offen)
+   - Schlaf Morgen → Aufwach-Himmel (wenn noch nicht eingetragen), Abend → Abend-Journal (ab 20 Uhr)
+3. **Coach freut sich:** lachendes Gesicht hüpft unten rein, goldene Funken, ein Satz: Training geschafft, Wasser-Ziel erreicht, alle Supplements genommen.
+4. **Kacheln leben:** Zahlen zählen hoch, Trinken-Kachel zeigt das Glas, Kochbuch eine Ranke, an der pro Gericht ein Blatt wächst.
+
+Code: `code/lib/bereiche/koerper_szene.dart`, `code/lib/ui/coach_freude.dart`, Flug und Leuchten in `bereich_seite.dart` (`BSeite.zeigt`, `Unterbereich.szene`).

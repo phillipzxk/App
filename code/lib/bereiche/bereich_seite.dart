@@ -1,8 +1,12 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
+import '../konto/konto_ui.dart' show bewegungAn;
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import 'glas.dart';
+import 'koerper_szene.dart';
 
 /// How big a tile is in the bento grid of an area page.
 enum KachelGroesse {
@@ -96,11 +100,16 @@ class BSeite {
     required this.name,
     required this.coach,
     required this.kacheln,
+    this.zeigt,
   });
 
   final String name;
   final String coach;
   final List<BKachel> kacheln;
+
+  /// The one tile that matters today: the coach's face flies over to it
+  /// and the tile lights up.
+  final String? zeigt;
 }
 
 /// A part of an area with its own four pages (Körper: Training,
@@ -114,7 +123,13 @@ class Unterbereich {
     required this.seiten,
     this.wert,
     this.woche = const [],
+    this.szene,
+    this.szeneDaten = const SzeneDaten(),
   });
+
+  /// The living picture on top instead of the ring (Körper parts).
+  final SzeneArt? szene;
+  final SzeneDaten szeneDaten;
 
   final String id;
   final String name;
@@ -169,6 +184,20 @@ class _BereichSeiteState extends State<BereichSeite>
   late PageController _pages = PageController();
   final _ringKey = GlobalKey();
   final _coachKey = GlobalKey();
+  final _avatarKey = GlobalKey();
+  final _stackKey = GlobalKey();
+  final _zielKey = GlobalKey();
+
+  /// The coach's face flying from the coach card to today's tile.
+  late final AnimationController _flug = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2300),
+  )..addListener(_flugTick);
+  Rect? _flugVon, _flugNach;
+
+  /// The list was scrolled: the face would hang in the air, so it hides.
+  bool _versteckt = false;
+  bool get _angekommen => _flugNach != null && _flug.value >= 1;
 
   /// Plays the spring-in of the tiles; restarted on every part switch.
   late final AnimationController _ein = AnimationController(
@@ -179,10 +208,54 @@ class _BereichSeiteState extends State<BereichSeite>
   Unterbereich get t => widget.teile[_teil];
 
   @override
+  void initState() {
+    super.initState();
+    _starteFlug();
+  }
+
+  @override
   void dispose() {
     _ein.dispose();
+    _flug.dispose();
     _pages.dispose();
     super.dispose();
+  }
+
+  /// Starts the flight for the shown page, if it has a tile to point at.
+  /// Off in widget tests, like all extra motion.
+  void _starteFlug() {
+    _flugVon = null;
+    _flugNach = null;
+    _versteckt = false;
+    _flug.value = 0;
+    if (!bewegungAn || t.seiten[_seite].zeigt == null) return;
+    _flug.forward(from: 0);
+  }
+
+  /// Once the tiles have sprung in, measure where the face flies.
+  void _flugTick() {
+    if (_flug.value < .5 || _flugNach != null) return;
+    Rect? rect(GlobalKey k) {
+      final box = k.currentContext?.findRenderObject() as RenderBox?;
+      final bezug = _stackKey.currentContext?.findRenderObject() as RenderBox?;
+      if (box == null || bezug == null || !box.hasSize) return null;
+      final o = box.localToGlobal(Offset.zero, ancestor: bezug);
+      return o & box.size;
+    }
+
+    final von = rect(_avatarKey), ziel = rect(_zielKey);
+    if (von == null || ziel == null) {
+      _flug.stop();
+      return;
+    }
+    setState(() {
+      _flugVon = von;
+      _flugNach = Rect.fromCenter(
+        center: Offset(ziel.right - 30, ziel.top + 28),
+        width: 44,
+        height: 44,
+      );
+    });
   }
 
   void _zuSeite(int i) {
@@ -202,6 +275,7 @@ class _BereichSeiteState extends State<BereichSeite>
       _pages = PageController();
     });
     _ein.forward(from: 0.25);
+    _starteFlug();
     widget.onWechsel?.call(widget.teile[i].id);
   }
 
@@ -210,80 +284,154 @@ class _BereichSeiteState extends State<BereichSeite>
     final seiten = t.seiten;
     return Scaffold(
       backgroundColor: CoachStyle.night,
-      body: GlasHintergrund(
-        child: SafeArea(
-          bottom: false,
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+      body: Stack(
+        key: _stackKey,
+        children: [
+          Positioned.fill(
+            child: GlasHintergrund(
+              child: SafeArea(
+                bottom: false,
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 480),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: InkWell(
-                            key: const ValueKey('bereich-zurueck'),
-                            borderRadius: BorderRadius.circular(20),
-                            onTap: () => Navigator.of(context).maybePop(),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 6),
-                              child: Text(
-                                '‹ ${widget.zurueck}',
-                                style: Glas.tLabel.copyWith(
-                                  fontSize: 15,
-                                  color: CoachStyle.goldLight,
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: InkWell(
+                                  key: const ValueKey('bereich-zurueck'),
+                                  borderRadius: BorderRadius.circular(20),
+                                  onTap: () => Navigator.of(context).maybePop(),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 6,
+                                    ),
+                                    child: Text(
+                                      '‹ ${widget.zurueck}',
+                                      style: Glas.tLabel.copyWith(
+                                        fontSize: 15,
+                                        color: CoachStyle.goldLight,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                              if (t.szene == null)
+                                _kopf()
+                              else
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: KoerperSzene(
+                                    key: ValueKey('szene-${t.id}'),
+                                    art: t.szene!,
+                                    titel: widget.name,
+                                    sub: t.sub,
+                                    wert: t.wert,
+                                    daten: t.szeneDaten,
+                                    onTap: widget.verlauf == null
+                                        ? null
+                                        : () => oeffneFeld(
+                                            context,
+                                            _ringKey,
+                                            widget.verlauf!,
+                                            widget.name,
+                                          ),
+                                  ),
+                                ),
+                              if (widget.teile.length > 1) ...[
+                                const SizedBox(height: 12),
+                                _TeilLeiste(
+                                  teile: widget.teile,
+                                  aktiv: _teil,
+                                  onTap: _zuTeil,
+                                ),
+                              ],
+                              const SizedBox(height: 12),
+                              AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 380),
+                                child: _SegmentLeiste(
+                                  key: ValueKey('seg-${t.id}'),
+                                  namen: [for (final s in seiten) s.name],
+                                  aktiv: _seite,
+                                  onTap: _zuSeite,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              _coachKarte(seiten[_seite].coach),
+                            ],
                           ),
                         ),
-                        _kopf(),
-                        if (widget.teile.length > 1) ...[
-                          const SizedBox(height: 12),
-                          _TeilLeiste(
-                            teile: widget.teile,
-                            aktiv: _teil,
-                            onTap: _zuTeil,
-                          ),
-                        ],
-                        const SizedBox(height: 12),
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 380),
-                          child: _SegmentLeiste(
-                            key: ValueKey('seg-${t.id}'),
-                            namen: [for (final s in seiten) s.name],
-                            aktiv: _seite,
-                            onTap: _zuSeite,
+                        Expanded(
+                          child: PageView(
+                            key: ValueKey('pages-${t.id}'),
+                            controller: _pages,
+                            onPageChanged: (i) {
+                              setState(() => _seite = i);
+                              _starteFlug();
+                            },
+                            children: [
+                              for (final (i, s) in seiten.indexed)
+                                _Bento(
+                                  seite: s,
+                                  ein: _ein,
+                                  bereich: t.name,
+                                  zielKey: i == _seite ? _zielKey : null,
+                                  hervor: i == _seite && _angekommen,
+                                ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        _coachKarte(seiten[_seite].coach),
+                        _Punkte(anzahl: seiten.length, aktiv: _seite),
+                        SizedBox(
+                          height: 10 + MediaQuery.paddingOf(context).bottom,
+                        ),
                       ],
                     ),
                   ),
-                  Expanded(
-                    child: PageView(
-                      key: ValueKey('pages-${t.id}'),
-                      controller: _pages,
-                      onPageChanged: (i) => setState(() => _seite = i),
-                      children: [
-                        for (final s in seiten)
-                          _Bento(seite: s, ein: _ein, bereich: t.name),
-                      ],
-                    ),
-                  ),
-                  _Punkte(anzahl: seiten.length, aktiv: _seite),
-                  SizedBox(height: 10 + MediaQuery.paddingOf(context).bottom),
-                ],
+                ),
               ),
             ),
           ),
-        ),
+          if (_flugVon != null && _flugNach != null && !_versteckt)
+            AnimatedBuilder(
+              animation: _flug,
+              builder: (context, _) {
+                final v = Curves.easeInOutCubic.transform(
+                  ((_flug.value - .5) / .5).clamp(0.0, 1.0),
+                );
+                final r = Rect.lerp(_flugVon, _flugNach, v)!;
+                // A small arc upwards on the way.
+                final hoch = math.sin(v * math.pi) * 40;
+                return Positioned(
+                  left: r.left,
+                  top: r.top - hoch,
+                  width: r.width,
+                  height: r.height,
+                  child: IgnorePointer(
+                    child: Container(
+                      key: const ValueKey('coach-fliegt'),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0x66E0BF7E),
+                            blurRadius: 10 + 10 * v,
+                          ),
+                        ],
+                      ),
+                      child: CoachAvatar(size: r.width),
+                    ),
+                  ),
+                );
+              },
+            ),
+        ],
       ),
     );
   }
@@ -345,7 +493,7 @@ class _BereichSeiteState extends State<BereichSeite>
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const CoachAvatar(size: 34),
+                CoachAvatar(key: _avatarKey, size: 34),
                 const SizedBox(width: 11),
                 Expanded(
                   child: AnimatedSwitcher(
@@ -652,11 +800,28 @@ class _Punkte extends StatelessWidget {
 
 /// The tiles of one page: whole-width tiles alone, half tiles in pairs.
 class _Bento extends StatelessWidget {
-  const _Bento({required this.seite, required this.ein, required this.bereich});
+  const _Bento({
+    required this.seite,
+    required this.ein,
+    required this.bereich,
+    this.zielKey,
+    this.hervor = false,
+  });
 
   final BSeite seite;
   final Animation<double> ein;
   final String bereich;
+
+  /// Put on the tile the coach points at, to measure where he flies.
+  final GlobalKey? zielKey;
+
+  /// The coach has arrived: that tile glows.
+  final bool hervor;
+
+  Widget _kachel(BKachel k) {
+    if (k.id != seite.zeigt) return KachelView(k, bereich);
+    return _Leuchten(key: zielKey, an: hervor, child: KachelView(k, bereich));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -678,7 +843,7 @@ class _Bento extends StatelessWidget {
         for (final z in zeilen) ...[
           if (z != zeilen.first) const SizedBox(height: 10),
           z.length == 1 && z.first.groesse != KachelGroesse.halb
-              ? _Einflug(ein: ein, nr: n++, child: KachelView(z.first, bereich))
+              ? _Einflug(ein: ein, nr: n++, child: _kachel(z.first))
               : IntrinsicHeight(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -686,11 +851,7 @@ class _Bento extends StatelessWidget {
                       for (final k in z) ...[
                         if (k != z.first) const SizedBox(width: 10),
                         Expanded(
-                          child: _Einflug(
-                            ein: ein,
-                            nr: n++,
-                            child: KachelView(k, bereich),
-                          ),
+                          child: _Einflug(ein: ein, nr: n++, child: _kachel(k)),
                         ),
                       ],
                       if (z.length == 1) ...[
@@ -704,6 +865,64 @@ class _Bento extends StatelessWidget {
       ],
     );
   }
+}
+
+/// A tile value: a number at the start ("82", "3/4", "1,5 l") counts up
+/// from 0 when the tile appears; other text shows as it is.
+class _ZaehltHoch extends StatelessWidget {
+  const _ZaehltHoch(this.text, {required this.style});
+  final String text;
+  final TextStyle style;
+
+  static final _zahl = RegExp(r'^(\d+)(,\d+)?');
+
+  @override
+  Widget build(BuildContext context) {
+    final m = _zahl.firstMatch(text);
+    if (m == null) return GoldSchrift(text, style: style);
+    final komma = m.group(2) != null;
+    final ziel = double.parse(m.group(0)!.replaceAll(',', '.'));
+    final rest = text.substring(m.end);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: ziel),
+      duration: const Duration(milliseconds: 900),
+      curve: Curves.easeOutCubic,
+      builder: (context, v, _) {
+        final zahl = v >= ziel
+            ? m.group(0)!
+            : komma
+            ? v.toStringAsFixed(m.group(2)!.length - 1).replaceAll('.', ',')
+            : '${v.round()}';
+        return GoldSchrift('$zahl$rest', style: style);
+      },
+    );
+  }
+}
+
+/// The tile the coach points at: a gold glow fades in around it.
+class _Leuchten extends StatelessWidget {
+  const _Leuchten({super.key, required this.an, required this.child});
+  final bool an;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => AnimatedContainer(
+    duration: const Duration(milliseconds: 500),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(Glas.radius),
+      border: Border.all(
+        color: an ? const Color(0xD9E0BF7E) : const Color(0x00E0BF7E),
+        width: 1.4,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: an ? const Color(0x40E0BF7E) : const Color(0x00E0BF7E),
+          blurRadius: 26,
+        ),
+      ],
+    ),
+    child: child,
+  );
 }
 
 /// A tile springs in out of a small gold light, one after another.
@@ -821,7 +1040,7 @@ class _KachelViewState extends State<KachelView> {
                         const SizedBox(height: 8),
                       ],
                       if (k.wert != null)
-                        GoldSchrift(
+                        _ZaehltHoch(
                           k.wert!,
                           style: Glas.tBig.copyWith(
                             fontSize: k.groesse == KachelGroesse.hoch ? 38 : 30,

@@ -213,6 +213,7 @@ extension _Koerper on _HomePageState {
       Icons.trending_up,
       'Kurve, Rekorde und Form-Videos pro Übung.',
     );
+    final fertig = einheit?.status == EinheitStatus.fertig;
     return Unterbereich(
       id: b.name,
       name: 'Training',
@@ -220,9 +221,18 @@ extension _Koerper on _HomePageState {
       wert: _wert(b).$1,
       woche: _woche7(b),
       sub: _koerperZeile(),
+      szene: SzeneArt.training,
+      szeneDaten: SzeneDaten(
+        zeile: frei
+            ? 'Heute frei · Erholung zählt mit'
+            : fertig
+            ? 'Heute $name · geschafft'
+            : 'Heute $name${uebungen.isEmpty ? '' : ' · ${uebungen.length} Übungen'}',
+      ),
       seiten: [
         BSeite(
           name: 'Heute',
+          zeigt: frei || fertig || _plan.isEmpty ? null : 't-heute',
           coach: _coach(
             b,
             frei
@@ -269,6 +279,7 @@ extension _Koerper on _HomePageState {
         ),
         BSeite(
           name: 'Woche',
+          zeigt: stag == null ? null : 't-stag',
           coach:
               'Deine Woche auf einen Blick. Verschiebt sich etwas, sage ich '
               'dir warum.',
@@ -406,6 +417,10 @@ extension _Koerper on _HomePageState {
     final next = naechsteOffene(_supplements, _genommen, today);
     final suppOffen = _supplements.length - gen;
     final trink = d.trinkTag(dayKey(today));
+    final wasser = wasserZiel(u.kg, training: u.training != null);
+    final minuteJetzt = today.hour * 60 + today.minute;
+    double tagPos(int m) => ((m - 6 * 60) / (17 * 60)).clamp(0.0, 1.0);
+    final wenigWasser = today.hour >= 13 && trink.liter < wasser / 2;
     Widget seite(Widget Function() bau) => _lebendig(bau);
     return Unterbereich(
       id: b.name,
@@ -414,12 +429,29 @@ extension _Koerper on _HomePageState {
       wert: _wert(b).$1,
       woche: _woche7(b),
       sub: _koerperZeile(),
+      szene: SzeneArt.ernaehrung,
+      szeneDaten: SzeneDaten(
+        zeile: slots.isEmpty
+            ? 'Deine Energie über den Tag'
+            : '${gegessen.length} von ${slots.length} Mahlzeiten · ${literText(trink.liter)} l getrunken',
+        mahlzeiten: [
+          for (final m in slots)
+            (tagPos(m.minute), eintraege[m.id]?.gegessen == true),
+        ],
+        jetzt: tagPos(minuteJetzt),
+      ),
       seiten: [
         BSeite(
           name: 'Heute',
+          zeigt: wenigWasser
+              ? 'e-trinken'
+              : (slots.isNotEmpty && naechste.isNotEmpty ? 'e-essen' : null),
           coach: _coach(
             b,
-            slots.isEmpty
+            wenigWasser
+                ? 'Erst ${literText(trink.liter)} von ${literText(wasser)} l. '
+                      'Wenig Wasser macht nachmittags müde.'
+                : slots.isEmpty
                 ? 'Leg einmal fest, wie oft du isst. Dann plane ich deine '
                       'Mahlzeiten um Training und Termine.'
                 : '${gegessen.length} von ${slots.length} Mahlzeiten. '
@@ -471,8 +503,9 @@ extension _Koerper on _HomePageState {
               icon: Icons.local_drink_outlined,
               groesse: KachelGroesse.mittel,
               wert: '${literText(trink.liter)} l',
+              bild: TrinkGlas(anteil: trink.liter / wasser, size: 54),
               unter:
-                  'von ${literText(wasserZiel(u.kg, training: u.training != null))} l'
+                  'von ${literText(wasser)} l'
                   '${trink.kaffee.isEmpty ? '' : ' · Kaffee ${trink.kaffee.length}'}'
                   '${trink.alkohol == 0 ? '' : ' · Alkohol ${trink.alkohol}'}',
               seite: (_) => seite(() => TrinkenSeite(umfeld: u)),
@@ -494,6 +527,7 @@ extension _Koerper on _HomePageState {
               wert: '$blaetter',
               unter:
                   '${blaetter == 1 ? 'Blatt' : 'Blätter'} · Basis und Rettung',
+              bild: KochbuchRanke(blaetter: blaetter),
               seite: (_) => seite(() => KochbuchSeite(umfeld: u)),
             ),
             BKachel(
@@ -508,6 +542,7 @@ extension _Koerper on _HomePageState {
         ),
         BSeite(
           name: 'Ziel',
+          zeigt: _supplements.isNotEmpty && suppOffen > 0 ? 'e-supp' : null,
           coach: 'Das kcal-Ziel ist nur Orientierung. Gezählt wird nichts.',
           kacheln: [
             BKachel(
@@ -579,9 +614,17 @@ extension _Koerper on _HomePageState {
       wert: _wert(b).$1,
       woche: _woche7(b),
       sub: _koerperZeile(),
+      szene: SzeneArt.schlaf,
+      szeneDaten: SzeneDaten(
+        mond: (morgen?.wert ?? 70) / 100,
+        zeile: bz == null
+            ? 'Leg deine Schlafzeiten fest'
+            : 'Heute ins Bett um ${formatUhrzeit(bz.bett)}',
+      ),
       seiten: [
         BSeite(
           name: 'Morgen',
+          zeigt: morgen == null ? 's-himmel' : null,
           coach: _coach(
             b,
             morgen == null
@@ -692,6 +735,7 @@ extension _Koerper on _HomePageState {
         ),
         BSeite(
           name: 'Abend',
+          zeigt: today.hour >= 20 && journal == null ? 's-journal' : null,
           coach: _routine.isEmpty
               ? 'Leg einmal fest, wie dein Abend aussieht. Danach 3 und 3, '
                     'dann Gute Nacht.'

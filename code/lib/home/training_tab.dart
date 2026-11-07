@@ -15,6 +15,7 @@ import '../training/training_widgets.dart';
 import '../training/trainings_modus.dart';
 import '../training/uebung_verlauf.dart';
 import '../training/woche_karte.dart';
+import '../ui/coach_freude.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import 'bereichs_werte.dart';
@@ -278,6 +279,12 @@ class _TrainingTabState extends State<TrainingTab> {
       ..removeWhere((k, _) => e.uebungen.any((u) => u.name.toLowerCase() == k));
     await _speichern(d.copyWith(vorschlaege: vorschlaege).mitEinheit(e));
     _sessionAufbauen();
+    if (mounted) {
+      coachFreut(
+        context,
+        'Training geschafft${widget.profile.name.isEmpty ? '' : ', ${widget.profile.name}'}. Genau so wächst es.',
+      );
+    }
     await widget.onGeaendert();
   }
 

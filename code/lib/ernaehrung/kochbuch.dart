@@ -860,3 +860,71 @@ class _GerichtEditorState extends State<GerichtEditor> {
     ],
   );
 }
+
+/// The cookbook as a vine for its tile: the stem draws itself, then one
+/// leaf after another unfolds, one per dish (at most 9 shown).
+class KochbuchRanke extends StatelessWidget {
+  const KochbuchRanke({super.key, required this.blaetter});
+  final int blaetter;
+
+  @override
+  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
+    tween: Tween(begin: 0, end: 1),
+    duration: Duration(milliseconds: 900 + 140 * math.min(blaetter, 9)),
+    curve: Curves.easeOut,
+    builder: (context, v, _) => CustomPaint(
+      size: const Size(150, 56),
+      painter: _RankeMaler(v, math.min(blaetter, 9)),
+    ),
+  );
+}
+
+class _RankeMaler extends CustomPainter {
+  _RankeMaler(this.v, this.n);
+  final double v;
+  final int n;
+
+  @override
+  void paint(Canvas c, Size s) {
+    final w = s.width, h = s.height;
+    double y(double x) => h / 2 + math.sin(x / w * math.pi * 2) * 5;
+    final pfad = Path()..moveTo(0, y(0));
+    for (var x = 2.0; x <= w; x += 2) {
+      pfad.lineTo(x, y(x));
+    }
+    final m = pfad.computeMetrics().first;
+    final stiel = (v / .45).clamp(0.0, 1.0);
+    c.drawPath(
+      m.extractPath(0, m.length * stiel),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.8
+        ..strokeCap = StrokeCap.round
+        ..color = const Color(0xFFB98E47),
+    );
+    for (var i = 0; i < n; i++) {
+      final start = .3 + i * (.6 / math.max(n, 1));
+      final t = Curves.easeOutBack.transform(
+        ((v - start) / .25).clamp(0.0, 1.0),
+      );
+      if (t <= 0) continue;
+      final x = 8 + i * (w - 16) / math.max(n - 1, 1);
+      final oben = i.isEven;
+      final mitte = Offset(x, y(x) + (oben ? -8 : 8));
+      c.save();
+      c.translate(mitte.dx, mitte.dy);
+      c.rotate(oben ? -.5 : .5);
+      c.drawOval(
+        Rect.fromCenter(center: Offset.zero, width: 16 * t, height: 7 * t),
+        Paint()
+          ..color = i % 3 == 2
+              ? const Color(0xEBE7A08A)
+              : const Color(0xEBC9A25C),
+      );
+      c.restore();
+    }
+  }
+
+  @override
+  bool shouldRepaint(_RankeMaler old) => old.v != v || old.n != n;
+}

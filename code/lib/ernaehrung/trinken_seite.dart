@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../sleep/schlafzeiten.dart';
 import '../training/training_widgets.dart';
+import '../ui/coach_freude.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import 'ernaehrung_data.dart';
@@ -55,7 +56,17 @@ class TrinkenSeite extends StatelessWidget {
               MainButton(
                 key: const ValueKey('trinken-glas-plus'),
                 label: 'Ein Glas getrunken',
-                onPressed: () => _setze(t.copyWith(glaeser: t.glaeser + 1)),
+                onPressed: () async {
+                  await _setze(t.copyWith(glaeser: t.glaeser + 1));
+                  if (t.liter < ziel &&
+                      t.liter + .25 >= ziel &&
+                      context.mounted) {
+                    coachFreut(
+                      context,
+                      'Dein Wasser für heute ist drin. Stark.',
+                    );
+                  }
+                },
               ),
               if (t.glaeser > 0)
                 Padding(
