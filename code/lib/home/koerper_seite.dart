@@ -187,12 +187,20 @@ extension _Koerper on _HomePageState {
 
   /// The best value of each logged session of one exercise.
   List<double> _bestwerte(String name) => [
-    for (final (_, log) in _training.verlauf(name))
+    for (final (_, w) in _bestwerteMitTag(name)) w,
+  ];
+
+  /// Best value per training with its day, oldest first.
+  List<(DateTime, double)> _bestwerteMitTag(String name) => [
+    for (final (tag, log) in _training.verlauf(name))
       if (log.saetze.where((x) => x.fertig && x.wert != null).isNotEmpty)
-        log.saetze
-            .where((x) => x.fertig && x.wert != null)
-            .map((x) => x.wert!)
-            .reduce(math.max),
+        (
+          tag,
+          log.saetze
+              .where((x) => x.fertig && x.wert != null)
+              .map((x) => x.wert!)
+              .reduce(math.max),
+        ),
   ];
 
   Unterbereich _teilTraining() {
@@ -217,13 +225,29 @@ extension _Koerper on _HomePageState {
                   x.saetze.any((s) => s.fertig),
             ) ??
             false);
+    int fertigeSaetze(String n) =>
+        einheit?.uebungen
+            .where((x) => x.name.toLowerCase() == n.toLowerCase())
+            .fold<int>(
+              0,
+              (a, x) => a + x.saetze.where((s) => s.fertig).length,
+            ) ??
+        0;
     final heuteListe = <HeuteUebung>[
       if (planHeute.isNotEmpty)
         for (final u in planHeute)
-          (name: u.name, ziel: _zielText(u), fertig: erledigt(u.name))
+          (
+            name: u.name,
+            ziel: _zielText(u),
+            fertig: erledigt(u.name),
+            saetze: u.saetze,
+            fertigeSaetze: fertigeSaetze(u.name),
+          )
       else
-        for (final l in uebungen) (name: l, ziel: '', fertig: erledigt(l)),
+        for (final l in uebungen)
+          (name: l, ziel: '', fertig: erledigt(l), saetze: 0, fertigeSaetze: 0),
     ];
+    final zeitHeute = trainingZeit(tag);
     final woche = _trainingsWoche();
     final gemacht = woche.where((x) => x == true).length;
     final geplant = woche.where((x) => x != null).length;
@@ -279,8 +303,18 @@ extension _Koerper on _HomePageState {
     final wochenTage = <WochenTag>[
       for (var i = 0; i < 7; i++)
         (
-          tag: 'MDMDFSS'[i],
-          name: shortDay(_woche.tage[i]),
+          tag: const ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'][i],
+          name: woche[i] == null ? '' : shortDay(_woche.tage[i]),
+          zeit: switch (trainingZeit(_woche.tage[i])) {
+            final m? => formatUhrzeit(m),
+            null => '',
+          },
+          uebungen: _woche.uebungenAm(i).isNotEmpty
+              ? [for (final u in _woche.uebungenAm(i)) u.name].join(' · ')
+              : [
+                  for (final l in dayDetails(_woche.tage[i]).split('\n'))
+                    if (l.trim().isNotEmpty) l.trim(),
+                ].join(' · '),
           fertig: woche[i],
           heute: i == heuteIndex,
         ),
@@ -321,6 +355,11 @@ extension _Koerper on _HomePageState {
           bild: BBild(
             bau: (tipp, v, t) => TrainingHeuteBild(
               uebungen: heuteListe,
+              titel: leer != null ? '' : name,
+              unter: [
+                if (zeitHeute != null) 'heute ${formatUhrzeit(zeitHeute)}',
+                '${heuteListe.length} ${heuteListe.length == 1 ? 'Übung' : 'Übungen'}',
+              ].join(' · '),
               leer: leer,
               tipp: tipp,
               v: v,
@@ -448,8 +487,16 @@ extension _Koerper on _HomePageState {
                   if (n != zeigeUebung) n,
               ].take(3).toList(),
               werte: werte,
+              labels: [
+                for (final (tag, _)
+                    in zeigeUebung == null
+                        ? const <(DateTime, double)>[]
+                        : _bestwerteMitTag(zeigeUebung))
+                  dayKey(tag) == dayKey(today)
+                      ? 'heute'
+                      : '${tag.day}.${tag.month}.',
+              ],
               einheit: kg ? 'kg' : '',
-              videos: 0,
               tipp: tipp,
               v: v,
               t: t,
@@ -516,6 +563,21 @@ extension _Koerper on _HomePageState {
     final naechste = slots.where((s) => eintraege[s.id]?.gegessen != true);
     final blaetter = kochbuchBlaetter(d);
     final rettung = d.gerichte.where((g) => g.quelle == 'coach').length;
+    // The plant shows open dishes, cooked ones first; one rescue dish
+    // glows as today's dish for the user.
+    final kuechenGerichte = [
+      ...d.gerichte.where((g) => g.freiAb == null && g.imKochbuch),
+      ...d.gerichte.where((g) => g.freiAb == null && !g.imKochbuch),
+    ].take(6).toList();
+    final heuteGericht = kuechenGerichte
+        .where((g) => g.quelle == 'coach' || g.gegen != null)
+        .firstOrNull;
+    final gesperrt = d.gerichte.where((g) => g.freiAb != null).toList()
+      ..sort((a, b) => a.freiAb!.compareTo(b.freiAb!));
+    final nochKochen = gesperrt.isEmpty
+        ? null
+        : math.max(1, gesperrt.first.freiAb! - kochenGesamt(d));
+    final knospe = nochKochen == null ? null : 'nach $nochKochen Mal kochen';
     final offen = einkaufsliste(d)
         .where((p) => !d.einkauf.erledigt.contains(p.key))
         .length;
@@ -535,6 +597,16 @@ extension _Koerper on _HomePageState {
       (w) => !w.datum.isAfter(today.subtract(const Duration(days: 14))),
     );
     final diff = kg == null || vor14.isEmpty ? null : kg - vor14.last.kg;
+    // The goal range on the scale: from the weight two weeks ago, the
+    // healthy step for the goal's direction (vault Körper komplett).
+    final richtung = zielRichtung(u.profile.ziel);
+    final (double, double)? zielBereich = vor14.isEmpty
+        ? null
+        : switch (richtung) {
+            < 0 => (vor14.last.kg - 1.0, vor14.last.kg - .2),
+            > 0 => (vor14.last.kg + .2, vor14.last.kg + 1.0),
+            _ => (vor14.last.kg - .5, vor14.last.kg + .5),
+          };
     Widget seite(Widget Function() bau) => _lebendig(bau);
     return Unterbereich(
       id: b.name,
@@ -633,9 +705,15 @@ extension _Koerper on _HomePageState {
           bild: BBild(
             bau: (tipp, v, t) => KuecheBild(
               blaetter: [
-                for (final g in d.gerichte)
-                  (voll: g.imKochbuch, rettung: g.quelle == 'coach'),
+                for (final g in kuechenGerichte)
+                  (
+                    name: g.name,
+                    voll: g.imKochbuch,
+                    rettung: g.quelle == 'coach',
+                    heute: g.id == heuteGericht?.id,
+                  ),
               ],
+              knospe: knospe,
               korb: offen,
               tipp: tipp,
               v: v,
@@ -677,7 +755,18 @@ extension _Koerper on _HomePageState {
           bild: BBild(
             bau: (tipp, v, t) => ZielBild(
               kcal: ziel,
-              gewichte: [for (final w in _weights) w.kg],
+              kg: kg,
+              kgAlt: vor14.isEmpty ? null : vor14.last.kg,
+              bereich: zielBereich,
+              unter: diff == null
+                  ? (kg == null ? '' : 'heute')
+                  : '${diff > 0 ? '+' : (diff < 0 ? '−' : '±')}'
+                        '${_HomePageState._komma(diff.abs())} in 2 Wochen · ',
+              unterGold: diff == null || zielBereich == null
+                  ? ''
+                  : kg! >= zielBereich.$1 && kg <= zielBereich.$2
+                  ? 'passt zum Ziel'
+                  : 'noch nicht im Zielbereich',
               kapseln: [
                 for (final s in _supplements)
                   (s.name, _genommen.contains(s.id)),

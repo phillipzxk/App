@@ -107,4 +107,18 @@ Seiten und Bilder (alles, was vorher eine Kachel war, ist im Bild, in einer Zahl
   - Abend: Fenster mit 6 Sternen fürs Journal (3 dankbar, 3 morgen besser), drei Kerzen auf der Fensterbank für die Routine (brennen ab ihrer Uhrzeit). Knopf Gute Nacht, kleiner Knopf Dein Tag vom Coach.
 - Weggefallen: die Seite „Tag“ (Dein Tag ist auf Heute und als Knopf auf Abend, Muster auf Nacht) und die Kachel „Mehr Daten“ (kommt mit der Handy-Version in die Einstellungen). Training „Plan“ steckt in Woche.
 
+## Körper als Bilder, Entwurf 4 (2026-11-07)
+
+Phillip: das Braun und Seiten mit nur einer Linie seien „sehr kacke“, manche Seiten zu leer. Er wählte „Bild größer machen“. Entwurf 4 (gleicher Link), danach „Training Woche sehr leer, Küche besser, Schlaf Abend leicht anpassen“, dann „Woche übersichtlicher als Trainingsplan“. Phillip: „So übernehmen!! Nix verändern“.
+
+- Grund überall tiefschwarz mit leichtem Goldlicht von oben, kein Braun mehr. Bilder größer (Brett 302 x 360).
+- Training Heute: oben Name und Uhrzeit des Trainings, Hantelscheiben, nächste Übung, darunter die Sätze der Übung (gold = geschafft).
+- Training Woche: Trainingsplan, eine Zeile pro Tag Mo bis So mit Training, Uhrzeit und Übungen; rechts Haken (geschafft), leuchtender Ring (heute) oder leerer Kreis (geplant); Ruhetage schmal mit „Pause“ und Mond. Oben „X von Y“ mit Balken.
+- Training Fortschritt: goldene Säulen, eine pro Training (bester Wert), Trieb auf jeder Säule mit Rekord, darunter das Datum.
+- Ernährung Heute: leuchtendes Goldband als Energie-Kurve, Mahlzeiten als kleine Teller darauf, „jetzt“-Punkt; darunter Teller und Glas.
+- Ernährung Küche: wachsende Pflanze, jedes Blatt ein Gericht mit Namen (voll = Basis, leer = Rettung), ein Rettungsgericht leuchtet als „heute für dich“, oben eine Knospe „neu vom Coach · nach N Mal kochen“ (nächstes gesperrtes Gericht), unten rechts der Korb.
+- Ernährung Ziel: Waage mit Nadel (schlägt beim Öffnen aus), goldener Zielbereich, gestrichelt das Gewicht vor 2 Wochen, oben die kcal als Pille, unten die Kapseln. Zielbereich ab dem Gewicht vor 2 Wochen: Abnehmen 0,2 bis 1 kg weniger, Aufbauen 0,2 bis 1 kg mehr, sonst ±0,5 kg (Richtung aus dem Ziel im Fragebogen). Darunter „passt zum Ziel“ oder „noch nicht im Zielbereich“.
+- Schlaf Morgen und Nacht: gleich, nur größer und schwarz-gold statt braun.
+- Schlaf Abend: größeres Fenster, größere Kerzen, brennende Kerzen machen das Fenster warm; Zähler „dankbar 0/3“ und „morgen besser 0/3“; unten Punkte und „Noch N Schritte bis Gute Nacht“.
+
 Code: `code/lib/bereiche/koerper_bilder.dart` (die 9 Bilder), `BBild`/`BZahl` und `_BildSeiteView` in `bereich_seite.dart`, Daten in `code/lib/home/koerper_seite.dart`. `kachel_bilder.dart` ist entfernt.
