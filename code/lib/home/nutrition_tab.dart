@@ -210,7 +210,8 @@ class _NutritionTabState extends State<NutritionTab> {
     final naechste = slots.where((s) => !gegessen.contains(s.id));
     final schlaf = widget.sleep.isEmpty ? null : widget.sleep.last.stunden;
     final alles = widget.teil == null;
-    bool zeig(String t) => alles || widget.teil == t;
+    final teile = widget.teil?.split(',') ?? const <String>[];
+    bool zeig(String t) => alles || teile.contains(t);
     final kinder = <Widget>[
       if (alles) ...[
         const PageHeader(label: 'Bereich', title: 'Ernährung', icon: Icons.eco),
@@ -342,7 +343,7 @@ class _NutritionTabState extends State<NutritionTab> {
                   ],
                 ),
               ),
-            if (zeig('teller') && slots.isEmpty && !alles)
+            if (zeig('teller') && slots.isEmpty && !alles && !zeig('energie'))
               const Text(
                 'Leg unter Energie-Kurve fest, wie oft du am Tag isst. '
                 'Dann füllt sich hier dein Teller.',

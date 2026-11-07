@@ -5,7 +5,9 @@ import 'package:coach_app/data/user_profile.dart';
 import 'package:coach_app/ernaehrung/ernaehrung_coach.dart';
 import 'package:coach_app/ernaehrung/ernaehrung_data.dart';
 import 'package:coach_app/ernaehrung/ernaehrung_logik.dart';
+import 'package:coach_app/bereiche/koerper_bilder.dart';
 import 'package:coach_app/ernaehrung/kochbuch.dart';
+import 'package:coach_app/konto/konto_ui.dart';
 import 'package:coach_app/feed/feed_coach.dart';
 import 'package:coach_app/feed/kcal.dart';
 import 'package:coach_app/main.dart';
@@ -22,6 +24,12 @@ const _profile = UserProfile(
 
 class _EssenCoach extends NoFeedCoach implements ErnaehrungCoach {
   String? grund;
+
+  /// What fotoArt answers.
+  String? art = 'kuehlschrank';
+
+  @override
+  Future<String?> fotoArt(String bild) async => art;
 
   @override
   Future<String?> zusammenhang(
@@ -281,7 +289,7 @@ void main() {
       WidgetTester tester, {
       int? mahlzeiten,
       ErnaehrungDaten? daten,
-      String kachel = 'e-kurve',
+      String kachel = 'e-essen',
     }) async {
       coach = _EssenCoach();
       final diary = MemoryDiaryStore()..checkIns.add(checkInOn(fixedNow));
@@ -359,8 +367,9 @@ void main() {
       tester,
     ) async {
       fotoAufnahme = () async => base64Encode([1]);
-      final feed = await start(tester, kachel: 'e-kuehl');
-      await tester.tap(find.byKey(const ValueKey('kuehl-aufnehmen')));
+      final feed = await start(tester, kachel: 'e-foto');
+      // One Foto button: the coach sees a fridge and opens that page.
+      await tester.tap(find.byKey(const ValueKey('foto-aufnehmen')));
       await tester.pumpAndSettle();
       expect(find.text('Spinat-Omelett'), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('kuehl-zutat-Feta')));
@@ -373,6 +382,116 @@ void main() {
       final g = feed.ernaehrung.gericht('k1')!;
       expect(g.gekocht, 1);
       expect(g.imKochbuch, isTrue);
+    });
+
+    testWidgets('Foto: a plate goes to the next meal, unsure asks', (
+      tester,
+    ) async {
+      fotoAufnahme = () async => base64Encode([1, 2, 3]);
+      final feed = await start(tester, mahlzeiten: 2, kachel: 'e-foto');
+      coach.art = 'teller';
+      await tester.tap(find.byKey(const ValueKey('foto-aufnehmen')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('teller-hinweise')), findsOneWidget);
+      expect(
+        feed.ernaehrung.tag(dayKey(fixedNow))['fruehstueck']!.teller,
+        isNotNull,
+      );
+    });
+
+    testWidgets('Foto: when the coach is unsure, the user picks', (
+      tester,
+    ) async {
+      fotoAufnahme = () async => base64Encode([1, 2, 3]);
+      await start(tester, mahlzeiten: 2, kachel: 'e-foto');
+      coach.art = null;
+      await tester.tap(find.byKey(const ValueKey('foto-aufnehmen')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('foto-kuehlschrank')));
+      await tester.pumpAndSettle();
+      expect(find.text('Spinat-Omelett'), findsOneWidget);
+    });
+
+    testWidgets('Trinken: glass fills, coffee after 14 Uhr gets a hint', (
+      tester,
+    ) async {
+      final feed = await start(tester, kachel: 'e-trinken');
+      final plus = find.byKey(const ValueKey('trinken-glas-plus'));
+      await tester.tap(plus);
+      await tester.pumpAndSettle();
+      await tester.tap(plus);
+      await tester.pumpAndSettle();
+      final t = feed.ernaehrung.trinkTag(dayKey(fixedNow));
+      expect(t.glaeser, 2);
+      expect(find.textContaining('0,5 von'), findsOneWidget);
+      final kaffee = find.byKey(const ValueKey('trinken-kaffee-plus'));
+      await scrollTo(tester, kaffee);
+      await tester.tap(kaffee);
+      await tester.pumpAndSettle();
+      expect(feed.ernaehrung.trinkTag(dayKey(fixedNow)).kaffee, hasLength(1));
+    });
+
+    testWidgets('the page is one picture with numbers and buttons', (
+      tester,
+    ) async {
+      await start(tester, mahlzeiten: 3);
+      tester.state<NavigatorState>(find.byType(Navigator).first).pop();
+      await tester.pumpAndSettle();
+      expect(find.byType(EssenHeuteBild), findsOneWidget);
+      expect(find.text('Mahlzeiten'), findsOneWidget);
+      expect(find.byKey(const ValueKey('knopf-e-foto')), findsOneWidget);
+      // The glass in the picture opens Trinken.
+      await tester.tap(find.byKey(const ValueKey('kachel-e-trinken')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('trinken-glas')), findsOneWidget);
+    });
+
+    testWidgets('Trinken: reaching the goal makes the coach cheer', (
+      tester,
+    ) async {
+      await start(tester, kachel: 'e-trinken');
+      final plus = find.byKey(const ValueKey('trinken-glas-plus'));
+      for (var i = 0; i < 7; i++) {
+        await tester.tap(plus);
+        await tester.pumpAndSettle();
+      }
+      expect(find.byKey(const ValueKey('coach-freut')), findsNothing);
+      await tester.tap(plus);
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(find.byKey(const ValueKey('coach-freut')), findsOneWidget);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('coach-freut')), findsNothing);
+    });
+
+    testWidgets('the picture plays in when its page shows', (tester) async {
+      await start(tester, mahlzeiten: 3);
+      tester.state<NavigatorState>(find.byType(Navigator).first).pop();
+      await tester.pumpAndSettle();
+      bewegungErzwingen = true;
+      addTearDown(() => bewegungErzwingen = false);
+      await tester.tap(find.byKey(const ValueKey('seite-Küche')));
+      for (var i = 0; i < 25; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(find.byType(KuecheBild), findsOneWidget);
+      expect(find.byKey(const ValueKey('knopf-e-einkauf')), findsOneWidget);
+      bewegungErzwingen = false;
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('cookbook filter shows only basis or rescue dishes', (
+      tester,
+    ) async {
+      final feed = await start(tester, kachel: 'e-koch');
+      final id = feed.ernaehrung.gerichte.first.id;
+      expect(find.byKey(ValueKey('rettung-$id')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('kochbuch-filter-Basis')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(ValueKey('rettung-$id')), findsNothing);
+      expect(find.byKey(const ValueKey('gericht-neu-name')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('kochbuch-filter-Rettung')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('gericht-neu-name')), findsNothing);
     });
 
     testWidgets('cookbook offers rescue dishes, shopping list adds them', (
@@ -422,7 +541,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await openTab(tester, 'Ernährung', 'e-kcal');
+    await openTab(tester, 'Ernährung', 'e-ziel');
     final link = find.byKey(const ValueKey('gewicht-check-link'));
     await scrollTo(tester, link);
     await tester.tap(link);

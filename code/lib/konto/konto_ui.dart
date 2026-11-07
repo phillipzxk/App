@@ -7,7 +7,12 @@ import '../ui/coach_style.dart';
 
 /// Endless motion is off in widget tests (they wait for all animations).
 bool get bewegungAn =>
+    bewegungErzwingen ||
     !WidgetsBinding.instance.runtimeType.toString().contains('Test');
+
+/// Turns the motion on in a test (for screenshots and the flight test).
+@visibleForTesting
+bool bewegungErzwingen = false;
 
 /// The calm page of the account screens (Entwurf 2, 2026-11-01): warm dark
 /// gradient and one slowly breathing light instead of many blobs.

@@ -76,13 +76,13 @@ void main() {
     expect(find.text('Schlaf & Routine'), findsWidgets);
     expect(find.byKey(const ValueKey('kachel-s-himmel')), findsOneWidget);
 
-    // Switch to Training directly at the top, then to its Plan page.
+    // Switch to Training directly at the top, then to its Woche page.
     await tester.tap(find.byKey(const ValueKey('teil-training')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('kachel-t-heute')), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('seite-Plan')));
+    await tester.tap(find.byKey(const ValueKey('seite-Woche')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('kachel-t-plan')), findsOneWidget);
+    expect(find.byKey(const ValueKey('knopf-t-plan')), findsOneWidget);
 
     // Without a plan the tile opens the plan straight away; back goes to
     // Körper.
@@ -205,7 +205,7 @@ void main() {
     tester,
   ) async {
     final (diary, feed) = await _openFeed(tester);
-    await openTab(tester, 'Ernährung', 'e-kcal');
+    await openTab(tester, 'Ernährung', 'e-ziel');
     await tester.tap(find.text('kcal-Ziel einrichten'));
     await tester.pumpAndSettle();
 
@@ -253,7 +253,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await openTab(tester, 'Ernährung', 'e-kcal');
+    await openTab(tester, 'Ernährung', 'e-ziel');
     // (900 + 1125 - 150 + 5) * 1.55 = 2914
     expect(find.textContaining('2.900'), findsOneWidget);
   });

@@ -33,6 +33,10 @@ abstract class ErnaehrungCoach {
     String bild,
   );
 
+  /// What a photo shows: 'teller' (a meal) or 'kuehlschrank' (fridge,
+  /// pantry, ingredients). Null when the coach can't tell.
+  Future<String?> fotoArt(String bild);
+
   /// A dish from the fridge: from a photo, or again from a corrected list.
   Future<({List<String> zutaten, Gericht? gericht})?> kuehlschrank(
     UserProfile profile,
@@ -84,6 +88,9 @@ class NoErnaehrungCoach implements ErnaehrungCoach {
     String mahlzeit,
     String bild,
   ) async => null;
+
+  @override
+  Future<String?> fotoArt(String bild) async => null;
 
   @override
   Future<({List<String> zutaten, Gericht? gericht})?> kuehlschrank(

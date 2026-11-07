@@ -13,10 +13,18 @@ import 'ernaehrung_stand.dart';
 /// Idea 3: a photo of the plate, the coach says roughly how it fits the
 /// goal: protein, vegetables, size. In words, never numbers.
 class TellerFotoSeite extends StatefulWidget {
-  const TellerFotoSeite({super.key, required this.umfeld, required this.slot});
+  const TellerFotoSeite({
+    super.key,
+    required this.umfeld,
+    required this.slot,
+    this.bild,
+  });
 
   final EssenUmfeld umfeld;
   final MahlzeitSlot slot;
+
+  /// A photo already taken (from the Foto button): read it right away.
+  final String? bild;
 
   @override
   State<TellerFotoSeite> createState() => _TellerFotoSeiteState();
@@ -35,6 +43,18 @@ class _TellerFotoSeiteState extends State<TellerFotoSeite> {
   String? _fehler;
   bool _ohneCoach = false;
 
+  @override
+  void initState() {
+    super.initState();
+    final b = widget.bild;
+    if (b != null) {
+      _phase = _Phase.lesen;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _lesen(b);
+      });
+    }
+  }
+
   Future<void> _aufnehmen() async {
     setState(() => _fehler = null);
     final bild = await fotoAufnahme();
@@ -43,6 +63,10 @@ class _TellerFotoSeiteState extends State<TellerFotoSeite> {
       setState(() => _fehler = 'Kein Foto. Versuch es nochmal.');
       return;
     }
+    await _lesen(bild);
+  }
+
+  Future<void> _lesen(String bild) async {
     setState(() => _phase = _Phase.lesen);
     final h = await u.coach.teller(u.profile, widget.slot.name, bild);
     await u.stand.setze(

@@ -391,7 +391,7 @@ void main() {
       final feed = await _start(tester);
       await openKachel(tester, 'm-rad');
       await _tippe(tester, 'rad-speichern');
-      expect(feed.mindset.raeder.single.werte['Business'], 5);
+      expect(feed.mindset.raeder.single.werte['Fokus & Arbeit'], 5);
       expect(find.text('Das nächste kommt in 91 Tagen.'), findsOneWidget);
     });
 

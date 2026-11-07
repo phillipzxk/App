@@ -163,15 +163,10 @@ void main() {
   });
 
   group('page', () {
-    testWidgets('five roots and the life goals at the bottom', (tester) async {
+    testWidgets('four roots and the life goals at the bottom', (tester) async {
       await _start(tester);
-      for (final id in [
-        'koerper',
-        'produktiv',
-        'business',
-        'persoenlich',
-        'mindset',
-      ]) {
+      expect(find.byKey(const ValueKey('wurzel-business')), findsNothing);
+      for (final id in ['koerper', 'produktiv', 'persoenlich', 'mindset']) {
         await scrollTo(tester, find.byKey(ValueKey('wurzel-$id')));
         expect(find.byKey(ValueKey('wurzel-$id')), findsOneWidget);
       }
@@ -199,12 +194,13 @@ void main() {
       expect(produktivWert(feed.produktiv, dayKey(fixedNow)), isNotNull);
     });
 
-    testWidgets('Business: coach lever, ticks and the turnover goal', (
+    testWidgets('Fokus & Arbeit: work goals with the coach lever', (
       tester,
     ) async {
       final (feed, coach) = await _start(tester);
-      await openBereich(tester, 'business');
-      expect(find.byKey(const ValueKey('business-seite')), findsOneWidget);
+      expect(find.byKey(const ValueKey('wurzel-business')), findsNothing);
+      await openBereich(tester, 'produktiv');
+      expect(find.text('Fokus & Arbeit'), findsWidgets);
       await openKachel(tester, 'b-hebel');
       await _tippe(tester, 'hebel-vorschlag');
       expect(coach.arten, contains('hebel'));
@@ -212,52 +208,9 @@ void main() {
       expect(find.text('Frag wen, nicht ob.'), findsOneWidget);
       await _tippe(tester, 'hebel-punkt-0');
       expect(feed.business.hebel.single.erledigt, 1);
-
-      await tester.tap(find.byKey(const ValueKey('feld-zurueck')));
-      await tester.pumpAndSettle();
-      await openKachel(tester, 'b-umsatz');
-      await tester.enterText(find.byKey(const ValueKey('ziel-feld')), '3.000');
-      await _tippe(tester, 'ziel-setzen');
-      expect(feed.business.ziele['2026-10'], 3000);
-      await tester.enterText(find.byKey(const ValueKey('umsatz-feld')), '3100');
-      await tester.tap(find.byKey(const ValueKey('umsatz-dazu')));
-      await tester.pump(const Duration(milliseconds: 500));
-      // Goal reached: the big gold tick over the screen.
-      expect(find.byKey(const ValueKey('grosses-haken')), findsOneWidget);
-      await tester.pumpAndSettle();
-      expect(find.byKey(const ValueKey('grosses-haken')), findsNothing);
-      expect(umsatzIm(feed.business, '2026-10'), 3100);
     });
 
-    testWidgets('Business: bold asks grow, skill ladder from the coach', (
-      tester,
-    ) async {
-      final (feed, _) = await _start(tester);
-      await openBereich(tester, 'business');
-      await openKachel(tester, 'b-anfrage');
-      await tester.enterText(
-        find.byKey(const ValueKey('anfrage-feld')),
-        'Preis erhöhen',
-      );
-      await _tippe(tester, 'anfrage-dazu');
-      await _tippe(tester, 'anfrage-0');
-      expect(feed.business.anfragen.single.an, isTrue);
-      expect(find.text('1 geschafft'), findsOneWidget);
-
-      await tester.tap(find.byKey(const ValueKey('feld-zurueck')));
-      await tester.pumpAndSettle();
-      await openKachel(tester, 'b-skill');
-      await tester.enterText(
-        find.byKey(const ValueKey('skill-feld')),
-        'Verkaufen',
-      );
-      await _tippe(tester, 'skill-start');
-      expect(feed.business.skill!.stufen, hasLength(7));
-      await _tippe(tester, 'skill-weiter');
-      expect(feed.business.skill!.erreicht, 1);
-    });
-
-    testWidgets('Persönlichkeit: care ticks and the course opens lesson 2 '
+    testWidgets('Ausstrahlung: care ticks and the course opens lesson 2 '
         'after the right answer', (tester) async {
       final (feed, coach) = await _start(tester);
       await openBereich(tester, 'persoenlich');
@@ -284,7 +237,7 @@ void main() {
       expect(feed.persoenlich.kurs!.erreicht, 1);
     });
 
-    testWidgets('Persönlichkeit: small things and the library', (tester) async {
+    testWidgets('Ausstrahlung: small things and the library', (tester) async {
       final (feed, _) = await _start(tester);
       await openBereich(tester, 'persoenlich');
       await openKachel(tester, 'pe-kleine');

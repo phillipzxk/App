@@ -394,7 +394,16 @@ class ErnaehrungDaten {
     this.gewicht = const [],
     this.kcalAnpassung = 0,
     this.zusammenhang,
+    this.trinken = const {},
   });
+
+  /// Day key -> what was drunk that day.
+  final Map<String, TrinkTag> trinken;
+
+  TrinkTag trinkTag(String key) => trinken[key] ?? const TrinkTag();
+
+  ErnaehrungDaten mitTrinken(String key, TrinkTag t) =>
+      copyWith(trinken: {...trinken, key: t});
 
   /// Day key -> meal id -> entry.
   final Map<String, Map<String, MahlzeitEintrag>> tage;
@@ -421,6 +430,7 @@ class ErnaehrungDaten {
     List<GewichtsCheck>? gewicht,
     int? kcalAnpassung,
     ({String tag, String? satz})? zusammenhang,
+    Map<String, TrinkTag>? trinken,
   }) => ErnaehrungDaten(
     tage: tage ?? this.tage,
     verschoben: verschoben ?? this.verschoben,
@@ -430,6 +440,7 @@ class ErnaehrungDaten {
     gewicht: gewicht ?? this.gewicht,
     kcalAnpassung: kcalAnpassung ?? this.kcalAnpassung,
     zusammenhang: zusammenhang ?? this.zusammenhang,
+    trinken: trinken ?? this.trinken,
   );
 
   Map<String, MahlzeitEintrag> tag(String key) => tage[key] ?? const {};
@@ -490,6 +501,7 @@ class ErnaehrungDaten {
     'kcal_anpassung': kcalAnpassung,
     if (zusammenhang != null)
       'zusammenhang': {'tag': zusammenhang!.tag, 'satz': zusammenhang!.satz},
+    'trinken': {for (final t in trinken.entries) t.key: t.value.toJson()},
   };
 
   factory ErnaehrungDaten.fromJson(Map<String, dynamic> j) {
@@ -530,6 +542,60 @@ class ErnaehrungDaten {
       zusammenhang: z == null
           ? null
           : (tag: z['tag'] as String? ?? '', satz: z['satz'] as String?),
+      trinken: {
+        for (final t in ((j['trinken'] as Map?) ?? const {}).entries)
+          '${t.key}': TrinkTag.fromJson(t.value as Map<String, dynamic>),
+      },
     );
   }
+}
+
+/// What was drunk on one day: water in glasses of 250 ml, coffee and
+/// alcohol as counts, plus the minute of the day of each coffee.
+class TrinkTag {
+  const TrinkTag({this.glaeser = 0, this.kaffee = const [], this.alkohol = 0});
+
+  final int glaeser;
+
+  /// Minute of the day of each coffee.
+  final List<int> kaffee;
+  final int alkohol;
+
+  double get liter => glaeser * 0.25;
+
+  TrinkTag copyWith({int? glaeser, List<int>? kaffee, int? alkohol}) =>
+      TrinkTag(
+        glaeser: glaeser ?? this.glaeser,
+        kaffee: kaffee ?? this.kaffee,
+        alkohol: alkohol ?? this.alkohol,
+      );
+
+  Map<String, dynamic> toJson() => {
+    'glaeser': glaeser,
+    'kaffee': kaffee,
+    'alkohol': alkohol,
+  };
+
+  factory TrinkTag.fromJson(Map<String, dynamic> j) => TrinkTag(
+    glaeser: (j['glaeser'] as num?)?.toInt() ?? 0,
+    kaffee: [
+      for (final k in j['kaffee'] as List? ?? const []) (k as num).toInt(),
+    ],
+    alkohol: (j['alkohol'] as num?)?.toInt() ?? 0,
+  );
+}
+
+/// Daily water goal in liters: 35 ml per kg, plus half a liter on a
+/// training day, rounded to a quarter liter. 2,5 l without a weight.
+double wasserZiel(double? kg, {required bool training}) {
+  final basis = kg == null ? 2.0 : kg * 0.035;
+  final l = basis + (training ? 0.5 : 0);
+  return (l * 4).round() / 4;
+}
+
+/// 1.25 -> "1,25", 1.5 -> "1,5", 2.0 -> "2".
+String literText(double l) {
+  var s = l.toStringAsFixed(2);
+  s = s.replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '');
+  return s.replaceAll('.', ',');
 }

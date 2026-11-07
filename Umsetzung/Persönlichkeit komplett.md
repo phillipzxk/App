@@ -5,6 +5,8 @@ status: entschieden
 
 # Persönlichkeit komplett
 
+> **Neuer Name seit 2026-11-04: Ausstrahlung.** Phillip hat auf Claudes Vorschlag „Ausstrahlung“ gewählt, weil „Persönlichkeit“ eher nach Charakter klingt als nach Look, Pflege, Haltung und Stimme. In der App, im Check-in, im Fragebogen, im Lebensrad und beim Coach heißt der Bereich jetzt so.
+
 Inhalte siehe [[Ideen neue Bereiche]] (Auswahl 2026-10-28). Aufbau wie [[Mindset komplett]] Entwurf 7.
 
 ## Entwurf 1 (2026-10-29)

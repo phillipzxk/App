@@ -1,7 +1,8 @@
 part of 'home_page.dart';
 
-/// Produktivität & Fokus: Heute, Handy, Rhythmus, Gewohnheiten (vault
-/// Umsetzung/Produktivität und Fokus komplett, Phillip 2026-10-29 16:36).
+/// Fokus & Arbeit: Heute, Ziele, Handy, Rhythmus, Routinen (vault
+/// Umsetzung/Produktivität und Fokus komplett, Phillip 2026-10-29 16:36;
+/// "Ziele" from the old Business area since 2026-11-04).
 extension _Produktiv on _HomePageState {
   ProduktivUmfeld get _produktivUmfeld {
     final jetzt = widget.clock();
@@ -65,6 +66,12 @@ extension _Produktiv on _HomePageState {
     final schlafMuster = sichtbareSchlafMuster(_schlaf.d);
     final gibt = schlafMuster.where((m) => m.gut).toList();
     final nimmt = schlafMuster.where((m) => !m.gut).toList();
+    final bz = _business.d;
+    final h = bz.hebelIn(dayKey(montagVon(jetzt)));
+    final ast = naechsterAst(bz);
+    final astText = ast == null ? null : bz.meilensteine[ast].text;
+    final astAnt = astText == null ? null : astAnteil(astText, bz, jetzt);
+    final erreicht = bz.meilensteine.where((m) => m.an).length;
     final verlauf = _verlauf(_pw, jetzt);
     final da = [for (final v in verlauf) ?v];
     final schnitt = da.isEmpty
@@ -258,6 +265,65 @@ extension _Produktiv on _HomePageState {
         ],
       ),
       BSeite(
+        name: 'Ziele',
+        coach: h == null
+            ? '${name.isEmpty ? 'W' : '$name, w'}elche eine Aktion bringt dich '
+                  'diese Woche bei der Arbeit am weitesten?'
+            : '${name.isEmpty ? '' : '$name, '}diese Woche zählt ein Hebel: '
+                  '${h.text}.'
+                  '${h.punkte.isEmpty ? '' : ' ${h.erledigt} von ${h.punkte.length} geschafft.'}',
+        kacheln: [
+          BKachel(
+            id: 'b-hebel',
+            titel: 'Hebel der Woche',
+            icon: Icons.trending_up,
+            groesse: KachelGroesse.hoch,
+            gold: true,
+            hot: h == null ? 'diese Woche' : 'bis Sonntag',
+            text: h?.text ?? 'Was bringt dich diese Woche am weitesten?',
+            unter: h == null
+                ? 'für Job, Studium oder eigene Firma'
+                : '${h.erledigt} von ${h.punkte.length} erledigt'
+                      '${h.tipps.isEmpty ? '' : ' · ${h.tipps.length} Tipps vom Coach'}',
+            feld: _bFeld(
+              'Hebel der Woche',
+              Icons.trending_up,
+              'Eine Aktion, die dich diese Woche bei der Arbeit am meisten '
+                  'voranbringt. Dazu Tipps, auf die man allein nicht kommt.',
+              (u) => HebelSeite(u: u),
+            ),
+          ),
+          BKachel(
+            id: 'b-baum',
+            titel: 'Dein Weg zum Ziel',
+            icon: Icons.park_outlined,
+            groesse: KachelGroesse.mittel,
+            hot: erreicht == 0
+                ? null
+                : '$erreicht ${erreicht == 1 ? 'Ast' : 'Äste'}',
+            bild: bz.meilensteine.isEmpty
+                ? null
+                : SizedBox(
+                    width: 110,
+                    child: BusinessBaum(meilensteine: bz.meilensteine),
+                  ),
+            text: astText ?? 'Dein erster Meilenstein?',
+            unter: astText == null
+                ? 'jeder Meilenstein ein Ast'
+                : astAnt == null
+                ? 'nächster Ast'
+                : 'nächster Ast · ${(astAnt * 100).round()} %',
+            feld: _bFeld(
+              'Dein Weg zum Ziel',
+              Icons.park_outlined,
+              'Jeder Meilenstein ist ein Ast, egal ob Prüfung, Beförderung '
+                  'oder erste Kunden. So siehst du, wie du vorankommst.',
+              (u) => BaumSeite(u: u),
+            ),
+          ),
+        ],
+      ),
+      BSeite(
         name: 'Handy',
         coach: stunde == null
             ? 'Tipp den Drang-Knopf, wenn du zum Handy greifen willst. Mehr '
@@ -444,12 +510,12 @@ extension _Produktiv on _HomePageState {
 
     return BereichSeite(
       key: const ValueKey('produktiv-seite'),
-      name: 'Produktivität & Fokus',
+      name: 'Fokus & Arbeit',
       wert: wert,
       teile: [
         Unterbereich(
           id: 'produktiv',
-          name: 'Produktivität',
+          name: 'Fokus & Arbeit',
           icon: Icons.bolt,
           wert: wert,
           woche: [
@@ -464,8 +530,8 @@ extension _Produktiv on _HomePageState {
         titel: 'Frag den Coach',
         icon: Icons.chat_bubble_outline,
         coach:
-            'Alles zu Fokus und Energie. Ich kenne deinen Schlaf, dein Training '
-            'und deinen Tag.',
+            'Alles zu Fokus, Energie und Arbeit. Ich kenne deinen Schlaf, dein '
+            'Training, deinen Tag und deinen Hebel.',
         inhalt: (_) => [
           _lebendig(
             () => AskCoachCard(

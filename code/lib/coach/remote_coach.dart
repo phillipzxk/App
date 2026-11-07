@@ -543,6 +543,13 @@ class RemoteCoach
   }
 
   @override
+  Future<String?> fotoArt(String bild) async {
+    final data = await _essen('foto_art', {'bild': bild});
+    final art = data?['art'];
+    return art == 'teller' || art == 'kuehlschrank' ? art as String : null;
+  }
+
+  @override
   Future<({List<String> zutaten, Gericht? gericht})?> kuehlschrank(
     UserProfile profile,
     String kontext, {

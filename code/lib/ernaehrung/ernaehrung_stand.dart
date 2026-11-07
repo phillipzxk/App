@@ -41,7 +41,11 @@ class EssenUmfeld {
     required this.tagText,
     required this.musterText,
     this.training,
+    this.kg,
   });
+
+  /// Latest weight, for the water goal.
+  final double? kg;
 
   final ErnaehrungStand stand;
   final UserProfile profile;

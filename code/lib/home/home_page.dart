@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -6,6 +7,7 @@ import '../checkin/checkin.dart';
 import '../data/diary_store.dart';
 import '../data/user_profile.dart';
 import '../ernaehrung/ernaehrung_coach.dart';
+import '../ernaehrung/ernaehrung_data.dart';
 import '../ernaehrung/ernaehrung_logik.dart';
 import '../ernaehrung/ernaehrung_stand.dart';
 import '../feed/durchgezogen.dart';
@@ -51,11 +53,13 @@ import 'today_tab.dart';
 import 'training_tab.dart';
 import '../bereiche/bereich_seite.dart';
 import '../bereiche/glas.dart';
+import '../bereiche/koerper_bilder.dart';
 import '../ernaehrung/einkaufsliste.dart';
 import '../ernaehrung/heisshunger_seite.dart';
 import '../ernaehrung/kochbuch.dart';
-import '../ernaehrung/kuehlschrank.dart';
-import '../ernaehrung/teller_foto.dart';
+import '../ernaehrung/foto_seite.dart';
+import '../ernaehrung/trinken_seite.dart';
+import '../ui/coach_freude.dart';
 import '../schlaf/aufwachen.dart';
 import '../schlaf/muster_tag.dart';
 import '../schlaf/wecker_seite.dart';
@@ -88,7 +92,7 @@ part 'erinnerungen_home.dart';
 part 'health_home.dart';
 part 'mindset_seite.dart';
 part 'produktiv_seite.dart';
-part 'business_seite.dart';
+part 'arbeit_ziele.dart';
 part 'persoenlich_seite.dart';
 
 /// The Main Feed: opens after the daily check-in. "Heute" on top, the
@@ -900,6 +904,7 @@ class _HomePageState extends State<HomePage> {
     tagText: _essenTagText,
     musterText: _essenMusterText,
     training: _tagRahmen.training,
+    kg: _weights.isEmpty ? null : _weights.last.kg,
   );
 
   String _essenTagText() {
@@ -915,6 +920,7 @@ class _HomePageState extends State<HomePage> {
       if (ziel != null) 'kcal-Ziel (nur Orientierung): $ziel',
       for (final m in _mahlzeitSlots)
         '${m.name} ${m.uhrzeit}: ${eintraege[m.id]?.gegessen == true ? 'gegessen${eintraege[m.id]!.gefuehl == null ? '' : ', ${eintraege[m.id]!.gefuehl}'}' : 'noch offen'}',
+      _trinkZeile(_essen.d.trinkTag(dayKey(jetzt))),
     ].join('\n');
   }
 
@@ -928,8 +934,16 @@ class _HomePageState extends State<HomePage> {
           'Check-in ${dayKey(c.datum)}: ${c.ernaehrung}',
       for (final e in _sleep.reversed.take(7))
         'Schlaf ${dayKey(e.datum)}: ${e.stunden} h',
+      for (final t in d.trinken.entries.toList().reversed.take(7))
+        'Trinken ${t.key}: ${_trinkZeile(t.value)}',
     ].join('\n');
   }
+
+  static String _trinkZeile(TrinkTag t) => [
+    'Wasser ${literText(t.liter)} l',
+    'Kaffee ${t.kaffee.length}${t.kaffee.isEmpty ? '' : ' (letzter ${formatUhrzeit(t.kaffee.last)})'}',
+    'Alkohol ${t.alkohol}',
+  ].join(', ');
 
   static const _icons = {
     Bereich.training: Icons.fitness_center,
@@ -1180,9 +1194,9 @@ class _HomePageState extends State<HomePage> {
         WerteScope(checkIns: _checkIns, today: widget.clock(), child: bau()),
   );
 
-  /// The five roots on Heute (vault Home-Schichten, Glas-Look
-  /// 2026-10-28): Körper with its 3 parts, Produktivität & Fokus, Business
-  /// & Beruf, Persönlichkeit and Mindset.
+  /// The four roots on Heute (vault Home-Schichten, Glas-Look
+  /// 2026-10-28; Business dropped 2026-11-04): Körper with its 3 parts,
+  /// Fokus & Arbeit, Persönlichkeit and Mindset.
   List<WurzelBereich> _wurzeln(DateTime today) {
     final koerper = [Bereich.training, Bereich.ernaehrung, Bereich.schlaf];
     int? schnitt(List<int?> l) {
@@ -1219,11 +1233,7 @@ class _HomePageState extends State<HomePage> {
       for (var i = 6; i >= 0; i--) _pw(today.subtract(Duration(days: i))),
     ];
     final pf = p.fokusAm(heute);
-    final bz = _business.d;
-    final bWoche = [
-      for (var i = 6; i >= 0; i--) _bw(today.subtract(Duration(days: i))),
-    ];
-    final h = bz.hebelIn(dayKey(montagVon(today)));
+    final h = _business.d.hebelIn(dayKey(montagVon(today)));
     final pe = _persoenlich.d;
     final peWoche = [
       for (var i = 6; i >= 0; i--) _pew(today.subtract(Duration(days: i))),
@@ -1243,7 +1253,7 @@ class _HomePageState extends State<HomePage> {
       ),
       WurzelBereich(
         id: 'produktiv',
-        name: 'Produktivität & Fokus',
+        name: 'Fokus & Arbeit',
         icon: Icons.bolt,
         wert: diff(pWoche).$1,
         diff: diff(pWoche).$2,
@@ -1253,25 +1263,14 @@ class _HomePageState extends State<HomePage> {
             : pf.erledigt
             ? 'Die eine Sache heute ist geschafft.'
             : null,
-        infos: [if (pf != null) ('Fokus', pf.text)],
-      ),
-      WurzelBereich(
-        id: 'business',
-        name: 'Business & Beruf',
-        icon: Icons.work_outline,
-        wert: diff(bWoche).$1,
-        diff: diff(bWoche).$2,
-        woche: bWoche,
         infos: [
+          if (pf != null) ('Fokus', pf.text),
           if (h != null) ('Hebel', '${h.erledigt} von ${h.punkte.length}'),
-          if (bz.ziele[monatVon(today)] case final z?)
-            ('Umsatz', '${euro(umsatzIm(bz, monatVon(today)))} von ${euro(z)}'),
         ],
-        grund: h == null ? 'Noch kein Hebel für diese Woche.' : null,
       ),
       WurzelBereich(
         id: 'persoenlich',
-        name: 'Persönlichkeit',
+        name: 'Ausstrahlung',
         icon: Icons.person_outline,
         wert: diff(peWoche).$1,
         diff: diff(peWoche).$2,
@@ -1308,9 +1307,6 @@ class _HomePageState extends State<HomePage> {
     'produktiv',
     t,
   );
-
-  int? _bw(DateTime t) =>
-      mitCheckIn(businessWert(_business.d, t), _checkIns, 'business', t);
 
   int? _pew(DateTime t) => mitCheckIn(
     persoenlichWert(_persoenlich.d, dayKey(t)),
@@ -1412,7 +1408,6 @@ class _HomePageState extends State<HomePage> {
     (_) => _lebendig(switch (id) {
       'mindset' => _mindsetSeite,
       'produktiv' => _produktivSeite,
-      'business' => _businessSeite,
       'persoenlich' => _persoenlichSeite,
       // Training, Ernährung and Schlaf & Routine live in Körper now
       // (vault Umsetzung/Körper komplett, Entwurf 3, 2026-10-29).
@@ -1746,6 +1741,10 @@ class _HomePageState extends State<HomePage> {
           onToggleSupplement: (s, an) async {
             await widget.feed.setGenommen(widget.clock(), s.id, an);
             await _reload();
+            final ids = {for (final x in _supplements) x.id};
+            if (an && mounted && ids.every(_genommen.contains)) {
+              coachFreut(context, 'Alle Supplements für heute genommen.');
+            }
           },
         );
       case Bereich.schlaf:

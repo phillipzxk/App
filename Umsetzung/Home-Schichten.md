@@ -118,3 +118,8 @@ Phillip wollte das Design besonderer, „wie Apple“, aber mit dem Wurzel-Prinz
 - **Bereich öffnen = Aufblühen** (entschieden 17:58, Entwurf https://claude.ai/artifact/Q1tLKYnJunAfwy2VKRmcPi): Homefeed verschwimmt hinter Glas, der Kreis fliegt nach oben links und wird Kopf der Seite (Name + Coach-Satz), aus seiner Mitte springen die vier Felder wie Blütenblätter im Bogen nacheinander heraus, mit Funken. Zuletzt kommt „Alles zu …“. „‹ Heute“ spielt alles rückwärts.
 - Felder je Bereich (Entwurf): Körper = Training, Ernährung, Schlaf & Routine, Verlauf. Produktivität = Fokus heute, Fokus-Block, Handy-Spiegel, Beste Stunden. Business = Hebel der Woche, Umsatz-Ziel, Business-Baum, Brainstorming. Persönlichkeit = Pflege, Look, Lernen, Stimme. Mindset = Dein Berg, Wort gehalten, Werte, Ruhe.
 - Verworfen: Wurzeln wachsen, Zellteilung, Karten austeilen; Felder-Umordnen-Varianten (Morph-Leiste, Wallet, Folien, Goldfaden-Liste) waren ein Missverständnis.
+
+
+## 4 Wurzeln statt 5 (2026-11-04)
+
+Business & Beruf ist gestrichen (siehe [[Business und Beruf komplett]]). Unten sind jetzt 4 Wurzeln: Körper, **Fokus & Arbeit** (früher Produktivität & Fokus, zeigt jetzt auch den Hebel), Persönlichkeit und Mindset. Das Lebensrad in Mindset hat dazu passend 4 Bereiche.

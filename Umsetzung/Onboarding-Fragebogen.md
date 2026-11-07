@@ -25,7 +25,7 @@ Jetzt **7 Fragen**, alle im Glas-Look (Fortschritt oben als Wurzel, die golden w
    - Gerade keine größeren Probleme
    - Feld „Und was klappt bei Schlaf, Essen oder Training schon gut?“
 5. **Produktivität & Fokus:** „Was frisst gerade deinen Fokus?“ Ich verliere mich am Handy · Ich schiebe Wichtiges auf · Energietiefs am Tag · Mir fehlt eine feste Struktur · Gerade keine größeren Probleme. Feld „Wann bist du am klarsten im Kopf?“
-6. **Business & Beruf:** „Wo stehst du gerade beruflich?“ Ich weiß nicht, wo ich anfangen soll · Ich habe Ideen, setze aber nichts um · Ich verdiene weniger, als ich will · Ich komme im Job nicht weiter · Gerade keine größeren Probleme. Feld „Was machst du gerade beruflich?“
+6. **Arbeit** (bis 2026-11-04 „Business & Beruf“): „Wo stehst du gerade bei der Arbeit?“ Ich weiß nicht, wo ich anfangen soll · Ich habe Ideen, setze aber nichts um · Ich komme im Job oder Studium nicht weiter · Ich verdiene weniger, als ich will · Gerade keine größeren Probleme. Feld „Was machst du gerade? Job, Studium, Schule oder eigene Firma“. Daraus macht der Coach den ersten Hebel der Woche in Fokus & Arbeit.
 7. **Persönlichkeit:** „Woran willst du an dir selbst arbeiten?“ Ich fühle mich mit meinem Aussehen nicht wohl · Mir fehlt eine Pflege-Routine · Ich trete unsicher auf · Ich lerne viel, setze aber wenig um · Gerade keine größeren Probleme. Feld „Was willst du gerade lernen?“
 
 Unter den Fragen 4 bis 7 sagt der Coach in einem Satz, wofür er die Antwort braucht (z. B. „Daraus mache ich deinen ersten Hebel der Woche.“). Mindset steckt in Frage 2 und 3. Gespeichert in [[Nutzer]] als `koerper`, `produktiv`, `business`, `persoenlich`. Die Zusammenfassung „So sehe ich dich gerade“ bleibt bei 2 bis 3 Sätzen.

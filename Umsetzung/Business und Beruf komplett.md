@@ -1,9 +1,11 @@
 ---
 tags: [umsetzung, business]
-status: entschieden
+status: gestrichen
 ---
 
 # Business & Beruf komplett
+
+> **Gestrichen am 2026-11-04.** Phillip („Okay ja machen wir so“) auf Claudes Vorschlag: Business ist kein eigener Bereich mehr, weil die meisten Nutzer kein Business haben, es den Kern (Körper und Kopf zusammen) verwässert und das Wichtige schon in Produktivität steckt. Hebel der Woche, Meilensteine („Dein Weg zum Ziel“) und Skill-Leiter leben als Seite „Ziele“ in [[Produktivität und Fokus komplett|Fokus & Arbeit]] weiter, für Job, Studium, Schule oder eigene Firma. Umsatz-Ziel, Spar-Plan, Stundenwert, Mutige Anfrage, Erster Euro, Brainstorming, Ideen-Prüfer, Gesprächs-Hilfe und Arbeit & Körper sind nicht mehr in der App. Der Rest dieser Notiz ist Geschichte.
 
 Inhalte siehe [[Ideen neue Bereiche]] (Auswahl 2026-10-28, Punkte 1–14). Aufbau wie [[Mindset komplett]] Entwurf 7 und [[Produktivität und Fokus komplett]].
 

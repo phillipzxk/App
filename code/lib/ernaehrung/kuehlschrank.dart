@@ -12,8 +12,11 @@ import 'kochbuch.dart';
 /// Idea C: a photo of what is at home. The coach names what it sees (wrong
 /// ones can be tapped away) and builds one dish from it that fits today.
 class KuehlschrankSeite extends StatefulWidget {
-  const KuehlschrankSeite({super.key, required this.umfeld});
+  const KuehlschrankSeite({super.key, required this.umfeld, this.bild});
   final EssenUmfeld umfeld;
+
+  /// A photo already taken (from the Foto button): read it right away.
+  final String? bild;
 
   @override
   State<KuehlschrankSeite> createState() => _KuehlschrankSeiteState();
@@ -30,6 +33,18 @@ class _KuehlschrankSeiteState extends State<KuehlschrankSeite> {
   bool _gespeichert = false;
 
   EssenUmfeld get u => widget.umfeld;
+
+  @override
+  void initState() {
+    super.initState();
+    final b = widget.bild;
+    if (b != null) {
+      _phase = _Phase.lesen;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _frag(bild: b);
+      });
+    }
+  }
 
   Future<void> _frag({String? bild}) async {
     setState(() {

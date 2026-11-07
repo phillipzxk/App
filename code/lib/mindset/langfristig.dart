@@ -28,13 +28,13 @@ class _RadMaler extends CustomPainter {
     final c = Offset(s.width / 2, s.height / 2 + (namen ? 6 : 0));
     final r = math.min(s.width, s.height) / 2 - (namen ? 34 : 4);
     Offset pt(double v, int k) {
-      final a = -math.pi / 2 + k * 2 * math.pi / 5;
+      final a = -math.pi / 2 + k * 2 * math.pi / radBereiche.length;
       return c + Offset(math.cos(a), math.sin(a)) * r * v / 10;
     }
 
     Path poly(double Function(int k) v) {
       final p = Path()..moveTo(pt(v(0), 0).dx, pt(v(0), 0).dy);
-      for (var k = 1; k < 5; k++) {
+      for (var k = 1; k < radBereiche.length; k++) {
         p.lineTo(pt(v(k), k).dx, pt(v(k), k).dy);
       }
       return p..close();
@@ -68,7 +68,7 @@ class _RadMaler extends CustomPainter {
         ..color = CoachStyle.goldLight,
     );
     if (!namen) return;
-    for (var k = 0; k < 5; k++) {
+    for (var k = 0; k < radBereiche.length; k++) {
       final tp = TextPainter(
         text: TextSpan(
           text: radBereiche[k],
