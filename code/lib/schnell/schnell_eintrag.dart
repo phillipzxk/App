@@ -20,7 +20,60 @@ class SchnellEintrag {
   /// durchgezogen or notiz.
   final String art;
   final String titel;
+
+  /// The coach's own words; the card shows [wohin] instead, so it always
+  /// says where the app really files it.
   final String detail;
+
+  /// The card's title with the numbers the app will file.
+  String get anzeige {
+    String z(double v) =>
+        v == v.roundToDouble() ? '${v.round()}' : '$v'.replaceAll('.', ',');
+    switch (art) {
+      case 'training':
+        final u = text('uebung') ?? '';
+        if (u.isEmpty) return titel;
+        final kg = zahl('kg'), wdh = zahl('wdh');
+        final n = (zahl('saetze') ?? 1).round();
+        return [
+          u,
+          if (kg != null) '${z(kg)} kg',
+          if (wdh != null) n > 1 ? '$n × ${z(wdh)}' : '${z(wdh)} Wdh',
+        ].join(' · ');
+      case 'termin':
+        final tag = (zahl('tag') ?? 0).round();
+        final wann = switch (tag) {
+          0 => 'heute',
+          1 => 'morgen',
+          2 => 'übermorgen',
+          _ => 'in $tag Tagen',
+        };
+        final zeit = text('zeit');
+        return '${text('text') ?? titel} · $wann${zeit == null ? '' : ' $zeit'}';
+      case 'gewicht':
+        final kg = zahl('kg');
+        return kg == null ? titel : 'Gewicht ${z(kg)} kg';
+      case 'schlaf':
+        final h = zahl('stunden');
+        return h == null ? titel : '${z(h)} Stunden geschlafen';
+      default:
+        return titel;
+    }
+  }
+
+  String get wohin => switch (art) {
+    'mahlzeit' => 'in Mahlzeiten heute',
+    'training' =>
+      flag('fertig') && (text('uebung') ?? '').isEmpty
+          ? 'Training heute als fertig'
+          : 'in dein Training heute',
+    'termin' => 'in Dein Tag',
+    'gewicht' => 'in deinen Gewichtsverlauf',
+    'schlaf' => 'in deine Nächte',
+    'supplement' => 'als genommen abgehakt',
+    'durchgezogen' => 'zu Durchgezogen',
+    _ => 'als Notiz an deinen Coach',
+  };
 
   /// Set when the coach is unsure: the card asks, "Nein" drops it.
   final String? frage;
@@ -77,6 +130,75 @@ class SchnellEintrag {
       },
     );
   }
+}
+
+/// A tap-start under the text field: [text] goes into the field.
+class SchnellVorschlag {
+  const SchnellVorschlag(this.icon, this.label, this.text);
+  final String icon;
+  final String label;
+  final String text;
+}
+
+/// Up to five starts that fit right now (Phillip 2026-11-08: make them
+/// better): what is due or open today first, then the general ones.
+List<SchnellVorschlag> schnellVorschlaege({
+  required int jetzt,
+  String? trainingName,
+  bool trainingGeloggt = false,
+  bool trainingFertig = false,
+  List<MahlzeitSlot> mahlzeiten = const [],
+  Set<String> gegessen = const {},
+  List<String> offeneSupplements = const [],
+  bool schlafHeute = false,
+  bool gewichtHeute = false,
+}) {
+  final out = <SchnellVorschlag>[];
+  // The meal closest to now that is still open and already due.
+  MahlzeitSlot? essen;
+  for (final m in mahlzeiten) {
+    if (gegessen.contains(m.id) || m.minute > jetzt + 30) continue;
+    if (essen == null || m.minute > essen.minute) essen = m;
+  }
+  if (essen != null) {
+    out.add(
+      SchnellVorschlag('essen', '${essen.name} gegessen', '${essen.name}: '),
+    );
+  }
+  if (trainingName != null && !trainingFertig) {
+    out.add(
+      trainingGeloggt
+          ? const SchnellVorschlag('training', 'Noch eine Übung', 'Übung: ')
+          : SchnellVorschlag(
+              'training',
+              '$trainingName fertig',
+              '$trainingName fertig. ',
+            ),
+    );
+  }
+  if (!schlafHeute && jetzt < 12 * 60) {
+    out.add(
+      const SchnellVorschlag(
+        'schlaf',
+        'So geschlafen',
+        'Heute Nacht geschlafen: ',
+      ),
+    );
+  }
+  if (offeneSupplements.isNotEmpty) {
+    final s = offeneSupplements.first;
+    out.add(SchnellVorschlag('supplement', '$s genommen', '$s genommen. '));
+  }
+  if (!gewichtHeute && jetzt < 11 * 60) {
+    out.add(
+      const SchnellVorschlag('gewicht', 'Gewicht heute', 'Gewicht heute: '),
+    );
+  }
+  out.add(const SchnellVorschlag('termin', 'Termin', 'Termin: '));
+  out.add(
+    const SchnellVorschlag('durch', 'Endlich gemacht', 'Endlich gemacht: '),
+  );
+  return out.take(5).toList();
 }
 
 /// What the coach made of one text.

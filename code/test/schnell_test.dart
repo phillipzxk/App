@@ -97,6 +97,30 @@ void main() {
       expect(f, isEmpty);
     });
 
+    test('suggestions fit the moment, at most five', () {
+      final v = schnellVorschlaege(
+        jetzt: 9 * 60,
+        trainingName: 'Push',
+        mahlzeiten: [_slot('fruehstueck', 8 * 60), _slot('mittag', 12 * 60)],
+        offeneSupplements: ['Kreatin'],
+      );
+      expect(v.map((x) => x.label), [
+        'fruehstueck gegessen',
+        'Push fertig',
+        'So geschlafen',
+        'Kreatin genommen',
+        'Gewicht heute',
+      ]);
+      final abends = schnellVorschlaege(
+        jetzt: 20 * 60,
+        trainingName: 'Push',
+        trainingGeloggt: true,
+        trainingFertig: true,
+        schlafHeute: true,
+      );
+      expect(abends.map((x) => x.label), ['Termin', 'Endlich gemacht']);
+    });
+
     test('a meal goes to its open slot, else the nearest', () {
       final slots = [
         _slot('fruehstueck', 8 * 60),
@@ -134,6 +158,17 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('schnell-knopf')));
     await tester.pumpAndSettle();
     expect(find.text('Was gibt\'s, Phillip?'), findsOneWidget);
+    // At 18:00 with Push planned: "Push fertig" is one of the starts.
+    expect(find.text('Push fertig'), findsOneWidget);
+    await tester.tap(find.text('Push fertig'));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const ValueKey('schnell-feld')))
+          .controller!
+          .text,
+      'Push fertig. ',
+    );
     await tester.enterText(
       find.byKey(const ValueKey('schnell-feld')),
       'Bankdrücken 80 Kilo 3 mal 8, morgen 10 Uhr Zahnarzt',
@@ -142,7 +177,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(coach.gesagt, contains('Zahnarzt'));
     expect(find.text('Hab ich, vier Sachen.'), findsOneWidget);
-    expect(find.text('Morgen 10:00 Zahnarzt'), findsOneWidget);
+    expect(find.text('Zahnarzt · morgen 10:00'), findsOneWidget);
+    expect(find.text('Bankdrücken · 80 kg · 3 × 8'), findsOneWidget);
     // Training is in the text, so no follow-up about it.
     expect(find.textContaining('geplant'), findsNothing);
 

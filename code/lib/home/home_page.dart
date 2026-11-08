@@ -1822,6 +1822,7 @@ class _HomePageState extends State<HomePage> {
       context,
       name: widget.profile.name,
       sofortSprechen: sofort,
+      vorschlaege: _schnellVorschlaege(),
       frageCoach: (t) async =>
           coach?.schnell(widget.profile, t, _schnellKontext()),
       gegenfragen: (e) {
@@ -1854,6 +1855,28 @@ class _HomePageState extends State<HomePage> {
       liste.length == 1
           ? 'Eingetragen: ${liste.first.titel}.'
           : '${liste.length} Dinge eingetragen.',
+    );
+  }
+
+  List<SchnellVorschlag> _schnellVorschlaege() {
+    final jetzt = widget.clock();
+    final key = dayKey(jetzt);
+    final plan = _woche.forDay(jetzt).trim();
+    final ruhe = RegExp(r'^(ruhe|pause|frei|off\b)', caseSensitive: false);
+    final einheit = _training.einheitAm(jetzt);
+    return schnellVorschlaege(
+      jetzt: jetzt.hour * 60 + jetzt.minute,
+      trainingName: plan.isEmpty || ruhe.hasMatch(plan) ? null : shortDay(plan),
+      trainingGeloggt: einheit != null,
+      trainingFertig: einheit != null && einheit.status != EinheitStatus.laeuft,
+      mahlzeiten: _mahlzeitSlots,
+      gegessen: _gegessenHeute,
+      offeneSupplements: [
+        for (final s in _supplements)
+          if (!_genommen.contains(s.id)) s.name,
+      ],
+      schlafHeute: _sleep.any((e) => dayKey(e.datum) == key),
+      gewichtHeute: _weights.any((e) => dayKey(e.datum) == key),
     );
   }
 

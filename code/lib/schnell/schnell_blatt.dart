@@ -105,6 +105,7 @@ Future<List<SchnellEintrag>?> zeigeSchnellEintrag(
   required String name,
   required Future<SchnellAntwort?> Function(String text) frageCoach,
   required List<Gegenfrage> Function(List<SchnellEintrag> e) gegenfragen,
+  List<SchnellVorschlag> vorschlaege = const [],
   bool sofortSprechen = false,
 }) => showModalBottomSheet<List<SchnellEintrag>>(
   context: context,
@@ -115,6 +116,7 @@ Future<List<SchnellEintrag>?> zeigeSchnellEintrag(
     name: name,
     frageCoach: frageCoach,
     gegenfragen: gegenfragen,
+    vorschlaege: vorschlaege,
     sofortSprechen: sofortSprechen,
   ),
 );
@@ -125,8 +127,10 @@ class SchnellBlatt extends StatefulWidget {
     required this.name,
     required this.frageCoach,
     required this.gegenfragen,
+    this.vorschlaege = const [],
     this.sofortSprechen = false,
   });
+  final List<SchnellVorschlag> vorschlaege;
   final String name;
   final Future<SchnellAntwort?> Function(String text) frageCoach;
   final List<Gegenfrage> Function(List<SchnellEintrag> e) gegenfragen;
@@ -170,6 +174,7 @@ class _SchnellBlattState extends State<SchnellBlatt> {
   void dispose() {
     if (_hoert) _sprache.stop();
     _text.dispose();
+    _fokus.dispose();
     super.dispose();
   }
 
@@ -222,6 +227,19 @@ class _SchnellBlattState extends State<SchnellBlatt> {
         });
       },
     );
+  }
+
+  final _fokus = FocusNode();
+
+  void _nimm(SchnellVorschlag v) {
+    setState(() {
+      final alt = _text.text.trim();
+      _text.text = alt.isEmpty
+          ? v.text
+          : '$alt${RegExp(r'[.,!?]$').hasMatch(alt) ? '' : ','} ${v.text}';
+      _text.selection = TextSelection.collapsed(offset: _text.text.length);
+    });
+    _fokus.requestFocus();
   }
 
   Future<void> _senden() async {
@@ -354,6 +372,7 @@ class _SchnellBlattState extends State<SchnellBlatt> {
               child: TextField(
                 key: const ValueKey('schnell-feld'),
                 controller: _text,
+                focusNode: _fokus,
                 minLines: 1,
                 maxLines: 5,
                 textCapitalization: TextCapitalization.sentences,
@@ -425,44 +444,35 @@ class _SchnellBlattState extends State<SchnellBlatt> {
             style: const TextStyle(fontSize: 13, color: Color(0xFFE39A7E)),
           ),
         ],
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 6,
-          runSpacing: 6,
-          children: [
-            for (final b in const [
-              'Gerade gegessen: ',
-              'Training: ',
-              'Morgen Termin: ',
-              'Endlich gemacht: ',
-            ])
-              GestureDetector(
-                onTap: () => setState(() {
-                  _text.text = '${_text.text.trim()} $b'.trimLeft();
-                  _text.selection = TextSelection.collapsed(
-                    offset: _text.text.length,
-                  );
-                }),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 9,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0x33C9A25C)),
-                  ),
-                  child: Text(
-                    b.trim().replaceAll(':', ' …'),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: CoachStyle.beigeLabel,
-                    ),
-                  ),
+        if (widget.vorschlaege.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Text(
+            'GERADE PASSEND',
+            style: CoachStyle.goldLabel.copyWith(
+              fontFamily: 'Sora',
+              fontSize: 9.5,
+              letterSpacing: 1.4,
+              color: CoachStyle.beigeLabel,
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 40,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: widget.vorschlaege.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
+              itemBuilder: (_, i) => _Rein(
+                verzoegerung: Duration(milliseconds: 80 + i * 70),
+                child: _VorschlagChip(
+                  key: ValueKey('vorschlag-$i'),
+                  v: widget.vorschlaege[i],
+                  onTap: () => _nimm(widget.vorschlaege[i]),
                 ),
               ),
-          ],
-        ),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -603,17 +613,17 @@ class _SchnellBlattState extends State<SchnellBlatt> {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  k.gegen != null ? k.gegen!.frage : e.titel,
+                  k.gegen != null ? k.gegen!.frage : e.anzeige,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: CoachStyle.cream,
                   ),
                 ),
-                if (k.gegen == null && (e.frage ?? e.detail).isNotEmpty) ...[
+                if (k.gegen == null && (e.frage ?? e.wohin).isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(
-                    e.frage ?? e.detail,
+                    e.frage ?? e.wohin,
                     style: const TextStyle(
                       fontSize: 12,
                       color: CoachStyle.inkSoft,
@@ -679,6 +689,77 @@ class _SchnellBlattState extends State<SchnellBlatt> {
       child: Text(
         text,
         style: const TextStyle(fontSize: 12.5, color: CoachStyle.goldLight),
+      ),
+    ),
+  );
+}
+
+/// One suggestion: symbol and label in a glass pill; it flashes gold when
+/// tapped.
+class _VorschlagChip extends StatefulWidget {
+  const _VorschlagChip({super.key, required this.v, required this.onTap});
+  final SchnellVorschlag v;
+  final VoidCallback onTap;
+
+  @override
+  State<_VorschlagChip> createState() => _VorschlagChipState();
+}
+
+class _VorschlagChipState extends State<_VorschlagChip> {
+  bool _an = false;
+
+  static IconData _icon(String i) => switch (i) {
+    'essen' => Icons.restaurant,
+    'training' => Icons.fitness_center,
+    'schlaf' => Icons.bedtime_outlined,
+    'supplement' => Icons.medication_outlined,
+    'gewicht' => Icons.monitor_weight_outlined,
+    'termin' => Icons.event,
+    _ => Icons.landscape_outlined,
+  };
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: () {
+      setState(() => _an = true);
+      widget.onTap();
+      Future.delayed(const Duration(milliseconds: 380), () {
+        if (mounted) setState(() => _an = false);
+      });
+    },
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOut,
+      padding: const EdgeInsets.fromLTRB(10, 0, 13, 0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: _an
+            ? CoachStyle.goldGradient
+            : const LinearGradient(
+                colors: [Color(0xFF2E2318), Color(0xFF221A11)],
+              ),
+        border: Border.all(
+          color: _an ? Colors.transparent : const Color(0x59C9A25C),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            _icon(widget.v.icon),
+            size: 16,
+            color: _an ? CoachStyle.goldInk : CoachStyle.goldLight,
+          ),
+          const SizedBox(width: 7),
+          Text(
+            widget.v.label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: _an ? CoachStyle.goldInk : CoachStyle.cream,
+            ),
+          ),
+        ],
       ),
     ),
   );

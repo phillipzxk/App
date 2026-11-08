@@ -31,4 +31,15 @@ Gehört zu [[Heute und Fundament]] (Knopf neben der Glas-Leiste).
 - `home_page.dart`: `_schnellEintrag`, `_ablegen`
 - Worker: `backend/src` Route `/schnell` (`schnellPrompt`, `parseSchnell`)
 - Mikro über das Paket `speech_to_text` (iPhone: Mikro- und Spracherkennungs-Hinweis in Info.plist)
-- Offen: Worker online stellen (wartet auf Phillips OK), GitHub gesperrt, deshalb nur lokal gesichert.
+- Worker `/schnell` online seit 2026-11-08 (Phillip „OK“). GitHub gesperrt, deshalb nur lokal gesichert.
+
+## Vorschläge unter dem Feld („Gerade passend“, Phillip: besser machen)
+Höchstens 5, passend zum Moment, als Glas-Pillen mit Symbol, waagerecht wischbar, leuchten beim Antippen gold auf und schreiben den Anfang ins Feld:
+- die fällige, noch offene Mahlzeit („Mittag gegessen“)
+- geplantes Training („Push fertig“, nach dem ersten Eintrag „Noch eine Übung“)
+- vor 12 Uhr ohne Schlafeintrag „So geschlafen“
+- das erste offene Supplement („Kreatin genommen“)
+- vor 11 Uhr ohne Gewicht „Gewicht heute“
+- immer „Termin“ und „Endlich gemacht“
+
+Karten zeigen die Zahlen, die gespeichert werden (z. B. „Bankdrücken · 80 kg · 3 × 8“, „Zahnarzt · morgen 10:00“) und darunter fest, wohin es geht.
