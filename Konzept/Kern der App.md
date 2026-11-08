@@ -15,11 +15,13 @@ Entschieden mit Phillip am 2026-11-08: **vor allem Anfänger**, aber auch perfek
 - **Anfänger:** Groundset bildet das Fundament für den Anfang, wenn man noch nicht weiß, was man braucht.
 - **Fortgeschrittene:** Groundset hilft, den Alltag zu perfektionieren.
 
-Der Satz unten ist noch auf Fortgeschrittene ausgerichtet und wird gemeinsam neu formuliert.
+## In einem Satz (neu, 2026-11-08)
 
-## In einem Satz
+> Du willst an dir arbeiten, weißt aber nicht, wo du anfangen sollst? Groundset ist dein Fundament fürs Leben: Körper, Fokus, Ausstrahlung und Mindset an einem Ort, mit einem Coach, der alles zusammen sieht, dir zeigt, was du wirklich brauchst, und dich Schritt für Schritt selbstständig macht. Für den Anfang genauso wie für alle, die ihren Alltag perfektionieren wollen.
 
-> Für alle, die viel wissen und trotzdem stagnieren: Groundset sieht dein Training, Essen, Schlaf und deinen Kopf zusammen, zeigt dir, woran es wirklich hängt, und macht dich Schritt für Schritt selbstständig.
+Kurze Überschrift für App Store und Werbung: **„Bau dein Fundament fürs Leben.“**
+
+Alter Satz (2026-10-18, nur Fortgeschrittene, ersetzt): „Für alle, die viel wissen und trotzdem stagnieren: Groundset sieht dein Training, Essen, Schlaf und deinen Kopf zusammen, zeigt dir, woran es wirklich hängt, und macht dich Schritt für Schritt selbstständig.“
 
 ## Aufbau
 
