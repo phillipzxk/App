@@ -165,6 +165,7 @@ void main() {
   group('page', () {
     testWidgets('four roots and the life goals at the bottom', (tester) async {
       await _start(tester);
+      await zumFundament(tester);
       expect(find.byKey(const ValueKey('wurzel-business')), findsNothing);
       for (final id in ['koerper', 'produktiv', 'persoenlich', 'mindset']) {
         await scrollTo(tester, find.byKey(ValueKey('wurzel-$id')));

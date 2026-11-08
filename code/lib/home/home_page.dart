@@ -49,6 +49,7 @@ import 'muster_widgets.dart';
 import 'nutrition_tab.dart';
 import 'sleep_tab.dart';
 import 'bereichs_werte.dart';
+import 'fundament_seite.dart';
 import 'today_tab.dart';
 import 'training_tab.dart';
 import '../bereiche/bereich_seite.dart';
@@ -1793,6 +1794,66 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  /// Open page: 0 = Heute, 1 = Fundament (vault Umsetzung/Heute und
+  /// Fundament.md). Each opening of Fundament lets the roots grow in again.
+  int _offeneSeite = 0;
+  int _fundamentMal = 0;
+
+  void _zeigeSeite(int i) {
+    if (i == _offeneSeite) return;
+    setState(() {
+      _offeneSeite = i;
+      if (i == 1) _fundamentMal++;
+    });
+  }
+
+  Widget _zweiSeiten(Widget heute, DateTime today) {
+    final fundament = FundamentSeite(
+      key: ValueKey('fundament-$_fundamentMal'),
+      bereiche: _wurzeln(today),
+      onOpen: _oeffneBereich,
+      streak: checkInStreak(_checkIns, today),
+      wurzeln: _fokusLaeuft ? _fokus!.anzahlGeschafft : 0,
+      jubelTick: _jubelTick,
+      lebensziele: _lebenszieleKarte(),
+    );
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 380),
+            switchInCurve: Curves.easeOutCubic,
+            transitionBuilder: (child, a) => FadeTransition(
+              opacity: a,
+              child: SlideTransition(
+                position: Tween(
+                  begin: const Offset(.04, 0),
+                  end: Offset.zero,
+                ).animate(a),
+                child: child,
+              ),
+            ),
+            layoutBuilder: (cur, prev) => Stack(children: [...prev, ?cur]),
+            child: _offeneSeite == 0
+                ? KeyedSubtree(key: const ValueKey('seite-heute'), child: heute)
+                : KeyedSubtree(
+                    key: const ValueKey('seite-fundament'),
+                    child: fundament,
+                  ),
+          ),
+        ),
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 22 + MediaQuery.paddingOf(context).bottom,
+          child: Center(
+            child: GlasLeiste(seite: _offeneSeite, onWahl: _zeigeSeite),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final today = widget.clock();
@@ -1831,9 +1892,7 @@ class _HomePageState extends State<HomePage> {
       ),
       onOpenMuster: _oeffneMuster,
       bereiche: _wurzeln(today),
-      lebensziele: _lebenszieleKarte(),
-      onOpenBereich: _oeffneBereich,
-      wurzeln: _fokusLaeuft ? _fokus!.anzahlGeschafft : 0,
+      onFundament: () => _zeigeSeite(1),
       jubel: _jubel,
       jubelTick: _jubelTick,
       samen: _samenHeute,
@@ -1870,7 +1929,7 @@ class _HomePageState extends State<HomePage> {
                       ? WerteScope(
                           checkIns: _checkIns,
                           today: today,
-                          child: heute,
+                          child: _zweiSeiten(heute, today),
                         )
                       : const Center(
                           child: CircularProgressIndicator(

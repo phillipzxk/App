@@ -396,11 +396,22 @@ Future<void> openKachel(WidgetTester tester, String id) async {
   await tester.pumpAndSettle();
 }
 
+/// Opens the Fundament page with the roots via the glass bar (no-op when
+/// it is open already).
+Future<void> zumFundament(WidgetTester tester) async {
+  if (find.byKey(const ValueKey('fundament-seite')).evaluate().isNotEmpty) {
+    return;
+  }
+  await tester.tap(find.byKey(const ValueKey('leiste-fundament')));
+  await tester.pumpAndSettle();
+}
+
 /// Taps the area [b] on its root: it opens big over the whole screen.
 Future<void> openBereich(WidgetTester tester, String b) async {
   // Training, Ernährung and Schlaf are the three parts of Körper.
   const koerper = ['training', 'ernaehrung', 'schlaf'];
   final w = koerper.contains(b) ? 'koerper' : b;
+  await zumFundament(tester);
   await scrollTo(tester, find.byKey(ValueKey('wurzel-$w')));
   await tester.tap(find.byKey(ValueKey('wurzel-$w')));
   await tester.pumpAndSettle();
