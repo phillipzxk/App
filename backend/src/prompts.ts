@@ -1001,3 +1001,36 @@ ${JSON_ONLY}
       return null;
   }
 }
+
+/// Schnell-Eintrag (vault Umsetzung/Schnell-Eintrag.md): one spoken or typed
+/// text, split into single entries that the app files in the right area.
+export function schnellPrompt(p: Profile, text: string, kontext: string): string {
+  return `Das weißt du von der Person:
+
+${profileBlock(p)}
+
+Ihr Tag bis jetzt:
+<nutzer>
+${clip(kontext, 1500)}
+</nutzer>
+
+Sie hat gerade schnell gesagt oder getippt:
+<nutzer>
+${clip(text, 1200)}
+</nutzer>
+
+Zerlege das in einzelne Einträge. Jede Sache genau einmal, nichts erfinden, nichts weglassen. Arten:
+- "mahlzeit": sie hat gegessen. "mahlzeit": "fruehstueck", "mittag", "abend" oder "snack" (aus Wörtern oder Uhrzeit ableiten).
+- "training": eine Übung. "uebung" (Name wie im Plan, falls passend), "kg" (Zahl oder null), "wdh" (Zahl oder null), "saetze" (Zahl, sonst 1). "fertig": true, wenn sie sagt, dass das Training heute fertig ist (dann darf "uebung" leer sein).
+- "termin": "text" (kurz, z. B. "Zahnarzt"), "tag" (0 = heute, 1 = morgen, 2 = übermorgen, bis 6), "zeit" ("HH:MM" oder null).
+- "gewicht": "kg".
+- "schlaf": "stunden" (letzte Nacht).
+- "supplement": "name" (eines aus ihrer Liste, wenn es passt).
+- "durchgezogen": sie hat etwas getan, wovor sie sich gedrückt hat. "text" kurz in ihren Worten. Bist du nicht sicher, ob es so gemeint ist: "unsicher": true und "frage" (kurz, z. B. "Zählt das als durchgezogen?").
+- "notiz": alles andere, "bereich": "training", "ernaehrung", "schlaf", "mindset", "produktiv" oder "persoenlich".
+Zu jedem Eintrag "titel" (sehr kurz, wie eine Überschrift) und "detail" (ein kurzer Halbsatz, was die App damit macht, z. B. "in Mahlzeiten heute").
+"satz": ein kurzer Satz von dir als Coach, z. B. "Hab ich, drei Sachen." Kein Lob, keine Floskel.
+
+${JSON_ONLY}
+{"satz": "...", "eintraege": [{"art": "...", "titel": "...", "detail": "..."}]}`;
+}

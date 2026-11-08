@@ -42,6 +42,7 @@ dependencies:
   timezone: ^0.11.2
   flutter_timezone: ^5.1.1
   alarm_kit: ^0.1.1
+  speech_to_text: ^7.5.0
 
 dev_dependencies:
   flutter_test:

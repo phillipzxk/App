@@ -24,6 +24,7 @@ import '../onboarding/onboarding_evaluator.dart';
 import '../training/form_video.dart';
 import '../training/training_coach.dart';
 import '../training/training_data.dart';
+import '../schnell/schnell_eintrag.dart';
 
 /// Address of the coach backend (backend/ in the repo, a Cloudflare Worker)
 /// and the app token it checks. Set at build time:
@@ -46,7 +47,8 @@ class RemoteCoach
         MindsetCoach,
         BusinessCoach,
         PersoenlichCoach,
-        WochenCoach {
+        WochenCoach,
+        SchnellCoach {
   RemoteCoach({required this.baseUrl, required this.token, http.Client? client})
     : _client = client ?? http.Client();
 
@@ -106,6 +108,28 @@ class RemoteCoach
     'muster': muster,
     'erste': erste,
   });
+
+  @override
+  Future<SchnellAntwort?> schnell(
+    UserProfile profile,
+    String text,
+    String kontext,
+  ) async {
+    final data = await _postJson('/schnell', {
+      'profile': profileJson(profile),
+      'text': text,
+      'kontext': kontext,
+    });
+    if (data == null) return null;
+    final liste = data['eintraege'];
+    return SchnellAntwort(
+      satz: data['satz'] is String ? data['satz'] as String : null,
+      eintraege: [
+        for (final e in liste is List ? liste : const [])
+          ?SchnellEintrag.fromJson(e),
+      ],
+    );
+  }
 
   @override
   Future<String?> summarize(UserProfile answers) =>

@@ -50,6 +50,8 @@ import 'nutrition_tab.dart';
 import 'sleep_tab.dart';
 import 'bereichs_werte.dart';
 import 'fundament_seite.dart';
+import '../schnell/schnell_blatt.dart';
+import '../schnell/schnell_eintrag.dart';
 import 'today_tab.dart';
 import 'training_tab.dart';
 import '../bereiche/bereich_seite.dart';
@@ -1807,6 +1809,201 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  final _schnellKey = GlobalKey();
+
+  SchnellCoach? get _schnellCoach =>
+      widget.coach is SchnellCoach ? widget.coach as SchnellCoach : null;
+
+  /// Schnell-Eintrag (vault Umsetzung/Schnell-Eintrag.md): talk or type,
+  /// the coach splits it, the app files each entry in its area.
+  Future<void> _schnellEintrag({bool sofort = false}) async {
+    final coach = _schnellCoach;
+    final liste = await zeigeSchnellEintrag(
+      context,
+      name: widget.profile.name,
+      sofortSprechen: sofort,
+      frageCoach: (t) async =>
+          coach?.schnell(widget.profile, t, _schnellKontext()),
+      gegenfragen: (e) {
+        final jetzt = widget.clock();
+        final plan = _woche.forDay(jetzt).trim();
+        return gegenfragen(
+          jetzt: jetzt.hour * 60 + jetzt.minute,
+          trainingName: plan.isEmpty ? null : shortDay(plan),
+          trainingMinute: trainingZeit(plan),
+          trainingGeloggt: _training.einheitAm(jetzt) != null,
+          mahlzeiten: _mahlzeitSlots,
+          gegessen: _gegessenHeute,
+          eintraege: e,
+        );
+      },
+    );
+    if (liste == null || liste.isEmpty || !mounted) return;
+    await _ablegen(liste);
+    if (!mounted) return;
+    final box = _schnellKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box != null) {
+      lichtpunkteFliegen(
+        context,
+        box.localToGlobal(box.size.center(Offset.zero)),
+        liste.length,
+      );
+    }
+    coachFreut(
+      context,
+      liste.length == 1
+          ? 'Eingetragen: ${liste.first.titel}.'
+          : '${liste.length} Dinge eingetragen.',
+    );
+  }
+
+  Set<String> get _gegessenHeute => {
+    for (final e in _essen.d.tag(dayKey(widget.clock())).entries)
+      if (e.value.gegessen) e.key,
+  };
+
+  String _schnellKontext() {
+    final jetzt = widget.clock();
+    final plan = _woche.forDay(jetzt).trim();
+    return [
+      _essenTagText(),
+      if (plan.isNotEmpty) 'Trainingsplan heute:\n$plan',
+      if (_supplements.isNotEmpty)
+        'Supplements: ${_supplements.map((s) => s.name).toSet().join(', ')}',
+      for (final t in termineAm(_termine, jetzt))
+        'Termin heute: ${t.zeit ?? ''} ${t.text}',
+    ].join('\n');
+  }
+
+  Future<void> _ablegen(List<SchnellEintrag> liste) async {
+    final jetzt = widget.clock();
+    final heute = DateTime(jetzt.year, jetzt.month, jetzt.day);
+    final key = dayKey(jetzt);
+    final minute = jetzt.hour * 60 + jetzt.minute;
+    var training = _training;
+    var trainingNeu = false;
+    final durch = <Durchgezogen>[];
+    Future<void> notiz(SchnellEintrag e, Bereich b) => widget.feed.addFrage(
+      CoachFrage(datum: jetzt, bereich: b, text: e.titel),
+    );
+    for (final e in liste) {
+      switch (e.art) {
+        case 'mahlzeit':
+          final slot = slotFuer(e, _mahlzeitSlots, _gegessenHeute, minute);
+          if (slot == null) {
+            await notiz(e, Bereich.ernaehrung);
+          } else {
+            final alt = _essen.d.tag(key)[slot.id] ?? const MahlzeitEintrag();
+            await _essen.setze(
+              _essen.d.mitEintrag(key, slot.id, alt.copyWith(gegessen: true)),
+            );
+          }
+        case 'training':
+          final plan = _woche.forDay(jetzt).trim();
+          var einheit =
+              training.einheitAm(jetzt) ??
+              TrainingEinheit(
+                datum: heute,
+                name: plan.isEmpty ? 'Training' : shortDay(plan),
+              );
+          final uebung = e.text('uebung') ?? '';
+          if (uebung.isNotEmpty) {
+            final kg = e.zahl('kg'), wdh = e.zahl('wdh');
+            final n = (e.zahl('saetze') ?? 1).round().clamp(1, 10);
+            final saetze = [
+              for (var i = 0; i < n; i++)
+                SatzLog(wert: kg, menge: wdh, fertig: true),
+            ];
+            final da = einheit.uebungen.indexWhere(
+              (u) => u.name.toLowerCase() == uebung.toLowerCase(),
+            );
+            einheit = einheit.copyWith(
+              uebungen: da < 0
+                  ? [
+                      ...einheit.uebungen,
+                      UebungLog(
+                        name: uebung,
+                        art: kg == null
+                            ? UebungArt.koerpergewicht
+                            : UebungArt.gewicht,
+                        saetze: saetze,
+                      ),
+                    ]
+                  : [
+                      for (var i = 0; i < einheit.uebungen.length; i++)
+                        i == da
+                            ? einheit.uebungen[i].copyWith(
+                                saetze: [
+                                  ...einheit.uebungen[i].saetze,
+                                  ...saetze,
+                                ],
+                              )
+                            : einheit.uebungen[i],
+                    ],
+            );
+          }
+          if (e.flag('fertig')) {
+            einheit = einheit.copyWith(status: EinheitStatus.fertig);
+          }
+          training = training.mitEinheit(einheit);
+          trainingNeu = true;
+        case 'termin':
+          final tag = (e.zahl('tag') ?? 0).round().clamp(0, 6);
+          await widget.feed.addTermin(
+            Termin(
+              datum: heute.add(Duration(days: tag)),
+              zeit: e.text('zeit'),
+              text: e.text('text') ?? e.titel,
+              erstellt: jetzt,
+            ),
+          );
+        case 'gewicht':
+          final kg = e.zahl('kg');
+          if (kg != null) {
+            await widget.store.addWeight(WeightEntry(jetzt, kg));
+          }
+        case 'schlaf':
+          final h = e.zahl('stunden');
+          if (h != null) await widget.store.saveSleep(SleepEntry(jetzt, h));
+        case 'supplement':
+          final name = (e.text('name') ?? e.titel).toLowerCase();
+          final passt = _supplements.where(
+            (s) =>
+                !_genommen.contains(s.id) &&
+                (s.name.toLowerCase().contains(name) ||
+                    name.contains(s.name.toLowerCase())),
+          );
+          if (passt.isEmpty) {
+            await notiz(e, Bereich.ernaehrung);
+          } else {
+            await widget.feed.setGenommen(jetzt, passt.first.id, true);
+          }
+        case 'durchgezogen':
+          durch.add(
+            Durchgezogen(
+              datum: heute,
+              text: e.text('text') ?? e.titel,
+              vonCoach: false,
+              erstellt: jetzt,
+            ),
+          );
+        default:
+          await notiz(e, switch (e.text('bereich')) {
+            'training' => Bereich.training,
+            'ernaehrung' => Bereich.ernaehrung,
+            'schlaf' => Bereich.schlaf,
+            _ => Bereich.mindset,
+          });
+      }
+    }
+    if (trainingNeu) await widget.feed.saveTraining(training);
+    if (durch.isNotEmpty) {
+      final aktuell = await widget.feed.loadDurchgezogen();
+      await widget.feed.saveDurchgezogen([...aktuell, ...durch]);
+    }
+    await _reload();
+  }
+
   Widget _zweiSeiten(Widget heute, DateTime today) {
     final fundament = FundamentSeite(
       key: ValueKey('fundament-$_fundamentMal'),
@@ -1847,7 +2044,18 @@ class _HomePageState extends State<HomePage> {
           right: 0,
           bottom: 22 + MediaQuery.paddingOf(context).bottom,
           child: Center(
-            child: GlasLeiste(seite: _offeneSeite, onWahl: _zeigeSeite),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GlasLeiste(seite: _offeneSeite, onWahl: _zeigeSeite),
+                const SizedBox(width: 10),
+                SchnellKnopf(
+                  key: _schnellKey,
+                  onTap: () => _schnellEintrag(),
+                  onHalten: () => _schnellEintrag(sofort: true),
+                ),
+              ],
+            ),
           ),
         ),
       ],
