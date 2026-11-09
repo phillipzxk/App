@@ -98,6 +98,103 @@ extension _Persoenlich on _HomePageState {
         ? null
         : (da.reduce((a, b) => a + b) / da.length).round();
 
+    // For the pictures (draft "Bereiche als Bilder" 3).
+    final an = d.pflegeAm(heute);
+    final schritte = [
+      for (final (i, n) in d.morgens.indexed)
+        (name: n, fertig: an.contains('m$i')),
+    ];
+    final List<LookPunkt?> lookPunkte = [
+      if (look == null || look.punkte.isEmpty)
+        (name: 'Look', ziel: 'pe-look')
+      else
+        (name: look.punkte.first.titel, ziel: 'pe-look'),
+      if (look != null && look.punkte.length > 1)
+        (name: look.punkte[1].titel, ziel: 'pe-look')
+      else
+        null,
+      (name: 'Stil', ziel: 'pe-stil'),
+      (name: 'Haltung', ziel: 'pe-haltung'),
+    ];
+    final hw = haut == null ? null : hautWoche(haut, jetzt);
+    (int, int)? wochen(String titel) {
+      final z = [
+        for (final m in RegExp(r'\d+').allMatches(titel))
+          int.parse(m.group(0)!),
+      ];
+      return z.isEmpty ? null : (z.first, z.last);
+    }
+
+    final phase = haut == null || hw == null
+        ? null
+        : haut.phasen.where((p) {
+            final w = wochen(p.titel);
+            return w != null && w.$1 <= hw && hw <= w.$2;
+          }).firstOrNull;
+    final teiler = [
+      for (final p in haut?.phasen ?? const <Tipp>[])
+        if (wochen(p.titel) case final w? when w.$2 < 8) w.$2,
+    ];
+    final kleineSortiert = [...d.kleine]
+      ..sort((a, b) {
+        int r(KleinesDing x) => kleinesHeute(x, jetzt)
+            ? 1
+            : kleinesFaellig(x, jetzt)
+            ? 0
+            : 2;
+        return r(a).compareTo(r(b));
+      });
+    final List<KleinesPunkt> kleinePunkte = [
+      for (final x in kleineSortiert.take(3))
+        (
+          name: x.name,
+          unter: kleinesHeute(x, jetzt)
+              ? 'erledigt'
+              : kleinesFaellig(x, jetzt)
+              ? 'fällig'
+              : 'in ${x.alle - tageSeit(x.zuletzt!, jetzt)} Tagen',
+          an: kleinesFaellig(x, jetzt) && !kleinesHeute(x, jetzt),
+          fertig: kleinesHeute(x, jetzt),
+          ziel: 'pe-kleine',
+        ),
+      (
+        name: 'Frisur',
+        unter: frisur == null
+            ? 'was passt?'
+            : ft == null
+            ? 'Schnitt eintragen'
+            : ft <= 0
+            ? 'fällig'
+            : ft < 14
+            ? 'in $ft Tagen'
+            : 'in ${ft ~/ 7} Wochen',
+        an: ft != null && ft <= 0,
+        fertig: false,
+        ziel: 'pe-frisur',
+      ),
+    ];
+    final kleineHeute = d.kleine.where((x) => kleinesHeute(x, jetzt)).length;
+    final bald = [
+      for (final x in d.kleine)
+        if (!kleinesFaellig(x, jetzt) &&
+            x.alle - tageSeit(x.zuletzt!, jetzt) <= 7)
+          x,
+    ].length;
+    final lese = d.buecher.indexWhere((b) => !b.fertig);
+    final regal = [
+      for (final (i, b) in d.buecher.take(5).indexed)
+        (
+          titel: b.titel,
+          art: d.umsetzen.any((u) => u.quelle == b.titel && u.erledigt != null)
+              ? 3
+              : i == lese
+              ? 2
+              : b.fertig
+              ? 1
+              : 0,
+        ),
+    ];
+
     String sub() {
       if (wert == null) return 'Fang mit deiner Pflege-Routine an';
       if (wertGestern == null) return '$wert von 10';
@@ -152,6 +249,29 @@ extension _Persoenlich on _HomePageState {
           else
             'Lern-Ziel für heute geschafft.',
         ].join(' '),
+        bild: BBild(
+          bau: (tipp, v, t) => PflegeHeuteBild(
+            schritte: schritte,
+            lern: lern,
+            onSchritt: (i) => _persoenlich.setze(
+              _persoenlich.d.pflegeUmschalten(heute, 'm$i'),
+            ),
+            tipp: tipp,
+            v: v,
+            t: t,
+          ),
+          zahlen: [
+            BZahl(
+              d.morgens.isEmpty ? '–' : '$morgens/${d.morgens.length}',
+              'Pflege',
+              ziel: 'pe-pflege',
+            ),
+            BZahl('$lern/10', 'Minuten', ziel: 'pe-lern'),
+            const BZahl('–', 'Füllwörter', ziel: 'pe-stimme'),
+          ],
+          knopf: ('Lernen starten', 'pe-lern'),
+          knopf2: (Icons.mic_none, 'pe-stimme'),
+        ),
         kacheln: [
           BKachel(
             id: 'pe-pflege',
@@ -219,6 +339,24 @@ extension _Persoenlich on _HomePageState {
                   'am meisten ausmachen.'
             : 'Drei kleine Hebel machen bei dir am meisten aus: '
                   '${look.punkte.map((p) => p.titel).join(', ')}.',
+        bild: BBild(
+          bau: (tipp, v, t) => LookBild(
+            punkte: lookPunkte,
+            unten: fotos < 2
+                ? 'Look-Verlauf ab 2 Fortschrittsfotos'
+                : 'Look-Verlauf: Woche 1 bis $fotos',
+            tipp: tipp,
+            v: v,
+            t: t,
+          ),
+          zahlen: [
+            BZahl('${look?.punkte.length ?? 0}', 'Hinweise', ziel: 'pe-look'),
+            BZahl('$fotos', 'Fotos', ziel: 'pe-verlauf'),
+            const BZahl('ehrlich', 'Stil-Check', ziel: 'pe-stil'),
+          ],
+          knopf: ('Foto machen', 'pe-look'),
+          knopf2: (Icons.photo_camera_outlined, 'pe-stil'),
+        ),
         kacheln: [
           BKachel(
             id: 'pe-look',
@@ -295,6 +433,33 @@ extension _Persoenlich on _HomePageState {
           else
             'Die kleinen Dinge sind heute erledigt.',
         ].join(' '),
+        bild: BBild(
+          bau: (tipp, v, t) => HautBild(
+            woche: hw,
+            teiler: teiler,
+            gross: hw == null
+                ? 'Was stört dich an deiner Haut?'
+                : 'Woche $hw von 8',
+            klein: haut == null
+                ? 'ein Plan über 8 Wochen'
+                : phase?.text ?? haut.problem,
+            kleine: kleinePunkte,
+            tipp: tipp,
+            v: v,
+            t: t,
+          ),
+          zahlen: [
+            BZahl(hw == null ? '–' : '$hw/8', 'Wochen', ziel: 'pe-haut'),
+            BZahl(
+              '$kleineHeute/${kleineHeute + faellig.length}',
+              'heute dran',
+              ziel: 'pe-kleine',
+            ),
+            BZahl('$bald', 'bald fällig', ziel: 'pe-kleine'),
+          ],
+          knopf: ('Routine abhaken', 'pe-kleine'),
+          knopf2: (Icons.add, 'pe-haut'),
+        ),
         kacheln: [
           BKachel(
             id: 'pe-haut',
@@ -378,6 +543,37 @@ extension _Persoenlich on _HomePageState {
                   'machen wir einen kleinen Schritt.'
             : '$umgesetzt von ${d.umsetzen.length} Sachen aus Büchern und '
                   'Podcasts machst du schon.',
+        bild: BBild(
+          bau: (tipp, v, t) => WissenBild(
+            skill: k?.skill,
+            lektionen: k?.lektionen.length ?? 12,
+            erreicht: k?.erreicht ?? 0,
+            lektionText: lek != null
+                ? 'Lektion ${k!.erreicht + 1} von ${k.lektionen.length}: ${lek.titel}'
+                : k == null
+                ? 'Welchen Skill willst du lernen?'
+                : 'Kurs geschafft',
+            buecher: regal,
+            tipp: tipp,
+            v: v,
+            t: t,
+          ),
+          zahlen: [
+            BZahl(
+              k == null ? '–' : '${k.erreicht}/${k.lektionen.length}',
+              'Lektionen',
+              ziel: 'pe-kurs',
+            ),
+            BZahl('${d.buecher.length}', 'Bücher', ziel: 'pe-buecher'),
+            BZahl('$umgesetzt', 'umgesetzt', ziel: 'pe-umsetzen'),
+          ],
+          knopf: lek != null
+              ? ('Lektion ${k!.erreicht + 1} starten', 'pe-kurs')
+              : k == null
+              ? ('Skill wählen', 'pe-kurs')
+              : ('Kurs ansehen', 'pe-kurs'),
+          knopf2: (Icons.add, 'pe-buecher'),
+        ),
         kacheln: [
           BKachel(
             id: 'pe-kurs',

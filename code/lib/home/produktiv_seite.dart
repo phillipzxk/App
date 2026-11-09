@@ -78,6 +78,67 @@ extension _Produktiv on _HomePageState {
         ? null
         : (da.reduce((a, b) => a + b) / da.length).round();
 
+    // For the pictures (draft "Bereiche als Bilder" 3).
+    String kurz(int m) =>
+        m % 60 == 0 ? '${(m ~/ 60) % 24}' : formatUhrzeit(m % 1440);
+    final tagVon = e.werte.first.$1, tagBis = e.werte.last.$1;
+    final drangGestern = drangAm(d, gestern).length;
+    final gruendeHeute = <String, int>{};
+    for (final x in drangAm(d, heute).isEmpty ? d.drang : drangAm(d, heute)) {
+      if (x.grund case final g?) gruendeHeute[g] = (gruendeHeute[g] ?? 0) + 1;
+    }
+    final gruende = [for (final e in gruendeHeute.entries) (e.key, e.value)]
+      ..sort((a, b) => b.$2.compareTo(a.$2));
+    final freiMin = d.handyfreiMinuten;
+    String minText(int m) => m < 60
+        ? '$m Min'
+        : m % 60 == 0
+        ? '${m ~/ 60} h'
+        : '${(m / 60).toStringAsFixed(1).replaceAll('.', ',')} h';
+    final ms = bz.meilensteine;
+    final List<ZielBlatt> blaetter;
+    if (ms.isEmpty) {
+      blaetter = [(name: 'Dein erster Meilenstein?', art: -1)];
+    } else {
+      final int start = ((ast ?? ms.length) - 1).clamp(
+        0,
+        math.max(0, ms.length - 4),
+      );
+      blaetter = [
+        for (var i = start; i < math.min(start + 4, ms.length); i++)
+          (
+            name: ms[i].text,
+            art: ms[i].an
+                ? 2
+                : i == ms.length - 1 && ms.length > 1
+                ? -1
+                : i == ast
+                ? 1
+                : 0,
+          ),
+      ];
+    }
+    final hebelFertig =
+        h != null && h.punkte.isNotEmpty && h.erledigt == h.punkte.length;
+    int amStueck(List<String> tage) {
+      var n = 0;
+      var t = jetzt;
+      if (!tage.contains(dayKey(t))) t = t.subtract(const Duration(days: 1));
+      while (tage.contains(dayKey(t)) && n < 999) {
+        n++;
+        t = t.subtract(const Duration(days: 1));
+      }
+      return n;
+    }
+
+    final glieder = [
+      ...d.andocken.where((a) => !a.laeuft),
+      ...d.andocken.where((a) => a.laeuft),
+    ].take(3).toList();
+    final stueck = d.andocken.isEmpty
+        ? 0
+        : d.andocken.map((a) => amStueck(a.tage)).reduce(math.max);
+
     String sub() {
       if (wert == null) return 'Leg heute deinen Fokus fest';
       if (wertGestern == null) return '$wert von 10';
@@ -205,6 +266,35 @@ extension _Produktiv on _HomePageState {
             ? 'Die eine Sache ist geschafft. Der Rest darf leichter sein.'
             : '${name.isEmpty ? '' : '$name, '}heute zählt nur „${f.text}“. '
                   'Leg es in dein Hoch, $hoch.',
+        bild: BBild(
+          bau: (tipp, v, t) => FokusHeuteBild(
+            sache: f?.text,
+            erledigt: f?.erledigt ?? false,
+            energie: e.werte,
+            hoch: e.hoch,
+            tief: e.tief,
+            tiefText: 'Tief ${formatUhrzeit(e.tief % 1440)}',
+            block: block,
+            tipp: tipp,
+            v: v,
+            t: t,
+          ),
+          zahlen: [
+            BZahl('$block Min', 'Fokus-Block', ziel: 'p-block'),
+            BZahl(
+              'bis ${formatUhrzeit(e.hoch.$2 % 1440)}',
+              'hoch',
+              ziel: 'p-energie',
+            ),
+            BZahl(
+              f?.erledigt ?? false ? '1/1' : '0/1',
+              'die eine Sache',
+              ziel: 'p-fokus',
+            ),
+          ],
+          knopf: ('Fokus-Block starten', 'p-block'),
+          knopf2: (Icons.edit_outlined, 'p-fokus'),
+        ),
         kacheln: [
           BKachel(
             id: 'p-fokus',
@@ -272,6 +362,42 @@ extension _Produktiv on _HomePageState {
             : '${name.isEmpty ? '' : '$name, '}diese Woche zählt ein Hebel: '
                   '${h.text}.'
                   '${h.punkte.isEmpty ? '' : ' ${h.erledigt} von ${h.punkte.length} geschafft.'}',
+        bild: BBild(
+          bau: (tipp, v, t) => FokusZieleBild(
+            hebel: h?.text,
+            hebelFertig: hebelFertig,
+            blaetter: blaetter,
+            skill: bz.skill?.name,
+            stufen: bz.skill?.stufen.length ?? 0,
+            erreicht: bz.skill?.erreicht ?? 0,
+            tipp: tipp,
+            v: v,
+            t: t,
+          ),
+          zahlen: [
+            BZahl(
+              ms.isEmpty ? '–' : '$erreicht/${ms.length}',
+              'Meilensteine',
+              ziel: 'b-baum',
+            ),
+            BZahl(
+              bz.skill == null
+                  ? '–'
+                  : '${bz.skill!.erreicht}/${bz.skill!.stufen.length}',
+              'Skill-Stufe',
+              ziel: 'b-skill',
+            ),
+            BZahl(
+              h == null || h.punkte.isEmpty
+                  ? '–'
+                  : '${h.erledigt}/${h.punkte.length}',
+              'Hebel',
+              ziel: 'b-hebel',
+            ),
+          ],
+          knopf: ('Meilenstein eintragen', 'b-baum'),
+          knopf2: (Icons.add, 'b-hebel'),
+        ),
         kacheln: [
           BKachel(
             id: 'b-hebel',
@@ -321,6 +447,20 @@ extension _Produktiv on _HomePageState {
               (u) => BaumSeite(u: u),
             ),
           ),
+          // The skill ladder of the picture opens here.
+          BKachel(
+            id: 'b-skill',
+            titel: 'Dein Skill',
+            icon: Icons.stairs_outlined,
+            groesse: KachelGroesse.schmal,
+            feld: _bFeld(
+              'Dein Skill',
+              Icons.stairs_outlined,
+              'Ein Skill, Stufe für Stufe. Jede Stufe eine Aufgabe für die '
+                  'Woche.',
+              (u) => SkillSeite(u: u),
+            ),
+          ),
         ],
       ),
       BSeite(
@@ -329,6 +469,47 @@ extension _Produktiv on _HomePageState {
             ? 'Tipp den Drang-Knopf, wenn du zum Handy greifen willst. Mehr '
                   'musst du nicht tun.'
             : 'Der Griff zum Handy kommt meist zwischen $stunde.',
+        bild: BBild(
+          bau: (tipp, v, t) => HandyBild(
+            n: drangHeute,
+            gruende: gruende,
+            frei: freiMin <= 0
+                ? null
+                : (
+                    0.0,
+                    (freiMin / math.max(60, tagBis - tagVon)).clamp(0.0, 1.0),
+                  ),
+            freiLinks: '${kurz(tagVon)}–${kurz(tagVon + freiMin)} Uhr',
+            freiRechts: '$frei7 von 7 Morgen',
+            onDrang: () async {
+              final pd = _produktiv.d;
+              await _produktiv.setze(
+                pd.copyWith(
+                  drang: [
+                    ...pd.drang,
+                    Drang(zeit: widget.clock()),
+                  ],
+                ),
+              );
+            },
+            tipp: tipp,
+            v: v,
+            t: t,
+          ),
+          zahlen: [
+            BZahl('$drangHeute×', 'heute', ziel: 'p-drang'),
+            BZahl(
+              drangHeute == drangGestern
+                  ? '±0'
+                  : '${drangHeute < drangGestern ? '−' : '+'}${(drangHeute - drangGestern).abs()}',
+              'vs. gestern',
+              ziel: 'p-drang',
+            ),
+            BZahl(minText(freiMin), 'handyfrei', ziel: 'p-handyfrei'),
+          ],
+          knopf: ('Handyfreie Zeit festlegen', 'p-handyfrei'),
+          knopf2: (Icons.lightbulb_outline, 'p-frei'),
+        ),
         kacheln: [
           BKachel(
             id: 'p-spiegel',
@@ -392,6 +573,18 @@ extension _Produktiv on _HomePageState {
               (u) => HandyfreiSeite(u: u),
             ),
           ),
+          // The same page without the focus button, for the picture.
+          BKachel(
+            id: 'p-handyfrei',
+            titel: 'Handyfrei',
+            icon: Icons.phonelink_erase,
+            feld: _pFeld(
+              'Handyfrei',
+              Icons.phonelink_erase,
+              'Der Morgen gehört dir, nicht dem Handy.',
+              (u) => HandyfreiSeite(u: u),
+            ),
+          ),
         ],
       ),
       BSeite(
@@ -399,6 +592,36 @@ extension _Produktiv on _HomePageState {
         coach:
             'Am klarsten bist du heute von $hoch. Das Schwere gehört dorthin, '
             'nicht in den Abend.',
+        bild: BBild(
+          bau: (tipp, v, t) => RhythmusBild(
+            von: tagVon,
+            bis: tagBis,
+            hoch: e.hoch,
+            tief: e.tief,
+            training: _tagRahmen.training,
+            vonText: formatUhrzeit(tagVon % 1440),
+            bisText: formatUhrzeit(tagBis % 1440),
+            hochText: '${kurz(e.hoch.$1)}–${kurz(e.hoch.$2)}',
+            geber: [
+              for (final m in [...gibt.take(2), ...nimmt.take(1)])
+                (text: m.text, gut: m.gut),
+            ],
+            tipp: tipp,
+            v: v,
+            t: t,
+          ),
+          zahlen: [
+            BZahl(
+              '${kurz(e.hoch.$1)}–${kurz(e.hoch.$2)}',
+              'beste Zeit',
+              ziel: 'p-stunden',
+            ),
+            BZahl(formatUhrzeit(e.tief % 1440), 'Tief', ziel: 'p-stunden'),
+            BZahl('${gibt.length}', 'Geber', ziel: 'p-geber'),
+          ],
+          knopf: ('Tag danach planen', 'p-stunden'),
+          knopf2: (Icons.add, 'p-geber'),
+        ),
         kacheln: [
           BKachel(
             id: 'p-stunden',
@@ -442,6 +665,35 @@ extension _Produktiv on _HomePageState {
             ? 'Dock eine neue Gewohnheit an etwas an, das du sowieso machst.'
             : '„${aktiv.neu}“ hält seit ${aktiv.tage.length} Tagen. Die '
                   'nächste kommt erst, wenn sie von allein läuft.',
+        bild: BBild(
+          bau: (tipp, v, t) => RoutinenBild(
+            ketten: [
+              for (final a in glieder)
+                (
+                  anker: a.anker,
+                  neu: a.neu,
+                  unter: a.laeuft
+                      ? 'seit ${a.tage.length} Tagen'
+                      : 'Tag ${a.tage.length}/21',
+                  heute: a.tage.contains(heute),
+                  aktiv: identical(a, aktiv),
+                ),
+            ],
+            laeuftText: laeuft.isEmpty
+                ? 'Nach 21 Tagen läuft eine Gewohnheit von allein'
+                : 'Läuft von allein: ${laeuft.map((a) => a.neu).join(', ')}',
+            tipp: tipp,
+            v: v,
+            t: t,
+          ),
+          zahlen: [
+            BZahl('${d.andocken.length}', 'angedockt', ziel: 'p-andock'),
+            BZahl('$stueck', 'Tage am Stück', ziel: 'p-andock'),
+            BZahl('${laeuft.length}', 'laufen allein', ziel: 'p-laeuft'),
+          ],
+          knopf: ('Gewohnheit andocken', 'p-neu'),
+          knopf2: (Icons.add, 'p-andock'),
+        ),
         kacheln: [
           BKachel(
             id: 'p-andock',

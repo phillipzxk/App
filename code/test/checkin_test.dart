@@ -176,6 +176,7 @@ void main() {
         ),
       );
     await openApp(tester, diary);
+    await zumFundament(tester);
     final wert = find.byKey(const ValueKey('knoten-wert-koerper'));
     await scrollTo(tester, wert);
     expect(

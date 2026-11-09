@@ -210,7 +210,7 @@ void main() {
         'm-warum',
       ]) {
         await zeigeKachel(tester, k);
-        expect(find.byKey(ValueKey('kachel-$k')), findsOneWidget);
+        expect(kachelFinder(k), findsWidgets);
       }
     });
 
@@ -307,8 +307,8 @@ void main() {
 
     testWidgets('Ruhe-Knopf locks for 3 minutes and counts', (tester) async {
       final feed = await _start(tester);
+      // On the picture page the round Ruhe button starts right away.
       await openKachel(tester, 'm-ruhe');
-      await _tippe(tester, 'ruhe-start');
       expect(find.byKey(const ValueKey('ruhe-zeit')), findsOneWidget);
       expect(find.byKey(const ValueKey('ruhe-fertig')), findsNothing);
       await tester.pump(const Duration(seconds: 181));
@@ -316,6 +316,7 @@ void main() {
       expect(feed.mindset.ruhe, hasLength(1));
       await tester.tap(find.byKey(const ValueKey('ruhe-fertig')));
       await tester.pumpAndSettle();
+      await openKachel(tester, 'm-ruhe-seite');
       expect(find.text('1 Mal Ruhe genommen'), findsOneWidget);
     });
 

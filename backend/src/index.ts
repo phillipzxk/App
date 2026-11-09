@@ -40,6 +40,7 @@ import {
   briefPrompt,
   businessPrompt,
   persoenlichPrompt,
+  schnellPrompt,
   type LetzterFokus,
   type CheckIn,
   type Profile,
@@ -659,6 +660,74 @@ export async function training(env: Env, body: Record<string, unknown>, profile:
   }
 }
 
+const SCHNELL_ARTEN = ["mahlzeit", "training", "termin", "gewicht", "schlaf", "supplement", "durchgezogen", "notiz"];
+const SCHNELL_BEREICHE = ["training", "ernaehrung", "schlaf", "mindset", "produktiv", "persoenlich"];
+
+/// Keeps only well-formed Schnell-Eintrag entries (max 8).
+export function parseSchnell(raw: string): { satz: string | null; eintraege: Record<string, unknown>[] } {
+  const d = parseObjekt(raw);
+  const liste = Array.isArray(d.eintraege) ? d.eintraege : [];
+  const eintraege = liste
+    .map((v) => {
+      const e = (v ?? {}) as Record<string, unknown>;
+      const art = String(e.art ?? "");
+      const titel = kurz(e.titel, 80);
+      if (!SCHNELL_ARTEN.includes(art) || !titel) return null;
+      const out: Record<string, unknown> = { art, titel, detail: kurz(e.detail, 120) ?? "" };
+      if (e.unsicher === true && text(e.frage, 120)) {
+        out.unsicher = true;
+        out.frage = text(e.frage, 120);
+      }
+      switch (art) {
+        case "mahlzeit":
+          out.mahlzeit = ["fruehstueck", "mittag", "abend", "snack"].includes(String(e.mahlzeit)) ? e.mahlzeit : "snack";
+          break;
+        case "training":
+          out.uebung = text(e.uebung, 80) ?? "";
+          out.kg = zahl(e.kg);
+          out.wdh = zahl(e.wdh);
+          out.saetze = Math.min(Math.max(Math.round(zahl(e.saetze) ?? 1), 1), 10);
+          out.fertig = e.fertig === true;
+          if (!out.uebung && !out.fertig) return null;
+          break;
+        case "termin": {
+          const t = text(e.text, 80);
+          if (!t) return null;
+          out.text = t;
+          out.tag = Math.min(Math.max(Math.round(zahl(e.tag) ?? 0), 0), 6);
+          out.zeit = typeof e.zeit === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(e.zeit) ? e.zeit : null;
+          break;
+        }
+        case "gewicht": {
+          const kg = zahl(e.kg);
+          if (kg === null || kg < 25 || kg > 350) return null;
+          out.kg = kg;
+          break;
+        }
+        case "schlaf": {
+          const h = zahl(e.stunden);
+          if (h === null || h <= 0 || h > 16) return null;
+          out.stunden = h;
+          break;
+        }
+        case "supplement":
+          out.name = text(e.name, 60);
+          if (!out.name) return null;
+          break;
+        case "durchgezogen":
+          out.text = text(e.text, 160) ?? titel;
+          break;
+        case "notiz":
+          out.bereich = SCHNELL_BEREICHE.includes(String(e.bereich)) ? e.bereich : "mindset";
+          break;
+      }
+      return out;
+    })
+    .filter((e): e is Record<string, unknown> => e !== null)
+    .slice(0, 8);
+  return { satz: kurz(d.satz, 160), eintraege };
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
@@ -820,6 +889,16 @@ export default {
         try {
           const res = await training(env, body, profile);
           return res === null ? json({ error: "not found" }, 404) : json(res);
+        } catch (e) {
+          console.error(e);
+          return json({ error: "coach unavailable" }, 502);
+        }
+      }
+      case "/schnell": {
+        const t = typeof body.text === "string" ? body.text.trim() : "";
+        if (!t) return json({ satz: null, eintraege: [] });
+        try {
+          return json(parseSchnell(await ask(env, schnellPrompt(profile, t, String(body.kontext ?? "")))));
         } catch (e) {
           console.error(e);
           return json({ error: "coach unavailable" }, 502);

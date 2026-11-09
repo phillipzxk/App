@@ -13,6 +13,7 @@ import 'coach_karte.dart';
 import 'muster_widgets.dart';
 import 'warum_karte.dart';
 import 'feed_widgets.dart';
+import 'fundament_seite.dart';
 import 'wurzelwerk.dart';
 
 /// Days in a row with a check-in, counted back from [today]. A day without
@@ -44,8 +45,9 @@ List<bool> lastSevenDays(List<CheckIn> checkIns, DateTime today) {
 /// Start page after the check-in (vault Umsetzung/Home-Schichten.md,
 /// decided with Phillip 2026-10-25): on top clear fields, the coach big,
 /// below it Fokus and Heute dran side by side and a slim field with the
-/// days in a row. Below the ground line a big root system that puts the
-/// four areas in focus.
+/// days in a row. Since 2026-11-08 the root system has its own page
+/// (Fundament, vault Umsetzung/Heute und Fundament.md); Heute ends with a
+/// small card that leads there.
 class TodayTab extends StatelessWidget {
   const TodayTab({
     super.key,
@@ -68,9 +70,7 @@ class TodayTab extends StatelessWidget {
     required this.fotoFeld,
     required this.onOpenMuster,
     required this.bereiche,
-    required this.onOpenBereich,
-    this.lebensziele,
-    this.wurzeln = 0,
+    required this.onFundament,
     this.jubel,
     this.jubelTick = 0,
     this.scroll,
@@ -135,15 +135,10 @@ class TodayTab extends StatelessWidget {
   /// The small progress photo field next to the days in a row.
   final Widget fotoFeld;
 
-  /// The four areas on the roots and what happens on a tap.
+  /// The areas for the small Fundament card at the end; tapping it opens
+  /// the Fundament page.
   final List<WurzelBereich> bereiche;
-  final Future<void> Function(String id, Offset mitte) onOpenBereich;
-
-  /// The life goals card at the end of the tap root.
-  final Widget? lebensziele;
-
-  /// How deep the roots reach (each "Heute geschafft" this week).
-  final int wurzeln;
+  final VoidCallback onFundament;
 
   /// Cheer from the coach and its trigger, see [CoachKarte.jubel].
   final String? jubel;
@@ -169,7 +164,7 @@ class TodayTab extends StatelessWidget {
     return NightScope(
       child: ListView(
         controller: scroll,
-        padding: const EdgeInsets.only(bottom: 40),
+        padding: const EdgeInsets.only(bottom: 110),
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -293,19 +288,11 @@ class TodayTab extends StatelessWidget {
                   const SizedBox(height: 10),
                   MusterFeld(muster: m, neu: musterNeu, onTap: onOpenMuster),
                 ],
-                const SizedBox(height: 18),
+                const SizedBox(height: 10),
+                // The roots live on their own page now (2026-11-08).
+                FundamentVorschau(bereiche: bereiche, onTap: onFundament),
               ],
             ),
-          ),
-          // The soil runs edge to edge.
-          Wurzelwerk(
-            bereiche: bereiche,
-            onOpen: onOpenBereich,
-            streak: streak,
-            wurzeln: wurzeln,
-            jubelTick: jubelTick,
-            gross: true,
-            lebensziele: lebensziele,
           ),
         ],
       ),
