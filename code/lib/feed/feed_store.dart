@@ -18,6 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../checkin/checkin.dart';
 import '../future_me/future_me_data.dart';
 import '../planner/planner_data.dart';
+import '../kalender/kalender_dienst.dart';
 import '../supplements/supplement_data.dart';
 import 'feed_data.dart';
 import 'kcal.dart';
@@ -51,6 +52,10 @@ abstract class FeedStore {
   Future<List<Termin>> loadTermine();
   Future<void> addTermin(Termin termin);
   Future<void> removeTermin(Termin termin);
+
+  /// Kalender verbinden: connected, hidden calendars, target calendar.
+  Future<KalenderEinstellung> loadKalender();
+  Future<void> saveKalender(KalenderEinstellung e);
 
   /// Meals per day for the day plan; null until the user has set it.
   Future<int?> loadMahlzeiten();
@@ -150,6 +155,7 @@ class LocalFeedStore implements FeedStore {
   static const _kcalKey = 'kcal_profil';
   static const _fragenKey = 'coach_fragen';
   static const _termineKey = 'termine';
+  static const _kalenderKey = 'kalender';
   static const _mahlzeitenKey = 'mahlzeiten_pro_tag';
   static const _schwerpunktKey = 'schwerpunkt';
   static const _fotoEinstellungenKey = 'foto_einstellungen';
@@ -253,6 +259,18 @@ class LocalFeedStore implements FeedStore {
       ..removeWhere((t) => t.erstellt == termin.erstellt);
     await _write(_termineKey, [for (final t in all) t.toJson()]);
   }
+
+  @override
+  Future<KalenderEinstellung> loadKalender() async {
+    final json = await _read(_kalenderKey);
+    return json == null
+        ? const KalenderEinstellung()
+        : KalenderEinstellung.fromJson(json as Map<String, dynamic>);
+  }
+
+  @override
+  Future<void> saveKalender(KalenderEinstellung e) =>
+      _write(_kalenderKey, e.toJson());
 
   @override
   Future<Schwerpunkt?> loadSchwerpunkt() async {

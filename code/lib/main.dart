@@ -22,6 +22,7 @@ import 'training/training_data.dart' show istTrainingstag;
 import 'home/home_page.dart';
 import 'health/health_dienst.dart';
 import 'health/health_logik.dart';
+import 'kalender/kalender_dienst.dart';
 import 'konto/konto_daten.dart';
 import 'schlaf/schritt_zaehler.dart';
 import 'konto/konto_dienst.dart';
@@ -62,6 +63,7 @@ void main() {
       aboKauf: const VorschauKauf(),
       erinnerungen: erinnerungenFuerPlattform(),
       health: healthFuerPlattform(),
+      kalender: kalenderFuerPlattform(),
       schritte: schrittZaehlerFuerPlattform(),
       schrittWahl: const LocalSchrittWahl(),
     ),
@@ -83,6 +85,7 @@ class CoachApp extends StatelessWidget {
     this.kontoStore,
     this.erinnerungen,
     this.health,
+    this.kalender,
     this.aboStore,
     this.aboKauf = const VorschauKauf(),
     this.schritte = const KeinZaehler(),
@@ -99,6 +102,10 @@ class CoachApp extends StatelessWidget {
 
   /// Apple Health (vault Umsetzung/Apple Health). Null in tests.
   final HealthDienst? health;
+
+  /// The phone's calendar (vault Umsetzung/Kalender verbinden). Null in
+  /// tests that don't care.
+  final KalenderDienst? kalender;
 
   /// Reminders on the phone (vault Umsetzung/Erinnerungen). Null in tests.
   final ErinnerungDienst? erinnerungen;
@@ -162,6 +169,7 @@ class _StartGateState extends State<StartGate> {
   Konto? _konto;
   bool _schonKonto = false;
   final _erinnerungenNeu = ValueNotifier<int>(0);
+  final _kalenderNeu = ValueNotifier<int>(0);
   DateTime? _letzteSicherung;
   late final AppLifecycleListener _leben = AppLifecycleListener(
     onHide: () => _sichern(sofort: true),
@@ -334,6 +342,7 @@ class _StartGateState extends State<StartGate> {
     _splashTimer?.cancel();
     _leben.dispose();
     _erinnerungenNeu.dispose();
+    _kalenderNeu.dispose();
     super.dispose();
   }
 
@@ -403,6 +412,9 @@ class _StartGateState extends State<StartGate> {
             erinnerungen: widget.app.erinnerungen,
             onErinnerungen: () => _erinnerungenNeu.value++,
             health: widget.app.health,
+            kalender: widget.app.kalender,
+            feed: widget.app.feed,
+            onKalender: () => _kalenderNeu.value++,
             abo: _aboText(),
             onAbo: () => _aboOeffnen(context),
             onAbgemeldet: () => setState(() => _konto = null),
@@ -519,6 +531,8 @@ class _StartGateState extends State<StartGate> {
       erinnerungen: widget.app.erinnerungen,
       erinnerungenNeu: _erinnerungenNeu,
       health: widget.app.health,
+      kalender: widget.app.kalender,
+      kalenderNeu: _kalenderNeu,
     );
   }
 }

@@ -107,6 +107,7 @@ Future<List<SchnellEintrag>?> zeigeSchnellEintrag(
   required List<Gegenfrage> Function(List<SchnellEintrag> e) gegenfragen,
   List<SchnellVorschlag> vorschlaege = const [],
   bool sofortSprechen = false,
+  String? kalender,
 }) => showModalBottomSheet<List<SchnellEintrag>>(
   context: context,
   isScrollControlled: true,
@@ -118,6 +119,7 @@ Future<List<SchnellEintrag>?> zeigeSchnellEintrag(
     gegenfragen: gegenfragen,
     vorschlaege: vorschlaege,
     sofortSprechen: sofortSprechen,
+    kalender: kalender,
   ),
 );
 
@@ -129,8 +131,12 @@ class SchnellBlatt extends StatefulWidget {
     required this.gegenfragen,
     this.vorschlaege = const [],
     this.sofortSprechen = false,
+    this.kalender,
   });
   final List<SchnellVorschlag> vorschlaege;
+
+  /// The connected calendar's name: appointments say they go there.
+  final String? kalender;
   final String name;
   final Future<SchnellAntwort?> Function(String text) frageCoach;
   final List<Gegenfrage> Function(List<SchnellEintrag> e) gegenfragen;
@@ -623,7 +629,10 @@ class _SchnellBlattState extends State<SchnellBlatt> {
                 if (k.gegen == null && (e.frage ?? e.wohin).isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(
-                    e.frage ?? e.wohin,
+                    e.frage ??
+                        (e.art == 'termin' && widget.kalender != null
+                            ? 'in deinen ${widget.kalender}'
+                            : e.wohin),
                     style: const TextStyle(
                       fontSize: 12,
                       color: CoachStyle.inkSoft,

@@ -1,6 +1,7 @@
 import AlarmKit
 import AppIntents
 import CoreMotion
+import EventKit
 import Flutter
 import HealthKit
 import SwiftUI
@@ -37,6 +38,9 @@ import alarm_kit
     }
     if let r = engineBridge.pluginRegistry.registrar(forPlugin: "GroundsetSchritte") {
       GroundsetSchritte.shared.register(messenger: r.messenger())
+    }
+    if let r = engineBridge.pluginRegistry.registrar(forPlugin: "GroundsetKalender") {
+      GroundsetKalender.shared.register(messenger: r.messenger())
     }
   }
 }
@@ -396,5 +400,138 @@ final class GroundsetSchritte: NSObject, FlutterStreamHandler {
   func onCancel(withArguments arguments: Any?) -> FlutterError? {
     pedometer.stopUpdates()
     return nil
+  }
+}
+
+// MARK: - Groundset Kalender
+
+/// The iPhone calendar (vault Umsetzung/Kalender verbinden): read the
+/// appointments, add new ones. Same names as lib/kalender/kalender_dienst.dart.
+final class GroundsetKalender {
+  static let shared = GroundsetKalender()
+  private let store = EKEventStore()
+  private var channel: FlutterMethodChannel?
+
+  func register(messenger: FlutterBinaryMessenger) {
+    let c = FlutterMethodChannel(name: "groundset/kalender", binaryMessenger: messenger)
+    c.setMethodCallHandler { [weak self] call, result in
+      guard let self = self else { return }
+      let args = call.arguments as? [String: Any] ?? [:]
+      switch call.method {
+      case "verbinden":
+        self.verbinden(result)
+      case "kalender":
+        result(self.erlaubt ? self.kalender() : [])
+      case "termine":
+        guard self.erlaubt,
+          let von = GroundsetKalender.datum(args["von"]),
+          let bis = GroundsetKalender.datum(args["bis"])
+        else {
+          result([])
+          return
+        }
+        let aus = Set(args["aus"] as? [String] ?? [])
+        result(self.termine(von: von, bis: bis, aus: aus))
+      case "anlegen":
+        result(self.anlegen(args))
+      default:
+        result(FlutterMethodNotImplemented)
+      }
+    }
+    channel = c
+  }
+
+  private static func datum(_ v: Any?) -> Date? {
+    guard let n = v as? NSNumber else { return nil }
+    return Date(timeIntervalSince1970: n.doubleValue / 1000)
+  }
+
+  private static func ms(_ d: Date) -> Double { d.timeIntervalSince1970 * 1000 }
+
+  private var erlaubt: Bool {
+    let s = EKEventStore.authorizationStatus(for: .event)
+    if #available(iOS 17.0, *) { return s == .fullAccess }
+    return s == .authorized
+  }
+
+  private func verbinden(_ result: @escaping FlutterResult) {
+    let fertig: (Bool, Error?) -> Void = { [weak self] ok, _ in
+      DispatchQueue.main.async {
+        if ok { self?.store.reset() }
+        result(ok)
+      }
+    }
+    if #available(iOS 17.0, *) {
+      store.requestFullAccessToEvents(completion: fertig)
+    } else {
+      store.requestAccess(to: .event, completion: fertig)
+    }
+  }
+
+  private static func farbe(_ c: CGColor) -> Int {
+    var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+    UIColor(cgColor: c).getRed(&r, green: &g, blue: &b, alpha: &a)
+    func k(_ x: CGFloat) -> Int { Int((max(0, min(1, x)) * 255).rounded()) }
+    return (255 << 24) | (k(r) << 16) | (k(g) << 8) | k(b)
+  }
+
+  /// All calendars, the default for new appointments first.
+  private func kalender() -> [[String: Any]] {
+    let standard = store.defaultCalendarForNewEvents?.calendarIdentifier
+    let alle = store.calendars(for: .event).sorted { a, b in
+      if a.calendarIdentifier == standard { return true }
+      if b.calendarIdentifier == standard { return false }
+      return a.title.localizedCaseInsensitiveCompare(b.title) == .orderedAscending
+    }
+    return alle.map {
+      [
+        "id": $0.calendarIdentifier,
+        "name": $0.title,
+        "farbe": GroundsetKalender.farbe($0.cgColor),
+        "schreibbar": $0.allowsContentModifications,
+      ]
+    }
+  }
+
+  private func termine(von: Date, bis: Date, aus: Set<String>) -> [[String: Any]] {
+    let kalender = store.calendars(for: .event).filter { !aus.contains($0.calendarIdentifier) }
+    if kalender.isEmpty { return [] }
+    let p = store.predicateForEvents(withStart: von, end: bis, calendars: kalender)
+    return store.events(matching: p)
+      .sorted { $0.startDate < $1.startDate }
+      .map {
+        [
+          "start": GroundsetKalender.ms($0.startDate),
+          "titel": $0.title ?? "",
+          "ganztags": $0.isAllDay,
+          "kalender": $0.calendar?.title ?? "Kalender",
+        ]
+      }
+  }
+
+  private func anlegen(_ args: [String: Any]) -> Bool {
+    guard erlaubt, let start = GroundsetKalender.datum(args["start"]),
+      let titel = args["titel"] as? String
+    else { return false }
+    let e = EKEvent(eventStore: store)
+    e.title = titel
+    e.startDate = start
+    let ganztags = args["ganztags"] as? Bool ?? false
+    e.isAllDay = ganztags
+    e.endDate = start.addingTimeInterval(ganztags ? 0 : 3600)
+    if let id = args["kalender"] as? String, let k = store.calendar(withIdentifier: id),
+      k.allowsContentModifications
+    {
+      e.calendar = k
+    } else {
+      e.calendar = store.defaultCalendarForNewEvents
+    }
+    guard e.calendar != nil else { return false }
+    do {
+      try store.save(e, span: .thisEvent)
+      return true
+    } catch {
+      return false
+    }
   }
 }

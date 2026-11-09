@@ -5,6 +5,9 @@ import '../erinnerungen/erinnerung_dienst.dart';
 import '../erinnerungen/erinnerung_plan.dart';
 import '../health/health_dienst.dart';
 import '../health/health_verbinden.dart';
+import '../feed/feed_store.dart';
+import '../kalender/kalender_dienst.dart';
+import '../kalender/kalender_logik.dart';
 import '../ui/coach_style.dart';
 import 'konto_daten.dart';
 import 'konto_dienst.dart';
@@ -28,9 +31,19 @@ class KontoEinstellungen extends StatefulWidget {
     this.erinnerungen,
     this.onErinnerungen,
     this.health,
+    this.kalender,
+    this.feed,
+    this.onKalender,
     this.abo,
     this.onAbo,
   });
+
+  /// The phone's calendar (vault Umsetzung/Kalender verbinden): which
+  /// calendars are shown, where new appointments go, disconnect. Needs
+  /// [feed], where the choice is kept; [onKalender] after a change.
+  final KalenderDienst? kalender;
+  final FeedStore? feed;
+  final VoidCallback? onKalender;
 
   /// Apple Health to connect (vault Umsetzung/Apple Health); null without.
   final HealthDienst? health;
@@ -75,6 +88,8 @@ class _KontoEinstellungenState extends State<KontoEinstellungen>
   bool _sichert = false;
   String? _meldung;
   ErinnerungEinstellungen? _erinnerungen;
+  KalenderEinstellung? _kal;
+  List<KalenderInfo> _kalListe = const [];
 
   @override
   void initState() {
@@ -94,8 +109,17 @@ class _KontoEinstellungenState extends State<KontoEinstellungen>
     final s = await widget.store.loadStand();
     final i = await widget.sicherung.inhalt();
     final e = await widget.erinnerungen?.ladeEinstellungen();
+    final kd = widget.kalender, feed = widget.feed;
+    final kal = kd != null && kd.moeglich && feed != null
+        ? await feed.loadKalender()
+        : null;
+    final kalListe = kal?.verbunden == true
+        ? await kd!.kalender()
+        : const <KalenderInfo>[];
     if (mounted) {
       setState(() {
+        _kal = kal;
+        _kalListe = kalListe;
         _erinnerungen = e;
         _konto = k;
         _stand = s;
@@ -524,6 +548,7 @@ class _KontoEinstellungenState extends State<KontoEinstellungen>
                 ),
               ),
             ]),
+          if (_kal case final kal?) ..._kalenderGruppen(gruppe, kal),
           gruppe(.4, 'Deine Daten', [
             _Zeile(
               key: const ValueKey('daten-herunterladen'),
@@ -569,6 +594,141 @@ class _KontoEinstellungenState extends State<KontoEinstellungen>
         ],
       ),
     );
+  }
+
+  Future<void> _kalSpeichern(KalenderEinstellung e) async {
+    await widget.feed!.saveKalender(e);
+    widget.onKalender?.call();
+    await _laden();
+  }
+
+  Future<void> _kalVerbinden() async {
+    final ok = await kalenderVerbinden(
+      widget.kalender!,
+      widget.feed!,
+      widget.clock(),
+    );
+    if (!ok && mounted) {
+      setState(
+        () => _meldung =
+            'Ohne Erlaubnis geht es nicht. Du kannst es in den '
+            'iPhone-Einstellungen unter Groundset erlauben.',
+      );
+      return;
+    }
+    widget.onKalender?.call();
+    await _laden();
+  }
+
+  Future<void> _zielWaehlen(KalenderEinstellung kal) async {
+    final moeglich = [
+      for (final k in _kalListe)
+        if (k.schreibbar) k,
+    ];
+    final id = await showDialog<String>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        backgroundColor: CoachStyle.card,
+        title: Text('Neue Termine landen in', style: Glas.tText),
+        children: [
+          for (final k in moeglich)
+            SimpleDialogOption(
+              key: ValueKey('kalender-ziel-${k.id}'),
+              onPressed: () => Navigator.pop(context, k.id),
+              child: Row(
+                children: [
+                  _Punkt(k.farbe),
+                  const SizedBox(width: 10),
+                  Text(k.name, style: Glas.tText),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+    if (id != null) await _kalSpeichern(kal.copyWith(ziel: () => id));
+  }
+
+  List<Widget> _kalenderGruppen(
+    Widget Function(double start, String? titel, List<Widget> zeilen) gruppe,
+    KalenderEinstellung kal,
+  ) {
+    final name = widget.kalender!.name;
+    if (!kal.verbunden) {
+      return [
+        gruppe(.39, 'Kalender', [
+          _Zeile(
+            key: const ValueKey('konto-kalender'),
+            vorne: const _KalBlatt(),
+            titel: name,
+            unter: 'Deine Termine kommen von selbst in Dein Tag.',
+            hinten: 'Verbinden',
+            pfeil: true,
+            onTap: _kalVerbinden,
+          ),
+        ]),
+      ];
+    }
+    final schreibbar = [
+      for (final k in _kalListe)
+        if (k.schreibbar) k,
+    ];
+    KalenderInfo? ziel;
+    for (final k in schreibbar) {
+      if (k.id == kal.ziel) ziel = k;
+    }
+    ziel ??= schreibbar.isEmpty ? null : schreibbar.first;
+    return [
+      gruppe(.39, 'Kalender', [
+        _Zeile(
+          key: const ValueKey('konto-kalender'),
+          vorne: const _KalBlatt(),
+          titel: name,
+          hinten: 'verbunden',
+        ),
+      ]),
+      if (_kalListe.isNotEmpty)
+        gruppe(.39, 'Welche Kalender zeigen', [
+          for (final k in _kalListe)
+            _Zeile(
+              vorne: _Punkt(k.farbe),
+              titel: k.name,
+              schalter: _GoldSchalter(
+                key: ValueKey('kalender-zeigen-${k.id}'),
+                an: !kal.aus.contains(k.id),
+                onChanged: (v) => _kalSpeichern(
+                  kal.copyWith(
+                    aus: v ? ({...kal.aus}..remove(k.id)) : {...kal.aus, k.id},
+                  ),
+                ),
+              ),
+            ),
+        ]),
+      if (ziel != null)
+        gruppe(.39, 'Neue Termine landen in', [
+          _Zeile(
+            key: const ValueKey('kalender-ziel'),
+            vorne: _Punkt(ziel.farbe),
+            titel: ziel.name,
+            hinten: 'ändern',
+            pfeil: true,
+            onTap: () => _zielWaehlen(kal),
+          ),
+        ]),
+      gruppe(.39, null, [
+        _Zeile(
+          key: const ValueKey('kalender-trennen'),
+          titel: 'Kalender trennen',
+          unter: 'Danach ist die Terminliste der App wieder da.',
+          rot: true,
+          onTap: () async {
+            await kalenderTrennen(widget.feed!);
+            widget.onKalender?.call();
+            await _laden();
+          },
+        ),
+      ]),
+    ];
   }
 }
 
@@ -689,6 +849,56 @@ class _GoldSchalter extends StatelessWidget {
           ),
         ),
       ),
+    ),
+  );
+}
+
+/// Colour dot of one calendar.
+class _Punkt extends StatelessWidget {
+  const _Punkt(this.farbe);
+  final int farbe;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 9,
+    height: 9,
+    decoration: BoxDecoration(shape: BoxShape.circle, color: Color(farbe)),
+  );
+}
+
+/// Small calendar sheet like on the "Kalender verbinden" card.
+class _KalBlatt extends StatelessWidget {
+  const _KalBlatt();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 30,
+    height: 32,
+    clipBehavior: Clip.antiAlias,
+    decoration: BoxDecoration(
+      color: const Color(0xFFF3E9D8),
+      borderRadius: BorderRadius.circular(7),
+    ),
+    child: Column(
+      children: [
+        Container(
+          height: 8,
+          decoration: const BoxDecoration(gradient: CoachStyle.goldGradient),
+        ),
+        Expanded(
+          child: Center(
+            child: Text(
+              '${DateTime.now().day}',
+              style: const TextStyle(
+                fontFamily: 'Sora',
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF2A1D0D),
+              ),
+            ),
+          ),
+        ),
+      ],
     ),
   );
 }

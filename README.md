@@ -38,6 +38,7 @@ Adaptive KI-Coaching-App für Sport und Selbstoptimierung. Statt starrer Formula
 - [[Coach-Stil]]: wie die KI als Coach schreibt, mit Beispielen
 - [[Design]]: Name Groundset, Farben, Schrift und Logo (Wurzeln und Trieb)
 - [[Tages-Planer]]: Kalender + Training, KI plant die Woche um Termine herum (Tagesplan gebaut)
+- [[Kalender verbinden]]: ein Knopf, danach kommen die Termine nur noch aus dem iPhone-Kalender (gebaut)
 - [[Dein zukünftiges Ich]]: Fortschritt sichtbar machen, Wochenfoto mit eigenem Foto-Produkt, Vorschau 3/6/12 Monate (gebaut, KI-Teile folgen)
 - [[Supplement-Routine]]: eigene Supplements mit fester Uhrzeit auf der Seite Ernährung, Abhaken dort, kleines Erinnerungsfeld auf „Heute“ (gebaut, Erinnerungen folgen mit der Handy-Version)
 
