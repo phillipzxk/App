@@ -10,18 +10,16 @@ import '../ui/coach_style.dart';
 abstract final class Glas {
   static const radius = 24.0;
 
+  // Since the Umbau (vault Umsetzung/Umbau.md, 2026-11-12): calm, even
+  // glass without a gold frame, like the tiles on Heute.
   static const fill = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [Color(0x1AFFECDC), Color(0x08FFECDC), Color(0x40120C10)],
-    stops: [0, 0.4, 1],
+    colors: [Color(0x0FFFF5E6), Color(0x0FFFF5E6)],
   );
 
   static const goldFill = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0x26FFE8BE), Color(0x0AE0BF7E), Color(0x40120C10)],
-    stops: [0, 0.45, 1],
+    colors: [Color(0x24F5DFAE), Color(0x12F5DFAE)],
   );
 
   static const nightFill = LinearGradient(
@@ -30,21 +28,16 @@ abstract final class Glas {
     colors: [Color(0x73464A8C), Color(0x990E0F22)],
   );
 
-  static const edge = Color(0x21FFEED7);
-  static const goldEdge = Color(0x99E0BF7E);
+  static const edge = Color(0x0DFFF5E6);
+  static const goldEdge = Color(0x33F5DFAE);
   static const nightEdge = Color(0x38AAB4FF);
   static const label = Color(0xFFE6C98F);
   static const soft = Color(0xFFCDBB98);
   static const text = Color(0xFFF7EEDD);
 
-  static const shadow = [
-    BoxShadow(color: Color(0x80000000), blurRadius: 34, offset: Offset(0, 10)),
-  ];
+  static const shadow = <BoxShadow>[];
 
-  static const goldShadow = [
-    BoxShadow(color: Color(0x33E0BF7E), blurRadius: 28),
-    BoxShadow(color: Color(0x80000000), blurRadius: 34, offset: Offset(0, 10)),
-  ];
+  static const goldShadow = <BoxShadow>[];
 
   static TextStyle tLabel = const TextStyle(
     fontFamily: 'Figtree',
@@ -110,14 +103,6 @@ class GlasBox extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(color: edge),
         boxShadow: shadow,
-      ),
-      foregroundDecoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(radius),
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment(0, -0.85),
-          colors: [Color(0x1FFFF8EB), Color(0x00FFF8EB)],
-        ),
       ),
       child: child,
     );
@@ -280,7 +265,13 @@ class _GlasHintergrundState extends State<GlasHintergrund>
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-    decoration: const BoxDecoration(gradient: CoachStyle.nightGradient),
+    decoration: const BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xFF1B1611), Color(0xFF0F0C09)],
+      ),
+    ),
     child: Stack(
       children: [
         Positioned.fill(
@@ -296,30 +287,26 @@ class _GlasHintergrundState extends State<GlasHintergrund>
   );
 }
 
+/// One soft gold light from the top right that drifts slowly (Umbau
+/// 2026-11-12: gold only, no coloured lights).
 class _BlobPainter extends CustomPainter {
   _BlobPainter(this.t);
   final double t;
 
   @override
   void paint(Canvas canvas, Size size) {
-    void blob(Offset c, double r, Color col) {
-      canvas.drawCircle(
-        c,
-        r,
-        Paint()
-          ..shader = RadialGradient(colors: [col, col.withValues(alpha: 0)])
-              .createShader(Rect.fromCircle(center: c, radius: r)),
-      );
-    }
-
     final w = size.width, h = size.height;
-    blob(Offset(w * (.05 + .08 * t), h * .12), w * .7, const Color(0x388A5A2A));
-    blob(
-      Offset(w * (.95 - .1 * t), h * (.38 + .05 * t)),
-      w * .75,
-      const Color(0x2E3A4A2A),
+    final c = Offset(w * (.8 - .12 * t), -h * .04);
+    final r = w * (1.05 + .1 * t);
+    canvas.drawCircle(
+      c,
+      r,
+      Paint()
+        ..shader = const RadialGradient(
+          colors: [Color(0x38E9C98A), Color(0x00E9C98A)],
+          stops: [0, .8],
+        ).createShader(Rect.fromCircle(center: c, radius: r)),
     );
-    blob(Offset(w * .3, h * (.85 - .06 * t)), w * .7, const Color(0x266B4520));
   }
 
   @override

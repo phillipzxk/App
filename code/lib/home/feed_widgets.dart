@@ -36,10 +36,13 @@ class PageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final labelStyle = CoachStyle.goldLabel.copyWith(
+    // Since the Umbau (2026-11-12): small light label, calm white title.
+    const labelStyle = TextStyle(
       fontFamily: 'Sora',
-      letterSpacing: 2.2,
-      color: const Color(0xFFC9A25C),
+      fontWeight: FontWeight.w600,
+      fontSize: 10,
+      letterSpacing: 1.6,
+      color: Color(0xFFD8C6A8),
     );
     final heading = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,7 +75,19 @@ class PageHeader extends StatelessWidget {
               ),
               const SizedBox(width: 12),
             ],
-            Expanded(child: GoldText(title, style: CoachStyle.title)),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontFamily: 'Sora',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 27,
+                  height: 1.15,
+                  letterSpacing: -.6,
+                  color: Color(0xFFF6ECDB),
+                ),
+              ),
+            ),
           ],
         ),
       ],
@@ -82,12 +97,7 @@ class PageHeader extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(2, 16, 2, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            heading,
-            const SizedBox(height: 16),
-            const GoldLine(),
-            const SizedBox(height: 18),
-          ],
+          children: [heading, const SizedBox(height: 16)],
         ),
       );
     }
