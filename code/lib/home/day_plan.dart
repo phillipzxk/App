@@ -796,17 +796,12 @@ class _KalenderVerbindenState extends State<_KalenderVerbinden>
     ];
     return ClipRRect(
       key: const ValueKey('kalender-karte'),
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(22),
       child: Container(
         padding: const EdgeInsets.fromLTRB(13, 12, 12, 12),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: const Color(0x6BC9A25C)),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0x1FF0D49A), Color(0x0AC49A55)],
-          ),
+          borderRadius: BorderRadius.circular(22),
+          color: const Color(0x14F5DFAE),
         ),
         child: Stack(
           clipBehavior: Clip.none,

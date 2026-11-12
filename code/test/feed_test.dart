@@ -72,7 +72,7 @@ void main() {
 
     // Schlaf opens in Körper with Schlaf & Routine picked.
     await openBereich(tester, 'schlaf');
-    expect(find.text('Körper'), findsOneWidget);
+    expect(find.text('KÖRPER'), findsOneWidget);
     expect(find.text('Schlaf & Routine'), findsWidgets);
     expect(find.byKey(const ValueKey('kachel-s-himmel')), findsOneWidget);
 

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../konto/konto_ui.dart' show bewegungAn;
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
+import '../ui/umbau.dart';
 import 'glas.dart';
 import 'koerper_bilder.dart';
 import 'koerper_szene.dart';
@@ -545,22 +546,17 @@ class _BereichSeiteState extends State<BereichSeite>
       backgroundColor: const Color(0xFF0F0C09),
       // Dark brown with a soft gold light from the top (draft "Bereiche
       // als Bilder" 3, Phillip "ins Braun" 2026-11-07).
+      // Since the Umbau (2026-11-12): espresso brown with one gold light
+      // from the top right, like Heute.
       body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF2A2016), Color(0xFF1A140E), Color(0xFF0F0C09)],
-            stops: [0, .45, 1],
-          ),
-        ),
+        decoration: const BoxDecoration(gradient: Umbau.seite),
         child: DecoratedBox(
           decoration: const BoxDecoration(
             gradient: RadialGradient(
-              center: Alignment(0, -1.1),
-              radius: 1.1,
-              colors: [Color(0x26C9A25C), Color(0x00C9A25C)],
-              stops: [0, .72],
+              center: Alignment(.6, -1.15),
+              radius: 1.15,
+              colors: [Color(0x38E9C98A), Color(0x00E9C98A)],
+              stops: [0, .75],
             ),
           ),
           child: Center(
@@ -582,15 +578,14 @@ class _BereichSeiteState extends State<BereichSeite>
                               width: 36,
                               height: 36,
                               alignment: Alignment.center,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: const Color(0x0DFFF0D7),
-                                border: Border.all(color: Glas.edge),
+                                color: Color(0x1FFFECD2),
                               ),
                               child: const Icon(
                                 Icons.chevron_left,
                                 size: 22,
-                                color: CoachStyle.goldLight,
+                                color: Umbau.gold,
                               ),
                             ),
                           ),
@@ -610,9 +605,11 @@ class _BereichSeiteState extends State<BereichSeite>
                             const SizedBox(width: 10),
                             Text(
                               widget.zurueck,
-                              style: Glas.tLabel.copyWith(
-                                fontSize: 12.5,
-                                color: Glas.label,
+                              style: const TextStyle(
+                                fontFamily: 'Figtree',
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                                color: Umbau.text,
                               ),
                             ),
                           ],
@@ -620,67 +617,111 @@ class _BereichSeiteState extends State<BereichSeite>
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(22, 14, 14, 0),
+                      padding: const EdgeInsets.fromLTRB(22, 14, 22, 0),
                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  widget.teile.length == 1
-                                      ? 'Bereich'
-                                      : widget.name,
-                                  style: Glas.tLabel.copyWith(
-                                    fontSize: widget.teile.length == 1
-                                        ? 11
-                                        : 12,
-                                    letterSpacing: .4,
-                                    color: widget.teile.length == 1
-                                        ? Glas.label
-                                        : CoachStyle.goldLight,
+                                  (widget.teile.length == 1
+                                          ? 'Bereich'
+                                          : widget.name)
+                                      .toUpperCase(),
+                                  style: Umbau.label.copyWith(
+                                    color: const Color(0xFFF1E6D2),
                                   ),
                                 ),
+                                const SizedBox(height: 3),
                                 AnimatedSwitcher(
                                   duration: const Duration(milliseconds: 300),
                                   child: Text(
                                     t.name,
                                     key: ValueKey('titel-${t.id}'),
                                     maxLines: 1,
-                                    style: CoachStyle.title.copyWith(
+                                    style: const TextStyle(
+                                      fontFamily: 'Sora',
+                                      fontWeight: FontWeight.w700,
                                       fontSize: 27,
-                                      color: Glas.text,
+                                      height: 1.15,
                                       letterSpacing: -0.6,
+                                      color: Umbau.text,
+                                    ),
+                                  ),
+                                ),
+                                // The score big in gold, counting up.
+                                GestureDetector(
+                                  key: const ValueKey('bereich-ring'),
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: widget.verlauf == null
+                                      ? null
+                                      : () => oeffneFeld(
+                                          context,
+                                          _ringKey,
+                                          widget.verlauf!,
+                                          widget.name,
+                                        ),
+                                  child: KeyedSubtree(
+                                    key: _ringKey,
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        ZaehlZahl(
+                                          key: ValueKey('ring-${t.id}'),
+                                          wert: (t.wert ?? 0).toDouble(),
+                                          leer: t.wert == null ? '–' : null,
+                                          style: const TextStyle(
+                                            fontFamily: 'Sora',
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 60,
+                                            height: 1.05,
+                                            letterSpacing: -2.4,
+                                            color: Colors.white,
+                                            fontFeatures: [
+                                              FontFeature.tabularFigures(),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Flexible(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                              bottom: 10,
+                                            ),
+                                            child: Text(
+                                              _trend(t),
+                                              style: const TextStyle(
+                                                fontFamily: 'Figtree',
+                                                fontSize: 12,
+                                                height: 1.3,
+                                                color: Color(0xFFE6D9C2),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          GestureDetector(
-                            key: const ValueKey('bereich-ring'),
-                            onTap: widget.verlauf == null
-                                ? null
-                                : () => oeffneFeld(
-                                    context,
-                                    _ringKey,
-                                    widget.verlauf!,
-                                    widget.name,
-                                  ),
-                            child: KeyedSubtree(
-                              key: _ringKey,
-                              child: WertRing(
-                                key: ValueKey('ring-${t.id}'),
-                                wert: t.wert,
-                                size: 40,
+                          if (t.woche.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: _WochenBalken(
+                                key: ValueKey('woche-${t.id}'),
+                                woche: t.woche,
                               ),
                             ),
-                          ),
                         ],
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 380),
                         child: _SegmentLeiste(
@@ -724,6 +765,14 @@ class _BereichSeiteState extends State<BereichSeite>
         ),
       ),
     );
+  }
+
+  /// "+1 zu gestern", "wie gestern" or nothing before two ratings.
+  static String _trend(Unterbereich t) {
+    final w = t.woche;
+    if (w.length < 2 || w.last == null || w[w.length - 2] == null) return '';
+    final d = w.last! - w[w.length - 2]!;
+    return d == 0 ? 'wie gestern' : '${d > 0 ? '+' : '−'}${d.abs()} zu gestern';
   }
 
   Widget _kopf() => Row(
@@ -1010,14 +1059,13 @@ class _SegmentLeiste extends StatelessWidget {
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
-        color: const Color(0x12FFECC8),
-        border: Border.all(color: const Color(0x29FFEECD)),
+        color: const Color(0x17FFF0DC),
       ),
       child: Stack(
         children: [
           AnimatedAlign(
-            duration: const Duration(milliseconds: 520),
-            curve: Curves.easeInOutCubic,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeOutBack,
             alignment: Alignment(n == 1 ? 0 : -1 + 2 * aktiv / (n - 1), 0),
             child: FractionallySizedBox(
               widthFactor: 1 / n,
@@ -1025,10 +1073,7 @@ class _SegmentLeiste extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(999),
-                  gradient: CoachStyle.goldGradient,
-                  boxShadow: const [
-                    BoxShadow(color: Color(0x66E0BF7E), blurRadius: 16),
-                  ],
+                  gradient: Umbau.grad,
                 ),
               ),
             ),
@@ -1048,7 +1093,9 @@ class _SegmentLeiste extends StatelessWidget {
                           fontFamily: 'Figtree',
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
-                          color: i == aktiv ? CoachStyle.goldInk : Glas.soft,
+                          color: i == aktiv
+                              ? Umbau.tinte
+                              : const Color(0xFFDCCBB0),
                         ),
                         child: Text(namen[i], maxLines: 1),
                       ),
@@ -1845,21 +1892,9 @@ class _TeilPillen extends StatelessWidget {
               curve: Curves.easeOutCubic,
               padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 8),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: i == aktiv
-                    ? const LinearGradient(
-                        colors: [Color(0xFFE9CC8E), Color(0xFFB98E47)],
-                      )
-                    : null,
-                color: i == aktiv ? null : const Color(0x8C120E0A),
-                border: Border.all(
-                  color: i == aktiv ? Colors.transparent : Glas.edge,
-                ),
-                boxShadow: i == aktiv
-                    ? const [
-                        BoxShadow(color: Color(0x55E0BF7E), blurRadius: 18),
-                      ]
-                    : null,
+                borderRadius: BorderRadius.circular(999),
+                gradient: i == aktiv ? Umbau.grad : null,
+                color: i == aktiv ? null : const Color(0x17FFF0DC),
               ),
               child: Row(
                 children: [
@@ -1993,31 +2028,31 @@ class _BildSeiteViewState extends State<_BildSeiteView>
             key: widget.coachKey,
             child: Row(
               children: [
+                // The coach stands free, like on Heute (Umbau 2026-11-12).
                 Container(
+                  padding: const EdgeInsets.all(2),
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(color: Color(0x44E0BF7E), blurRadius: 12),
-                    ],
+                    gradient: Umbau.grad,
                   ),
-                  child: const CoachAvatar(size: 38),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.fromLTRB(14, 9, 14, 10),
-                    decoration: BoxDecoration(
-                      color: const Color(0x0AFFF0D7),
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: Glas.edge),
+                  child: const ClipOval(
+                    child: Image(
+                      image: AssetImage('assets/images/coach.jpg'),
+                      width: 38,
+                      height: 38,
+                      fit: BoxFit.cover,
                     ),
-                    child: Text(
-                      s.coach,
-                      style: Glas.tText.copyWith(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w500,
-                        height: 1.38,
-                      ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    s.coach,
+                    style: const TextStyle(
+                      fontFamily: 'Figtree',
+                      fontSize: 14.5,
+                      height: 1.4,
+                      color: Color(0xFFF1E6D2),
                     ),
                   ),
                 ),
@@ -2027,17 +2062,12 @@ class _BildSeiteViewState extends State<_BildSeiteView>
         ),
         const SizedBox(height: 12),
         ClipRRect(
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(30),
           child: DecoratedBox(
-            // Dark brown with a faint gold light (draft "Bereiche als
-            // Bilder" 3, Phillip "ins Braun" 2026-11-07).
+            // A calm glass tile like on Heute (Umbau 2026-11-12).
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(32),
-              gradient: const LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0xFF211910), Color(0xFF140F0A)],
-              ),
+              borderRadius: BorderRadius.circular(30),
+              color: Umbau.glas,
               border: Border.all(color: Glas.edge),
             ),
             child: DecoratedBox(
@@ -2065,8 +2095,8 @@ class _BildSeiteViewState extends State<_BildSeiteView>
         Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: const Color(0x08FFF0D7),
-            borderRadius: BorderRadius.circular(22),
+            color: Umbau.glas,
+            borderRadius: BorderRadius.circular(26),
             border: Border.all(color: Glas.edge),
           ),
           child: IntrinsicHeight(
@@ -2098,15 +2128,8 @@ class _BildSeiteViewState extends State<_BildSeiteView>
                   height: 50,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    gradient: CoachStyle.goldGradient,
+                    gradient: Umbau.grad,
                     borderRadius: BorderRadius.circular(999),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x38C9A25C),
-                        blurRadius: 22,
-                        offset: Offset(0, 8),
-                      ),
-                    ],
                   ),
                   child: Text(
                     label,
@@ -2115,7 +2138,7 @@ class _BildSeiteViewState extends State<_BildSeiteView>
                       fontFamily: 'Figtree',
                       fontWeight: FontWeight.w700,
                       fontSize: 14.5,
-                      color: CoachStyle.goldInk,
+                      color: Umbau.tinte,
                     ),
                   ),
                 ),
@@ -2129,10 +2152,9 @@ class _BildSeiteViewState extends State<_BildSeiteView>
                 Container(
                   width: 50,
                   height: 50,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0x0DFFF0D7),
-                    border: Border.all(color: Glas.edge),
+                    color: Color(0x17FFF0DC),
                   ),
                   child: Icon(icon, size: 20, color: Glas.text),
                 ),
@@ -2226,4 +2248,73 @@ class _ZielState extends State<_Ziel> {
       child: KeyedSubtree(key: _g, child: widget.child),
     ),
   );
+}
+
+/// The last seven days as slim bars, today in gold (Umbau 2026-11-12).
+class _WochenBalken extends StatelessWidget {
+  const _WochenBalken({super.key, required this.woche});
+  final List<int?> woche;
+
+  @override
+  Widget build(BuildContext context) {
+    final n = woche.length;
+    final heute = DateTime.now().weekday;
+    const tage = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < n; i++)
+          Padding(
+            padding: const EdgeInsets.only(left: 6),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 52,
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween(begin: bewegungAn ? 0 : 1, end: 1),
+                      duration: Duration(milliseconds: 900 + i * 70),
+                      curve: Interval(
+                        i * 70 / (900 + i * 70),
+                        1,
+                        curve: Curves.easeOutBack,
+                      ),
+                      builder: (context, v, _) => Container(
+                        width: 11,
+                        height: math.max(
+                          0,
+                          (4 + 48 * (woche[i] ?? 0) / 10) * v,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(6),
+                          gradient: i == n - 1 && woche[i] != null
+                              ? Umbau.grad
+                              : null,
+                          color: i == n - 1 && woche[i] != null
+                              ? null
+                              : const Color(0x33FFECD2),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  tage[(heute - 1 - (n - 1 - i)) % 7],
+                  style: TextStyle(
+                    fontFamily: 'Sora',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 8.5,
+                    color: i == n - 1 ? Colors.white : const Color(0xFFCDBB9D),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
 }

@@ -363,7 +363,7 @@ class _SonnenbogenState extends State<Sonnenbogen>
       final rest = wahl.minute - _jetzt;
       t2 = [
         if (wahl.text != null) wahl.text!,
-        rest > 0 ? 'in ${_dauer(rest)}' : 'erledigt ✓',
+        rest > 0 ? 'in ${_dauer(rest)}' : 'erledigt',
       ].join(' · ');
     } else {
       final n = _sortiert.where((p) => p.minute > _jetzt).firstOrNull;
@@ -387,40 +387,43 @@ class _SonnenbogenState extends State<Sonnenbogen>
         t2 = n.text;
       }
     }
-    return Container(
+    // Since the Umbau (2026-11-12) the same light gold tile as "Heute
+    // dran" on Heute; while looking ahead it turns to quiet glass.
+    const tinte = Color(0xFF2A1D0D);
+    final farbe = vorschau ? const Color(0xFFF6ECDB) : tinte;
+    return AnimatedContainer(
       key: const ValueKey('tag-naechstes'),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      duration: const Duration(milliseconds: 250),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: vorschau ? const Color(0xFF8E95B8) : CoachStyle.goldEdge,
-        ),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF241B12), Color(0xFF16110C)],
+        borderRadius: BorderRadius.circular(30),
+        gradient: LinearGradient(
+          begin: const Alignment(-1, -.6),
+          end: const Alignment(1, .6),
+          colors: vorschau
+              ? const [Color(0x1FFFF5E6), Color(0x1FFFF5E6)]
+              : const [Color(0xFFF6E3B8), Color(0xFFD7A45C)],
         ),
       ),
       child: Row(
         children: [
           ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 104),
-            child: ShaderMask(
-              shaderCallback: (r) => _gold.createShader(r),
-              child: Text.rich(
-                TextSpan(
-                  text: gross,
-                  children: [
-                    TextSpan(text: klein, style: const TextStyle(fontSize: 15)),
-                  ],
-                ),
-                style: const TextStyle(
-                  fontFamily: 'Sora',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 28,
-                  color: Colors.white,
-                  fontFeatures: [FontFeature.tabularFigures()],
-                ),
+            child: Text.rich(
+              TextSpan(
+                text: gross,
+                children: [
+                  TextSpan(text: klein, style: const TextStyle(fontSize: 16)),
+                ],
+              ),
+              style: TextStyle(
+                fontFamily: 'Sora',
+                fontWeight: FontWeight.w700,
+                fontSize: 31,
+                height: 1,
+                letterSpacing: -.6,
+                color: farbe,
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ),
@@ -429,14 +432,27 @@ class _SonnenbogenState extends State<Sonnenbogen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(t1, style: CoachStyle.cardTitle.copyWith(fontSize: 14.5)),
+                Text(
+                  t1,
+                  style: TextStyle(
+                    fontFamily: 'Sora',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14.5,
+                    height: 1.25,
+                    color: farbe,
+                  ),
+                ),
                 if (t2 != null) ...[
                   const SizedBox(height: 2),
                   Text(
                     t2,
-                    style: CoachStyle.body.copyWith(
+                    style: TextStyle(
+                      fontFamily: 'Figtree',
                       fontSize: 12.5,
-                      color: CoachStyle.beigeLabel,
+                      height: 1.3,
+                      color: vorschau
+                          ? const Color(0xFFCDBB9D)
+                          : const Color(0x9E2A1D0D),
                     ),
                   ),
                 ],
