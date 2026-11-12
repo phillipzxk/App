@@ -240,7 +240,12 @@ class FotoFeld extends StatelessWidget {
     required this.einstellungen,
     required this.fotos,
     required this.onOpen,
+    this.schlicht = false,
   });
+
+  /// Without its own frame, inside the tile with the days in a row
+  /// (Umbau 2026-11-12).
+  final bool schlicht;
 
   final DateTime today;
   final FotoEinstellungen? einstellungen;
@@ -270,6 +275,55 @@ class FotoFeld extends StatelessWidget {
     final pose = letztes == null || letztes.bilder.isEmpty
         ? ''
         : letztes.bilder.keys.first;
+    if (schlicht) {
+      return GestureDetector(
+        key: const ValueKey('foto-feld'),
+        behavior: HitTestBehavior.opaque,
+        onTap: onOpen,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'FOTO',
+              style: TextStyle(
+                fontFamily: 'Sora',
+                fontWeight: FontWeight.w600,
+                fontSize: 9.5,
+                letterSpacing: 1.5,
+                color: Color(0xFFB3A188),
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              titel,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: 'Sora',
+                fontWeight: FontWeight.w600,
+                fontSize: 14.5,
+                height: 1.25,
+                color: jetzt
+                    ? const Color(0xFFF5DFAE)
+                    : const Color(0xFFF6ECDB),
+              ),
+            ),
+            Text(
+              unter,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontFamily: 'Figtree',
+                fontSize: 11.5,
+                height: 1.3,
+                color: Color(0xFFCDBB9D),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     return Container(
       key: const ValueKey('foto-feld'),
       padding: const EdgeInsets.all(1.2),

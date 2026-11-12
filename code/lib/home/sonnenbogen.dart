@@ -867,7 +867,12 @@ class HeuteBogen extends StatefulWidget {
     this.onTap,
     this.ohneZeit,
     this.rund = false,
+    this.held = false,
   });
+
+  /// The light gold tile of the Umbau (2026-11-12): what is next with its
+  /// time, a big countdown and the day as one line the sun wanders along.
+  final bool held;
 
   final List<BogenPunkt> punkte;
   final int start;
@@ -932,6 +937,7 @@ class _HeuteBogenState extends State<HeuteBogen>
 
   @override
   Widget build(BuildContext context) {
+    if (widget.held) return _held();
     if (widget.rund) return _rund();
     return Material(
       color: Colors.transparent,
@@ -991,6 +997,89 @@ class _HeuteBogenState extends State<HeuteBogen>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _held() {
+    const tinte = Color(0xFF2A1D0D);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ValueListenableBuilder<int>(
+          valueListenable: _zeile,
+          builder: (context, _, _) {
+            final liste = _sortiert;
+            final n = liste
+                .where((p) => !p.erledigt && p.minute > _jetzt)
+                .firstOrNull;
+            String gross, titel;
+            if (n == null) {
+              gross = formatUhrzeit(_jetzt.floor() % 1440);
+              titel = liste.isEmpty ? 'Tag planen ›' : 'Alles geschafft';
+            } else {
+              final sek = ((n.minute - _jetzt) * 60).round().clamp(0, 86400);
+              gross =
+                  '${sek ~/ 3600}:${(sek % 3600 ~/ 60).toString().padLeft(2, '0')}'
+                  ':${(sek % 60).toString().padLeft(2, '0')}';
+              titel = '${n.titel} · ${formatUhrzeit(n.minute % 1440)}';
+            }
+            return Row(
+              key: const ValueKey('heute-naechstes'),
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'HEUTE DRAN',
+                        style: TextStyle(
+                          fontFamily: 'Sora',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 9.5,
+                          letterSpacing: 1.5,
+                          color: Color(0x9E2A1D0D),
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        titel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: 'Sora',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 17,
+                          height: 1.25,
+                          color: tinte,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  gross,
+                  style: const TextStyle(
+                    fontFamily: 'Sora',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 31,
+                    height: 1,
+                    letterSpacing: -.6,
+                    color: tinte,
+                    fontFeatures: [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 8),
+        CustomPaint(
+          size: const Size(double.infinity, 22),
+          painter: _TagLinie(this),
+        ),
+      ],
     );
   }
 
@@ -1148,6 +1237,53 @@ class _HeuteBogenState extends State<HeuteBogen>
       ),
     );
   }
+}
+
+/// The day as one line: every point of today a dot, the sun at now.
+class _TagLinie extends CustomPainter {
+  _TagLinie(this.s) : super(repaint: s._bild);
+  final _HeuteBogenState s;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const tinte = Color(0xFF2A1D0D);
+    final w = size.width, y = size.height / 2;
+    final a = s.widget.start, e = math.max(a + 1, s.widget.ende);
+    double wo(num minute) => ((minute - a) / (e - a)).clamp(.02, .98) * w;
+    final jetzt = wo(s._jetzt) * s._auf;
+    final spur = Paint()
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(
+      Offset(0, y),
+      Offset(w, y),
+      spur..color = const Color(0x2E2A1D0D),
+    );
+    canvas.drawLine(Offset(0, y), Offset(jetzt, y), spur..color = tinte);
+    for (final p in s.widget.punkte) {
+      final x = wo(p.minute);
+      canvas.drawCircle(
+        Offset(x, y),
+        4.5,
+        Paint()
+          ..color = x <= jetzt || p.erledigt ? tinte : const Color(0x472A1D0D),
+      );
+    }
+    final o = Offset(jetzt, y);
+    canvas
+      ..drawCircle(
+        o.translate(0, 2),
+        10,
+        Paint()
+          ..color = const Color(0x402A1D0D)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+      )
+      ..drawCircle(o, 14.5, Paint()..color = const Color(0x66FFFFFF))
+      ..drawCircle(o, 9.5, Paint()..color = Colors.white);
+  }
+
+  @override
+  bool shouldRepaint(_TagLinie old) => false;
 }
 
 class _HeuteMaler extends CustomPainter {

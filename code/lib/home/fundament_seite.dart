@@ -1,11 +1,11 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import '../ui/coach_style.dart';
+import '../konto/konto_ui.dart' show bewegungAn;
 import '../ui/coach_widgets.dart';
-import '../ui/logo.dart';
-import 'feed_widgets.dart';
+import '../ui/umbau.dart';
 import 'today_tab.dart';
 import 'wurzelwerk.dart';
 
@@ -52,7 +52,13 @@ class FundamentSeite extends StatelessWidget {
     this.wurzeln = 0,
     this.jubelTick = 0,
     this.lebensziele,
+    this.name = '',
+    this.onKonto,
   });
+
+  /// The round button top right, like on Heute.
+  final String name;
+  final VoidCallback? onKonto;
 
   final List<WurzelBereich> bereiche;
   final Future<void> Function(String id, Offset mitte) onOpen;
@@ -68,50 +74,138 @@ class FundamentSeite extends StatelessWidget {
     return NightScope(
       child: ListView(
         key: const ValueKey('fundament-seite'),
-        padding: const EdgeInsets.only(bottom: 110),
+        padding: const EdgeInsets.only(top: 14, bottom: 120),
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: PageHeader(
-              label: 'Deine ${bereiche.length} Bereiche',
-              title: 'Fundament',
-              trailing: null,
+            padding: const EdgeInsets.symmetric(horizontal: 22),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  height: 32,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'DEINE ${bereiche.length} BEREICHE',
+                          style: Umbau.label.copyWith(
+                            fontSize: 10,
+                            letterSpacing: 1.6,
+                            color: Umbau.hell,
+                          ),
+                        ),
+                      ),
+                      if (onKonto != null)
+                        KontoKnopfKlein(
+                          initiale: name.isEmpty ? '' : name[0].toUpperCase(),
+                          onTap: onKonto!,
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Fundament',
+                  style: TextStyle(
+                    fontFamily: 'Sora',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 32,
+                    height: 1.15,
+                    letterSpacing: -.6,
+                    color: Umbau.text,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // The same light gold tile as "Heute dran" on Heute.
+                GlasKachel(
+                  hell: true,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'DEIN SCHNITT',
+                            style: Umbau.label.copyWith(
+                              color: Umbau.tinteWeich,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          ZaehlZahl(
+                            wert: s ?? 0,
+                            leer: s == null ? '–' : null,
+                            stellen: 1,
+                            gold: false,
+                            textKey: const ValueKey('fundament-schnitt'),
+                            style: Umbau.zahl.copyWith(
+                              fontSize: 40,
+                              color: Umbau.tinte,
+                            ),
+                          ),
+                          if (t != null) ...[
+                            const SizedBox(height: 3),
+                            Text(
+                              trendText(t),
+                              style: Umbau.klein.copyWith(
+                                color: Umbau.tinteWeich,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            for (final b in bereiche)
+                              Flexible(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 13),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        b.wert?.toString() ?? '–',
+                                        style: const TextStyle(
+                                          fontFamily: 'Sora',
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 21,
+                                          height: 1.1,
+                                          color: Umbau.tinte,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        kurzName(b.name),
+                                        maxLines: 1,
+                                        softWrap: false,
+                                        overflow: TextOverflow.fade,
+                                        style: const TextStyle(
+                                          fontFamily: 'Sora',
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 9,
+                                          color: Umbau.tinteWeich,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          if (s != null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 0, 18, 6),
-              child: Row(
-                children: [
-                  Text('SCHNITT HEUTE', style: _klein),
-                  const Spacer(),
-                  TweenAnimationBuilder<double>(
-                    tween: Tween(begin: 0, end: s),
-                    duration: const Duration(milliseconds: 1400),
-                    curve: Curves.easeOutCubic,
-                    builder: (_, v, _) => GoldText(
-                      komma(v),
-                      key: const ValueKey('fundament-schnitt'),
-                      style: CoachStyle.title.copyWith(fontSize: 24),
-                    ),
-                  ),
-                  if (t != null && t != 0) ...[
-                    const SizedBox(width: 8),
-                    Text(
-                      '${t > 0 ? '+' : '−'}${komma(t.abs())} zu gestern',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: t > 0
-                            ? const Color(0xFF9BCB8A)
-                            : const Color(0xFFE39A7E),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
+          const SizedBox(height: 6),
           Wachsen(
+            dauer: const Duration(milliseconds: 2600),
             child: Wurzelwerk(
               bereiche: bereiche,
               onOpen: onOpen,
@@ -126,13 +220,16 @@ class FundamentSeite extends StatelessWidget {
       ),
     );
   }
+}
 
-  static final _klein = CoachStyle.goldLabel.copyWith(
-    fontFamily: 'Sora',
-    fontSize: 10,
-    letterSpacing: 1.8,
-    color: CoachStyle.beigeLabel,
-  );
+/// "+0,5 zu gestern", "−1,0 zu gestern" or "wie gestern".
+String trendText(double t) =>
+    t == 0 ? 'wie gestern' : '${t > 0 ? '+' : '−'}${komma(t.abs())} zu gestern';
+
+/// Short area name under a number or a bar: "Fokus", "Ausstr.".
+String kurzName(String name) {
+  final w = name.split(' ').first;
+  return w.length > 7 ? '${w.substring(0, 6)}.' : w;
 }
 
 /// Lets its child grow in from the top: a soft edge with a line of light
@@ -216,7 +313,8 @@ class _WachsenState extends State<Wachsen> with SingleTickerProviderStateMixin {
   }
 }
 
-/// Small card at the end of Heute that leads to the Fundament page.
+/// Wide tile at the end of Heute that leads to the Fundament page: the
+/// mean score counts up, beside it one gold bar per area.
 class FundamentVorschau extends StatelessWidget {
   const FundamentVorschau({
     super.key,
@@ -229,189 +327,153 @@ class FundamentVorschau extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = fundamentSchnitt(bereiche);
+    final t = fundamentTrend(bereiche);
     final schwach = fundamentSchwach(bereiche);
-    final satz = [
-      if (s != null) 'Schnitt ${komma(s)}',
+    final unter = [
+      if (t != null) trendText(t),
       if (schwach != null) '${schwach.name} braucht dich',
     ].join(' · ');
-    return HeuteFeld(
+    return GlasKachel(
       key: const ValueKey('fundament-vorschau'),
+      platz: 6,
       onTap: (_) => onTap(),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Container(
-            width: 52,
-            height: 58,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: CoachStyle.goldEdge),
-              color: const Color(0xFF17110B),
-            ),
-            child: const Center(
-              child: LogoMark(size: 36, ground: CoachStyle.cream),
-            ),
-          ),
-          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  'DEIN FUNDAMENT',
-                  style: CoachStyle.goldLabel.copyWith(
-                    fontFamily: 'Sora',
-                    fontSize: 9.5,
-                    letterSpacing: 1.6,
-                    color: CoachStyle.goldLight,
-                  ),
+                const Text('DEIN FUNDAMENT', style: Umbau.label),
+                const SizedBox(height: 6),
+                ZaehlZahl(
+                  wert: s ?? 0,
+                  leer: s == null ? '–' : null,
+                  stellen: 1,
+                  style: Umbau.zahl,
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  satz.isEmpty ? 'Alle Bereiche im Blick' : satz,
-                  style: const TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w600,
-                    color: CoachStyle.cream,
-                  ),
-                ),
-                const SizedBox(height: 7),
-                Wrap(
-                  spacing: 5,
-                  runSpacing: 5,
-                  children: [
-                    for (final b in bereiche)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(9),
-                          border: Border.all(color: CoachStyle.nightLineStrong),
-                        ),
-                        child: Text.rich(
-                          TextSpan(
-                            text: '${b.name.split(' ').first} ',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: CoachStyle.beigeLabel,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: b.wert?.toString() ?? '–',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  color: CoachStyle.goldLight,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                  ],
+                  unter.isEmpty ? 'Alle Bereiche im Blick' : unter,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Umbau.klein,
                 ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: CoachStyle.gold),
+          const SizedBox(width: 10),
+          for (final (i, b) in bereiche.indexed)
+            Padding(
+              padding: const EdgeInsets.only(left: 13),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    height: 48,
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(begin: bewegungAn ? 0 : 1, end: 1),
+                        duration: Duration(milliseconds: 1700 + i * 90),
+                        curve: Interval(
+                          (700 + i * 90) / (1700 + i * 90),
+                          1,
+                          curve: Curves.easeOutBack,
+                        ),
+                        builder: (context, v, _) => Container(
+                          width: 8,
+                          height: math.max(
+                            0,
+                            (4 + 44 * (b.wert ?? 0) / 10) * v,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            gradient: b.wert == null ? null : Umbau.grad,
+                            color: b.wert == null
+                                ? const Color(0x29FFECD2)
+                                : null,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    kurzName(b.name),
+                    style: const TextStyle(
+                      fontFamily: 'Sora',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 9,
+                      color: Color(0xFFCDBB9D),
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
   }
 }
 
-/// The slim glass bar at the bottom: two symbols, a gold drop glides to the
-/// open page and only there the name shows.
+/// The glass pill at the bottom: "Heute | Fundament", a gold knob glides
+/// to the open page.
 class GlasLeiste extends StatelessWidget {
   const GlasLeiste({super.key, required this.seite, required this.onWahl});
   final int seite;
   final ValueChanged<int> onWahl;
 
   static const _namen = ['Heute', 'Fundament'];
-  static const _icons = [Icons.wb_sunny_outlined, Icons.spa_outlined];
-
-  static const _text = TextStyle(
-    fontSize: 13.5,
-    fontWeight: FontWeight.w600,
-    color: CoachStyle.goldInk,
-  );
+  static const _b = 98.0;
 
   @override
   Widget build(BuildContext context) {
-    // Widths are known up front so the gold drop can glide between them.
-    final scaler = MediaQuery.textScalerOf(context);
-    double breite(int i) {
-      if (i != seite) return 52;
-      final tp = TextPainter(
-        text: TextSpan(text: _namen[i], style: _text),
-        textDirection: TextDirection.ltr,
-        textScaler: scaler,
-      )..layout();
-      return 52 + 7 + tp.width.ceilToDouble() + 1;
-    }
-
-    final w0 = breite(0), w1 = breite(1);
-    const kurve = Curves.easeOutBack;
-    const zeit = Duration(milliseconds: 450);
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(30),
-      child: BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Container(
-          padding: const EdgeInsets.all(5),
-          decoration: BoxDecoration(
-            color: const Color(0x9E221910),
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: const Color(0x59C9A25C)),
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(28)),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x66000000),
+            blurRadius: 30,
+            offset: Offset(0, 10),
           ),
-          child: AnimatedContainer(
-            duration: zeit,
-            curve: Curves.easeOutCubic,
-            width: w0 + w1,
-            height: 40,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                AnimatedPositioned(
-                  duration: zeit,
-                  curve: kurve,
-                  left: seite == 0 ? 0 : w0,
-                  width: seite == 0 ? w0 : w1,
-                  top: 0,
-                  bottom: 0,
-                  child: const DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: CoachStyle.goldGradient,
-                      borderRadius: BorderRadius.all(Radius.circular(24)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color(0x59F0D49A),
-                          blurRadius: 16,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: const Color(0x17FFF5E6),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: const Color(0x14FFFFFF)),
+            ),
+            child: SizedBox(
+              width: _b * 2,
+              height: 42,
+              child: Stack(
+                children: [
+                  AnimatedPositioned(
+                    duration: Duration(milliseconds: bewegungAn ? 550 : 0),
+                    curve: Curves.easeOutBack,
+                    left: seite * _b,
+                    width: _b,
+                    top: 0,
+                    bottom: 0,
+                    child: const DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: Umbau.grad,
+                        borderRadius: BorderRadius.all(Radius.circular(24)),
+                      ),
                     ),
                   ),
-                ),
-                AnimatedPositioned(
-                  duration: zeit,
-                  curve: Curves.easeOutCubic,
-                  left: 0,
-                  width: w0,
-                  top: 0,
-                  bottom: 0,
-                  child: _knopf(0),
-                ),
-                AnimatedPositioned(
-                  duration: zeit,
-                  curve: Curves.easeOutCubic,
-                  left: w0,
-                  width: w1,
-                  top: 0,
-                  bottom: 0,
-                  child: _knopf(1),
-                ),
-              ],
+                  Row(children: [_knopf(0), _knopf(1)]),
+                ],
+              ),
             ),
           ),
         ),
@@ -425,32 +487,25 @@ class GlasLeiste extends StatelessWidget {
       button: true,
       selected: an,
       label: _namen[i],
+      excludeSemantics: true,
       child: GestureDetector(
         key: ValueKey('leiste-${i == 0 ? 'heute' : 'fundament'}'),
         behavior: HitTestBehavior.opaque,
         onTap: () => onWahl(i),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              _icons[i],
-              size: 20,
-              color: an ? CoachStyle.goldInk : CoachStyle.beigeLabel,
-            ),
-            if (an)
-              Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 7),
-                  child: Text(
-                    _namen[i],
-                    style: _text,
-                    maxLines: 1,
-                    overflow: TextOverflow.clip,
-                    softWrap: false,
-                  ),
-                ),
+        child: SizedBox(
+          width: _b,
+          child: Center(
+            child: AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 300),
+              style: TextStyle(
+                fontFamily: 'Figtree',
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+                color: an ? Umbau.tinte : const Color(0xFFDCCBB0),
               ),
-          ],
+              child: Text(_namen[i], maxLines: 1, softWrap: false),
+            ),
+          ),
         ),
       ),
     );

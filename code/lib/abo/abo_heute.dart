@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -90,41 +89,26 @@ class _AboZaehlerState extends State<AboZaehler>
       child: GestureDetector(
         key: const ValueKey('abo-zaehler'),
         onTap: () => _blase == null ? _zeige() : _weg(),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(4, 4, 11, 4),
-          decoration: BoxDecoration(
-            color: const Color(0x12FFF0D7),
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: const Color(0x4DF3D79A)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedBuilder(
-                animation: _c,
-                builder: (_, _) => CustomPaint(
-                  size: const Size.square(32),
-                  painter: _RingMaler(widget.tag, _c.value),
-                ),
-              ),
-              const SizedBox(width: 7),
-              Text.rich(
+        // Since the Umbau (2026-11-12) a plain line: "Tag 1 von 7".
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text.rich(
+            TextSpan(
+              children: [
+                const TextSpan(text: 'Tag '),
                 TextSpan(
-                  children: [
-                    const TextSpan(text: 'Tag\n'),
-                    TextSpan(
-                      text: '${widget.tag} von 7',
-                      style: const TextStyle(
-                        color: Glas.label,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12.5,
-                      ),
-                    ),
-                  ],
+                  text: '${widget.tag}',
+                  style: const TextStyle(color: Color(0xFFF5DFAE)),
                 ),
-                style: Glas.tSoft.copyWith(fontSize: 10.5, height: 1.2),
-              ),
-            ],
+                const TextSpan(text: ' von 7'),
+              ],
+            ),
+            style: const TextStyle(
+              fontFamily: 'Sora',
+              fontWeight: FontWeight.w600,
+              fontSize: 10,
+              color: Color(0xFFD8C6A8),
+            ),
           ),
         ),
       ),
@@ -182,66 +166,6 @@ class _Blase extends StatelessWidget {
       ),
     ),
   );
-}
-
-class _RingMaler extends CustomPainter {
-  _RingMaler(this.tag, this.t);
-  final int tag;
-  final double t;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final c = size.center(Offset.zero);
-    final r = size.width / 2 - 3;
-    for (var i = 0; i < 7; i++) {
-      final a0 = -math.pi / 2 + i * 2 * math.pi / 7 + .12;
-      final an = i < tag && t * 7 > i;
-      final offen = i == tag;
-      canvas.drawArc(
-        Rect.fromCircle(center: c, radius: r),
-        a0,
-        2 * math.pi / 7 - .24,
-        false,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 3
-          ..strokeCap = StrokeCap.round
-          ..color = an
-              ? const Color(0xFFF6D690)
-              : offen && tag == 6
-              ? const Color(0x80F6D690)
-              : const Color(0x40D9C7A7),
-      );
-    }
-    // Ground line and a sprout that grows with the days.
-    final boden = c.dy + 7;
-    canvas.drawLine(
-      Offset(c.dx - 6, boden),
-      Offset(c.dx + 6, boden),
-      Paint()
-        ..color = const Color(0x80D9C7A7)
-        ..strokeWidth = 1,
-    );
-    final h = (3 + tag * 1.3) * Curves.easeOut.transform(t);
-    final s = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4
-      ..strokeCap = StrokeCap.round
-      ..color = const Color(0xFFF6D690);
-    canvas.drawPath(
-      Path()
-        ..moveTo(c.dx, boden)
-        ..lineTo(c.dx, boden - h)
-        ..moveTo(c.dx, boden - h * .55)
-        ..quadraticBezierTo(c.dx - 2, boden - h * .7, c.dx - 5, boden - h * .62)
-        ..moveTo(c.dx, boden - h * .8)
-        ..quadraticBezierTo(c.dx + 2, boden - h, c.dx + 5, boden - h * .95),
-      s,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_RingMaler old) => old.t != t || old.tag != tag;
 }
 
 /// Day 6 under the coach card: "Morgen: Deine erste Woche geht auf."

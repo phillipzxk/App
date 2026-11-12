@@ -7,6 +7,8 @@ tags: [umsetzung, navigation, heute, fundament]
 
 # Heute und Fundament
 
+> Aussehen seit 2026-11-12 neu: siehe [[Umbau]]. Die Struktur hier gilt weiter.
+
 Entschieden mit Phillip am 2026-11-08 (Entwurf 4 „Yes“ zur Struktur, Entwurf 6 „Sehr gut“ zum Aussehen). Entwurf: https://claude.ai/artifact/TaY5WKw9ugeYR9DzbDo5o1
 
 ## Warum
