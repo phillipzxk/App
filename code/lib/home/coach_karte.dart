@@ -3,7 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../ui/coach_style.dart';
-import '../ui/coach_widgets.dart';
+import '../konto/konto_ui.dart' show bewegungAn;
+import '../ui/umbau.dart';
 import 'heute_animationen.dart';
 
 /// The coach's reply on "Heute" (decided with Phillip 2026-10-20): as text
@@ -108,7 +109,14 @@ class _CoachKarteState extends State<CoachKarte>
         ],
       );
     },
-    child: CoachAvatar(lacht: widget.jubel != null),
+    child: Container(
+      padding: const EdgeInsets.all(2.5),
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: Umbau.grad,
+      ),
+      child: _Bild(lacht: widget.jubel != null),
+    ),
   );
 
   bool get _zu => widget.ansicht.startsWith('zu:');
@@ -127,61 +135,38 @@ class _CoachKarteState extends State<CoachKarte>
   Widget build(BuildContext context) {
     final zu = _zu;
     final punkte = _sicht == 'punkte' && widget.umschaltbar;
-    return Container(
-      key: const ValueKey('coach-karte'),
-      padding: const EdgeInsets.all(1.2),
-      decoration: BoxDecoration(
-        gradient: CoachStyle.goldEdgeGradient,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: CoachStyle.nightShadow,
-      ),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(18, 16, 14, 18),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF2A2118), Color(0xFF1B1611)],
+    final klappen = GestureDetector(
+      key: const ValueKey('coach-klappen'),
+      behavior: HitTestBehavior.opaque,
+      onTap: () => widget.onAnsicht(zu ? _sicht : 'zu:$_sicht'),
+      child: Tooltip(
+        message: zu ? 'Aufklappen' : 'Wegklappen',
+        child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: Icon(
+            zu ? Icons.expand_more : Icons.expand_less,
+            size: 20,
+            color: Umbau.weich,
           ),
-          borderRadius: BorderRadius.circular(19),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                _avatar(),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'DEIN COACH · HEUTE',
-                    style: CoachStyle.goldLabel.copyWith(
-                      color: CoachStyle.goldLight,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  key: const ValueKey('coach-klappen'),
-                  tooltip: zu ? 'Aufklappen' : 'Wegklappen',
-                  onPressed: () => widget.onAnsicht(zu ? _sicht : 'zu:$_sicht'),
-                  icon: Icon(
-                    zu ? Icons.expand_more : Icons.expand_less,
-                    color: CoachStyle.goldLight,
-                  ),
-                  style: IconButton.styleFrom(
-                    side: const BorderSide(color: CoachStyle.goldEdge),
-                    minimumSize: const Size(32, 32),
-                    padding: EdgeInsets.zero,
-                  ),
-                ),
-              ],
-            ),
-            if (zu)
-              InkWell(
-                key: const ValueKey('coach-aufklappen'),
-                onTap: () => widget.onAnsicht(_sicht),
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 10, right: 4),
+      ),
+    );
+    // Since the Umbau (2026-11-12) the coach stands free on the page: the
+    // picture with a gold ring, beside it the reply that types itself.
+    return Row(
+      key: const ValueKey('coach-karte'),
+      crossAxisAlignment: zu
+          ? CrossAxisAlignment.center
+          : CrossAxisAlignment.start,
+      children: [
+        _avatar(),
+        const SizedBox(width: 14),
+        Expanded(
+          child: zu
+              ? GestureDetector(
+                  key: const ValueKey('coach-aufklappen'),
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => widget.onAnsicht(_sicht),
                   child: Row(
                     children: [
                       Expanded(
@@ -189,75 +174,89 @@ class _CoachKarteState extends State<CoachKarte>
                           widget.text,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: CoachStyle.body.copyWith(
+                          style: _stil.copyWith(
                             fontSize: 13.5,
-                            color: CoachStyle.inkSoft,
+                            color: Umbau.weich,
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text(
-                        'Aufklappen',
-                        style: CoachStyle.body.copyWith(
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w700,
-                          color: CoachStyle.goldLight,
-                        ),
-                      ),
+                      Text('Aufklappen', style: _link),
                     ],
                   ),
-                ),
-              )
-            else ...[
-              if (widget.jubel case final j?) ...[
-                const SizedBox(height: 12),
-                Text.rich(
-                  key: const ValueKey('coach-jubel'),
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: j.split('\n').first,
-                        style: CoachStyle.title.copyWith(
-                          fontSize: 17,
-                          height: 1.4,
-                          color: const Color(0xFFF5DFAE),
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (widget.jubel case final j?) ...[
+                      Text.rich(
+                        key: const ValueKey('coach-jubel'),
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: j.split('\n').first,
+                              style: CoachStyle.title.copyWith(
+                                fontSize: 17,
+                                height: 1.4,
+                                color: Umbau.gold,
+                              ),
+                            ),
+                            if (j.contains('\n'))
+                              TextSpan(
+                                text: '\n${j.split('\n').skip(1).join(' ')}',
+                                style: _stil.copyWith(
+                                  fontSize: 13.5,
+                                  color: Umbau.hell,
+                                ),
+                              ),
+                          ],
                         ),
                       ),
-                      if (j.contains('\n'))
-                        TextSpan(
-                          text: '\n${j.split('\n').skip(1).join(' ')}',
-                          style: CoachStyle.body.copyWith(
-                            color: CoachStyle.beigeLabel,
+                      const SizedBox(height: 10),
+                    ],
+                    punkte ? _punkte() : _text(),
+                    if (widget.umschaltbar)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: GestureDetector(
+                          key: ValueKey(
+                            punkte ? 'coach-als-text' : 'coach-als-punkte',
+                          ),
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => _zeige(punkte ? 'text' : 'punkte'),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Text(
+                              punkte ? 'Als Text ›' : 'Als Stichpunkte ›',
+                              style: _link,
+                            ),
                           ),
                         ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
-              ],
-              if (widget.umschaltbar) ...[
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: _Umschalter(sicht: _sicht, onWahl: _zeige),
-                ),
-              ],
-              const SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: punkte ? _punkte() : _text(),
-              ),
-            ],
-          ],
         ),
-      ),
+        klappen,
+      ],
     );
   }
 
-  Widget _text() => Text(
-    widget.text,
-    key: const ValueKey('coach-text'),
-    style: CoachStyle.body.copyWith(color: CoachStyle.onDark),
+  static const _stil = TextStyle(
+    fontFamily: 'Figtree',
+    fontSize: 15,
+    height: 1.45,
+    color: Color(0xFFF1E6D2),
   );
+
+  static const _link = TextStyle(
+    fontFamily: 'Figtree',
+    fontWeight: FontWeight.w600,
+    fontSize: 11.5,
+    color: Umbau.gold,
+  );
+
+  Widget _text() =>
+      _Getippt(widget.text, key: const ValueKey('coach-text'), style: _stil);
 
   Widget _punkte() {
     if (widget.stichpunkte.isEmpty) {
@@ -275,7 +274,7 @@ class _CoachKarteState extends State<CoachKarte>
             const SizedBox(width: 10),
             Text(
               'Der Coach fasst zusammen …',
-              style: CoachStyle.body.copyWith(color: CoachStyle.inkSoft),
+              style: _stil.copyWith(color: Umbau.weich),
             ),
           ],
         );
@@ -287,28 +286,26 @@ class _CoachKarteState extends State<CoachKarte>
       key: const ValueKey('coach-punkte'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final p in widget.stichpunkte)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 6,
-                  height: 6,
-                  margin: const EdgeInsets.only(top: 8, right: 10),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFD4A85E),
-                    shape: BoxShape.circle,
+        for (final (i, p) in widget.stichpunkte.indexed)
+          Einflug(
+            platz: i,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    margin: const EdgeInsets.only(top: 8, right: 8),
+                    decoration: const BoxDecoration(
+                      gradient: Umbau.grad,
+                      shape: BoxShape.circle,
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: Text(
-                    p,
-                    style: CoachStyle.body.copyWith(color: CoachStyle.onDark),
-                  ),
-                ),
-              ],
+                  Expanded(child: Text(p, style: _stil)),
+                ],
+              ),
             ),
           ),
       ],
@@ -316,60 +313,63 @@ class _CoachKarteState extends State<CoachKarte>
   }
 }
 
-/// Small pill "Text | Stichpunkte".
-class _Umschalter extends StatelessWidget {
-  const _Umschalter({required this.sicht, required this.onWahl});
-
-  final String sicht;
-  final ValueChanged<String> onWahl;
+/// A text that types itself once when it appears (whole at once in tests).
+class _Getippt extends StatelessWidget {
+  const _Getippt(this.text, {super.key, required this.style});
+  final String text;
+  final TextStyle style;
 
   @override
   Widget build(BuildContext context) {
-    Widget teil(String key, String label, String wert) {
-      final an = sicht == wert;
-      return Semantics(
-        button: true,
-        selected: an,
-        child: InkWell(
-          key: ValueKey(key),
-          borderRadius: BorderRadius.circular(999),
-          onTap: () => onWahl(wert),
-          child: Ink(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              gradient: an ? CoachStyle.goldGradient : null,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Text(
-              label,
-              style: CoachStyle.body.copyWith(
-                fontSize: 12.5,
-                fontWeight: FontWeight.w700,
-                color: an ? CoachStyle.goldInk : CoachStyle.beigeLabel,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1510),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xFF4A3D2E)),
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
+    if (!bewegungAn) return Text(text, style: style);
+    final z = text.characters;
+    return TweenAnimationBuilder<int>(
+      key: ValueKey(text),
+      tween: IntTween(begin: 0, end: z.length),
+      duration: Duration(milliseconds: 300 + z.length * 16),
+      builder: (context, n, _) => Text.rich(
+        TextSpan(
           children: [
-            teil('coach-als-text', 'Text', 'text'),
-            teil('coach-als-punkte', 'Stichpunkte', 'punkte'),
+            TextSpan(text: z.take(n).toString()),
+            // The rest keeps its place, so nothing jumps while typing.
+            TextSpan(
+              text: z.skip(n).toString(),
+              style: const TextStyle(color: Color(0x00000000)),
+            ),
           ],
         ),
+        style: style,
       ),
     );
   }
+}
+
+/// The coach's picture, round, without the old frame.
+class _Bild extends StatelessWidget {
+  const _Bild({required this.lacht});
+  final bool lacht;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    key: const ValueKey('coach-avatar'),
+    width: 44,
+    height: 44,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      border: Border.all(color: const Color(0xFF1A110A), width: 2),
+    ),
+    child: ClipOval(
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: Image.asset(
+          lacht ? 'assets/images/coach_lacht.jpg' : 'assets/images/coach.jpg',
+          key: ValueKey(lacht),
+          fit: BoxFit.cover,
+          width: 44,
+          height: 44,
+          semanticLabel: lacht ? 'Dein Coach lacht' : 'Dein Coach',
+        ),
+      ),
+    ),
+  );
 }

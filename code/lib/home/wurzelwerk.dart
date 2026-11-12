@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../ui/coach_style.dart';
+import '../ui/umbau.dart';
 
 /// "Home-Feed als Wurzelwerk" (vault Umsetzung/Home-Schichten.md, decided
 /// with Phillip 2026-10-25): below the gold ground line a drawn root system
@@ -98,7 +99,18 @@ class _Ast {
 
 /// Everything that stays put: computed once per size.
 class _Geo {
-  _Geo(this.size, this.boden, this.ziele, this.haupt, this.picture, this.baum);
+  _Geo(
+    this.size,
+    this.boden,
+    this.ziele,
+    this.haupt,
+    this.picture,
+    this.baum, [
+    this.schein,
+  ]);
+
+  /// The soft gold glow under the roots of the big version; it breathes.
+  final ui.Picture? schein;
   final Size size;
   final double boden;
   final List<Offset> ziele;
@@ -265,72 +277,76 @@ _Geo _baue(
   final rec = ui.PictureRecorder();
   final c = Canvas(rec);
   final erde = Rect.fromLTRB(0, boden, w, h);
-  c.drawRect(
-    erde,
-    Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [Color(0xFF2A1F15), Color(0xFF1F170F), Color(0xF2120D09)],
-        stops: [0, .4, 1],
-      ).createShader(erde),
-  );
-  for (var b = 0; b < 6; b++) {
-    final y = boden + 40 + b * (h - boden) / 6 + r.next() * 20;
-    final path = Path()..moveTo(0, y);
-    for (double x = 0; x <= w; x += 20) {
-      path.lineTo(x, y + math.sin(x / 60 + b) * 6 + r.next() * 3);
-    }
-    path
-      ..lineTo(w, y + 30)
-      ..lineTo(0, y + 30)
-      ..close();
-    c.drawPath(path, Paint()..color = Color.fromARGB(30, 60 + b * 4, 44, 28));
-  }
-  final speck = Paint();
-  for (var i = 0; i < w * (h - boden) / 260; i++) {
-    speck.color = Color.fromARGB(
-      (13 + r.next() * 30).round(),
-      (150 + r.next() * 80).round(),
-      (110 + r.next() * 60).round(),
-      (70 + r.next() * 40).round(),
-    );
-    c.drawCircle(
-      Offset(r.next() * w, boden + r.next() * (h - boden)),
-      r.next() * 1.4 + .3,
-      speck,
-    );
-  }
-  for (var i = 0; i < 8; i++) {
-    final o = Offset(r.next() * w, boden + 30 + r.next() * (h - boden - 50));
-    final rx = 4 + r.next() * 9, ry = rx * (.55 + r.next() * .3);
-    final rect = Rect.fromCenter(center: o, width: rx * 2, height: ry * 2);
-    c.drawOval(
-      rect,
+  // Since the Umbau (2026-11-12) the big version has no soil: the roots
+  // glow in champagne gold right on the living background.
+  if (!gross) {
+    c.drawRect(
+      erde,
       Paint()
-        ..shader = const RadialGradient(
-          center: Alignment(-.3, -.4),
-          colors: [Color(0xFF5A4A3A), Color(0xFF241A12)],
-        ).createShader(rect),
+        ..shader = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF2A1F15), Color(0xFF1F170F), Color(0xF2120D09)],
+          stops: [0, .4, 1],
+        ).createShader(erde),
+    );
+    for (var b = 0; b < 6; b++) {
+      final y = boden + 40 + b * (h - boden) / 6 + r.next() * 20;
+      final path = Path()..moveTo(0, y);
+      for (double x = 0; x <= w; x += 20) {
+        path.lineTo(x, y + math.sin(x / 60 + b) * 6 + r.next() * 3);
+      }
+      path
+        ..lineTo(w, y + 30)
+        ..lineTo(0, y + 30)
+        ..close();
+      c.drawPath(path, Paint()..color = Color.fromARGB(30, 60 + b * 4, 44, 28));
+    }
+    final speck = Paint();
+    for (var i = 0; i < w * (h - boden) / 260; i++) {
+      speck.color = Color.fromARGB(
+        (13 + r.next() * 30).round(),
+        (150 + r.next() * 80).round(),
+        (110 + r.next() * 60).round(),
+        (70 + r.next() * 40).round(),
+      );
+      c.drawCircle(
+        Offset(r.next() * w, boden + r.next() * (h - boden)),
+        r.next() * 1.4 + .3,
+        speck,
+      );
+    }
+    for (var i = 0; i < 8; i++) {
+      final o = Offset(r.next() * w, boden + 30 + r.next() * (h - boden - 50));
+      final rx = 4 + r.next() * 9, ry = rx * (.55 + r.next() * .3);
+      final rect = Rect.fromCenter(center: o, width: rx * 2, height: ry * 2);
+      c.drawOval(
+        rect,
+        Paint()
+          ..shader = const RadialGradient(
+            center: Alignment(-.3, -.4),
+            colors: [Color(0xFF5A4A3A), Color(0xFF241A12)],
+          ).createShader(rect),
+      );
+    }
+    c.drawRect(
+      Rect.fromLTWH(0, boden - 8, w, 8),
+      Paint()..color = const Color(0x14F0C878),
     );
   }
-  c.drawRect(
-    Rect.fromLTWH(0, boden - 8, w, 8),
-    Paint()..color = const Color(0x14F0C878),
-  );
   c.drawLine(
     Offset(0, boden),
     Offset(w, boden),
     Paint()
       ..strokeWidth = 2
-      ..shader = const LinearGradient(
+      ..shader = LinearGradient(
         colors: [
-          Color(0x00C9A25C),
-          Color(0xFFC9A25C),
-          Color(0xFFC9A25C),
-          Color(0x00C9A25C),
+          const Color(0x00C9A25C),
+          Color(gross ? 0x66E0BF7E : 0xFFC9A25C),
+          Color(gross ? 0x66E0BF7E : 0xFFC9A25C),
+          const Color(0x00C9A25C),
         ],
-        stops: [0, .12, .88, 1],
+        stops: const [0, .12, .88, 1],
       ).createShader(Rect.fromLTWH(0, boden, w, 2)),
   );
 
@@ -363,7 +379,7 @@ _Geo _baue(
     );
   }
   final haar = Paint()
-    ..color = const Color(0x73967046)
+    ..color = Color(gross ? 0x80D9B878 : 0x73967046)
     ..strokeWidth = .6;
   for (final pts in [...haupt, ...neben]) {
     for (var i = 0; i < pts.length; i += 3) {
@@ -378,20 +394,41 @@ _Geo _baue(
     }
   }
   for (final p in neben) {
-    _linie(c, p, (q) => q.w + 1.4, const Color(0xFF20160D));
-    _linie(c, p, (q) => q.w, const Color(0xFF6E5032));
+    if (!gross) _linie(c, p, (q) => q.w + 1.4, const Color(0xFF20160D));
+    _linie(c, p, (q) => q.w, Color(gross ? 0xFFAE8A52 : 0xFF6E5032));
   }
   for (final p in haupt) {
-    _linie(c, p, (q) => q.w + 2.2, const Color(0xFF1D140C));
-    _linie(c, p, (q) => q.w, const Color(0xFF86613B));
+    if (!gross) _linie(c, p, (q) => q.w + 2.2, const Color(0xFF1D140C));
+    _linie(c, p, (q) => q.w, Color(gross ? 0xFFC8A468 : 0xFF86613B));
+    if (gross) {
+      // A darker side gives the root its round body.
+      _linie(
+        c,
+        [for (final q in p) _P(q.x + q.w * .22, q.y, q.w)],
+        (q) => math.max(.6, q.w * .3),
+        const Color(0x738A6535),
+      );
+    }
     _linie(
       c,
       [for (final q in p) _P(q.x - q.w * .18, q.y, q.w)],
       (q) => math.max(.6, q.w * .25),
-      const Color(0x66E8C691),
+      Color(gross ? 0x73F6E2B4 : 0x66E8C691),
     );
   }
-  return _Geo(size, boden, ziele, haupt, rec.endRecording(), baum);
+  ui.Picture? schein;
+  if (gross) {
+    final r2 = ui.PictureRecorder();
+    final c2 = Canvas(r2);
+    for (final p in haupt) {
+      _linie(c2, p, (q) => q.w + 6, const Color(0x2EF2CF8A), blur: 10);
+    }
+    for (final p in neben) {
+      _linie(c2, p, (q) => q.w + 3, const Color(0x1AF2CF8A), blur: 5);
+    }
+    schein = r2.endRecording();
+  }
+  return _Geo(size, boden, ziele, haupt, rec.endRecording(), baum, schein);
 }
 
 void _linie(
@@ -438,10 +475,51 @@ class _Maler extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawPicture(geo.picture);
     final ms = zeit();
+    if (geo.schein case final s?) {
+      // The glow breathes slowly.
+      final a = lebendig ? .72 + .28 * math.cos(ms / 5000 * math.pi * 2) : .8;
+      canvas
+        ..saveLayer(
+          Offset.zero & size,
+          Paint()..color = Color.fromRGBO(255, 255, 255, a),
+        )
+        ..drawPicture(s)
+        ..restore();
+    }
+    canvas.drawPicture(geo.picture);
+    if (lebendig && geo.schein != null) {
+      // Big version: a small bright light runs down each root.
+      final punkt = Paint()..color = const Color(0xFFFFF3D0);
+      final hof = Paint()
+        ..color = const Color(0xB3FFD98A)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+      for (var i = 0; i < geo.haupt.length; i++) {
+        final r = geo.haupt[i];
+        final ph = ((ms / (2600 + i * 700)) + i * .27) % 1;
+        final q = ph * (r.length - 1);
+        final k = q.floor();
+        final o = Offset.lerp(
+          r[k].o,
+          r[math.min(r.length - 1, k + 1)].o,
+          q - k,
+        )!;
+        final sicht = (ph < .1 ? ph / .1 : (ph > .85 ? (1 - ph) / .15 : 1.0));
+        canvas
+          ..drawCircle(
+            o,
+            7,
+            hof..color = Color.fromRGBO(255, 217, 138, .7 * sicht),
+          )
+          ..drawCircle(
+            o,
+            3,
+            punkt..color = Color.fromRGBO(255, 243, 208, sicht),
+          );
+      }
+    }
     // Sap: a soft light travels down each root to its area.
-    if (lebendig) {
+    if (lebendig && geo.schein == null) {
       for (var i = 0; i < geo.haupt.length; i++) {
         final r = geo.haupt[i];
         final ph = ((ms / 3600) + i * .27) % 1;
@@ -814,125 +892,165 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
     return best;
   }
 
-  /// Big version (variant B, chosen by Phillip 2026-10-25): a small circle
-  /// at the edge with the area's symbol, score and arrow, and beside it an
-  /// info card like the old big field: name, 7 bars, change to yesterday,
-  /// two facts and the coach's sentence. The weakest area's card glows.
+  /// Big version since the Umbau (draft 9, Phillip 2026-11-12): at each
+  /// root end one round glass capsule. Its ring fills in gold while the
+  /// number counts up; beside it the name, the change to yesterday and one
+  /// line of detail. The coach's sentence lives on the area page.
   List<Widget> _knotenGross(int i, Offset z, bool sagt) {
     final b = widget.bereiche[i];
     final dim = _wahl >= 0 && _wahl != i;
-    final links = z.dx < _geo!.size.width / 2;
     final w = _geo!.size.width;
-    final (pfeil, farbe) = switch (b.diff) {
-      null => ('', CoachStyle.inkSoft),
-      0 => ('→', CoachStyle.beigeLabel),
-      > 0 => ('↑', const Color(0xFF9BCB8A)),
-      _ => ('↓', const Color(0xFFE39A7E)),
-    };
+    final links = z.dx < w / 2;
     final trend = switch (b.diff) {
       null => '',
       0 => 'wie gestern',
       > 0 => '+${b.diff} zu gestern',
       _ => '−${-b.diff!} zu gestern',
     };
-    Widget einblenden(Widget child, {double klein = .3}) =>
-        TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0, end: 1),
-          duration: Duration(milliseconds: 600 + i * 180),
-          curve: Curves.easeOutBack,
-          builder: (context, v, child) => Transform.scale(
-            scale:
-                (klein + (1 - klein) * v) *
-                (_wahl == i ? 1.06 : (dim ? .95 : 1)),
-            child: Opacity(opacity: v.clamp(0.0, 1.0), child: child),
+    final detail = b.teile.isNotEmpty
+        ? b.teile.join(' · ')
+        : b.infos.isNotEmpty
+        ? [for (final (t, x) in b.infos) '$t $x'].join(' · ')
+        : (b.grund ?? '');
+    // The capsule springs open when the growing roots reach it.
+    final warte = _lebendig ? 350 + 2600 * z.dy / _geo!.size.height : 0.0;
+    final ganz = warte + 800;
+    final ring = SizedBox.square(
+      dimension: 72,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: _lebendig ? 0 : 1, end: 1),
+        duration: Duration(milliseconds: (ganz + 1400).round()),
+        curve: Interval(ganz / (ganz + 1400), 1, curve: Curves.easeInOut),
+        builder: (context, v, child) => CustomPaint(
+          painter: _KapselRing(
+            (b.wert ?? 0) / 10 * v,
+            puls: _lebendig ? _zeit : null,
+            phase: i * .25,
           ),
-          child: AnimatedOpacity(
-            duration: const Duration(milliseconds: 300),
-            opacity: dim ? .45 : 1,
-            child: child,
-          ),
-        );
-    final kartenLinks = links ? z.dx + _r + 12 : 16.0;
-    final kartenBreite = links ? w - 16 - kartenLinks : z.dx - _r - 12 - 16;
-    return [
-      Positioned(
-        left: z.dx - _r,
-        top: z.dy - _r,
-        width: _r * 2,
-        height: _r * 2,
-        child: einblenden(
-          Semantics(
-            button: true,
-            label: b.name,
-            child: GestureDetector(
-              key: ValueKey('wurzel-${b.id}'),
-              onTap: () => _tippen(i),
-              child: CustomPaint(
-                painter: _Ring(b.wert, leuchtet: sagt),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ShaderMask(
-                      shaderCallback: (r) =>
-                          CoachStyle.goldGradient.createShader(r),
-                      child: Icon(b.icon, size: 22, color: Colors.white),
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        ShaderMask(
-                          shaderCallback: (r) =>
-                              CoachStyle.goldGradient.createShader(r),
-                          child: Text(
-                            b.wert?.toString() ?? '–',
-                            key: ValueKey('knoten-wert-${b.id}'),
-                            style: const TextStyle(
-                              fontFamily: 'Sora',
-                              fontWeight: FontWeight.w700,
-                              fontSize: 26,
-                              height: 1.05,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        if (pfeil.isNotEmpty)
-                          Text(
-                            ' $pfeil',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: farbe,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+          child: child,
+        ),
+        child: Center(
+          child: ZaehlZahl(
+            wert: (b.wert ?? 0).toDouble(),
+            leer: b.wert == null ? '–' : null,
+            textKey: ValueKey('knoten-wert-${b.id}'),
+            style: const TextStyle(
+              fontFamily: 'Sora',
+              fontWeight: FontWeight.w700,
+              fontSize: 26,
+              height: 1,
+              color: Colors.white,
             ),
           ),
         ),
       ),
-      Positioned(
-        left: kartenLinks,
-        width: kartenBreite,
-        top: z.dy - 140,
-        height: 280,
-        child: Align(
-          alignment: Alignment.center,
-          child: einblenden(
-            GestureDetector(
-              onTap: () => _tippen(i),
-              child: _InfoKarte(
-                key: ValueKey('info-${b.id}'),
-                b: b,
-                trend: trend,
-                sagt: sagt,
+    );
+    final text = Expanded(
+      child: Padding(
+        key: ValueKey('info-${b.id}'),
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: links
+              ? CrossAxisAlignment.start
+              : CrossAxisAlignment.end,
+          children: [
+            Text(
+              b.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontFamily: 'Sora',
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+                height: 1.2,
+                color: Umbau.text,
               ),
             ),
-            klein: .8,
+            if (trend.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 3),
+                child: Text(
+                  trend,
+                  style: const TextStyle(
+                    fontFamily: 'Figtree',
+                    fontSize: 12,
+                    height: 1.2,
+                    color: Umbau.hell,
+                  ),
+                ),
+              ),
+            if (sagt || detail.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 3),
+                child: Text(
+                  sagt ? 'Hier hängt es gerade.' : detail,
+                  key: sagt ? ValueKey('knoten-sagt-${b.id}') : null,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: 'Figtree',
+                    fontWeight: sagt ? FontWeight.w600 : FontWeight.w500,
+                    fontSize: 10.5,
+                    height: 1.2,
+                    color: sagt ? Umbau.gold : const Color(0xFFA8977D),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+    return [
+      Positioned(
+        left: links ? z.dx - 46 : null,
+        right: links ? null : w - z.dx - 46,
+        top: z.dy - 46,
+        width: w * .7,
+        height: 92,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: _lebendig ? 0 : 1, end: 1),
+          duration: Duration(milliseconds: ganz.round()),
+          curve: Interval(warte / ganz, 1, curve: Curves.easeOutBack),
+          builder: (context, v, child) => Opacity(
+            opacity: v.clamp(0.0, 1.0),
+            child: Transform.scale(
+              scale: (.8 + .2 * v) * (_wahl == i ? 1.04 : (dim ? .96 : 1)),
+              alignment: Alignment(links ? -.7 : .7, 0),
+              child: child,
+            ),
+          ),
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 300),
+            opacity: dim ? .45 : 1,
+            child: Semantics(
+              button: true,
+              label: b.name,
+              child: GestureDetector(
+                key: ValueKey('wurzel-${b.id}'),
+                behavior: HitTestBehavior.opaque,
+                onTap: () => _tippen(i),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(46),
+                  child: BackdropFilter(
+                    filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0x12FFF5E6),
+                        borderRadius: BorderRadius.circular(46),
+                        border: Border.all(color: const Color(0x0FFFF5E6)),
+                      ),
+                      child: Row(
+                        children: links
+                            ? [ring, const SizedBox(width: 6), text]
+                            : [text, const SizedBox(width: 6), ring],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -1090,11 +1208,8 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
 
 /// Dark round node with the score as a gold ring.
 class _Ring extends CustomPainter {
-  _Ring(this.wert, {this.leuchtet = false});
+  _Ring(this.wert);
   final int? wert;
-
-  /// Weakest area: a bright gold edge.
-  final bool leuchtet;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1122,7 +1237,7 @@ class _Ring extends CustomPainter {
       r,
       Paint()
         ..style = PaintingStyle.stroke
-        ..color = leuchtet ? const Color(0xFFE0BF7E) : const Color(0xFF2E251B)
+        ..color = const Color(0xFF2E251B)
         ..strokeWidth = 3,
     );
     final w = wert;
@@ -1142,180 +1257,57 @@ class _Ring extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_Ring old) => old.wert != wert || old.leuchtet != leuchtet;
+  bool shouldRepaint(_Ring old) => old.wert != wert;
 }
 
-/// The info card beside a big area circle (see [_WurzelwerkState._knotenGross]).
-class _InfoKarte extends StatelessWidget {
-  const _InfoKarte({
-    super.key,
-    required this.b,
-    required this.trend,
-    required this.sagt,
-  });
-
-  final WurzelBereich b;
-  final String trend;
-  final bool sagt;
+/// The ring of an area capsule: dark ground, a gold arc for the score and
+/// a fine ring that widens and fades now and then.
+class _KapselRing extends CustomPainter {
+  _KapselRing(this.anteil, {this.puls, this.phase = 0}) : super(repaint: puls);
+  final double anteil;
+  final Animation<double>? puls;
+  final double phase;
 
   @override
-  Widget build(BuildContext context) {
-    final woche = b.woche;
-    final satz = [if (sagt) 'Hier hängt es gerade.', ?b.grund].join(' ');
-    return Container(
-      padding: const EdgeInsets.all(1),
-      decoration: BoxDecoration(
-        gradient: sagt ? CoachStyle.goldGradient : CoachStyle.goldEdgeGradient,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          if (sagt)
-            const BoxShadow(color: Color(0x55E0BF7E), blurRadius: 18)
-          else
-            const BoxShadow(
-              color: Color(0x99000000),
-              blurRadius: 18,
-              offset: Offset(0, 8),
-            ),
-        ],
-      ),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(11, 10, 11, 10),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xEE261C12), Color(0xEE140F0A)],
-          ),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              b.name,
-              style: CoachStyle.title.copyWith(
-                fontSize: 14.5,
-                height: 1.2,
-                color: CoachStyle.ink,
-              ),
-            ),
-            if (woche.isNotEmpty) ...[
-              const SizedBox(height: 5),
-              SizedBox(
-                height: 22,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    for (var j = 0; j < woche.length; j++)
-                      Container(
-                        width: 7,
-                        height: 3 + 19 * ((woche[j] ?? 0) / 10),
-                        margin: const EdgeInsets.only(right: 3),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(3),
-                          gradient: j == woche.length - 1 && woche[j] != null
-                              ? CoachStyle.goldGradient
-                              : null,
-                          color: j == woche.length - 1 && woche[j] != null
-                              ? null
-                              : const Color(0xFF5E4A33),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-            if (trend.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 3),
-                child: Text(
-                  trend,
-                  style: CoachStyle.body.copyWith(
-                    fontSize: 11,
-                    color: CoachStyle.beigeLabel,
-                  ),
-                ),
-              ),
-            if (b.teile.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 5),
-                child: Wrap(
-                  spacing: 4,
-                  runSpacing: 4,
-                  children: [
-                    for (final t in b.teile)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(99),
-                          border: Border.all(color: const Color(0x44E0BF7E)),
-                        ),
-                        child: Text(
-                          t,
-                          style: CoachStyle.body.copyWith(
-                            fontSize: 10.5,
-                            color: CoachStyle.beigeLabel,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            for (final (titel, wert) in b.infos)
-              Padding(
-                padding: const EdgeInsets.only(top: 3),
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(text: '$titel '),
-                      TextSpan(
-                        text: wert,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: CoachStyle.ink,
-                        ),
-                      ),
-                    ],
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: CoachStyle.body.copyWith(
-                    fontSize: 12,
-                    color: CoachStyle.beigeLabel,
-                  ),
-                ),
-              ),
-            if (satz.isNotEmpty) ...[
-              Container(
-                margin: const EdgeInsets.only(top: 7),
-                height: 1,
-                color: const Color(0xFF4A3B2A),
-              ),
-              Padding(
-                key: sagt ? ValueKey('knoten-sagt-${b.id}') : null,
-                padding: const EdgeInsets.only(top: 7),
-                child: Text(
-                  satz,
-                  maxLines: 4,
-                  overflow: TextOverflow.ellipsis,
-                  style: CoachStyle.body.copyWith(
-                    fontSize: 11.5,
-                    height: 1.35,
-                    fontWeight: sagt ? FontWeight.w600 : FontWeight.w400,
-                    color: const Color(0xFFD9CCB1),
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
+  void paint(Canvas canvas, Size size) {
+    final c = size.center(Offset.zero);
+    final r = size.shortestSide / 2;
+    canvas.drawCircle(c, r, Paint()..color = const Color(0x8C15110D));
+    final strich = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = r * .12;
+    final rect = Rect.fromCircle(center: c, radius: r * .84);
+    canvas.drawCircle(c, r * .84, strich..color = const Color(0x1AFFF5E6));
+    if (anteil > 0) {
+      canvas.drawArc(
+        rect,
+        -math.pi / 2,
+        math.pi * 2 * anteil.clamp(0.0, 1.0),
+        false,
+        strich
+          ..color = Colors.white
+          ..shader = Umbau.grad.createShader(rect),
+      );
+    }
+    if (puls case final p?) {
+      final t = (p.value * 60 / 3.2 + phase) % 1;
+      if (t < .7) {
+        final v = t / .7;
+        canvas.drawCircle(
+          c,
+          (r + 5) * (.92 + .36 * v),
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1
+            ..color = Color.fromRGBO(240, 215, 158, .55 * (1 - v)),
+        );
+      }
+    }
   }
+
+  @override
+  bool shouldRepaint(_KapselRing old) => old.anteil != anteil;
 }
 
 /// Opens [builder]'s page growing as a circle out of [mitte] (a point on

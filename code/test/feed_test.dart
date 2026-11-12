@@ -67,8 +67,8 @@ void main() {
     tester,
   ) async {
     await _openFeed(tester);
-    expect(find.text('MONTAG, 12. OKTOBER'), findsOneWidget);
-    expect(find.text('DEIN COACH · HEUTE'), findsOneWidget);
+    expect(find.text('MO, 12. OKTOBER'), findsOneWidget);
+    expect(find.byKey(const ValueKey('coach-karte')), findsOneWidget);
 
     // Schlaf opens in Körper with Schlaf & Routine picked.
     await openBereich(tester, 'schlaf');

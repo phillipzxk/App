@@ -92,8 +92,8 @@ void main() {
 
     await tester.tap(find.text('Fertig'));
     await tester.pumpAndSettle();
-    expect(find.text('MONTAG, 12. OKTOBER'), findsOneWidget);
-    expect(find.text('DEIN COACH · HEUTE'), findsOneWidget);
+    expect(find.text('MO, 12. OKTOBER'), findsOneWidget);
+    expect(find.byKey(const ValueKey('coach-karte')), findsOneWidget);
     expect(find.text('Check-in starten'), findsNothing);
   });
 
@@ -117,7 +117,7 @@ void main() {
     final diary = MemoryDiaryStore()
       ..checkIns.add(checkInOn(fixedNow, reply: 'Weiter so.'));
     await openApp(tester, diary);
-    expect(find.text('MONTAG, 12. OKTOBER'), findsOneWidget);
+    expect(find.text('MO, 12. OKTOBER'), findsOneWidget);
     expect(find.text('Weiter so.'), findsOneWidget);
   });
 

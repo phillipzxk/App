@@ -33,6 +33,7 @@ import '../training/training_coach.dart';
 import '../training/training_data.dart';
 import '../training/training_logik.dart';
 import '../ui/coach_style.dart';
+import '../ui/umbau.dart';
 import '../weight/weight.dart';
 import 'durchgezogen_widgets.dart';
 import 'fokus_widgets.dart';
@@ -416,6 +417,7 @@ class _HomePageState extends State<HomePage> {
       );
     }
     if (!mounted) return;
+    if (geschafft) _feiere();
     setState(() {
       if (geschafft) {
         _jubelTick++;
@@ -460,25 +462,29 @@ class _HomePageState extends State<HomePage> {
   /// The Reality Check is due: the week ran out (Umsetzung/Reality Check).
   bool get _realityFaellig => _fokus != null && !_fokusLaeuft;
 
-  /// What the round Fokus field in the crown shows.
+  final _fokusKnopf = GlobalKey();
+  final _fundKachel = GlobalKey();
+
+  /// "Heute geschafft": sparks at the button, a wave through the
+  /// background and a light that flies into the Fundament tile.
+  void _feiere() {
+    final k = _fokusKnopf.currentContext;
+    final von = k?.findRenderObject() as RenderBox?;
+    if (k == null || von == null || !von.hasSize) return;
+    final a = von.localToGlobal(von.size.center(Offset.zero));
+    funkenBei(k, a);
+    Wurzelnetz.welle(k, a);
+    final nach = _fundKachel.currentContext?.findRenderObject() as RenderBox?;
+    if (nach == null || !nach.hasSize) return;
+    fliegeLicht(k, a, nach.localToGlobal(const Offset(46, 52)));
+  }
+
+  /// What the Fokus tile on Heute shows.
   Widget _fokusFeld() {
     final f = _fokus;
-    final label = CoachStyle.goldLabel.copyWith(
-      fontFamily: 'Sora',
-      fontSize: 8.5,
-      letterSpacing: 1.4,
-      color: CoachStyle.gold,
-    );
-    final titel = CoachStyle.body.copyWith(
-      fontSize: 12.5,
-      height: 1.25,
-      fontWeight: FontWeight.w700,
-      color: const Color(0xFFF6EEDD),
-    );
-    final klein = CoachStyle.body.copyWith(
-      fontSize: 10.5,
-      color: CoachStyle.beigeLabel,
-    );
+    const label = Umbau.label;
+    const titel = Umbau.titel;
+    const klein = Umbau.klein;
     if (f != null && _fokusLaeuft) {
       final heute = widget.clock();
       final tag = f.tag(heute).clamp(1, Wochenfokus.tage);
@@ -486,61 +492,56 @@ class _HomePageState extends State<HomePage> {
       final geschafft = f.heuteGeschafft(heute);
       return Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('FOKUS · TAG $tag/${Wochenfokus.tage}', style: label),
           const SizedBox(height: 5),
           Text(
             f.text,
-            textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: titel,
           ),
-          const SizedBox(height: 7),
+          const SizedBox(height: 10),
           Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
               for (var i = 0; i < Wochenfokus.tage; i++)
-                Container(
-                  width: 8,
-                  height: 4,
-                  margin: const EdgeInsets.symmetric(horizontal: 1.3),
-                  decoration: BoxDecoration(
-                    gradient: striche[i] ? CoachStyle.goldGradient : null,
-                    color: striche[i]
-                        ? null
-                        : i < tag
-                        ? const Color(0xFF4A3D2E)
-                        : const Color(0xFF2E251B),
-                    borderRadius: BorderRadius.circular(2),
+                Expanded(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 500),
+                    height: 5,
+                    margin: EdgeInsets.only(left: i == 0 ? 0 : 4),
+                    decoration: BoxDecoration(
+                      gradient: striche[i] ? Umbau.grad : null,
+                      color: striche[i] ? null : const Color(0x29FFECD2),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 11),
           GestureDetector(
             key: const ValueKey('fokus-heute'),
             onTap: () => _umschalten(f),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+              key: _fokusKnopf,
+              duration: const Duration(milliseconds: 400),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                gradient: geschafft ? null : CoachStyle.goldGradient,
-                borderRadius: BorderRadius.circular(20),
-                border: geschafft
-                    ? Border.all(color: CoachStyle.goldEdge)
-                    : null,
+                gradient: geschafft ? null : Umbau.grad,
+                color: geschafft ? const Color(0x24F5DFAE) : null,
+                borderRadius: BorderRadius.circular(999),
               ),
               child: Text(
-                geschafft ? '✓ Geschafft' : 'Heute geschafft',
+                geschafft ? 'Geschafft' : 'Heute geschafft',
                 maxLines: 1,
                 softWrap: false,
-                style: CoachStyle.body.copyWith(
-                  fontSize: 10,
+                style: TextStyle(
+                  fontFamily: 'Figtree',
+                  fontSize: 11.5,
                   fontWeight: FontWeight.w700,
-                  color: geschafft
-                      ? CoachStyle.goldLight
-                      : const Color(0xFF1A140E),
+                  color: geschafft ? Umbau.gold : Umbau.tinte,
                 ),
               ),
             ),
@@ -551,14 +552,11 @@ class _HomePageState extends State<HomePage> {
     if (_realityFaellig) {
       return Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('NEUE WOCHE', style: label),
-          const SizedBox(height: 6),
-          Text(
-            'Erst dein\nReality Check',
-            textAlign: TextAlign.center,
-            style: titel,
-          ),
+          const Text('NEUE WOCHE', style: label),
+          const SizedBox(height: 5),
+          const Text('Erst dein\nReality Check', style: titel),
           const SizedBox(height: 6),
           Text(
             _fokusAuswahl == null ? 'Coach schaut zurück …' : 'Öffnen ›',
@@ -570,12 +568,12 @@ class _HomePageState extends State<HomePage> {
     final laedt = _fokusLaedt || !_fokusVersucht;
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('FOKUS DER WOCHE', style: label),
-        const SizedBox(height: 6),
+        const Text('FOKUS DER WOCHE', style: label),
+        const SizedBox(height: 5),
         Text(
           laedt ? 'Dein Coach sucht\nVorschläge …' : 'Wähl deinen\nFokus',
-          textAlign: TextAlign.center,
           style: titel,
         ),
         const SizedBox(height: 6),
@@ -1372,32 +1370,49 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      child: GlasBox(
-        art: GlasArt.gold,
+      child: GlasKachel(
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              width: 30,
-              height: 30,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: CoachStyle.goldGradient,
-                boxShadow: CoachStyle.goldGlow,
+            Center(
+              child: Container(
+                width: 30,
+                height: 30,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: Umbau.grad,
+                  boxShadow: [
+                    BoxShadow(color: Color(0x80F0D79E), blurRadius: 24),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 8),
-            Text('Ganz unten', style: Glas.tSoft.copyWith(fontSize: 12)),
-            GoldSchrift(
-              'Deine Lebensziele',
-              style: Glas.tBig.copyWith(fontSize: 20),
+            const SizedBox(height: 10),
+            const Text(
+              'Ganz unten',
+              textAlign: TextAlign.center,
+              style: Umbau.klein,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 2),
+            const GoldMaske(
+              child: Text(
+                'Deine Lebensziele',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Sora',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
             if (z.isEmpty)
-              Text(
+              const Text(
                 'Tippen und aufschreiben, was du im Leben erreichen willst',
                 textAlign: TextAlign.center,
-                style: Glas.tSoft,
+                style: Umbau.klein,
               )
             else
               Wrap(
@@ -1413,11 +1428,14 @@ class _HomePageState extends State<HomePage> {
                       ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(99),
-                        border: Border.all(color: const Color(0x55E0BF7E)),
+                        color: const Color(0x1FF5DFAE),
                       ),
                       child: Text(
                         x.text,
-                        style: Glas.tLabel.copyWith(fontSize: 12),
+                        style: Umbau.klein.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFFF1E6D2),
+                        ),
                       ),
                     ),
                 ],
@@ -1578,7 +1596,7 @@ class _HomePageState extends State<HomePage> {
       ende: t.ende,
       jetzt: _jetztMinute,
       ohneZeit: t.ohneZeit,
-      rund: true,
+      held: true,
     );
   }
 
@@ -2063,23 +2081,40 @@ class _HomePageState extends State<HomePage> {
       wurzeln: _fokusLaeuft ? _fokus!.anzahlGeschafft : 0,
       jubelTick: _jubelTick,
       lebensziele: _lebenszieleKarte(),
+      name: widget.profile.name,
+      onKonto: widget.onKonto,
     );
     return Stack(
       children: [
         Positioned.fill(
+          // Diving into the Fundament: Heute glides up and fades, the
+          // Fundament rises from below (Umbau 2026-11-12).
           child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 380),
-            switchInCurve: Curves.easeOutCubic,
-            transitionBuilder: (child, a) => FadeTransition(
-              opacity: a,
-              child: SlideTransition(
-                position: Tween(
-                  begin: const Offset(.04, 0),
-                  end: Offset.zero,
-                ).animate(a),
-                child: child,
-              ),
-            ),
+            duration: const Duration(milliseconds: 750),
+            switchInCurve: const Cubic(.7, 0, .2, 1),
+            switchOutCurve: const Cubic(.8, 0, .3, 1),
+            transitionBuilder: (child, a) =>
+                child.key == const ValueKey('seite-heute')
+                ? FadeTransition(
+                    opacity: a,
+                    child: SlideTransition(
+                      position: Tween(
+                        begin: const Offset(0, -.34),
+                        end: Offset.zero,
+                      ).animate(a),
+                      child: ScaleTransition(
+                        scale: Tween(begin: .94, end: 1.0).animate(a),
+                        child: child,
+                      ),
+                    ),
+                  )
+                : SlideTransition(
+                    position: Tween(
+                      begin: const Offset(0, 1),
+                      end: Offset.zero,
+                    ).animate(a),
+                    child: child,
+                  ),
             layoutBuilder: (cur, prev) => Stack(children: [...prev, ?cur]),
             child: _offeneSeite == 0
                 ? KeyedSubtree(key: const ValueKey('seite-heute'), child: heute)
@@ -2147,7 +2182,10 @@ class _HomePageState extends State<HomePage> {
         einstellungen: _fotoEinstellungen,
         fotos: _wochenFotos,
         onOpen: _oeffneZukunft,
+        schlicht: true,
       ),
+      blatt: _fokusLaeuft && _fokus!.heuteGeschafft(today),
+      fundamentKey: _fundKachel,
       onOpenMuster: _oeffneMuster,
       bereiche: _wurzeln(today),
       onFundament: () => _zeigeSeite(1),
@@ -2169,13 +2207,14 @@ class _HomePageState extends State<HomePage> {
       return RuheSchirm(umfeld: _schlafUmfeld, bis: ruhe);
     }
     // The whole app is dark with beige and gold (Phillip 2026-10-18).
+    // Since the Umbau (2026-11-12): espresso brown with the living root
+    // net behind everything; on Fundament the real roots take over.
     return Scaffold(
-      backgroundColor: CoachStyle.night,
-      body: DecoratedBox(
-        decoration: const BoxDecoration(gradient: CoachStyle.nightGradient),
-        child: DecoratedBox(
-          decoration: const BoxDecoration(gradient: CoachStyle.nightGlow),
-          child: SafeArea(
+      backgroundColor: const Color(0xFF0F0C09),
+      body: Wurzelnetz(
+        still: _offeneSeite == 1,
+        child: Builder(
+          builder: (context) => SafeArea(
             bottom: false,
             child: Center(
               child: ConstrainedBox(

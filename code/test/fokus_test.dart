@@ -244,7 +244,7 @@ void main() {
       find.textContaining('Fokus heute geschafft', findRichText: true),
       findsOneWidget,
     );
-    expect(find.text('✓ Geschafft'), findsOneWidget);
+    expect(find.text('Geschafft'), findsOneWidget);
 
     // On the page it counts too; tapping there again takes it back.
     await openKrone(tester, 'krone-fokus');

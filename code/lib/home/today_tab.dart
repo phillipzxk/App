@@ -6,13 +6,14 @@ import '../checkin/checkin.dart';
 import '../checkin/checkin_flow.dart';
 import '../health/health_heute.dart';
 import '../health/health_logik.dart';
+import '../konto/konto_ui.dart' show bewegungAn;
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
+import '../ui/umbau.dart';
 import '../feed/muster.dart';
 import 'coach_karte.dart';
 import 'muster_widgets.dart';
 import 'warum_karte.dart';
-import 'feed_widgets.dart';
 import 'fundament_seite.dart';
 import 'wurzelwerk.dart';
 
@@ -83,7 +84,15 @@ class TodayTab extends StatelessWidget {
     this.aboTag,
     this.coachStill = false,
     this.onAbo,
+    this.blatt = false,
+    this.fundamentKey,
   });
+
+  /// Today's focus is done: the sprout carries one more leaf.
+  final bool blatt;
+
+  /// Lets the home page find the Fundament tile (the light flies there).
+  final Key? fundamentKey;
 
   /// Free week counter, grey coach without Abo (vault Umsetzung/Abo.md).
   final int? aboTag;
@@ -156,148 +165,178 @@ class TodayTab extends StatelessWidget {
     return null;
   }
 
+  /// "Donnerstag, 12. November" as "DO, 12. NOVEMBER".
+  String get _kurzDatum {
+    final i = date.indexOf(',');
+    if (i < 2) return date.toUpperCase();
+    return '${date.substring(0, 2)}${date.substring(i)}'.toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = _todayCheckIn;
     final streak = checkInStreak(checkIns, today);
     final m = muster;
+    // The Umbau (vault Umsetzung/Umbau.md, 2026-11-12): calm glass tiles
+    // without frames, all on one screen, one light gold tile as eye-catcher.
     return NightScope(
       child: ListView(
         controller: scroll,
-        padding: const EdgeInsets.only(bottom: 110),
+        padding: const EdgeInsets.fromLTRB(22, 14, 22, 120),
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+          Einflug(
+            child: Row(
               children: [
-                PageHeader(
-                  label: date,
-                  title: name.isEmpty ? 'Heute' : 'Heute, $name',
-                  brand: true,
-                  trailing: onKonto == null && aboTag == null
-                      ? null
-                      : Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (aboTag != null) AboZaehler(tag: aboTag!),
-                            if (aboTag != null && onKonto != null)
-                              const SizedBox(width: 8),
-                            if (onKonto != null)
-                              KontoKnopfKlein(
-                                initiale: name.isEmpty
-                                    ? ''
-                                    : name[0].toUpperCase(),
-                                onTap: onKonto!,
-                              ),
-                          ],
-                        ),
-                ),
-                if (c != null) ...[
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      _Still(
-                        an: coachStill,
-                        child: CoachKarte(
-                          text: c.kiAntwort.isNotEmpty
-                              ? c.kiAntwort
-                              : noReplyYet,
-                          umschaltbar: c.kiAntwort.isNotEmpty,
-                          stichpunkte: c.stichpunkte,
-                          ansicht: coachAnsicht,
-                          onAnsicht: onCoachAnsicht,
-                          onStichpunkte: () => onStichpunkte(c),
-                          jubel: jubel,
-                          jubelTick: jubelTick,
-                        ),
-                      ),
-                      if (samen.isNotEmpty)
-                        Positioned.fill(
-                          child: SamenRegen(
-                            key: const ValueKey('samen-regen'),
-                            samen: samen,
-                            onFertig: onSamenFertig,
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  if (aboTag == 6) ...[
-                    const MorgenKarte(),
-                    const SizedBox(height: 10),
-                  ],
-                  if (coachStill && onAbo != null) ...[
-                    CoachEinschaltenFeld(onTap: onAbo!),
-                    const SizedBox(height: 10),
-                  ],
-                  if (healthFelder.isNotEmpty && onHealthKnopf != null) ...[
-                    HealthFelderListe(
-                      felder: healthFelder,
-                      onKnopf: onHealthKnopf!,
+                Expanded(
+                  child: Text(
+                    _kurzDatum,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Umbau.label.copyWith(
+                      fontSize: 10,
+                      letterSpacing: 1.6,
+                      color: Umbau.hell,
                     ),
-                    const SizedBox(height: 2),
-                  ],
-                  if (warum.trim().isNotEmpty &&
-                      (warumSatz ?? '').trim().isNotEmpty) ...[
-                    WarumKarte(warum: warum.trim(), satz: warumSatz!.trim()),
-                    const SizedBox(height: 10),
-                  ],
-                ],
-                IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: HeuteFeld(
-                          key: fokusKey ?? const ValueKey('krone-fokus'),
-                          onTap: onOpenFokus,
-                          child: fokusFeld,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: HeuteFeld(
-                          key: const ValueKey('dein-tag'),
-                          onTap: onOpenTag,
-                          child: heuteDran,
-                        ),
-                      ),
-                    ],
                   ),
                 ),
-                const SizedBox(height: 10),
-                IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: _TageFeld(
-                          streak: streak,
-                          woche: lastSevenDays(checkIns, today),
-                          jubelTick: jubelTick,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(flex: 2, child: fotoFeld),
-                    ],
+                if (aboTag != null) AboZaehler(tag: aboTag!),
+                if (aboTag != null && onKonto != null)
+                  const SizedBox(width: 10),
+                if (onKonto != null)
+                  KontoKnopfKlein(
+                    initiale: name.isEmpty ? '' : name[0].toUpperCase(),
+                    onTap: onKonto!,
                   ),
-                ),
-                if (m != null) ...[
-                  const SizedBox(height: 10),
-                  MusterFeld(muster: m, neu: musterNeu, onTap: onOpenMuster),
-                ],
-                const SizedBox(height: 10),
-                // The roots live on their own page now (2026-11-08).
-                FundamentVorschau(bereiche: bereiche, onTap: onFundament),
               ],
             ),
+          ),
+          const SizedBox(height: 10),
+          Einflug(
+            platz: 1,
+            child: Text.rich(
+              TextSpan(
+                text: name.isEmpty ? 'Heute' : 'Heute, ',
+                children: [
+                  if (name.isNotEmpty)
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.baseline,
+                      baseline: TextBaseline.alphabetic,
+                      child: GoldMaske(child: Text(name, style: _titel)),
+                    ),
+                ],
+              ),
+              style: _titel,
+            ),
+          ),
+          if (c != null) ...[
+            const SizedBox(height: 16),
+            Einflug(
+              platz: 2,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  _Still(
+                    an: coachStill,
+                    child: CoachKarte(
+                      text: c.kiAntwort.isNotEmpty ? c.kiAntwort : noReplyYet,
+                      umschaltbar: c.kiAntwort.isNotEmpty,
+                      stichpunkte: c.stichpunkte,
+                      ansicht: coachAnsicht,
+                      onAnsicht: onCoachAnsicht,
+                      onStichpunkte: () => onStichpunkte(c),
+                      jubel: jubel,
+                      jubelTick: jubelTick,
+                    ),
+                  ),
+                  if (samen.isNotEmpty)
+                    Positioned.fill(
+                      child: SamenRegen(
+                        key: const ValueKey('samen-regen'),
+                        samen: samen,
+                        onFertig: onSamenFertig,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            if (aboTag == 6) ...[
+              const SizedBox(height: 12),
+              const MorgenKarte(),
+            ],
+            if (coachStill && onAbo != null) ...[
+              const SizedBox(height: 12),
+              CoachEinschaltenFeld(onTap: onAbo!),
+            ],
+            if (healthFelder.isNotEmpty && onHealthKnopf != null) ...[
+              const SizedBox(height: 12),
+              HealthFelderListe(felder: healthFelder, onKnopf: onHealthKnopf!),
+            ],
+            if (warum.trim().isNotEmpty &&
+                (warumSatz ?? '').trim().isNotEmpty) ...[
+              const SizedBox(height: 12),
+              WarumKarte(warum: warum.trim(), satz: warumSatz!.trim()),
+            ],
+          ],
+          const SizedBox(height: 22),
+          GlasKachel(
+            key: const ValueKey('dein-tag'),
+            hell: true,
+            platz: 3,
+            onTap: onOpenTag,
+            child: heuteDran,
+          ),
+          const SizedBox(height: 12),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: GlasKachel(
+                    key: fokusKey ?? const ValueKey('krone-fokus'),
+                    platz: 4,
+                    onTap: onOpenFokus,
+                    child: fokusFeld,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: GlasKachel(
+                    platz: 5,
+                    child: _TageFeld(
+                      streak: streak,
+                      jubelTick: jubelTick,
+                      blatt: blatt,
+                      foto: fotoFeld,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (m != null) ...[
+            const SizedBox(height: 12),
+            MusterFeld(muster: m, neu: musterNeu, onTap: onOpenMuster),
+          ],
+          const SizedBox(height: 12),
+          // The roots live on their own page (2026-11-08).
+          FundamentVorschau(
+            key: fundamentKey,
+            bereiche: bereiche,
+            onTap: onFundament,
           ),
         ],
       ),
     );
   }
+
+  static const _titel = TextStyle(
+    fontFamily: 'Sora',
+    fontWeight: FontWeight.w700,
+    fontSize: 32,
+    height: 1.15,
+    letterSpacing: -.6,
+    color: Umbau.text,
+  );
 }
 
 /// Round glass button with the first letter of the name, top right on
@@ -345,17 +384,12 @@ class KontoKnopfKlein extends StatelessWidget {
       key: const ValueKey('konto-oeffnen'),
       onTap: onTap,
       child: Container(
-        width: 34,
-        height: 34,
+        width: 32,
+        height: 32,
         alignment: Alignment.center,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0x26FFE8BE), Color(0x0AE0BF7E)],
-          ),
-          border: Border.all(color: const Color(0x99E0BF7E)),
+          color: Color(0x1FFFECD2),
         ),
         child: initiale.isEmpty
             ? const Icon(
@@ -368,8 +402,8 @@ class KontoKnopfKlein extends StatelessWidget {
                 style: const TextStyle(
                   fontFamily: 'Sora',
                   fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  color: Color(0xFFE6C98F),
+                  fontSize: 12,
+                  color: Umbau.gold,
                 ),
               ),
       ),
@@ -425,99 +459,154 @@ class HeuteFeld extends StatelessWidget {
   }
 }
 
-/// Slim field: sprout, days in a row and the last 7 days as dots.
+/// Days in a row with the gold sprout, below a hairline the photo.
 class _TageFeld extends StatelessWidget {
   const _TageFeld({
     required this.streak,
-    required this.woche,
     required this.jubelTick,
+    required this.blatt,
+    required this.foto,
   });
 
   final int streak;
-  final List<bool> woche;
   final int jubelTick;
+  final bool blatt;
+  final Widget foto;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Stack(
       key: const ValueKey('spross'),
-      padding: const EdgeInsets.all(1.2),
-      decoration: BoxDecoration(
-        gradient: CoachStyle.goldEdgeGradient,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF261C12), Color(0xFF140F0A)],
-          ),
-          borderRadius: BorderRadius.circular(19),
-        ),
-        child: Row(
+      clipBehavior: Clip.none,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            ShaderMask(
-              shaderCallback: (r) => CoachStyle.goldGradient.createShader(r),
-              child: const Icon(Icons.spa, size: 24, color: Colors.white),
+            Text(
+              streak == 1 ? 'TAG AM STÜCK' : 'TAGE AM STÜCK',
+              style: Umbau.label,
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Bumps on every cheer.
-                  TweenAnimationBuilder<double>(
-                    key: ValueKey(jubelTick),
-                    tween: Tween(begin: jubelTick > 0 ? 1.3 : 1, end: 1),
-                    duration: const Duration(milliseconds: 700),
-                    curve: Curves.elasticOut,
-                    builder: (context, v, child) =>
-                        Transform.scale(scale: v, child: child),
-                    child: ShaderMask(
-                      shaderCallback: (r) =>
-                          CoachStyle.goldGradient.createShader(r),
-                      child: Text(
-                        '$streak',
-                        key: const ValueKey('spross-tage'),
-                        style: const TextStyle(
-                          fontFamily: 'Sora',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 26,
-                          height: 1,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    streak == 1 ? 'TAG AM STÜCK' : 'TAGE AM STÜCK',
-                    maxLines: 2,
-                    style: CoachStyle.goldLabel.copyWith(
-                      fontFamily: 'Sora',
-                      fontSize: 9,
-                      letterSpacing: 1.4,
-                      color: CoachStyle.gold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            for (final x in woche)
-              Container(
-                width: 7,
-                height: 7,
-                margin: const EdgeInsets.only(left: 3),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: x ? CoachStyle.goldGradient : null,
-                  color: x ? null : const Color(0xFF3A3127),
+            const SizedBox(height: 6),
+            // Bumps on every cheer.
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TweenAnimationBuilder<double>(
+                key: ValueKey(jubelTick),
+                tween: Tween(begin: jubelTick > 0 ? 1.3 : 1, end: 1),
+                duration: const Duration(milliseconds: 700),
+                curve: Curves.elasticOut,
+                builder: (context, v, child) => Transform.scale(
+                  scale: v,
+                  alignment: Alignment.centerLeft,
+                  child: child,
+                ),
+                child: ZaehlZahl(
+                  wert: streak.toDouble(),
+                  style: Umbau.zahl,
+                  textKey: const ValueKey('spross-tage'),
                 ),
               ),
+            ),
+            const SizedBox(height: 12),
+            const Divider(height: 1, thickness: 1, color: Umbau.linie),
+            const SizedBox(height: 9),
+            foto,
           ],
         ),
-      ),
+        Positioned(
+          right: -6,
+          top: -4,
+          width: 46,
+          height: 60,
+          child: IgnorePointer(child: _Spross(blatt: blatt)),
+        ),
+      ],
     );
   }
+}
+
+/// The small gold sprout: the stem draws itself, two leaves spring out,
+/// a third one grows once today's focus is done.
+class _Spross extends StatelessWidget {
+  const _Spross({required this.blatt});
+  final bool blatt;
+
+  @override
+  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
+    tween: Tween(begin: bewegungAn ? 0 : 1, end: 1),
+    duration: const Duration(milliseconds: 2400),
+    builder: (context, v, _) => TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: blatt ? 1 : 0),
+      duration: Duration(milliseconds: bewegungAn ? 700 : 0),
+      curve: Curves.easeOutBack,
+      builder: (context, n, _) => CustomPaint(painter: _SprossMaler(v, n)),
+    ),
+  );
+}
+
+class _SprossMaler extends CustomPainter {
+  _SprossMaler(this.v, this.neu);
+  final double v, neu;
+
+  static const _farbe = Color(0xFFF0D79E);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.scale(size.width / 46, size.height / 60);
+    double teil(double a, double b) => ((v - a) / (b - a)).clamp(0.0, 1.0);
+    final stiel = Path()
+      ..moveTo(23, 60)
+      ..cubicTo(23, 44, 21, 34, 23, 18);
+    final m = stiel.computeMetrics().first;
+    canvas.drawPath(
+      m.extractPath(0, m.length * Curves.easeOut.transform(teil(.25, .75))),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.4
+        ..strokeCap = StrokeCap.round
+        ..color = _farbe,
+    );
+    void blatt(Path p, Offset fuss, double g) {
+      if (g <= 0) return;
+      canvas
+        ..save()
+        ..translate(fuss.dx, fuss.dy)
+        ..scale(g)
+        ..translate(-fuss.dx, -fuss.dy)
+        ..drawPath(p, Paint()..color = _farbe)
+        ..restore();
+    }
+
+    blatt(
+      Path()
+        ..moveTo(23, 40)
+        ..cubicTo(34, 40, 40, 32, 40, 24)
+        ..cubicTo(30, 24, 23, 30, 23, 40)
+        ..close(),
+      const Offset(23, 40),
+      Curves.easeOutBack.transform(teil(.55, .85)),
+    );
+    blatt(
+      Path()
+        ..moveTo(22, 30)
+        ..cubicTo(12, 30, 6, 23, 6, 15)
+        ..cubicTo(15, 15, 22, 21, 22, 30)
+        ..close(),
+      const Offset(22, 30),
+      Curves.easeOutBack.transform(teil(.65, .95)),
+    );
+    blatt(
+      Path()
+        ..moveTo(23, 19)
+        ..cubicTo(32, 17, 36, 9, 34, 2)
+        ..cubicTo(26, 4, 22, 11, 23, 19)
+        ..close(),
+      const Offset(23, 19),
+      v < 1 ? 0 : neu,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_SprossMaler old) => old.v != v || old.neu != neu;
 }
