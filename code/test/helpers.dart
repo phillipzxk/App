@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:coach_app/checkin/checkin.dart';
+import 'package:coach_app/kalender/kalender_dienst.dart';
 import 'package:coach_app/data/diary_store.dart';
 import 'package:coach_app/data/profile_store.dart';
 import 'package:coach_app/data/user_profile.dart';
@@ -122,6 +123,14 @@ class MemoryFeedStore implements FeedStore {
   @override
   Future<void> removeTermin(Termin t) async =>
       termine.removeWhere((x) => x.erstellt == t.erstellt);
+
+  KalenderEinstellung kalender = const KalenderEinstellung();
+
+  @override
+  Future<KalenderEinstellung> loadKalender() async => kalender;
+
+  @override
+  Future<void> saveKalender(KalenderEinstellung e) async => kalender = e;
 
   @override
   Future<int?> loadMahlzeiten() async => mahlzeiten;

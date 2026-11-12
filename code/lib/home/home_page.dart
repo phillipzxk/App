@@ -89,11 +89,14 @@ import '../persoenlich/persoenlich_seiten.dart';
 import '../erinnerungen/erinnerung_dienst.dart';
 import '../erinnerungen/erinnerung_plan.dart';
 import '../health/health_dienst.dart';
+import '../kalender/kalender_dienst.dart';
+import '../kalender/kalender_logik.dart';
 import '../health/health_logik.dart';
 
 part 'koerper_seite.dart';
 part 'erinnerungen_home.dart';
 part 'health_home.dart';
+part 'kalender_home.dart';
 part 'mindset_seite.dart';
 part 'produktiv_seite.dart';
 part 'arbeit_ziele.dart';
@@ -115,6 +118,8 @@ class HomePage extends StatefulWidget {
     this.erinnerungen,
     this.erinnerungenNeu,
     this.health,
+    this.kalender,
+    this.kalenderNeu,
     this.aboTag,
     this.coachStill = false,
     this.onAbo,
@@ -129,6 +134,11 @@ class HomePage extends StatefulWidget {
 
   /// Apple Health (vault Umsetzung/Apple Health); null in tests.
   final HealthDienst? health;
+
+  /// The phone's calendar (vault Umsetzung/Kalender verbinden); null
+  /// without. [kalenderNeu] ticks when its settings changed.
+  final KalenderDienst? kalender;
+  final Listenable? kalenderNeu;
 
   /// Reminders on the phone (vault Umsetzung/Erinnerungen); null in tests.
   final ErinnerungDienst? erinnerungen;
@@ -158,6 +168,12 @@ class _HomePageState extends State<HomePage> {
     onResume: () => _healthHolen(sofort: true),
   );
   final _stand = ValueNotifier<int>(0);
+  KalenderEinstellung _kalenderEinst = const KalenderEinstellung();
+  late final AppLifecycleListener _kalenderLeben = AppLifecycleListener(
+    onResume: () {
+      if (_kalenderVerbunden) _reload();
+    },
+  );
   List<CheckIn> _checkIns = const [];
   List<WeightEntry> _weights = const [];
   List<SleepEntry> _sleep = const [];
@@ -234,6 +250,8 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     _heuteScroll.dispose();
     _healthLeben.dispose();
+    if (widget.kalender != null) _kalenderLeben.dispose();
+    widget.kalenderNeu?.removeListener(_reload);
     _erinnerungenAus();
     _essen.removeListener(_essenGeaendert);
     _essen.dispose();
@@ -257,6 +275,8 @@ class _HomePageState extends State<HomePage> {
     _reload();
     _erinnerungenAn();
     if (widget.health != null) _healthLeben;
+    if (widget.kalender != null) _kalenderLeben;
+    widget.kalenderNeu?.addListener(_reload);
   }
 
   /// Pages opened from Heute (coach, focus) rebuild with every change too.
@@ -275,7 +295,8 @@ class _HomePageState extends State<HomePage> {
     final routine = await widget.feed.loadRoutine();
     final kcal = await widget.feed.loadKcal();
     final fragen = await widget.feed.loadFragen();
-    final termine = await widget.feed.loadTermine();
+    final kalenderEinst = await widget.feed.loadKalender();
+    final termine = await _termineLaden(kalenderEinst);
     final mahlzeiten = await widget.feed.loadMahlzeiten();
     final schwerpunkt = await widget.feed.loadSchwerpunkt();
     final fotoEinstellungen = await widget.feed.loadFotoEinstellungen();
@@ -314,6 +335,7 @@ class _HomePageState extends State<HomePage> {
       _kcal = kcal;
       _fragen = fragen;
       _termine = termine;
+      _kalenderEinst = kalenderEinst;
       _mahlzeiten = mahlzeiten;
       _schwerpunkt = schwerpunkt;
       _fotoEinstellungen = fotoEinstellungen;
@@ -1634,6 +1656,10 @@ class _HomePageState extends State<HomePage> {
                   mahlzeitZeiten: [
                     for (final m in _mahlzeitSlots) (m.minute, m.name),
                   ],
+                  kalender: _kalenderVerbunden ? widget.kalender!.name : null,
+                  onKalenderVerbinden: widget.kalender?.moeglich == true
+                      ? _kalenderVerbinden
+                      : null,
                 ),
               ],
             ),
@@ -1823,6 +1849,7 @@ class _HomePageState extends State<HomePage> {
       name: widget.profile.name,
       sofortSprechen: sofort,
       vorschlaege: _schnellVorschlaege(),
+      kalender: _kalenderVerbunden ? widget.kalender!.name : null,
       frageCoach: (t) async =>
           coach?.schnell(widget.profile, t, _schnellKontext()),
       gegenfragen: (e) {
@@ -1972,7 +1999,7 @@ class _HomePageState extends State<HomePage> {
           trainingNeu = true;
         case 'termin':
           final tag = (e.zahl('tag') ?? 0).round().clamp(0, 6);
-          await widget.feed.addTermin(
+          await _terminAnlegen(
             Termin(
               datum: heute.add(Duration(days: tag)),
               zeit: e.text('zeit'),

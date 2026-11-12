@@ -9,7 +9,13 @@ class Termin {
     required this.text,
     required this.erstellt,
     this.zeit,
+    this.kalender,
   });
+
+  /// Set when it comes from the phone's calendar (vault Umsetzung/Kalender
+  /// verbinden): the calendar's name. Such appointments are only shown;
+  /// they are changed in the calendar itself.
+  final String? kalender;
 
   /// The day of the appointment (time of day ignored).
   final DateTime datum;

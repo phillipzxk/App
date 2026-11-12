@@ -32,7 +32,18 @@ class DayPlanCard extends StatelessWidget {
     this.onOpenSchlaf,
     this.aufstehen,
     this.mahlzeitZeiten = const [],
+    this.kalender,
+    this.onKalenderVerbinden,
   });
+
+  /// Kalender verbinden (vault Umsetzung/Kalender verbinden.md): the
+  /// calendar's name ("iPhone-Kalender") once connected. Then the
+  /// appointments come only from there and the own entry field is gone.
+  final String? kalender;
+
+  /// Shows "Kalender verbinden" while not connected; null where the phone
+  /// has no calendar to connect. Gets where the button is, for the dots.
+  final Future<void> Function(Offset von)? onKalenderVerbinden;
 
   /// Today's meals with their planned time (minute, name), placed by the
   /// coach like on the sun arc. Empty until the number of meals is set.
@@ -99,7 +110,15 @@ class DayPlanCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _TerminField(onAdd: onAddTermin),
+          if (kalender case final k?)
+            _KalenderVerbunden(name: k, heute: heute.length)
+          else ...[
+            if (onKalenderVerbinden case final v?) ...[
+              _KalenderVerbinden(onTap: v),
+              const SizedBox(height: 10),
+            ],
+            _TerminField(onAdd: onAddTermin),
+          ],
           const SizedBox(height: 10),
           _MealsLine(
             mahlzeiten: meals,
@@ -116,7 +135,7 @@ class DayPlanCard extends StatelessWidget {
               _UpcomingRow(
                 key: ObjectKey(t),
                 termin: t,
-                onRemove: () => onRemoveTermin(t),
+                onRemove: t.kalender != null ? null : () => onRemoveTermin(t),
               ),
           ],
         ],
@@ -201,9 +220,9 @@ extension on DayPlanCard {
           (v) => _PlanRow(
             key: ObjectKey(t),
             zeit: t.zeit ?? '–',
-            art: 'Termin',
+            art: t.kalender != null ? 'Kalender' : 'Termin',
             titel: t.text,
-            onRemove: () => onRemoveTermin(t),
+            onRemove: t.kalender != null ? null : () => onRemoveTermin(t),
             vorbei: v,
           ),
         ),
@@ -626,10 +645,12 @@ class _Spur extends StatelessWidget {
 
 /// An appointment in the coming week, e.g. "Fr · 19:00 Geburtstag".
 class _UpcomingRow extends StatelessWidget {
-  const _UpcomingRow({super.key, required this.termin, required this.onRemove});
+  const _UpcomingRow({super.key, required this.termin, this.onRemove});
 
   final Termin termin;
-  final VoidCallback onRemove;
+
+  /// Null for calendar appointments: they are changed in the calendar.
+  final VoidCallback? onRemove;
 
   static const _days = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
@@ -654,12 +675,15 @@ class _UpcomingRow extends StatelessWidget {
             ),
           ),
         ),
-        IconButton(
-          tooltip: 'Termin löschen',
-          visualDensity: VisualDensity.compact,
-          icon: const Icon(Icons.close, size: 16, color: Glas.soft),
-          onPressed: onRemove,
-        ),
+        if (onRemove != null)
+          IconButton(
+            tooltip: 'Termin löschen',
+            visualDensity: VisualDensity.compact,
+            icon: const Icon(Icons.close, size: 16, color: Glas.soft),
+            onPressed: onRemove,
+          )
+        else
+          const SizedBox(height: 40),
       ],
     );
   }
@@ -702,4 +726,256 @@ class _MahlzeitenDialog extends StatelessWidget {
       ),
     );
   }
+}
+
+/// "Kalender verbinden" with a small calendar sheet and a slow gold shine
+/// (Entwurf Kalender verbinden, Bildschirm 1).
+class _KalenderVerbinden extends StatefulWidget {
+  const _KalenderVerbinden({required this.onTap});
+
+  final Future<void> Function(Offset von) onTap;
+
+  @override
+  State<_KalenderVerbinden> createState() => _KalenderVerbindenState();
+}
+
+class _KalenderVerbindenState extends State<_KalenderVerbinden>
+    with SingleTickerProviderStateMixin {
+  late final bool _lebendig = !WidgetsBinding.instance.runtimeType
+      .toString()
+      .contains('Test');
+  late final _glanz = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 3200),
+  );
+  final _knopf = GlobalKey();
+  bool _laeuft = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_lebendig) _glanz.repeat();
+  }
+
+  @override
+  void dispose() {
+    _glanz.dispose();
+    super.dispose();
+  }
+
+  Future<void> _tippen() async {
+    if (_laeuft) return;
+    final box = _knopf.currentContext?.findRenderObject() as RenderBox?;
+    final von = box == null
+        ? Offset.zero
+        : box.localToGlobal(box.size.center(Offset.zero));
+    setState(() => _laeuft = true);
+    try {
+      await widget.onTap(von);
+    } finally {
+      if (mounted) setState(() => _laeuft = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final jetzt = DateTime.now();
+    const monate = [
+      'JAN',
+      'FEB',
+      'MÄR',
+      'APR',
+      'MAI',
+      'JUN',
+      'JUL',
+      'AUG',
+      'SEP',
+      'OKT',
+      'NOV',
+      'DEZ',
+    ];
+    return ClipRRect(
+      key: const ValueKey('kalender-karte'),
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(13, 12, 12, 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0x6BC9A25C)),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0x1FF0D49A), Color(0x0AC49A55)],
+          ),
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned.fill(
+              child: IgnorePointer(
+                child: AnimatedBuilder(
+                  animation: _glanz,
+                  builder: (_, _) {
+                    final t = (_glanz.value / .6).clamp(0.0, 1.0);
+                    return FractionalTranslation(
+                      translation: Offset(-1.2 + 2.4 * t, 0),
+                      child: const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Color(0x00F0D49A),
+                              Color(0x24F0D49A),
+                              Color(0x00F0D49A),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 42,
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF3E9D8),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: const [
+                      BoxShadow(color: Color(0x59000000), blurRadius: 12),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 2.5),
+                        decoration: const BoxDecoration(
+                          gradient: CoachStyle.goldGradient,
+                        ),
+                        child: Text(
+                          monate[jetzt.month - 1],
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontFamily: 'Sora',
+                            fontSize: 7.5,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: .5,
+                            color: Color(0xFF2A1D0D),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            '${jetzt.day}',
+                            style: const TextStyle(
+                              fontFamily: 'Sora',
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF2A1D0D),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Kalender verbinden',
+                        style: Glas.tText.copyWith(
+                          fontFamily: 'Sora',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Deine Termine kommen von selbst rein.',
+                        style: Glas.tSoft.copyWith(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  key: const ValueKey('kalender-verbinden'),
+                  onTap: _tippen,
+                  child: Container(
+                    key: _knopf,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 13,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      gradient: CoachStyle.goldGradient,
+                    ),
+                    child: Text(
+                      _laeuft ? '…' : 'Verbinden',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF2A1D0D),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// "iPhone-Kalender verbunden · 3 Termine heute" instead of the field.
+class _KalenderVerbunden extends StatelessWidget {
+  const _KalenderVerbunden({required this.name, required this.heute});
+
+  final String name;
+  final int heute;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    key: const ValueKey('kalender-verbunden'),
+    padding: const EdgeInsets.fromLTRB(2, 2, 2, 0),
+    child: Row(
+      children: [
+        Container(
+          width: 7,
+          height: 7,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: CoachStyle.goldLight,
+            boxShadow: [BoxShadow(color: Color(0xAAF0D49A), blurRadius: 8)],
+          ),
+        ),
+        const SizedBox(width: 9),
+        Expanded(
+          child: Text(
+            '$name verbunden',
+            style: Glas.tText.copyWith(fontSize: 12.5),
+          ),
+        ),
+        Text(
+          heute == 0
+              ? 'heute keine Termine'
+              : heute == 1
+              ? '1 Termin heute'
+              : '$heute Termine heute',
+          style: Glas.tSoft.copyWith(fontSize: 12),
+        ),
+      ],
+    ),
+  );
 }
