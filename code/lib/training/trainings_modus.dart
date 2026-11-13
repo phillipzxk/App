@@ -5,6 +5,7 @@ import '../ui/coach_widgets.dart';
 import 'training_data.dart';
 import 'training_logik.dart';
 import 'training_widgets.dart';
+import '../ui/umbau.dart';
 
 /// Idea 9: one exercise and one set at a time, big numbers with −/+,
 /// then the rest ring with the next set. Everything goes into the same
@@ -84,9 +85,8 @@ class _TrainingsModusState extends State<TrainingsModus> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CoachStyle.night,
-      body: DecoratedBox(
-        decoration: const BoxDecoration(gradient: CoachStyle.nightGradient),
+      backgroundColor: const Color(0xFF231B14),
+      body: KlarHintergrund(
         child: SafeArea(
           child: Center(
             child: ConstrainedBox(
@@ -239,21 +239,17 @@ class _TrainingsModusState extends State<TrainingsModus> {
         _kopf('Übung ${_ex + 1} von ${s.logs.length}'),
         const SizedBox(height: 8),
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             for (var k = 0; k < s.logs.length; k++)
-              Container(
-                width: 9,
-                height: 9,
-                margin: const EdgeInsets.symmetric(horizontal: 3),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: k < _ex
-                      ? CoachStyle.goldLight
-                      : (k == _ex ? null : const Color(0xFF3A2E21)),
-                  border: k == _ex
-                      ? Border.all(color: CoachStyle.goldLight, width: 2)
-                      : null,
+              Expanded(
+                child: Container(
+                  height: 4,
+                  margin: EdgeInsets.only(left: k == 0 ? 0 : 6),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    gradient: k <= _ex ? Umbau.grad : null,
+                    color: k <= _ex ? null : Klar.glas,
+                  ),
                 ),
               ),
           ],
@@ -263,22 +259,50 @@ class _TrainingsModusState extends State<TrainingsModus> {
         const SizedBox(height: 4),
         Center(child: TLabel('Satz ${_satz + 1} von ${l.saetze.length}')),
         const Spacer(),
-        if (u.art.wertEinheit != null) ...[
-          stepper(
-            'wert',
-            satz.wert,
-            u.art.wertEinheit!,
-            u.art == UebungArt.strecke ? 0.5 : 2.5,
-            false,
+        TKarte(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+          child: Column(
+            children: [
+              if (u.art.wertEinheit != null) ...[
+                stepper(
+                  'wert',
+                  satz.wert,
+                  u.art.wertEinheit!,
+                  u.art == UebungArt.strecke ? 0.5 : 2.5,
+                  false,
+                ),
+                const SizedBox(height: 18),
+              ],
+              stepper(
+                'menge',
+                satz.menge,
+                u.art.mengeEinheit,
+                u.art == UebungArt.zeit ? 5 : 1,
+                true,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (var k = 0; k < l.saetze.length; k++)
+                    Container(
+                      width: 9,
+                      height: 9,
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: l.saetze[k].fertig
+                            ? const Color(0xFFE2BD7A)
+                            : const Color(0x29FFF5E6),
+                        border: k == _satz
+                            ? Border.all(color: const Color(0xFFE2BD7A))
+                            : null,
+                      ),
+                    ),
+                ],
+              ),
+            ],
           ),
-          const SizedBox(height: 18),
-        ],
-        stepper(
-          'menge',
-          satz.menge,
-          u.art.mengeEinheit,
-          u.art == UebungArt.zeit ? 5 : 1,
-          true,
         ),
         const Spacer(),
         MainButton(
@@ -328,17 +352,16 @@ class _Knopf extends StatelessWidget {
   @override
   Widget build(BuildContext context) => InkWell(
     onTap: onTap,
-    borderRadius: BorderRadius.circular(16),
+    customBorder: const CircleBorder(),
     child: Container(
       width: 58,
-      height: 56,
+      height: 58,
       alignment: Alignment.center,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: CoachStyle.goldEdge),
-        color: const Color(0xFF1A140E),
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        color: Color(0x1FFFF5E6),
       ),
-      child: Text(text, style: tTitel.copyWith(color: CoachStyle.goldLight)),
+      child: Text(text, style: tTitel.copyWith(color: Umbau.text)),
     ),
   );
 }

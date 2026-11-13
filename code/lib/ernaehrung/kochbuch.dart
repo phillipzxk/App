@@ -296,11 +296,11 @@ InputDecoration _feld(String hint) => InputDecoration(
   hintStyle: tSoft,
   isDense: true,
   filled: true,
-  fillColor: const Color(0xFF1A140E),
+  fillColor: const Color(0x14FFF5E6),
   contentPadding: const EdgeInsets.symmetric(horizontal: 11, vertical: 11),
   enabledBorder: OutlineInputBorder(
     borderRadius: BorderRadius.circular(12),
-    borderSide: const BorderSide(color: Color(0xFF4A3B2A)),
+    borderSide: const BorderSide(color: Color(0x33FFF5E6)),
   ),
   focusedBorder: OutlineInputBorder(
     borderRadius: BorderRadius.circular(12),

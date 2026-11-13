@@ -212,7 +212,7 @@ class _Schalter extends StatelessWidget {
               borderRadius: BorderRadius.circular(13),
               gradient: an ? CoachStyle.goldGradient : null,
               color: an ? null : const Color(0xFF2A1F13),
-              border: an ? null : Border.all(color: const Color(0xFF4A3B2A)),
+              border: an ? null : Border.all(color: const Color(0x33FFF5E6)),
             ),
             child: Container(
               width: 20,

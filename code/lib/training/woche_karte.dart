@@ -63,10 +63,10 @@ class WochenStreifen extends StatelessWidget {
       key: ValueKey('woche-$i'),
       padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 2),
       decoration: BoxDecoration(
-        color: fertig ? const Color(0xFF2A1F13) : const Color(0xFF1A140E),
+        color: fertig ? const Color(0x33F8E6BC) : const Color(0x14FFF5E6),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: fertig || ist ? CoachStyle.goldLight : const Color(0xFF3A2E21),
+          color: ist ? CoachStyle.goldLight : const Color(0x00000000),
           width: ist ? 1.5 : 1,
         ),
       ),
