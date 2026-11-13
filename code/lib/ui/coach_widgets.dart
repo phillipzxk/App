@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../bereiche/glas.dart';
 import 'coach_style.dart';
+import 'umbau.dart';
 import 'logo.dart';
 
 /// Segmented progress bar above a question, e.g. 2 of 4 filled.
@@ -140,24 +141,22 @@ class _GoldButton extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         height: 56,
         decoration: BoxDecoration(
-          gradient: on ? CoachStyle.goldGradient : null,
-          color: on ? null : const Color(0xFF241E17),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: on ? CoachStyle.goldGlow : null,
+          gradient: on ? Umbau.grad : null,
+          color: on ? null : const Color(0x14FFF5E6),
+          borderRadius: BorderRadius.circular(999),
         ),
         child: Material(
           type: MaterialType.transparency,
           child: InkWell(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(999),
             onTap: onPressed,
             child: Center(
               child: Text(
                 label,
                 style: TextStyle(
                   fontFamily: 'Sora',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15.5,
-                  letterSpacing: 0.4,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
                   color: on ? CoachStyle.goldInk : CoachStyle.nightMuted,
                 ),
               ),

@@ -410,7 +410,7 @@ class _SleepTabState extends State<SleepTab> {
                                   : null,
                               color: m.wert >= 75
                                   ? null
-                                  : const Color(0xFF4A3B2A),
+                                  : const Color(0x33FFF5E6),
                             ),
                           ),
                         ),
@@ -1072,7 +1072,7 @@ class MehrDatenKarte extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
               color: gold ? const Color(0x24F3D79A) : null,
               border: Border.all(
-                color: gold ? const Color(0x73F3D79A) : const Color(0xFF4A3B2A),
+                color: gold ? const Color(0x73F3D79A) : const Color(0x33FFF5E6),
               ),
             ),
             child: Text(

@@ -271,7 +271,7 @@ class _RunterfahrenSeiteState extends State<RunterfahrenSeite> {
                           fontSize: i == _schritt ? 17 : 13,
                           color: i == _schritt
                               ? const Color(0xFFCDBB98)
-                              : const Color(0xFF4A3B2A),
+                              : const Color(0x33FFF5E6),
                         ),
                       ),
                     ),
@@ -282,7 +282,7 @@ class _RunterfahrenSeiteState extends State<RunterfahrenSeite> {
                       key: const ValueKey('runter-weiter'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF8F8068),
-                        side: const BorderSide(color: Color(0xFF4A3B2A)),
+                        side: const BorderSide(color: Color(0x33FFF5E6)),
                         padding: const EdgeInsets.symmetric(vertical: 13),
                         shape: const StadiumBorder(),
                       ),
@@ -362,7 +362,7 @@ class _RuheSchirmState extends State<RuheSchirm> {
                   fontFamily: 'Sora',
                   fontWeight: FontWeight.w600,
                   fontSize: 15,
-                  color: Color(0xFF4A3B2A),
+                  color: Color(0x33FFF5E6),
                 ),
               ),
               const SizedBox(height: 4),

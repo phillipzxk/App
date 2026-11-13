@@ -156,7 +156,7 @@ class _EinkaufslisteSeiteState extends State<EinkaufslisteSeite> {
                         hintStyle: tSoft,
                         isDense: true,
                         filled: true,
-                        fillColor: const Color(0xFF1A140E),
+                        fillColor: const Color(0x14FFF5E6),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 11,
                           vertical: 11,
@@ -164,7 +164,7 @@ class _EinkaufslisteSeiteState extends State<EinkaufslisteSeite> {
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                            color: Color(0xFF4A3B2A),
+                            color: Color(0x33FFF5E6),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -217,8 +217,8 @@ class _Knopf extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xFF4A3B2A)),
-        color: const Color(0xFF1A140E),
+        border: Border.all(color: const Color(0x33FFF5E6)),
+        color: const Color(0x14FFF5E6),
       ),
       child: Text(text, style: tTitel.copyWith(color: CoachStyle.goldLight)),
     ),

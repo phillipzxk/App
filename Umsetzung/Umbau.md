@@ -66,9 +66,15 @@ Entwurf mit allen Vorschlägen: https://claude.ai/artifact/2hxn4dcwTv5CWpW2oZwQ7
 
 Abweichung vom Entwurf, weil die Daten es so vorgeben: Die Sätze bleiben Eingabefelder (im Entwurf standen feste Zahlen). Wochenpunkte beim Muster und die drei Zahlen bei Gesundheit gibt es in der App nicht als Daten, dort stehen der Gegenschritt und die gemessenen Zeilen.
 
+## Reste (2026-11-13, Phillip „erstmal Reste alles fertig machen“)
+
+- Trainings-Modus im Look „3 klar“: heller Hintergrund mit Goldkreisen, Fortschritt als feine Goldstriche, die großen Zahlen in einer Glaskarte mit runden Knöpfen, darunter Punkte für die Sätze.
+- Der Hauptknopf der ganzen App ist jetzt eine goldene Pille ohne Schein (wie „Heute geschafft“).
+- Eingabefelder und kleine Kästen mit dunklem Rahmen (Einkaufsliste, Kochbuch, Abend, Wecker, Schlaf, Form-Check, Plan, Wochenstreifen) sind ruhiges Glas.
+
 ## Noch offen
 
-- Eigene Vollbild-Szenen (Trainings-Modus, Aufwachen, Abend, Wecker, Ruhe) haben ihr eigenes Bild und sind nicht angeglichen.
+- Die Himmel-Szenen (Aufwachen, Abend, Wecker, Ruhe) behalten bewusst ihr eigenes Bild.
 
 ## Stand im Code
 

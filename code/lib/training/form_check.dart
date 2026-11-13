@@ -230,7 +230,7 @@ class _FormCheckSeiteState extends State<FormCheckSeite> {
                   border: Border.all(
                     color: markiert.contains(k)
                         ? CoachStyle.goldLight
-                        : const Color(0xFF4A3B2A),
+                        : const Color(0x33FFF5E6),
                     width: markiert.contains(k) ? 1.6 : 1,
                   ),
                 ),

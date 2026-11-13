@@ -428,7 +428,7 @@ class _UebungOptionenState extends State<UebungOptionen> {
       decoration: BoxDecoration(
         color: const Color(0xFF120D09),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: CoachStyle.goldEdge),
+        border: Border.all(color: const Color(0x33FFF5E6)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

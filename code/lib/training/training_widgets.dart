@@ -407,7 +407,7 @@ class TStepper extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: CoachStyle.goldEdge),
+          color: const Color(0x1FFFF5E6),
         ),
         child: Text(
           t,
