@@ -8,6 +8,7 @@ import 'form_aufnahme.dart';
 import 'form_video.dart';
 import 'training_coach.dart';
 import 'training_widgets.dart';
+import '../ui/umbau.dart';
 
 /// Idea 10: film one set of an exercise. The stills are kept with the
 /// exercise and the coach gives "Hinweise vom Coach" (Phillip's wording,
@@ -103,15 +104,14 @@ class _FormCheckSeiteState extends State<FormCheckSeite> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CoachStyle.night,
+      backgroundColor: const Color(0xFF231B14),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         foregroundColor: CoachStyle.goldLight,
         elevation: 0,
         scrolledUnderElevation: 0,
       ),
-      body: DecoratedBox(
-        decoration: const BoxDecoration(gradient: CoachStyle.nightGradient),
+      body: KlarHintergrund(
         child: SafeArea(
           top: false,
           child: Center(

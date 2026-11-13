@@ -60,7 +60,7 @@ void main() {
     );
     expect(coach.calls, 1);
     expect(find.byKey(const ValueKey('warum-karte')), findsOneWidget);
-    expect(find.text('„$_warum“'), findsOneWidget);
+    expect(find.text(_warum), findsOneWidget);
     expect(find.text('Für genau solche Wochen ist es da.'), findsOneWidget);
     expect(feed.warumHeute?.satz, 'Für genau solche Wochen ist es da.');
   });

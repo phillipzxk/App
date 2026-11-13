@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
+import '../ui/umbau.dart';
 import 'training_data.dart';
 import 'training_logik.dart';
 import 'training_widgets.dart';
 
 /// One exercise of today's session (ideas 1 and 5): last time and today's
 /// target on top, the sets prefilled, a tick per set, the rest after each
-/// tick, one more or one less set, and how it felt.
+/// tick, one more or one less set, and how it felt. Since "3 klar"
+/// (2026-11-13): big gold number, small bars of the last times, hairline
+/// rows, and the set that is next lies on a light gold row.
 class UebungKarte extends StatelessWidget {
   const UebungKarte({
     super.key,
@@ -17,6 +20,7 @@ class UebungKarte extends StatelessWidget {
     required this.ziel,
     required this.onForm,
     required this.onVerlauf,
+    this.verlauf = const [],
   });
 
   final HeuteSession session;
@@ -24,6 +28,11 @@ class UebungKarte extends StatelessWidget {
   final UebungZiel ziel;
   final VoidCallback? onForm;
   final VoidCallback onVerlauf;
+
+  /// The best value of the last times, oldest first (for the small bars).
+  final List<double> verlauf;
+
+  static const _linie = BorderSide(color: Umbau.linie);
 
   @override
   Widget build(BuildContext context) {
@@ -34,40 +43,65 @@ class UebungKarte extends StatelessWidget {
     final zielText = ziel.saetze.isEmpty
         ? ''
         : satzText(art, ziel.saetze.first);
+    final jetzt = l.saetze.indexWhere((x) => !x.fertig);
     return TKarte(
       key: ValueKey('uebung-$i'),
+      padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              Expanded(child: Text(u.name, style: tTitel)),
-              TLabel('${l.fertige.length}/${l.saetze.length} Sätze'),
-            ],
-          ),
-          const SizedBox(height: 3),
-          Text.rich(
-            TextSpan(
-              style: tSoft,
-              children: [
-                TextSpan(
-                  text: ziel.letztes == null
-                      ? 'Erstes Mal · '
-                      : 'Letztes Mal ${satzText(art, ziel.letztes!)} · ',
-                ),
-                TextSpan(
-                  text: 'Ziel heute $zielText',
+              GoldMaske(
+                child: Text(
+                  '${i + 1}'.padLeft(2, '0'),
                   style: const TextStyle(
-                    color: CoachStyle.goldLight,
+                    fontFamily: 'Sora',
                     fontWeight: FontWeight.w700,
+                    fontSize: 34,
+                    height: 1,
+                    color: Colors.white,
                   ),
                 ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(u.name, style: tTitel.copyWith(fontSize: 18)),
+                    const SizedBox(height: 1),
+                    Text.rich(
+                      TextSpan(
+                        style: tSoft,
+                        children: [
+                          TextSpan(
+                            text: ziel.letztes == null
+                                ? 'Erstes Mal · '
+                                : 'Letztes Mal ${satzText(art, ziel.letztes!)} · ',
+                          ),
+                          TextSpan(
+                            text: 'Ziel heute $zielText',
+                            style: const TextStyle(
+                              color: CoachStyle.goldLight,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (verlauf.length > 1) ...[
+                const SizedBox(width: 10),
+                _Balken(verlauf),
               ],
-            ),
+            ],
           ),
           if (ziel.angepasst != null)
             Padding(
-              padding: const EdgeInsets.only(top: 2),
+              padding: const EdgeInsets.only(top: 4),
               child: Text(
                 'Vom Coach angepasst',
                 style: tSoft.copyWith(color: CoachStyle.goldLight),
@@ -75,13 +109,14 @@ class UebungKarte extends StatelessWidget {
             ),
           if (u.notiz.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(top: 2),
+              padding: const EdgeInsets.only(top: 4),
               child: Text(u.notiz, style: tSoft.copyWith(fontSize: 11.5)),
             ),
           const SizedBox(height: 10),
           for (var k = 0; k < warm.length && k < l.aufwaermen.length; k++)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              decoration: const BoxDecoration(border: Border(top: _linie)),
               child: Row(
                 children: [
                   SizedBox(
@@ -106,16 +141,33 @@ class UebungKarte extends StatelessWidget {
               ),
             ),
           for (var k = 0; k < l.saetze.length; k++)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 260),
+              curve: Curves.easeOutCubic,
+              margin: EdgeInsets.symmetric(vertical: k == jetzt ? 4 : 0),
+              padding: k == jetzt
+                  ? const EdgeInsets.fromLTRB(14, 8, 8, 8)
+                  : const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+              decoration: BoxDecoration(
+                gradient: k == jetzt ? Klar.held : null,
+                borderRadius: BorderRadius.circular(k == jetzt ? 22 : 0),
+                border: k == jetzt || k == jetzt + 1 && jetzt >= 0
+                    ? null
+                    : const Border(top: _linie),
+              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    width: 48,
+                    width: 46,
                     child: Padding(
                       padding: const EdgeInsets.only(top: 9),
-                      child: Text('Satz ${k + 1}', style: tSoft),
+                      child: Text(
+                        'Satz ${k + 1}',
+                        style: tSoft.copyWith(
+                          color: k == jetzt ? Umbau.tinteWeich : null,
+                        ),
+                      ),
                     ),
                   ),
                   if (art.wertEinheit != null) ...[
@@ -124,6 +176,7 @@ class UebungKarte extends StatelessWidget {
                         key: ValueKey('wert-$i-$k'),
                         wert: l.saetze[k].wert,
                         einheit: art.wertEinheit,
+                        hell: k == jetzt,
                         onChanged: (v) => session.setWert(i, k, v),
                       ),
                     ),
@@ -137,13 +190,16 @@ class UebungKarte extends StatelessWidget {
                           ? 'Wdh · Körpergewicht'
                           : art.mengeEinheit,
                       dezimal: art == UebungArt.strecke,
+                      hell: k == jetzt,
                       onChanged: (v) => session.setWert(i, k, v, menge: true),
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 8),
                   TTick(
                     key: ValueKey('satz-$i-$k'),
                     an: l.saetze[k].fertig,
+                    hell: k == jetzt,
+                    funken: true,
                     onTap: () => session.abhaken(i, k),
                   ),
                 ],
@@ -152,69 +208,55 @@ class UebungKarte extends StatelessWidget {
           if (session.pauseFuer == i)
             Container(
               key: ValueKey('pause-$i'),
-              margin: const EdgeInsets.only(top: 2, bottom: 4),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              margin: const EdgeInsets.only(top: 8),
+              padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
               decoration: BoxDecoration(
-                color: const Color(0xFF2A1F13),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: CoachStyle.goldEdge),
+                color: const Color(0x1AE2BD7A),
+                borderRadius: BorderRadius.circular(999),
               ),
               child: Row(
                 children: [
-                  Text('Pause', style: tText.copyWith(fontSize: 12.5)),
-                  const Spacer(),
+                  FuellRing(
+                    wert: u.pause > 0 ? session.pauseRest / u.pause : 0,
+                    size: 22,
+                    dicke: 3,
+                  ),
+                  const SizedBox(width: 10),
+                  Text('Pause', style: tText.copyWith(fontSize: 13)),
+                  const SizedBox(width: 6),
                   Text(
                     mmss(session.pauseRest),
                     style: tTitel.copyWith(color: CoachStyle.goldLight),
                   ),
                   const Spacer(),
+                  if (jetzt >= 0) Text('dann Satz ${jetzt + 1}', style: tSoft),
+                  const SizedBox(width: 6),
                   TLink('Weiter', onTap: session.pauseStopp),
                 ],
               ),
             ),
-          Row(
-            children: [
-              TLink(
-                '+ Satz',
-                key: ValueKey('satz-dazu-$i'),
-                onTap: () => session.satzDazu(i),
-              ),
-              const SizedBox(width: 12),
-              if (l.saetze.length > 1)
-                TLink(
-                  '– Satz',
-                  key: ValueKey('satz-weg-$i'),
-                  onTap: () => session.satzWeg(i),
-                ),
-              const SizedBox(width: 12),
-              if (u.pause > 0)
-                Text(
-                  'Pause ${mmss(u.pause)}',
-                  style: tSoft.copyWith(color: CoachStyle.inkSoft),
-                ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              for (final f in const ['leicht', 'passt', 'schwer']) ...[
-                Expanded(
-                  child: TChip(
-                    f,
-                    key: ValueKey('gefuehl-$i-$f'),
-                    an: l.gefuehl == f,
-                    onTap: () => session.gefuehl(i, f),
-                  ),
-                ),
-                if (f != 'schwer') const SizedBox(width: 6),
-              ],
-            ],
-          ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Wrap(
             spacing: 8,
-            runSpacing: 6,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
+              TChip(
+                '+ Satz',
+                key: ValueKey('satz-dazu-$i'),
+                an: false,
+                klein: true,
+                onTap: () => session.satzDazu(i),
+              ),
+              if (l.saetze.length > 1)
+                TChip(
+                  '– Satz',
+                  key: ValueKey('satz-weg-$i'),
+                  an: false,
+                  klein: true,
+                  onTap: () => session.satzWeg(i),
+                ),
+              if (u.pause > 0) KlarPille('Pause ${mmss(u.pause)}'),
               if (onForm != null)
                 TChip(
                   'Form filmen',
@@ -232,6 +274,83 @@ class UebungKarte extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: Klar.glas,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Row(
+              children: [
+                for (final f in const ['leicht', 'passt', 'schwer'])
+                  Expanded(
+                    child: GestureDetector(
+                      key: ValueKey('gefuehl-$i-$f'),
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => session.gefuehl(i, f),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 220),
+                        padding: const EdgeInsets.symmetric(vertical: 9),
+                        decoration: BoxDecoration(
+                          gradient: l.gefuehl == f ? Umbau.grad : null,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          f,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: 'Figtree',
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                            color: l.gefuehl == f ? Umbau.tinte : Umbau.weich,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Small gold bars: how the exercise went the last times.
+class _Balken extends StatelessWidget {
+  const _Balken(this.werte);
+  final List<double> werte;
+
+  @override
+  Widget build(BuildContext context) {
+    final w = werte.length > 5 ? werte.sublist(werte.length - 5) : werte;
+    final hoch = w.reduce((a, b) => a > b ? a : b);
+    final tief = w.reduce((a, b) => a < b ? a : b);
+    return SizedBox(
+      height: 34,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var k = 0; k < w.length; k++)
+            Padding(
+              padding: const EdgeInsets.only(left: 3),
+              child: Opacity(
+                opacity: k == w.length - 1 ? 1 : .45,
+                child: Container(
+                  width: 5,
+                  height: hoch == tief
+                      ? 24
+                      : 12 + 22 * (w[k] - tief) / (hoch - tief),
+                  decoration: BoxDecoration(
+                    gradient: Umbau.grad,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -449,14 +568,14 @@ class _VorschlagFeldState extends State<VorschlagFeld> {
               decoration: InputDecoration(
                 isDense: true,
                 filled: true,
-                fillColor: const Color(0xFF1A140E),
+                fillColor: const Color(0x14FFF5E6),
                 hintText: widget.art.wertEinheit == null
                     ? 'z. B. 13'
                     : 'z. B. 85 × 6',
                 hintStyle: const TextStyle(color: CoachStyle.inkSoft),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFF4A3B2A)),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),

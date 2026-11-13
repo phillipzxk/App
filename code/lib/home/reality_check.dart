@@ -5,6 +5,7 @@ import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import 'feed_widgets.dart';
 import 'fokus_widgets.dart';
+import '../ui/umbau.dart';
 
 /// Reality Check (see vault Umsetzung/Reality Check.md): on the day a focus
 /// week ends, Heute shows only this small field instead of the focus
@@ -176,114 +177,116 @@ class RealityCheckSeite extends StatelessWidget {
     );
     final t = a.training;
     return Scaffold(
-      backgroundColor: CoachStyle.night,
+      backgroundColor: const Color(0xFF231B14),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         foregroundColor: CoachStyle.goldLight,
         elevation: 0,
       ),
-      body: NightScope(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
-          children: [
-            PageHeader(
-              label: a.start == null ? 'Deine Woche' : wochenSpanne(a.start!),
-              title: 'Reality Check',
-            ),
-            _Box(
-              key: const ValueKey('reality-zahlen'),
-              label: '1 · VORGENOMMEN VS. UMGESETZT',
-              children: [
-                _Balken(
-                  key: const ValueKey('reality-fokus'),
-                  titel: 'Fokus: ${a.fokusText ?? ''}'.trim(),
-                  zahl: '${a.geschafft ?? 0} von 7',
-                  anteil: (a.geschafft ?? 0) / 7,
-                ),
-                if (t != null)
-                  t.geplant > 0
-                      ? _Balken(
-                          key: const ValueKey('reality-training'),
-                          titel: 'Training laut Plan',
-                          zahl: '${t.gemacht} von ${t.geplant}',
-                          anteil: t.gemacht / t.geplant,
-                        )
-                      : _Balken(
-                          key: const ValueKey('reality-training'),
-                          titel: 'Training (kein Plan eingetragen)',
-                          zahl:
-                              '${t.gemacht} ${t.gemacht == 1 ? 'Tag' : 'Tage'}',
-                          anteil: t.gemacht / 7,
-                        ),
-              ],
-            ),
-            if ((a.bremse ?? '').isNotEmpty)
+      body: KlarHintergrund(
+        child: NightScope(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+            children: [
+              PageHeader(
+                label: a.start == null ? 'Deine Woche' : wochenSpanne(a.start!),
+                title: 'Reality Check',
+              ),
               _Box(
-                key: const ValueKey('reality-bremse'),
-                label: '2 · WAS DICH AUSGEBREMST HAT',
+                key: const ValueKey('reality-zahlen'),
+                label: '1 · VORGENOMMEN VS. UMGESETZT',
                 children: [
-                  const SizedBox(height: 8),
-                  Text(
-                    a.bremse!,
-                    style: CoachStyle.body.copyWith(
-                      fontSize: 14.5,
-                      height: 1.45,
-                      color: CoachStyle.ink,
-                    ),
+                  _Balken(
+                    key: const ValueKey('reality-fokus'),
+                    titel: 'Fokus: ${a.fokusText ?? ''}'.trim(),
+                    zahl: '${a.geschafft ?? 0} von 7',
+                    anteil: (a.geschafft ?? 0) / 7,
                   ),
+                  if (t != null)
+                    t.geplant > 0
+                        ? _Balken(
+                            key: const ValueKey('reality-training'),
+                            titel: 'Training laut Plan',
+                            zahl: '${t.gemacht} von ${t.geplant}',
+                            anteil: t.gemacht / t.geplant,
+                          )
+                        : _Balken(
+                            key: const ValueKey('reality-training'),
+                            titel: 'Training (kein Plan eingetragen)',
+                            zahl:
+                                '${t.gemacht} ${t.gemacht == 1 ? 'Tag' : 'Tage'}',
+                            anteil: t.gemacht / 7,
+                          ),
                 ],
               ),
-            if (veraenderung != null)
-              GoldRahmen(
-                key: const ValueKey('reality-veraenderung'),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              if ((a.bremse ?? '').isNotEmpty)
+                _Box(
+                  key: const ValueKey('reality-bremse'),
+                  label: '2 · WAS DICH AUSGEBREMST HAT',
                   children: [
-                    Text(
-                      '3 · DIE EINE VERÄNDERUNG',
-                      style: CoachStyle.goldLabel.copyWith(
-                        fontSize: 10,
-                        color: CoachStyle.goldLight,
-                      ),
-                    ),
                     const SizedBox(height: 8),
                     Text(
-                      '${veraenderung.text}.',
-                      style: CoachStyle.cardTitle.copyWith(
-                        fontSize: 17,
-                        color: const Color(0xFFF5DFAE),
+                      a.bremse!,
+                      style: CoachStyle.body.copyWith(
+                        fontSize: 14.5,
+                        height: 1.45,
+                        color: CoachStyle.ink,
                       ),
                     ),
-                    if (veraenderung.warum.isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        veraenderung.warum,
-                        style: CoachStyle.body.copyWith(
-                          fontSize: 13.5,
-                          height: 1.45,
-                          color: CoachStyle.beigeLabel,
-                        ),
-                      ),
-                    ],
                   ],
                 ),
+              if (veraenderung != null)
+                GoldRahmen(
+                  key: const ValueKey('reality-veraenderung'),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '3 · DIE EINE VERÄNDERUNG',
+                        style: CoachStyle.goldLabel.copyWith(
+                          fontSize: 10,
+                          color: CoachStyle.goldLight,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${veraenderung.text}.',
+                        style: CoachStyle.cardTitle.copyWith(
+                          fontSize: 17,
+                          color: const Color(0xFFF5DFAE),
+                        ),
+                      ),
+                      if (veraenderung.warum.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          veraenderung.warum,
+                          style: CoachStyle.body.copyWith(
+                            fontSize: 13.5,
+                            height: 1.45,
+                            color: CoachStyle.beigeLabel,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 6),
+              FokusWahl(
+                auswahl: liste,
+                laedt: false,
+                titel: 'DEIN NEUER FOKUS · WÄHL EINEN',
+                mitRueckblick: false,
+                onNochmal: () {},
+                onStart: (v) async {
+                  final nav = Navigator.of(context);
+                  // Map the relabelled option back to the coach's original.
+                  final i = liste.vorschlaege.indexOf(v);
+                  await onStart(i < 0 ? v : vorschlaege[i]);
+                  nav.pop();
+                },
               ),
-            const SizedBox(height: 6),
-            FokusWahl(
-              auswahl: liste,
-              laedt: false,
-              titel: 'DEIN NEUER FOKUS · WÄHL EINEN',
-              mitRueckblick: false,
-              onNochmal: () {},
-              onStart: (v) async {
-                final nav = Navigator.of(context);
-                // Map the relabelled option back to the coach's original.
-                final i = liste.vorschlaege.indexOf(v);
-                await onStart(i < 0 ? v : vorschlaege[i]);
-                nav.pop();
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:coach_app/health/health_daten.dart';
 import 'package:coach_app/health/health_dienst.dart';
 import 'package:coach_app/health/health_heute.dart';
+import 'package:coach_app/home/heute_felder.dart';
 import 'package:coach_app/health/health_logik.dart';
 import 'package:coach_app/health/health_verbinden.dart';
 import 'package:coach_app/health/nacht_wurzel.dart';
@@ -216,9 +217,9 @@ void main() {
                   Positioned.fill(child: SamenRegen(samen: healthSamen(h))),
                 ],
               ),
-              HealthFelderListe(
-                felder: healthFelder(const SchlafDaten().mitHealth(h), h.tag),
-                onKnopf: (f) => getippt = f,
+              HeuteFelder(
+                health: healthFelder(const SchlafDaten().mitHealth(h), h.tag),
+                onHealthKnopf: (f) => getippt = f,
               ),
             ],
           ),

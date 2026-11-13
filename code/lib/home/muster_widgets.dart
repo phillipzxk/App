@@ -4,6 +4,7 @@ import '../feed/muster.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import 'feed_widgets.dart';
+import '../ui/umbau.dart';
 
 /// Small chip "Schlaf → Ernährung".
 class _BereichChip extends StatelessWidget {
@@ -54,9 +55,8 @@ class MusterKarte extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(1.3),
       decoration: BoxDecoration(
-        gradient: CoachStyle.goldEdgeGradient,
+        color: const Color(0x00000000),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: CoachStyle.nightShadow,
       ),
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -64,7 +64,7 @@ class MusterKarte extends StatelessWidget {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF2A2118), Color(0xFF1B1611)],
+            colors: [Color(0x17FFF5E6), Color(0x17FFF5E6)],
           ),
           borderRadius: BorderRadius.circular(19),
         ),
@@ -178,171 +178,81 @@ class MusterSeite extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CoachStyle.night,
+      backgroundColor: const Color(0xFF231B14),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         foregroundColor: CoachStyle.goldLight,
         elevation: 0,
       ),
-      body: NightScope(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
-          children: [
-            const PageHeader(label: 'Coach', title: 'Deine Muster'),
-            Text(
-              'Zusammenhänge, die der Coach in deinen Check-ins klar '
-              'gesehen hat. Das neueste steht oben.',
-              style: CoachStyle.body.copyWith(color: CoachStyle.inkSoft),
-            ),
-            const SizedBox(height: 14),
-            for (final m in muster)
-              Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                  color: CoachStyle.card,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: CoachStyle.line),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          _wann(m.datum),
-                          style: CoachStyle.body.copyWith(
-                            fontSize: 12,
-                            color: CoachStyle.inkSoft,
-                          ),
-                        ),
-                        const Spacer(),
-                        _BereichChip(m),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      m.text,
-                      style: CoachStyle.body.copyWith(
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFFF6EEDD),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text.rich(
-                      TextSpan(
+      body: KlarHintergrund(
+        child: NightScope(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+            children: [
+              const PageHeader(label: 'Coach', title: 'Deine Muster'),
+              Text(
+                'Zusammenhänge, die der Coach in deinen Check-ins klar '
+                'gesehen hat. Das neueste steht oben.',
+                style: CoachStyle.body.copyWith(color: CoachStyle.inkSoft),
+              ),
+              const SizedBox(height: 14),
+              for (final m in muster)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: CoachStyle.card,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: CoachStyle.line),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
                         children: [
-                          const TextSpan(
-                            text: 'Gegenschritt: ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              color: CoachStyle.goldLight,
+                          Text(
+                            _wann(m.datum),
+                            style: CoachStyle.body.copyWith(
+                              fontSize: 12,
+                              color: CoachStyle.inkSoft,
                             ),
                           ),
-                          TextSpan(text: m.schritt),
+                          const Spacer(),
+                          _BereichChip(m),
                         ],
                       ),
-                      style: CoachStyle.body.copyWith(
-                        fontSize: 13.5,
-                        color: CoachStyle.beigeLabel,
+                      const SizedBox(height: 8),
+                      Text(
+                        m.text,
+                        style: CoachStyle.body.copyWith(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFFF6EEDD),
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 8),
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            const TextSpan(
+                              text: 'Gegenschritt: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: CoachStyle.goldLight,
+                              ),
+                            ),
+                            TextSpan(text: m.schritt),
+                          ],
+                        ),
+                        style: CoachStyle.body.copyWith(
+                          fontSize: 13.5,
+                          color: CoachStyle.beigeLabel,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Small field for a pattern on "Heute" (Phillip 2026-10-25: much smaller
-/// than the old card, only there to find it): symbol, label and the
-/// pattern in one line. Tapping opens all patterns.
-class MusterFeld extends StatelessWidget {
-  const MusterFeld({
-    super.key,
-    required this.muster,
-    required this.neu,
-    required this.onTap,
-  });
-
-  final Muster muster;
-
-  /// Found in the last two days: "NEUES MUSTER", else "DEINE MUSTER".
-  final bool neu;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      key: const ValueKey('muster-feld'),
-      padding: const EdgeInsets.all(1.2),
-      decoration: BoxDecoration(
-        gradient: CoachStyle.goldEdgeGradient,
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: Ink(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF261C12), Color(0xFF140F0A)],
-            ),
-            borderRadius: BorderRadius.circular(17),
-          ),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(17),
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 8, 10, 8),
-              child: Row(
-                children: [
-                  ShaderMask(
-                    shaderCallback: (r) =>
-                        CoachStyle.goldGradient.createShader(r),
-                    child: const Icon(
-                      Icons.insights,
-                      size: 24,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          neu ? 'NEUES MUSTER' : 'DEINE MUSTER',
-                          style: CoachStyle.goldLabel.copyWith(
-                            fontFamily: 'Sora',
-                            fontSize: 9,
-                            letterSpacing: 1.4,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          muster.text,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: CoachStyle.body.copyWith(
-                            fontSize: 12.5,
-                            color: CoachStyle.ink,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  const Text(
-                    '›',
-                    style: TextStyle(fontSize: 18, color: CoachStyle.goldLight),
-                  ),
-                ],
-              ),
-            ),
+            ],
           ),
         ),
       ),

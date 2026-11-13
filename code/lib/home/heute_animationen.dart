@@ -405,9 +405,8 @@ class _BereichsFeldState extends State<BereichsFeld> {
             key: _feld,
             padding: const EdgeInsets.all(1.3),
             decoration: BoxDecoration(
-              gradient: CoachStyle.goldEdgeGradient,
+              color: const Color(0x00000000),
               borderRadius: BorderRadius.circular(24),
-              boxShadow: CoachStyle.nightShadow,
             ),
             child: Container(
               height: 250,
@@ -416,7 +415,7 @@ class _BereichsFeldState extends State<BereichsFeld> {
                 gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [Color(0xFF2C2319), Color(0xFF1B1611)],
+                  colors: [Color(0x17FFF5E6), Color(0x17FFF5E6)],
                 ),
                 borderRadius: BorderRadius.circular(23),
               ),

@@ -2263,12 +2263,7 @@ class _UnterSeite extends StatelessWidget {
       ),
       body: glas
           ? GlasHintergrund(child: _inhalt())
-          : DecoratedBox(
-              decoration: const BoxDecoration(
-                gradient: CoachStyle.nightGradient,
-              ),
-              child: _inhalt(),
-            ),
+          : KlarHintergrund(child: _inhalt()),
     );
   }
 

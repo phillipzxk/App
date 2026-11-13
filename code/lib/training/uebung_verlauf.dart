@@ -6,6 +6,7 @@ import '../ui/coach_widgets.dart';
 import 'form_video.dart';
 import 'training_data.dart';
 import 'training_widgets.dart';
+import '../ui/umbau.dart';
 
 /// One exercise over time: best value per week, records, form videos and
 /// one sentence from the coach that ties the curve to sleep, food or the
@@ -101,15 +102,14 @@ class _UebungVerlaufSeiteState extends State<UebungVerlaufSeite> {
     ];
     final satz = _saetze[_name];
     return Scaffold(
-      backgroundColor: CoachStyle.night,
+      backgroundColor: const Color(0xFF231B14),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         foregroundColor: CoachStyle.goldLight,
         elevation: 0,
         scrolledUnderElevation: 0,
       ),
-      body: DecoratedBox(
-        decoration: const BoxDecoration(gradient: CoachStyle.nightGradient),
+      body: KlarHintergrund(
         child: SafeArea(
           top: false,
           child: Center(
