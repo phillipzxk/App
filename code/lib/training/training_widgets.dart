@@ -5,50 +5,33 @@ import 'package:flutter/services.dart';
 
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
+import '../ui/umbau.dart';
 import 'training_data.dart';
 
-/// Dark card with a fine gold edge, like the draft (Entwurf 2).
+/// Calm glass card without a frame ("3 klar", 2026-11-13).
 class TKarte extends StatelessWidget {
   const TKarte({
     super.key,
     required this.child,
     this.gold = false,
-    this.padding = const EdgeInsets.all(14),
+    this.padding = const EdgeInsets.all(16),
   });
 
   final Widget child;
 
-  /// Highlighted: stronger gold edge and glow.
+  /// Highlighted: a touch of gold in the glass.
   final bool gold;
   final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) => Container(
     margin: const EdgeInsets.only(bottom: 12),
-    padding: const EdgeInsets.all(1.2),
+    padding: padding,
     decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(20),
-      gradient: gold
-          ? CoachStyle.goldGradient
-          : const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0x88E0BF7E), Color(0x335A4630), Color(0x55E0BF7E)],
-            ),
-      boxShadow: gold ? CoachStyle.goldGlow : null,
+      color: gold ? const Color(0x2EF5DFAE) : Klar.glas,
+      borderRadius: BorderRadius.circular(26),
     ),
-    child: Container(
-      padding: padding,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(19),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF261C12), Color(0xFF140F0A)],
-        ),
-      ),
-      child: child,
-    ),
+    child: child,
   );
 }
 
@@ -174,12 +157,9 @@ class TChip extends StatelessWidget {
         vertical: klein ? 5 : 7,
       ),
       decoration: BoxDecoration(
-        gradient: an ? CoachStyle.goldGradient : null,
-        color: an ? null : const Color(0xFF1A140E),
+        gradient: an ? Umbau.grad : null,
+        color: an ? null : Klar.glas,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: an ? Colors.transparent : const Color(0xFF4A3B2A),
-        ),
       ),
       child: Text(
         text,
@@ -208,7 +188,7 @@ class TGhost extends StatelessWidget {
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
         foregroundColor: CoachStyle.beigeLabel,
-        side: const BorderSide(color: CoachStyle.goldEdge),
+        side: const BorderSide(color: Color(0x33FFF5E6)),
         padding: const EdgeInsets.symmetric(vertical: 13),
         shape: const StadiumBorder(),
         textStyle: const TextStyle(
@@ -224,16 +204,36 @@ class TGhost extends StatelessWidget {
 
 /// Round tick for one set.
 class TTick extends StatelessWidget {
-  const TTick({super.key, required this.an, required this.onTap});
+  const TTick({
+    super.key,
+    required this.an,
+    required this.onTap,
+    this.hell = false,
+    this.funken = false,
+  });
   final bool an;
   final VoidCallback onTap;
+
+  /// On the light row: brown instead of gold.
+  final bool hell;
+
+  /// Gold sparks when a set gets ticked.
+  final bool funken;
 
   @override
   Widget build(BuildContext context) => Semantics(
     button: true,
     label: an ? 'Satz abgehakt' : 'Satz abhaken',
     child: InkWell(
-      onTap: onTap,
+      onTap: () {
+        if (funken && !an) {
+          final box = context.findRenderObject() as RenderBox?;
+          if (box != null && box.hasSize) {
+            funkenBei(context, box.localToGlobal(box.size.center(Offset.zero)));
+          }
+        }
+        onTap();
+      },
       customBorder: const CircleBorder(),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
@@ -241,15 +241,22 @@ class TTick extends StatelessWidget {
         height: 36,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          gradient: an ? CoachStyle.goldGradient : null,
+          gradient: an ? Umbau.grad : null,
           border: an
               ? null
-              : Border.all(color: CoachStyle.goldEdge, width: 1.4),
+              : Border.all(
+                  color: hell ? Umbau.tinte : const Color(0x66F6ECDB),
+                  width: 1.4,
+                ),
         ),
         child: Icon(
           Icons.check,
           size: 18,
-          color: an ? CoachStyle.goldInk : CoachStyle.goldLight,
+          color: an
+              ? Umbau.tinte
+              : hell
+              ? Umbau.tinteWeich
+              : const Color(0x66F6ECDB),
         ),
       ),
     ),
@@ -267,7 +274,11 @@ class ZahlFeld extends StatefulWidget {
     this.dezimal = true,
     this.gedimmt = false,
     this.enabled = true,
+    this.hell = false,
   });
+
+  /// On the light row: brown text on a soft brown field.
+  final bool hell;
 
   final double? wert;
   final ValueChanged<double?> onChanged;
@@ -318,31 +329,37 @@ class _ZahlFeldState extends State<ZahlFeld> {
           fontFamily: 'Figtree',
           fontWeight: widget.gedimmt ? FontWeight.w500 : FontWeight.w600,
           fontSize: 14.5,
-          color: widget.gedimmt ? CoachStyle.inkSoft : CoachStyle.ink,
+          color: widget.hell
+              ? Umbau.tinte
+              : widget.gedimmt
+              ? CoachStyle.inkSoft
+              : CoachStyle.ink,
         ),
-        cursorColor: CoachStyle.goldLight,
+        cursorColor: widget.hell ? Umbau.tinte : CoachStyle.goldLight,
         decoration: InputDecoration(
           isDense: true,
           hintText: '–',
           hintStyle: const TextStyle(color: CoachStyle.inkSoft),
           filled: true,
-          fillColor: const Color(0xFF1A140E),
+          fillColor: widget.hell
+              ? const Color(0x1F2A1D0D)
+              : const Color(0x14FFF5E6),
           contentPadding: const EdgeInsets.symmetric(
             vertical: 9,
             horizontal: 6,
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFF4A3B2A)),
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
           ),
           disabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFF2E261C)),
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(
-              color: CoachStyle.goldLight,
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: widget.hell ? Umbau.tinte : CoachStyle.goldLight,
               width: 1.5,
             ),
           ),
@@ -352,7 +369,13 @@ class _ZahlFeldState extends State<ZahlFeld> {
       ),
       if (widget.einheit != null) ...[
         const SizedBox(height: 2),
-        Text(widget.einheit!, style: tSoft.copyWith(fontSize: 10)),
+        Text(
+          widget.einheit!,
+          style: tSoft.copyWith(
+            fontSize: 10,
+            color: widget.hell ? Umbau.tinteWeich : null,
+          ),
+        ),
       ],
     ],
   );

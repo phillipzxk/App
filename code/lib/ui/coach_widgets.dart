@@ -325,9 +325,8 @@ class CoachCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(1.2),
       decoration: BoxDecoration(
-        gradient: CoachStyle.goldEdgeGradient,
+        color: const Color(0x00000000),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: CoachStyle.nightShadow,
       ),
       child: Container(
         padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
@@ -335,7 +334,7 @@ class CoachCard extends StatelessWidget {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF2A2118), Color(0xFF1B1611)],
+            colors: [Color(0x17FFF5E6), Color(0x17FFF5E6)],
           ),
           borderRadius: BorderRadius.circular(19),
         ),

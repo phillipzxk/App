@@ -8,6 +8,7 @@ import '../ui/coach_widgets.dart';
 import 'ernaehrung_coach.dart';
 import 'ernaehrung_data.dart';
 import 'ernaehrung_logik.dart';
+import '../ui/umbau.dart';
 
 /// The Ernährung data, shared by the page, its sub pages and Heute.
 /// Every change is saved right away.
@@ -86,15 +87,14 @@ class EssenSeite extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: CoachStyle.night,
+    backgroundColor: const Color(0xFF231B14),
     appBar: AppBar(
       backgroundColor: Colors.transparent,
       foregroundColor: CoachStyle.goldLight,
       elevation: 0,
       scrolledUnderElevation: 0,
     ),
-    body: DecoratedBox(
-      decoration: const BoxDecoration(gradient: CoachStyle.nightGradient),
+    body: KlarHintergrund(
       child: SafeArea(
         top: false,
         child: Center(

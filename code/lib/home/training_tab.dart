@@ -18,6 +18,7 @@ import '../training/woche_karte.dart';
 import '../ui/coach_freude.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
+import '../ui/umbau.dart';
 import 'bereichs_werte.dart';
 import 'feed_widgets.dart';
 
@@ -75,6 +76,9 @@ class _TrainingTabState extends State<TrainingTab> {
   HeuteSession? _session;
   int? _planTag;
   bool _skipOffen = false;
+
+  /// Which exercise of today's session is open (the strip switches).
+  int _wahl = 0;
   bool _tagesformLaedt = false;
   bool _stagLaedt = false;
 
@@ -707,26 +711,129 @@ class _TrainingTabState extends State<TrainingTab> {
     }
     final tf = d.tagesform;
     final heuteTf = tf != null && tf.tag == dayKey(_heute) ? tf : null;
+    final alle = s.logs.fold<int>(0, (a, l) => a + l.saetze.length);
+    final fertig = s.logs.fold<int>(0, (a, l) => a + l.fertige.length);
+    final begonnen = s.logs.where((l) => l.fertige.isNotEmpty).length;
+    final wahl = _wahl.clamp(0, s.logs.length - 1);
+    final jetzt = DateTime.now();
+    final zeit = trainingZeit(widget.plan.tage[_planTag!]);
+    final bis = zeit != null && dayKey(jetzt) == dayKey(_heute)
+        ? zeit - jetzt.hour * 60 - jetzt.minute
+        : null;
     return [
-      GroupLabel('Heute · $wochentag'),
-      Padding(
-        padding: const EdgeInsets.only(bottom: 10, left: 2),
-        child: GoldText(
-          'Heute: ${dayName(widget.plan.tage[_planTag!])}',
-          style: tTitel.copyWith(fontSize: 21),
+      RingKachel(
+        key: const ValueKey('training-held'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'HEUTE · ${wochentag.toUpperCase()}',
+                        style: Umbau.label.copyWith(color: Umbau.tinteWeich),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        dayName(widget.plan.tage[_planTag!]),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: 'Sora',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 30,
+                          height: 1.08,
+                          letterSpacing: -.6,
+                          color: Umbau.tinte,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        bis != null && bis > 0 && fertig == 0
+                            ? 'startet in ${bis ~/ 60 > 0 ? '${bis ~/ 60} Std ' : ''}${bis % 60} Min'
+                            : '$begonnen von ${s.logs.length} Übungen begonnen',
+                        style: const TextStyle(
+                          fontFamily: 'Figtree',
+                          fontSize: 13.5,
+                          color: Umbau.tinteWeich,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                FuellRing(
+                  wert: alle == 0 ? 0 : fertig / alle,
+                  size: 92,
+                  dunkel: true,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '$fertig/$alle',
+                        key: const ValueKey('training-saetze'),
+                        style: const TextStyle(
+                          fontFamily: 'Sora',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 21,
+                          height: 1,
+                          color: Umbau.tinte,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'SÄTZE',
+                        style: Umbau.label.copyWith(
+                          fontSize: 9,
+                          color: Umbau.tinteWeich,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                KlarPille(
+                  '${s.logs.length} ${s.logs.length == 1 ? 'Übung' : 'Übungen'}',
+                  dunkel: true,
+                ),
+                if (heuteTf?.aktiv != null)
+                  const KlarPille('Vom Coach angepasst', dunkel: true),
+              ],
+            ),
+            if (!_skipOffen) ...[
+              const SizedBox(height: 14),
+              DunkelKnopf(
+                key: const ValueKey('modus-start'),
+                label: 'Trainings-Modus starten',
+                onPressed: _modus,
+              ),
+            ],
+          ],
         ),
       ),
+      const SizedBox(height: 14),
       if (_tagesformLaedt)
-        const TKarte(
-          child: CoachZeile(
+        const Padding(
+          padding: EdgeInsets.only(bottom: 14),
+          child: CoachBlase(
             label: 'Deine Tagesform',
             text: 'Ich schaue auf deine Nacht …',
           ),
         )
       else if (heuteTf != null && heuteTf.satz.isNotEmpty)
-        TKarte(
+        Padding(
           key: const ValueKey('tagesform'),
-          child: CoachZeile(label: 'Deine Tagesform', text: heuteTf.satz),
+          padding: const EdgeInsets.only(bottom: 14),
+          child: CoachBlase(label: 'Deine Tagesform', text: heuteTf.satz),
         ),
       if (heuteTf?.aktiv case final a?)
         TKarte(
@@ -758,22 +865,78 @@ class _TrainingTabState extends State<TrainingTab> {
           onZurueck: () => setState(() => _skipOffen = false),
         )
       else ...[
-        MainButton(
-          key: const ValueKey('modus-start'),
-          label: 'Trainings-Modus starten',
-          onPressed: _modus,
-        ),
-        const SizedBox(height: 12),
-        for (var i = 0; i < s.logs.length; i++)
-          UebungKarte(
-            session: s,
-            i: i,
-            ziel: zielFuer(s.plan[i], d, _heute, anpassung: _anpassung),
-            onForm: s.plan[i].art.ausdauer
-                ? null
-                : () => _form(s.plan[i].name, i),
-            onVerlauf: () => _verlauf(s.plan[i].name),
+        if (s.logs.length > 1) ...[
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            clipBehavior: Clip.none,
+            child: Row(
+              children: [
+                for (var i = 0; i < s.logs.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: GestureDetector(
+                      key: ValueKey('uebung-wahl-$i'),
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => setState(() => _wahl = i),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 220),
+                        padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
+                        decoration: BoxDecoration(
+                          color: i == wahl ? Klar.glasAn : Klar.glas,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Row(
+                          children: [
+                            FuellRing(
+                              wert: s.logs[i].saetze.isEmpty
+                                  ? 0
+                                  : s.logs[i].fertige.length /
+                                        s.logs[i].saetze.length,
+                              size: 32,
+                              dicke: 3,
+                              child: Text(
+                                '${s.logs[i].fertige.length}/${s.logs[i].saetze.length}',
+                                style: const TextStyle(
+                                  fontFamily: 'Sora',
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 9.5,
+                                  color: Umbau.text,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              s.plan[i].name,
+                              style: TextStyle(
+                                fontFamily: 'Figtree',
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                                color: i == wahl ? Umbau.text : Umbau.weich,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
+          const SizedBox(height: 12),
+        ],
+        UebungKarte(
+          session: s,
+          i: wahl,
+          ziel: zielFuer(s.plan[wahl], d, _heute, anpassung: _anpassung),
+          onForm: s.plan[wahl].art.ausdauer
+              ? null
+              : () => _form(s.plan[wahl].name, wahl),
+          onVerlauf: () => _verlauf(s.plan[wahl].name),
+          verlauf: [
+            for (final (_, l) in d.verlauf(s.plan[wahl].name, vor: _heute))
+              if (l.bester case final b?) b.wert ?? b.menge ?? 0,
+          ],
+        ),
         MainButton(
           key: const ValueKey('training-fertig'),
           label: 'Training fertig',

@@ -17,9 +17,8 @@ class GoldRahmen extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(1.3),
       decoration: BoxDecoration(
-        gradient: CoachStyle.goldEdgeGradient,
+        color: const Color(0x00000000),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: CoachStyle.nightShadow,
       ),
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -27,7 +26,7 @@ class GoldRahmen extends StatelessWidget {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF2A2118), Color(0xFF1B1611)],
+            colors: [Color(0x17FFF5E6), Color(0x17FFF5E6)],
           ),
           borderRadius: BorderRadius.circular(19),
         ),

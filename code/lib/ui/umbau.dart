@@ -590,3 +590,376 @@ class _FunkenMaler extends CustomPainter {
   @override
   bool shouldRepaint(_FunkenMaler old) => old.v != v;
 }
+
+/// The look of the sub pages behind the tiles ("3 klar", confirmed by
+/// Phillip 2026-11-13, vault Umsetzung/Umbau.md): a lighter brown, clean
+/// glass, one light gold tile with rings, and fine gold circles that turn
+/// slowly in the background.
+abstract final class Klar {
+  static const seite = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF342A20), Color(0xFF231B14)],
+  );
+  static const glas = Color(0x17FFF5E6);
+  static const glasAn = Color(0x33F8E6BC);
+  static const held = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFFAEDCB), Color(0xFFE3B972)],
+  );
+}
+
+/// Background of a sub page: lighter brown, a soft light from the top
+/// right and fine gold circles that turn slowly.
+class KlarHintergrund extends StatefulWidget {
+  const KlarHintergrund({super.key, required this.child});
+  final Widget child;
+
+  @override
+  State<KlarHintergrund> createState() => _KlarHintergrundState();
+}
+
+class _KlarHintergrundState extends State<KlarHintergrund>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 90),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    if (bewegungAn) _c.repeat();
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: const BoxDecoration(gradient: Klar.seite),
+    child: Stack(
+      children: [
+        Positioned.fill(
+          child: IgnorePointer(
+            child: RepaintBoundary(
+              child: AnimatedBuilder(
+                animation: _c,
+                builder: (context, _) =>
+                    CustomPaint(painter: _KreisMaler(_c.value)),
+              ),
+            ),
+          ),
+        ),
+        widget.child,
+      ],
+    ),
+  );
+}
+
+class _KreisMaler extends CustomPainter {
+  _KreisMaler(this.t);
+  final double t;
+
+  static const _oben = [
+    (80.0, [150.0, 60.0]),
+    (125.0, [40.0, 30.0, 260.0, 80.0]),
+    (170.0, [420.0, 140.0]),
+    (215.0, [90.0, 50.0, 300.0, 200.0]),
+  ];
+  static const _unten = [
+    (70.0, [120.0, 50.0]),
+    (115.0, [260.0, 90.0]),
+    (160.0, [60.0, 40.0, 200.0, 120.0]),
+  ];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width, h = size.height;
+    final licht = Offset(w * .9, 0);
+    canvas.drawCircle(
+      licht,
+      w * .95,
+      Paint()
+        ..shader = const RadialGradient(
+          colors: [Color(0x29F8E6BC), Color(0x00F8E6BC)],
+        ).createShader(Rect.fromCircle(center: licht, radius: w * .95)),
+    );
+    final p = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = const Color(0x21F0D49C);
+    void gruppe(Offset m, List<(double, List<double>)> kreise, double dreh) {
+      for (final (r, muster) in kreise) {
+        final rect = Rect.fromCircle(center: m, radius: r);
+        var a = dreh;
+        final ende = dreh + 2 * math.pi;
+        var i = 0;
+        while (a < ende) {
+          final bogen = muster[i % muster.length] / r;
+          if (i.isEven) {
+            canvas.drawArc(rect, a, math.min(bogen, ende - a), false, p);
+          }
+          a += bogen;
+          i++;
+        }
+      }
+    }
+
+    gruppe(Offset(w * .85, 70), _oben, t * 2 * math.pi);
+    gruppe(Offset(20, h - 60), _unten, -t * 2 * math.pi * .75);
+  }
+
+  @override
+  bool shouldRepaint(_KreisMaler old) => old.t != t;
+}
+
+/// The light gold tile of a sub page, with fine rings around the place
+/// where the progress ring sits (top right).
+class RingKachel extends StatelessWidget {
+  const RingKachel({super.key, required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => ClipRRect(
+    borderRadius: BorderRadius.circular(Umbau.radius),
+    child: DecoratedBox(
+      decoration: const BoxDecoration(gradient: Klar.held),
+      child: CustomPaint(
+        painter: const _RingeMaler(),
+        child: Padding(padding: const EdgeInsets.all(20), child: child),
+      ),
+    ),
+  );
+}
+
+class _RingeMaler extends CustomPainter {
+  const _RingeMaler();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final m = Offset(size.width - 66, 66);
+    final p = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = const Color(0x1A2A1D0D);
+    for (var r = 62.0; r <= 160; r += 19) {
+      canvas.drawCircle(m, r, p);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_RingeMaler old) => false;
+}
+
+/// A ring that fills (0..1) with a short text inside. [dunkel] = brown on
+/// the light tile, otherwise gold on glass.
+class FuellRing extends StatelessWidget {
+  const FuellRing({
+    super.key,
+    required this.wert,
+    required this.size,
+    this.dunkel = false,
+    this.dicke = 7,
+    this.child,
+  });
+
+  final double wert;
+  final double size;
+  final bool dunkel;
+  final double dicke;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: size,
+    height: size,
+    child: TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: wert.clamp(0.0, 1.0)),
+      duration: Duration(milliseconds: bewegungAn ? 900 : 0),
+      curve: Curves.easeOutCubic,
+      builder: (context, v, c) => CustomPaint(
+        painter: _FuellMaler(v, dunkel, dicke),
+        child: Center(child: c),
+      ),
+      child: child,
+    ),
+  );
+}
+
+class _FuellMaler extends CustomPainter {
+  _FuellMaler(this.v, this.dunkel, this.dicke);
+  final double v;
+  final bool dunkel;
+  final double dicke;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final r = Rect.fromCircle(
+      center: size.center(Offset.zero),
+      radius: size.width / 2 - dicke / 2,
+    );
+    final p = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = dicke
+      ..strokeCap = StrokeCap.round
+      ..color = dunkel ? const Color(0x292A1D0D) : const Color(0x29FFF5E6);
+    canvas.drawArc(r, 0, 2 * math.pi, false, p);
+    if (v <= 0) return;
+    p.color = dunkel ? Umbau.tinte : const Color(0xFFE2BD7A);
+    canvas.drawArc(r, -math.pi / 2, 2 * math.pi * v, false, p);
+  }
+
+  @override
+  bool shouldRepaint(_FuellMaler old) => old.v != v || old.dunkel != dunkel;
+}
+
+/// The coach speaks: round picture and a glass speech bubble.
+class CoachBlase extends StatelessWidget {
+  const CoachBlase({super.key, required this.text, this.label, this.unten});
+
+  final String text;
+  final String? label;
+  final Widget? unten;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Container(
+        width: 40,
+        height: 40,
+        padding: const EdgeInsets.all(2),
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: Umbau.grad,
+        ),
+        child: ClipOval(
+          child: Image.asset(
+            'assets/images/coach.jpg',
+            fit: BoxFit.cover,
+            excludeFromSemantics: true,
+          ),
+        ),
+      ),
+      const SizedBox(width: 12),
+      Expanded(
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+          decoration: const BoxDecoration(
+            color: Klar.glas,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(6),
+              topRight: Radius.circular(22),
+              bottomLeft: Radius.circular(22),
+              bottomRight: Radius.circular(22),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (label != null) ...[
+                Text(label!.toUpperCase(), style: Umbau.label),
+                const SizedBox(height: 4),
+              ],
+              Text(
+                text,
+                style: const TextStyle(
+                  fontFamily: 'Figtree',
+                  fontSize: 14,
+                  height: 1.45,
+                  color: Umbau.text,
+                ),
+              ),
+              if (unten != null) ...[const SizedBox(height: 4), unten!],
+            ],
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+/// The dark main button on the light tile, with a small gold play circle.
+class DunkelKnopf extends StatelessWidget {
+  const DunkelKnopf({super.key, required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    child: GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onPressed,
+      child: Container(
+        height: 52,
+        decoration: BoxDecoration(
+          color: Umbau.tinte,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 22,
+              height: 22,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: Umbau.grad,
+              ),
+              child: const Icon(
+                Icons.play_arrow_rounded,
+                size: 16,
+                color: Umbau.tinte,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Flexible(
+              child: Text(
+                label,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: 'Sora',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                  color: Color(0xFFF6E3B8),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+/// A small pill on glass or on the light tile.
+class KlarPille extends StatelessWidget {
+  const KlarPille(this.text, {super.key, this.dunkel = false});
+  final String text;
+  final bool dunkel;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+    decoration: BoxDecoration(
+      color: dunkel ? const Color(0x1F2A1D0D) : Klar.glas,
+      borderRadius: BorderRadius.circular(999),
+    ),
+    child: Text(
+      text,
+      style: TextStyle(
+        fontFamily: 'Figtree',
+        fontWeight: FontWeight.w600,
+        fontSize: 12,
+        color: dunkel ? Umbau.tinte : Umbau.hell,
+      ),
+    ),
+  );
+}

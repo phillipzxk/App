@@ -7,13 +7,11 @@ import '../checkin/checkin_flow.dart';
 import '../health/health_heute.dart';
 import '../health/health_logik.dart';
 import '../konto/konto_ui.dart' show bewegungAn;
-import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import '../ui/umbau.dart';
 import '../feed/muster.dart';
 import 'coach_karte.dart';
-import 'muster_widgets.dart';
-import 'warum_karte.dart';
+import 'heute_felder.dart';
 import 'fundament_seite.dart';
 import 'wurzelwerk.dart';
 
@@ -177,6 +175,15 @@ class TodayTab extends StatelessWidget {
     final c = _todayCheckIn;
     final streak = checkInStreak(checkIns, today);
     final m = muster;
+    final felder = HeuteFelder(
+      warum: c == null ? '' : warum.trim(),
+      warumSatz: c == null ? '' : (warumSatz ?? '').trim(),
+      muster: m,
+      musterNeu: musterNeu,
+      onOpenMuster: onOpenMuster,
+      health: c == null ? const [] : healthFelder,
+      onHealthKnopf: onHealthKnopf,
+    );
     // The Umbau (vault Umsetzung/Umbau.md, 2026-11-12): calm glass tiles
     // without frames, all on one screen, one light gold tile as eye-catcher.
     return NightScope(
@@ -267,15 +274,6 @@ class TodayTab extends StatelessWidget {
               const SizedBox(height: 12),
               CoachEinschaltenFeld(onTap: onAbo!),
             ],
-            if (healthFelder.isNotEmpty && onHealthKnopf != null) ...[
-              const SizedBox(height: 12),
-              HealthFelderListe(felder: healthFelder, onKnopf: onHealthKnopf!),
-            ],
-            if (warum.trim().isNotEmpty &&
-                (warumSatz ?? '').trim().isNotEmpty) ...[
-              const SizedBox(height: 12),
-              WarumKarte(warum: warum.trim(), satz: warumSatz!.trim()),
-            ],
           ],
           const SizedBox(height: 22),
           GlasKachel(
@@ -285,6 +283,7 @@ class TodayTab extends StatelessWidget {
             onTap: onOpenTag,
             child: heuteDran,
           ),
+          if (!felder.leer) ...[const SizedBox(height: 12), felder],
           const SizedBox(height: 12),
           IntrinsicHeight(
             child: Row(
@@ -313,10 +312,6 @@ class TodayTab extends StatelessWidget {
               ],
             ),
           ),
-          if (m != null) ...[
-            const SizedBox(height: 12),
-            MusterFeld(muster: m, neu: musterNeu, onTap: onOpenMuster),
-          ],
           const SizedBox(height: 12),
           // The roots live on their own page (2026-11-08).
           FundamentVorschau(
@@ -423,9 +418,8 @@ class HeuteFeld extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(1.2),
       decoration: BoxDecoration(
-        gradient: CoachStyle.goldEdgeGradient,
+        color: const Color(0x00000000),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: CoachStyle.nightShadow,
       ),
       child: Material(
         color: Colors.transparent,
@@ -434,7 +428,7 @@ class HeuteFeld extends StatelessWidget {
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFF261C12), Color(0xFF140F0A)],
+              colors: [Color(0x17FFF5E6), Color(0x17FFF5E6)],
             ),
             borderRadius: BorderRadius.circular(19),
           ),

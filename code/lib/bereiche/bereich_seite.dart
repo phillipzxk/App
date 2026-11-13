@@ -1576,38 +1576,10 @@ class FeldSeite extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bloecke = [
-      GlasBox(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const CoachAvatar(size: 32),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                feld.coach,
-                style: Glas.tText.copyWith(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 14.5,
-                  height: 1.4,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      ...feld.inhalt(context),
-    ];
+    final bloecke = [CoachBlase(text: feld.coach), ...feld.inhalt(context)];
     return Scaffold(
-      backgroundColor: const Color(0xFF15110D),
-      body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF1E1813), Color(0xFF0C0A08)],
-          ),
-        ),
+      backgroundColor: const Color(0xFF231B14),
+      body: KlarHintergrund(
         child: SafeArea(
           bottom: false,
           child: Center(
@@ -1625,27 +1597,25 @@ class FeldSeite extends StatelessWidget {
                           key: const ValueKey('feld-zurueck'),
                           onTap: () => Navigator.of(context).maybePop(),
                           child: Container(
-                            height: 38,
-                            padding: const EdgeInsets.fromLTRB(8, 0, 12, 0),
+                            height: 34,
+                            padding: const EdgeInsets.fromLTRB(6, 0, 13, 0),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(999),
-                              color: const Color(0x14FFECC8),
-                              border: Border.all(
-                                color: const Color(0x2EFFEECD),
-                              ),
+                              color: Klar.glas,
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 const Icon(
                                   Icons.chevron_left,
-                                  color: CoachStyle.goldLight,
+                                  size: 20,
+                                  color: Umbau.hell,
                                 ),
                                 Text(
                                   bereich,
                                   style: Glas.tLabel.copyWith(
-                                    fontSize: 15,
-                                    color: CoachStyle.goldLight,
+                                    fontSize: 13,
+                                    color: Umbau.hell,
                                   ),
                                 ),
                               ],
@@ -1653,30 +1623,16 @@ class FeldSeite extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 14),
-                        Row(
-                          children: [
-                            GlasIcon(feld.icon, size: 64),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    bereich,
-                                    style: Glas.tLabel.copyWith(fontSize: 12),
-                                  ),
-                                  Text(
-                                    feld.titel,
-                                    style: CoachStyle.title.copyWith(
-                                      fontSize: 27,
-                                      color: Glas.text,
-                                      height: 1.05,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 2),
+                          child: Text(
+                            feld.titel,
+                            style: CoachStyle.title.copyWith(
+                              fontSize: 26,
+                              color: Umbau.text,
+                              height: 1.1,
                             ),
-                          ],
+                          ),
                         ),
                       ],
                     ),

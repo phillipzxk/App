@@ -5,6 +5,7 @@ import '../feed/durchgezogen.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import 'feed_widgets.dart';
+import '../ui/umbau.dart';
 
 const _wochentage = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 const _monate = [
@@ -85,9 +86,8 @@ class _DurchgezogenKarteState extends State<DurchgezogenKarte> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(1.3),
       decoration: BoxDecoration(
-        gradient: CoachStyle.goldEdgeGradient,
+        color: const Color(0x00000000),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: CoachStyle.nightShadow,
       ),
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -95,7 +95,7 @@ class _DurchgezogenKarteState extends State<DurchgezogenKarte> {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF2A2118), Color(0xFF1B1611)],
+            colors: [Color(0x17FFF5E6), Color(0x17FFF5E6)],
           ),
           borderRadius: BorderRadius.circular(19),
         ),
@@ -362,72 +362,77 @@ class _DurchgezogenSeiteState extends State<DurchgezogenSeite> {
     final diese = dayKey(wochenStart(widget.today));
     final wochen = nachWochen(_alle);
     return Scaffold(
-      backgroundColor: CoachStyle.night,
+      backgroundColor: const Color(0xFF231B14),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         foregroundColor: CoachStyle.goldLight,
         elevation: 0,
       ),
-      body: NightScope(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
-          children: [
-            const PageHeader(label: 'Seit deinem Start', title: 'Durchgezogen'),
-            Text(
-              _alle.isEmpty
-                  ? 'Hier sammelt sich alles, was du trotz Unlust gemacht '
-                        'hast. Noch ist nichts eingetragen.'
-                  : 'Alles, was du trotz Unlust gemacht hast, seit deinem '
-                        'Start. Mit ✕ löschst du einen Eintrag.',
-              style: CoachStyle.body.copyWith(color: CoachStyle.inkSoft),
-            ),
-            const SizedBox(height: 16),
-            for (final (start, eintraege) in wochen) ...[
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        dayKey(start) == diese
-                            ? 'DIESE WOCHE'
-                            : wochenTitel(start),
-                        style: CoachStyle.goldLabel.copyWith(
-                          color: CoachStyle.beigeLabel,
+      body: KlarHintergrund(
+        child: NightScope(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+            children: [
+              const PageHeader(
+                label: 'Seit deinem Start',
+                title: 'Durchgezogen',
+              ),
+              Text(
+                _alle.isEmpty
+                    ? 'Hier sammelt sich alles, was du trotz Unlust gemacht '
+                          'hast. Noch ist nichts eingetragen.'
+                    : 'Alles, was du trotz Unlust gemacht hast, seit deinem '
+                          'Start. Mit ✕ löschst du einen Eintrag.',
+                style: CoachStyle.body.copyWith(color: CoachStyle.inkSoft),
+              ),
+              const SizedBox(height: 16),
+              for (final (start, eintraege) in wochen) ...[
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          dayKey(start) == diese
+                              ? 'DIESE WOCHE'
+                              : wochenTitel(start),
+                          style: CoachStyle.goldLabel.copyWith(
+                            color: CoachStyle.beigeLabel,
+                          ),
                         ),
                       ),
-                    ),
-                    Text(
-                      '${eintraege.length} MAL',
-                      style: CoachStyle.goldLabel.copyWith(
-                        color: CoachStyle.goldLight,
+                      Text(
+                        '${eintraege.length} MAL',
+                        style: CoachStyle.goldLabel.copyWith(
+                          color: CoachStyle.goldLight,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Container(
-                margin: const EdgeInsets.only(bottom: 18),
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                decoration: BoxDecoration(
-                  color: CoachStyle.card,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: CoachStyle.line),
+                Container(
+                  margin: const EdgeInsets.only(bottom: 18),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  decoration: BoxDecoration(
+                    color: CoachStyle.card,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: CoachStyle.line),
+                  ),
+                  child: Column(
+                    children: [
+                      for (var i = 0; i < eintraege.length; i++)
+                        DurchZeile(
+                          key: ValueKey('durch-zeile-${eintraege[i].erstellt}'),
+                          e: eintraege[i],
+                          ersteZeile: i == 0,
+                          onDelete: () => _loeschen(eintraege[i]),
+                        ),
+                    ],
+                  ),
                 ),
-                child: Column(
-                  children: [
-                    for (var i = 0; i < eintraege.length; i++)
-                      DurchZeile(
-                        key: ValueKey('durch-zeile-${eintraege[i].erstellt}'),
-                        e: eintraege[i],
-                        ersteZeile: i == 0,
-                        onDelete: () => _loeschen(eintraege[i]),
-                      ),
-                  ],
-                ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

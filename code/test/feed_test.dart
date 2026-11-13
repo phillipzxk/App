@@ -161,7 +161,7 @@ void main() {
     expect(feed.schwerpunkt, Schwerpunkt.hybrid);
     // Saving goes back to Körper; now the tile opens today's training.
     await openKachel(tester, 't-heute');
-    expect(find.text('Heute: Push + Laufen'), findsOneWidget);
+    expect(find.text('Push + Laufen'), findsOneWidget);
     expect(find.text('Letztes Mal'), findsNothing);
 
     await tester.tap(find.byKey(const ValueKey('feld-zurueck')));
@@ -198,7 +198,7 @@ void main() {
     );
     await tester.tap(row);
     await tester.pumpAndSettle();
-    expect(find.text('Heute: Push + Laufen'), findsOneWidget);
+    expect(find.text('Push + Laufen'), findsOneWidget);
   });
 
   testWidgets('kcal setup asks for the first weight and shows the target', (
