@@ -94,9 +94,12 @@ import '../health/health_dienst.dart';
 import '../kalender/kalender_dienst.dart';
 import '../kalender/kalender_logik.dart';
 import '../health/health_logik.dart';
+import '../startwidget/widget_daten.dart';
+import '../startwidget/widget_dienst.dart';
 
 part 'koerper_seite.dart';
 part 'erinnerungen_home.dart';
+part 'widget_home.dart';
 part 'health_home.dart';
 part 'kalender_home.dart';
 part 'mindset_seite.dart';
@@ -119,6 +122,7 @@ class HomePage extends StatefulWidget {
     this.onKonto,
     this.erinnerungen,
     this.erinnerungenNeu,
+    this.widgets,
     this.health,
     this.kalender,
     this.kalenderNeu,
@@ -141,6 +145,10 @@ class HomePage extends StatefulWidget {
   /// without. [kalenderNeu] ticks when its settings changed.
   final KalenderDienst? kalender;
   final Listenable? kalenderNeu;
+
+  /// The widgets on the phone's home and lock screen (vault
+  /// Umsetzung/Widgets); null in tests.
+  final WidgetDienst? widgets;
 
   /// Reminders on the phone (vault Umsetzung/Erinnerungen); null in tests.
   final ErinnerungDienst? erinnerungen;
@@ -165,6 +173,10 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool _loaded = false;
   Timer? _planTimer;
+  Timer? _widgetTimer;
+  late final AppLifecycleListener _widgetLeben = AppLifecycleListener(
+    onResume: _widgetSenden,
+  );
   DateTime? _healthZuletzt;
   late final AppLifecycleListener _healthLeben = AppLifecycleListener(
     onResume: () => _healthHolen(sofort: true),
@@ -255,6 +267,8 @@ class _HomePageState extends State<HomePage> {
     if (widget.kalender != null) _kalenderLeben.dispose();
     widget.kalenderNeu?.removeListener(_reload);
     _erinnerungenAus();
+    _widgetsAus();
+    if (widget.widgets != null) _widgetLeben.dispose();
     _essen.removeListener(_essenGeaendert);
     _essen.dispose();
     _schlaf.removeListener(_essenGeaendert);
@@ -276,6 +290,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _reload();
     _erinnerungenAn();
+    _widgetsAn();
     if (widget.health != null) _healthLeben;
     if (widget.kalender != null) _kalenderLeben;
     widget.kalenderNeu?.addListener(_reload);
@@ -287,6 +302,7 @@ class _HomePageState extends State<HomePage> {
     super.setState(fn);
     _stand.value++;
     _erinnerungenSpaeter();
+    _widgetSpaeter();
   }
 
   Future<void> _reload() async {
