@@ -1,8 +1,8 @@
 ---
-title: Schlaf und Mindset, neuer Aufbau mit mehr Motivation
+title: Neuer Aufbau mit mehr Motivation (Schlaf, Mindset, Training, Ernährung)
 status: gebaut
 datum: 2026-11-13
-tags: [umsetzung, schlaf, mindset, motivation, aufbau]
+tags: [umsetzung, schlaf, mindset, training, ernaehrung, motivation, aufbau]
 ---
 
 # Schlaf und Mindset: neuer Aufbau
@@ -47,15 +47,30 @@ Phillip fand den Aufbau „sehr gut“ und wollte ihn noch mehr im helleren, mod
 
 „Diese Woche geschafft“ bei Schlaf: Schlafwert ab 75, genug Stunden geschlafen, Abend-Journal komplett. Bei Mindset: Durchgezogen-Einträge, geschaffte Steine, gehaltenes Wort.
 
+## Training und Ernährung (2026-11-14)
+
+Nach dem Übernehmen von Schlaf und Mindset sagte Phillip „gut weiter“. Training und Ernährung haben seitdem denselben Aufbau im helleren Stil.
+
+| Reiter | Jetzt dran | Serie | Nächstes Ziel |
+|---|---|---|---|
+| Training, Heute | Training starten (oder Plan anlegen, frei, geschafft) | Wochen in Folge trainiert | Woche voll machen |
+| Training, Woche | Deine Woche, Plan ändern; bei Stagnation zuerst die | Wochen in Folge trainiert | Woche voll machen |
+| Training, Fortschritt | Nächstes Ziel vorschlagen | Wochen in Folge trainiert | neuer Bestwert der gezeigten Übung |
+| Ernährung, Heute | nächste Mahlzeit, Essen eintragen | Tage in Folge alle Mahlzeiten gegessen | Wasser heute |
+| Ernährung, Küche | Heute kochen, Kochbuch öffnen | Tage in Folge alle Mahlzeiten gegessen | neues Gericht freischalten oder eigene Varianten |
+| Ernährung, Ziel | nächstes Supplement, sonst Gewicht eintragen | Wochen in Folge gewogen | alle Supplements heute |
+
+„Diese Woche geschafft“ bei Training: fertige Einheiten, trainierte Tage aus dem Check-in, neue Bestwerte. Bei Ernährung: alle Mahlzeiten gegessen, genug getrunken, Gewicht eingetragen. Trainierte Tage aus dem Check-in zählen auch für die Serie, damit sie zur Wochenansicht passt.
+
 ## Stand im Code
 
-- `code/lib/bereiche/bereich_seite.dart`: `BAufbau`, `BJetzt`, `BSerie`, `BNaechstes`, `BMehr`; eine Bildseite mit `aufbau` zeigt den neuen Aufbau, ohne bleibt sie wie bisher (Training, Ernährung und die anderen Bereiche sind unverändert).
+- `code/lib/bereiche/bereich_seite.dart`: `BAufbau`, `BJetzt`, `BSerie`, `BNaechstes`, `BMehr`; eine Bildseite mit `aufbau` zeigt den neuen Aufbau, ohne bleibt sie wie bisher (Fokus und Arbeit sowie Ausstrahlung sind unverändert).
 - `code/lib/bereiche/aufbau_logik.dart`: Serien in Tagen und Wochen, nächste Marke.
-- `code/lib/home/koerper_seite.dart` (Schlaf) und `code/lib/home/mindset_seite.dart` füllen den Aufbau.
+- `code/lib/home/koerper_seite.dart` (Training, Ernährung, Schlaf) und `code/lib/home/mindset_seite.dart` füllen den Aufbau.
 - Nebenbei behoben: der Ruhe-Knopf auf dem Reiter Ruhe startet jetzt wirklich.
 - Tests: `code/test/aufbau_test.dart`, `code/test/mindset_test.dart`.
 
 ## Noch offen
 
 - Eigene Weckerklänge und Musik für den Ruhe-Knopf (Hörproben gezeigt, noch nicht beurteilt).
-- Ob derselbe Aufbau auch für Training, Ernährung und die anderen Bereiche kommen soll.
+- Ob derselbe Aufbau auch für Fokus und Arbeit sowie Ausstrahlung kommen soll.
