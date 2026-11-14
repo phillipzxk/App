@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/wurzel"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"
+    android:padding="14dp" android:background="@drawable/widget_hell">
+    <TextView android:id="@+id/kicker" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Jetzt dran" android:textAllCaps="true" android:letterSpacing="0.12" android:textSize="9sp"
+        android:fontFamily="@font/figtree_semibold" android:textColor="#B32A1F14" android:maxLines="1"/>
+    <TextView android:id="@+id/titel" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="2dp" android:textSize="17sp" android:fontFamily="@font/sora_bold"
+        android:textColor="#2A1F14" android:maxLines="2" android:ellipsize="end" android:text="Dein Tag"/>
+    <TextView android:id="@+id/unter" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:textSize="11.5sp" android:fontFamily="@font/figtree_regular" android:textColor="#BF2A1F14"
+        android:maxLines="2" android:ellipsize="end" android:text="Öffne Groundset für heute."/>
+    <TextView android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="bottom">
+        <TextView android:id="@+id/knopf" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:background="@drawable/widget_pille_dunkel" android:paddingStart="11dp" android:paddingEnd="11dp" android:paddingTop="6dp" android:paddingBottom="6dp"
+            android:textSize="11sp" android:fontFamily="@font/figtree_semibold" android:textColor="#F3E2BD" android:text="Öffnen"/>
+        <TextView android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
+        <FrameLayout android:layout_width="44dp" android:layout_height="44dp">
+            <ProgressBar android:id="@+id/ring" style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent" android:layout_height="match_parent"
+                android:max="100" android:progress="0" android:progressDrawable="@drawable/widget_ring_hell"/>
+            <TextView android:id="@+id/ring_text" android:layout_width="match_parent" android:layout_height="match_parent"
+                android:gravity="center" android:textSize="11sp" android:fontFamily="@font/sora_bold"
+                android:textColor="#2A1F14" android:text="–"/>
+        </FrameLayout>
+    </LinearLayout>
+</LinearLayout>
