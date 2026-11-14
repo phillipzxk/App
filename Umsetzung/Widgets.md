@@ -1,6 +1,6 @@
 ---
 title: Widgets für Startbildschirm und Sperrbildschirm
-status: gebaut (iPhone), Android folgt
+status: gebaut (iPhone und Android)
 datum: 2026-11-14
 tags: [umsetzung, widget, handy-version, iphone]
 ---
@@ -41,5 +41,5 @@ Gehört zu [[Erinnerungen]], [[Fokus der Woche]], [[Tages-Planer]] und [[Umbau]]
 
 ## Noch offen
 
-- Android-Version (dort gibt es keine Sperrbildschirm-Widgets, also A, B und C).
+- Auf einem echten Android-Handy ansehen (dort gibt es A, B und C: `code/android/app/src/main/kotlin/.../Widgets.kt`; nur Uhrzeit statt Countdown, neu etwa alle 30 Minuten).
 - Auf einem echten iPhone ansehen: geht erst mit Apple-Entwicklerkonto, weil die gemeinsame Gruppe eine Signatur braucht.
