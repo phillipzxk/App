@@ -360,7 +360,7 @@ Future<void> openTab(
 /// Tile [id]: a tile, or on a picture page a part of the picture, a
 /// button or a number that opens it.
 Finder kachelFinder(String id) {
-  for (final art in ['kachel', 'knopf', 'zahl']) {
+  for (final art in ['kachel', 'knopf', 'zahl', 'mehr']) {
     final f = find.byKey(ValueKey('$art-$id'));
     if (f.evaluate().isNotEmpty) return f;
   }

@@ -259,6 +259,65 @@ extension _Mindset on _HomePageState {
       );
     }
 
+    // New structure with more motivation (vault Umsetzung/Schlaf und
+    // Mindset Aufbau, Phillip "passt" 2026-11-13). All numbers are counted
+    // from real entries.
+    final heuteKey = dayKey(heute);
+    final stark = name.isEmpty
+        ? 'Geschafft. Stark.'
+        : 'Geschafft. Stark, $name.';
+    final warum = widget.profile.warum;
+    final dafuer = warum.isEmpty ? null : '„$warum“';
+    final wortTage = <String, bool>{};
+    for (final v in d.vorsaetze) {
+      wortTage[v.tag] = (wortTage[v.tag] ?? true) && v.gehalten;
+    }
+    final serieWort = serieTage([
+      for (final e in wortTage.entries)
+        if (e.value) e.key,
+    ], heute);
+    final serieDurch = serieWochen([
+      for (final x in _durchgezogen) dayKey(montagVon(x.datum)),
+    ], heute);
+    final serieRuhe = serieTage([for (final r in d.ruhe) dayKey(r)], heute);
+    final weg = d.steine.where((x) => x.erledigt != null).toList();
+    final wegHeute = [
+      for (final x in weg)
+        if (x.erledigt == heuteKey) x,
+    ];
+    final durchHeute = [
+      for (final x in _durchgezogen)
+        if (dayKey(x.datum) == heuteKey) x,
+    ];
+    final ruheHeute = d.ruhe.any((r) => dayKey(r) == heuteKey);
+    final geschafft = <(String, String)>[
+      for (final x in inWoche(_durchgezogen, heute)) (x.text, dayKey(x.datum)),
+      for (final x in weg)
+        if (x.erledigt!.compareTo(woche) >= 0)
+          ('Stein geschafft: ${x.titel}', x.erledigt!),
+      for (final v in d.vorsaetze)
+        if (v.gehalten && v.tag.compareTo(woche) >= 0)
+          ('Wort gehalten: ${v.text}', v.tag),
+    ]..sort((a, b) => b.$2.compareTo(a.$2));
+    final geschafftListe = [
+      for (final g in geschafft.take(4)) (g.$1, tagKurz(DateTime.parse(g.$2))),
+    ];
+    BSerie serie(({int jetzt, int rekord}) x, String einheit, String text) =>
+        BSerie(
+          zahl: x.jetzt,
+          einheit: einheit,
+          text: x.jetzt == 0 ? 'Startet mit deinem nächsten Eintrag' : text,
+          rekord: x.rekord,
+        );
+    final serieWortK = serie(
+      serieWort,
+      serieWort.jetzt == 1 ? 'Tag' : 'Tage',
+      'in Folge Wort gehalten',
+    );
+    final wortWert = w.vorgenommen == 0
+        ? null
+        : '${w.gehalten}/${w.vorgenommen}';
+
     final seiten = [
       BSeite(
         name: 'Heute',
@@ -291,6 +350,57 @@ extension _Mindset on _HomePageState {
           ],
           knopf: ('2 Minuten starten', 'm-berg'),
           knopf2: (Icons.self_improvement, 'm-ruhe'),
+        ),
+        aufbau: BAufbau(
+          dafuer: dafuer,
+          jetzt: wegHeute.isNotEmpty
+              ? BJetzt(
+                  fertig: true,
+                  titel: stark,
+                  text: '„${wegHeute.last.titel}“ ist weg von deinem Berg.',
+                  knopf: offen.isEmpty ? null : ('Nächster Stein', 'm-berg'),
+                )
+              : offen.isEmpty
+              ? const BJetzt(
+                  titel: 'Leg deinen ersten Stein',
+                  text: 'Wovor drückst du dich gerade? Wir machen es klein.',
+                  mitte: '2:00',
+                  unter: 'Start',
+                  knopf: ('Stein legen', 'm-berg'),
+                )
+              : BJetzt(
+                  titel: 'Dein Stein heute: ${offen.first.titel}',
+                  text: 'Nur 2 Minuten. Danach darfst du aufhören.',
+                  mitte: '2:00',
+                  unter: 'Start',
+                  knopf: ('2 Minuten starten', 'm-berg'),
+                ),
+          serie: serieWortK,
+          naechstes: d.steine.isEmpty
+              ? const BNaechstes(
+                  titel: 'Erster Stein',
+                  anteil: 0,
+                  text: 'Leg ihn drauf, dann geht es los.',
+                )
+              : BNaechstes(
+                  titel: offen.isEmpty ? 'Berg ist frei' : 'Berg abtragen',
+                  anteil: weg.length / d.steine.length,
+                  text: offen.isEmpty
+                      ? 'Alle ${weg.length} Steine sind weg.'
+                      : 'Noch ${offen.length} '
+                            '${offen.length == 1 ? 'Stein' : 'Steine'}, dann '
+                            'ist er frei.',
+                ),
+          geschafft: geschafftListe,
+          mehr: [
+            BMehr('Wort gehalten', wert: wortWert, ziel: 'm-wort'),
+            const BMehr('Ruhe-Knopf', wert: '3 Min', ziel: 'm-ruhe-seite'),
+            BMehr(
+              'Alle Steine',
+              wert: offen.isEmpty ? null : '${offen.length} offen',
+              ziel: 'm-berg',
+            ),
+          ],
         ),
         kacheln: [
           BKachel(
@@ -365,6 +475,60 @@ extension _Mindset on _HomePageState {
           ],
           knopf: ('Durchgezogen eintragen', 'm-durch'),
           knopf2: (Icons.insights, 'm-muster'),
+        ),
+        aufbau: BAufbau(
+          dafuer: dafuer,
+          jetzt: durchHeute.isNotEmpty
+              ? BJetzt(
+                  fertig: true,
+                  titel: stark,
+                  text: 'Heute durchgezogen: ${durchHeute.last.text}',
+                  knopf: ('Noch etwas eintragen', 'm-durch'),
+                )
+              : BJetzt(
+                  titel: 'Was hast du trotzdem gemacht?',
+                  text: 'Trag ein, was du heute durchgezogen hast.',
+                  ring: durch / math.max(durchVorher, 1),
+                  mitte: '$durch',
+                  unter: 'diese Woche',
+                  knopf: ('Durchgezogen eintragen', 'm-durch'),
+                ),
+          serie: serie(
+            serieDurch,
+            serieDurch.jetzt == 1 ? 'Woche' : 'Wochen',
+            'in Folge etwas durchgezogen',
+          ),
+          naechstes: stufe.stufe >= 5
+              ? const BNaechstes(
+                  titel: 'Höchste Stufe',
+                  anteil: 1,
+                  text: 'Du findest deine ersten Schritte selbst.',
+                )
+              : BNaechstes(
+                  titel: 'Stufe ${stufe.stufe + 1}',
+                  anteil: (3 - stufe.bisNaechste) / 3,
+                  text:
+                      'Noch ${stufe.bisNaechste} eigene erste '
+                      '${stufe.bisNaechste == 1 ? 'Schritt' : 'Schritte'}.',
+                ),
+          geschafft: geschafftListe,
+          mehr: [
+            BMehr(
+              'Selbstständig',
+              wert: 'Stufe ${stufe.stufe}',
+              ziel: 'm-stufe',
+            ),
+            BMehr(
+              'Ausreden-Spiegel',
+              wert: aus.isEmpty ? null : aus.first.text,
+              ziel: 'm-aus',
+            ),
+            BMehr(
+              'Deine Muster',
+              wert: muster.isEmpty ? null : '${muster.length} erkannt',
+              ziel: 'm-muster',
+            ),
+          ],
         ),
         kacheln: [
           BKachel(
@@ -450,6 +614,54 @@ extension _Mindset on _HomePageState {
           knopf: ('Ruhe-Knopf', 'm-ruhe'),
           knopf2: (Icons.edit_outlined, 'm-sorgen'),
         ),
+        aufbau: BAufbau(
+          dafuer: dafuer,
+          jetzt: ruheHeute
+              ? BJetzt(
+                  fertig: true,
+                  titel: stark,
+                  text: 'Heute hast du dir Ruhe genommen.',
+                  knopf: ('Noch einmal 3 Minuten', 'm-ruhe'),
+                )
+              : const BJetzt(
+                  titel: 'Drei Minuten Ruhe',
+                  text: 'Nur atmen. Alles andere aus.',
+                  mitte: '3:00',
+                  unter: 'Start',
+                  knopf: ('Ruhe-Knopf starten', 'm-ruhe'),
+                ),
+          serie: serie(
+            serieRuhe,
+            serieRuhe.jetzt == 1 ? 'Tag' : 'Tage',
+            'in Folge Ruhe genommen',
+          ),
+          naechstes: d.werte.isEmpty
+              ? const BNaechstes(
+                  titel: 'Deine Werte',
+                  anteil: 0,
+                  text: 'Leg fest, was dir wichtig ist.',
+                )
+              : BNaechstes(
+                  titel: 'Alle Werte gelebt',
+                  anteil: gelebt / d.werte.length,
+                  text: '$gelebt von ${d.werte.length} diese Woche gelebt.',
+                ),
+          geschafft: geschafftListe,
+          mehr: [
+            BMehr(
+              'Deine Werte',
+              wert: d.werte.isEmpty ? null : '$gelebt/${d.werte.length}',
+              ziel: 'm-werte',
+            ),
+            const BMehr('Sorgen abgeben', ziel: 'm-sorgen'),
+            const BMehr('Ruhe-Knopf einstellen', ziel: 'm-ruhe-seite'),
+            BMehr(
+              'Frage heute Abend',
+              wert: abendHeute(d, heute) == null ? 'offen' : 'beantwortet',
+              ziel: 'm-abend',
+            ),
+          ],
+        ),
         kacheln: [
           BKachel(
             id: 'm-werte',
@@ -483,6 +695,20 @@ extension _Mindset on _HomePageState {
                 : 'heute beantwortet',
             feld: abendF,
           ),
+          // The Ruhe-Knopf also starts from this page (new structure).
+          BKachel(
+            id: 'm-ruhe',
+            titel: 'Ruhe-Knopf',
+            icon: Icons.self_improvement,
+            onKnopf: () => starteRuhe(context, _mindsetUmfeld),
+            feld: ruheF,
+          ),
+          BKachel(
+            id: 'm-ruhe-seite',
+            titel: 'Ruhe-Knopf',
+            icon: Icons.self_improvement,
+            feld: ruheF,
+          ),
         ],
       ),
       BSeite(
@@ -514,6 +740,57 @@ extension _Mindset on _HomePageState {
           ],
           knopf: ('Dein Warum', 'm-warum'),
           knopf2: (Icons.edit_outlined, 'm-brief'),
+        ),
+        aufbau: BAufbau(
+          dafuer: dafuer,
+          jetzt: rad == null || radTage == 0
+              ? BJetzt(
+                  titel: 'Dein Lebensrad',
+                  text: rad == null
+                      ? 'Einmal ehrlich: Wie zufrieden bist du in jedem '
+                            'Bereich?'
+                      : 'Drei Monate sind um. Zeit für ein neues.',
+                  mitte: rad == null ? '–' : radMitte,
+                  unter: 'Schnitt',
+                  knopf: ('Lebensrad ausfüllen', 'm-rad'),
+                )
+              : BJetzt(
+                  titel: 'Lies dein Warum',
+                  text: 'Deine eigenen Worte vom Anfang.',
+                  ring: rad.schnitt / 10,
+                  mitte: radMitte,
+                  unter: 'Lebensrad',
+                  knopf: ('Dein Warum', 'm-warum'),
+                ),
+          serie: serieWortK,
+          naechstes: rad == null
+              ? const BNaechstes(
+                  titel: 'Erstes Lebensrad',
+                  anteil: 0,
+                  text: 'Dann sehe ich, wo am meisten zu holen ist.',
+                )
+              : BNaechstes(
+                  titel: 'Nächstes Lebensrad',
+                  anteil: 1 - radTage / 90,
+                  text: radTage == 0
+                      ? 'Es ist dran.'
+                      : 'In $radTage ${radTage == 1 ? 'Tag' : 'Tagen'}.',
+                ),
+          geschafft: geschafftListe,
+          mehr: [
+            BMehr(
+              'Brief an dich',
+              wert: brief == null
+                  ? null
+                  : 'öffnet in ${brief.tageBis(heute)} Tagen',
+              ziel: 'm-brief',
+            ),
+            BMehr('Lebensziele', wert: '${d.ziele.length}', ziel: 'm-ziele'),
+            BMehr(
+              rad == null || radTage == 0 ? 'Dein Warum' : 'Dein Lebensrad',
+              ziel: rad == null || radTage == 0 ? 'm-warum' : 'm-rad',
+            ),
+          ],
         ),
         kacheln: [
           BKachel(

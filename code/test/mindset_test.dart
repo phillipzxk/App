@@ -2,6 +2,7 @@ import 'package:coach_app/checkin/checkin.dart';
 import 'package:coach_app/data/user_profile.dart';
 import 'package:coach_app/feed/feed_coach.dart';
 import 'package:coach_app/main.dart';
+import 'package:coach_app/mindset/berg.dart';
 import 'package:coach_app/mindset/mindset_coach.dart';
 import 'package:coach_app/mindset/mindset_data.dart';
 import 'package:coach_app/mindset/mindset_logik.dart';
@@ -303,6 +304,58 @@ void main() {
       await tester.pumpAndSettle();
       expect(feed.mindset.vorsaetze[1].gehalten, isTrue);
       expect(wortWoche(feed.mindset, fixedNow).gehalten, 1);
+    });
+
+    testWidgets('new structure: Jetzt dran, streak, next goal, done list, '
+        'more', (tester) async {
+      final tag = dayKey(fixedNow);
+      final gestern = dayKey(fixedNow.subtract(const Duration(days: 1)));
+      await _start(
+        tester,
+        daten: MindsetDaten(
+          steine: [
+            Stein(id: 'a', titel: 'Steuer', schritt: 'Ordner', seit: gestern),
+            Stein(
+              id: 'b',
+              titel: 'Keller',
+              schritt: 'Tür auf',
+              seit: gestern,
+              erledigt: gestern,
+            ),
+          ],
+          vorsaetze: [
+            Vorsatz(tag: gestern, text: 'Kalt duschen', gehalten: true),
+            Vorsatz(tag: tag, text: 'Lesen', gehalten: true),
+          ],
+        ),
+      );
+      expect(find.byKey(const ValueKey('dafuer')), findsOneWidget);
+      expect(
+        find.text('Dafür: „Ich will stolz auf mich sein.“'),
+        findsOneWidget,
+      );
+      expect(find.text('JETZT DRAN'), findsOneWidget);
+      expect(find.text('Dein Stein heute: Steuer'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('serie')),
+          matching: find.text('in Folge Wort gehalten'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Rekord 2'), findsOneWidget);
+      expect(find.text('Berg abtragen'), findsOneWidget);
+      expect(find.text('Noch 1 Stein, dann ist er frei.'), findsOneWidget);
+      await tester.drag(
+        find.byKey(const ValueKey('jetzt-dran')),
+        const Offset(0, -600),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Wort gehalten: Lesen'), findsOneWidget);
+      expect(find.text('Alle Steine'), findsOneWidget);
+      // The one button still opens the mountain.
+      await openKachel(tester, 'm-berg');
+      expect(find.byType(BergSeite), findsOneWidget);
     });
 
     testWidgets('Ruhe-Knopf locks for 3 minutes and counts', (tester) async {

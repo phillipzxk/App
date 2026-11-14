@@ -55,6 +55,7 @@ import '../schnell/schnell_blatt.dart';
 import '../schnell/schnell_eintrag.dart';
 import 'today_tab.dart';
 import 'training_tab.dart';
+import '../bereiche/aufbau_logik.dart';
 import '../bereiche/bereich_seite.dart';
 import '../bereiche/glas.dart';
 import '../bereiche/koerper_bilder.dart';
