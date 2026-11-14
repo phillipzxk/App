@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_jetzt_name">Jetzt dran</string>
+    <string name="widget_jetzt_text">Das Nächste aus deinem Tag und wie viel von heute geschafft ist.</string>
+    <string name="widget_fokus_name">Fokus der Woche</string>
+    <string name="widget_fokus_text">Dein Fokus mit sieben Strichen. „Heute geschafft“ geht direkt hier.</string>
+    <string name="widget_tag_name">Coach und Tag</string>
+    <string name="widget_tag_text">Der Satz deines Coachs, dein Schnitt und was heute dran ist.</string>
+</resources>

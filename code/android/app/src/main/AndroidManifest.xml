@@ -45,6 +45,25 @@
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
             </intent-filter>
         </receiver>
+        <!-- Widgets (vault Umsetzung/Widgets) -->
+        <receiver android:name=".JetztWidget" android:exported="true" android:label="@string/widget_jetzt_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_jetzt_info"/>
+        </receiver>
+        <receiver android:name=".FokusWidget" android:exported="true" android:label="@string/widget_fokus_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_fokus_info"/>
+        </receiver>
+        <receiver android:name=".TagWidget" android:exported="true" android:label="@string/widget_tag_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_tag_info"/>
+        </receiver>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

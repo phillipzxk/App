@@ -15,6 +15,7 @@ import 'data/profile_store.dart';
 import 'data/user_profile.dart';
 import 'feed/feed_coach.dart';
 import 'erinnerungen/erinnerung_dienst.dart';
+import 'startwidget/widget_dienst.dart';
 import 'feed/feed_data.dart';
 import 'feed/feed_store.dart';
 import 'schlaf/wecker_aufgabe.dart';
@@ -62,6 +63,7 @@ void main() {
       aboStore: LocalAboStore(),
       aboKauf: const VorschauKauf(),
       erinnerungen: erinnerungenFuerPlattform(),
+      widgets: widgetFuerPlattform(),
       health: healthFuerPlattform(),
       kalender: kalenderFuerPlattform(),
       schritte: schrittZaehlerFuerPlattform(),
@@ -84,6 +86,7 @@ class CoachApp extends StatelessWidget {
     this.kontoDienst,
     this.kontoStore,
     this.erinnerungen,
+    this.widgets,
     this.health,
     this.kalender,
     this.aboStore,
@@ -106,6 +109,9 @@ class CoachApp extends StatelessWidget {
   /// The phone's calendar (vault Umsetzung/Kalender verbinden). Null in
   /// tests that don't care.
   final KalenderDienst? kalender;
+
+  /// Widgets on the phone (vault Umsetzung/Widgets). Null in tests.
+  final WidgetDienst? widgets;
 
   /// Reminders on the phone (vault Umsetzung/Erinnerungen). Null in tests.
   final ErinnerungDienst? erinnerungen;
@@ -530,6 +536,7 @@ class _StartGateState extends State<StartGate> {
       onKonto: dienst == null ? null : () => _kontoOeffnen(context),
       erinnerungen: widget.app.erinnerungen,
       erinnerungenNeu: _erinnerungenNeu,
+      widgets: widget.app.widgets,
       health: widget.app.health,
       kalender: widget.app.kalender,
       kalenderNeu: _kalenderNeu,
