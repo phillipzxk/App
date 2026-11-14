@@ -438,9 +438,18 @@ void main() {
       tester.state<NavigatorState>(find.byType(Navigator).first).pop();
       await tester.pumpAndSettle();
       expect(find.byType(EssenHeuteBild), findsOneWidget);
-      expect(find.text('Mahlzeiten'), findsOneWidget);
-      expect(find.byKey(const ValueKey('knopf-e-foto')), findsOneWidget);
+      // New structure: "Jetzt dran" on top, the picture below it.
+      await tester.drag(find.byType(EssenHeuteBild), const Offset(0, 900));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('jetzt-dran')), findsOneWidget);
+      expect(find.byKey(const ValueKey('serie')), findsOneWidget);
+      expect(find.text('Wasser heute'), findsOneWidget);
+      expect(find.byKey(const ValueKey('knopf-e-essen')), findsOneWidget);
       // The glass in the picture opens Trinken.
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('kachel-e-trinken')),
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('kachel-e-trinken')));
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('trinken-glas')), findsOneWidget);
@@ -474,7 +483,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 100));
       }
       expect(find.byType(KuecheBild), findsOneWidget);
-      expect(find.byKey(const ValueKey('knopf-e-einkauf')), findsOneWidget);
+      expect(find.byKey(const ValueKey('knopf-e-koch')), findsOneWidget);
       bewegungErzwingen = false;
       await tester.pumpWidget(const SizedBox());
     });

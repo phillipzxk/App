@@ -334,6 +334,77 @@ extension _Koerper on _HomePageState {
                 : 'morgen geht es weiter',
           )
         : null;
+
+    // New structure with more motivation, like Schlaf and Mindset (vault
+    // Umsetzung/Schlaf und Mindset Aufbau; Phillip "gut weiter"
+    // 2026-11-14). All numbers are counted from real entries.
+    final ich = widget.profile.name.trim();
+    final stark = ich.isEmpty ? 'Geschafft. Stark.' : 'Geschafft. Stark, $ich.';
+    final zielSatz = widget.profile.zielSatz;
+    final dafuer = zielSatz.isEmpty ? null : '„$zielSatz“';
+    final montag = montagVon(today);
+    final fertige = [
+      for (final e in _training.einheiten)
+        if (e.status == EinheitStatus.fertig) e,
+    ];
+    // Trained days from the check-in count as well, like in the week.
+    final ausCheckIn = [
+      for (final c in _checkIns)
+        if (c.training.trim().isNotEmpty &&
+            !c.training.trim().startsWith('Pause') &&
+            !fertige.any((e) => dayKey(e.datum) == dayKey(c.datum)))
+          c,
+    ];
+    final serieT = serieWochen([
+      for (final e in fertige) dayKey(montagVon(e.datum)),
+      for (final c in ausCheckIn) dayKey(montagVon(c.datum)),
+    ], today);
+    final serie = BSerie(
+      zahl: serieT.jetzt,
+      einheit: serieT.jetzt == 1 ? 'Woche' : 'Wochen',
+      text: serieT.jetzt == 0
+          ? 'Startet mit deinem nächsten Training'
+          : 'in Folge trainiert',
+      rekord: serieT.rekord,
+    );
+    final wocheZiel = geplant == 0
+        ? const BNaechstes(
+            titel: 'Erster Plan',
+            anteil: 0,
+            text: 'Leg ihn einmal an, dann läuft er.',
+          )
+        : BNaechstes(
+            titel: 'Woche voll machen',
+            anteil: gemacht / geplant,
+            text: gemacht >= geplant
+                ? 'Alle $geplant Einheiten geschafft.'
+                : 'Noch ${geplant - gemacht} '
+                      '${geplant - gemacht == 1 ? 'Einheit' : 'Einheiten'} '
+                      'diese Woche.',
+          );
+    final geschafftT = <(String, DateTime)>[
+      for (final e in fertige)
+        if (!e.datum.isBefore(montag))
+          ('${e.name.trim().isEmpty ? 'Training' : e.name} trainiert', e.datum),
+      for (final c in ausCheckIn)
+        if (!c.datum.isBefore(montag)) (c.training.trim(), c.datum),
+      for (final n in mitVerlauf)
+        if (_bestwerteMitTag(n) case final w
+            when w.length >= 2 &&
+                !w.last.$1.isBefore(montag) &&
+                w.last.$2 >
+                    w
+                        .sublist(0, w.length - 1)
+                        .map((x) => x.$2)
+                        .reduce(math.max))
+          ('Neuer Bestwert: $n', w.last.$1),
+    ]..sort((a, b) => b.$2.compareTo(a.$2));
+    final geschafftListe = [
+      for (final g in geschafftT.take(4)) (g.$1, tagKurz(g.$2)),
+    ];
+    final wocheText = geplant == 0 ? '$gemacht' : '$gemacht/$geplant';
+    final fertigeUebungen = heuteListe.where((x) => x.fertig).length;
+
     return Unterbereich(
       id: b.name,
       name: 'Training',
@@ -383,6 +454,59 @@ extension _Koerper on _HomePageState {
             knopf2: _plan.isEmpty || frei
                 ? null
                 : (Icons.videocam_outlined, 't-form'),
+          ),
+          aufbau: BAufbau(
+            dafuer: dafuer,
+            jetzt: _plan.isEmpty
+                ? const BJetzt(
+                    titel: 'Leg deinen Plan an',
+                    text: 'Einmal festlegen, dann läuft er von selbst.',
+                    mitte: '–',
+                    unter: 'Plan',
+                    knopf: ('Plan anlegen', 't-heute'),
+                  )
+                : fertig
+                ? BJetzt(
+                    fertig: true,
+                    titel: stark,
+                    text: 'Heute $name durchgezogen.',
+                    knopf: ('Training ansehen', 't-heute'),
+                  )
+                : frei
+                ? BJetzt(
+                    titel: 'Heute ist frei',
+                    text: 'Erholung gehört zum Training.',
+                    ring: geplant == 0 ? null : gemacht / geplant,
+                    mitte: wocheText,
+                    unter: 'diese Woche',
+                    knopf: ('Training ansehen', 't-heute'),
+                  )
+                : BJetzt(
+                    titel: 'Heute: $name',
+                    text: [
+                      if (zeitHeute != null) 'Um ${formatUhrzeit(zeitHeute)}.',
+                      'Die Ziele sind schon eingetragen.',
+                    ].join(' '),
+                    ring: heuteListe.isEmpty
+                        ? null
+                        : fertigeUebungen / heuteListe.length,
+                    mitte: '$fertigeUebungen/${heuteListe.length}',
+                    unter: 'Übungen',
+                    knopf: ('Training starten', 't-modus'),
+                  ),
+            serie: serie,
+            naechstes: wocheZiel,
+            geschafft: geschafftListe,
+            mehr: [
+              BMehr(
+                'Training heute',
+                wert: frei ? 'frei' : name,
+                ziel: 't-heute',
+              ),
+              if (!_plan.isEmpty && !frei)
+                const BMehr('Form filmen', ziel: 't-form'),
+              BMehr('Diese Woche', wert: wocheText),
+            ],
           ),
           kacheln: [
             BKachel(
@@ -435,6 +559,53 @@ extension _Koerper on _HomePageState {
             ],
             knopf: (_plan.isEmpty ? 'Plan anlegen' : 'Plan ändern', 't-plan'),
             knopf2: (Icons.sports_gymnastics, 't-sport'),
+          ),
+          aufbau: BAufbau(
+            dafuer: dafuer,
+            jetzt: stag != null
+                ? BJetzt(
+                    titel: 'Stagnation prüfen',
+                    text: stag,
+                    mitte: wocheText,
+                    unter: 'Einheiten',
+                    knopf: ('Zusammen ansehen', 't-stag'),
+                  )
+                : _plan.isEmpty
+                ? const BJetzt(
+                    titel: 'Leg deinen Plan an',
+                    text: 'Dann siehst du hier deine Woche.',
+                    mitte: '–',
+                    unter: 'Plan',
+                    knopf: ('Plan anlegen', 't-plan'),
+                  )
+                : BJetzt(
+                    fertig: geplant > 0 && gemacht >= geplant,
+                    titel: geplant > 0 && gemacht >= geplant
+                        ? stark
+                        : 'Deine Woche',
+                    text: '$gemacht von $geplant Einheiten geschafft.',
+                    ring: geplant == 0 ? null : gemacht / geplant,
+                    mitte: wocheText,
+                    unter: 'Einheiten',
+                    knopf: ('Plan ändern', 't-plan'),
+                  ),
+            serie: serie,
+            naechstes: wocheZiel,
+            geschafft: geschafftListe,
+            mehr: [
+              const BMehr('Woche im Detail', ziel: 't-woche'),
+              BMehr(
+                'Hybrid-Balance',
+                wert: sport.isEmpty ? null : sport.join(', '),
+                ziel: 't-balance',
+              ),
+              BMehr(
+                'Stagnation',
+                wert: stag == null ? 'keine' : 'prüfen',
+                ziel: 't-stag',
+              ),
+              const BMehr('Sportarten', ziel: 't-sport'),
+            ],
           ),
           kacheln: [
             BKachel(
@@ -517,6 +688,50 @@ extension _Koerper on _HomePageState {
             ],
             knopf: ('Nächstes Ziel vorschlagen', 't-selbst'),
             knopf2: (Icons.play_circle_outline, 't-videos'),
+          ),
+          aufbau: BAufbau(
+            dafuer: dafuer,
+            jetzt: BJetzt(
+              titel: 'Schlag dein nächstes Ziel vor',
+              text: 'So brauchst du mich Schritt für Schritt weniger.',
+              ring: rekord == null || rekord == 0 ? null : werte.last / rekord,
+              mitte: rekord == null ? '–' : _zahl1(rekord),
+              unter: kg ? 'Rekord kg' : 'Rekord',
+              knopf: ('Nächstes Ziel vorschlagen', 't-selbst'),
+            ),
+            serie: serie,
+            naechstes: rekord == null || zeigeUebung == null
+                ? const BNaechstes(
+                    titel: 'Erster Bestwert',
+                    anteil: 0,
+                    text: 'Trag dein erstes Training ein.',
+                  )
+                : BNaechstes(
+                    titel: '$zeigeUebung: neuer Bestwert',
+                    anteil: rekord == 0 ? 0 : werte.last / rekord,
+                    text: werte.last >= rekord
+                        ? 'Zuletzt dein Bestwert. Jetzt eins drauf.'
+                        : 'Zuletzt ${_zahl1(werte.last)}, Bestwert '
+                              '${_zahl1(rekord)}${kg ? ' kg' : ''}.',
+                  ),
+            geschafft: geschafftListe,
+            mehr: [
+              const BMehr('Übungen im Verlauf', ziel: 't-kurve'),
+              BMehr(
+                'Rekorde',
+                wert: rekord == null
+                    ? null
+                    : '${_zahl1(rekord)}${kg ? ' kg' : ''}',
+                ziel: 't-rekorde',
+              ),
+              const BMehr('Form-Videos', ziel: 't-videos'),
+              BMehr(
+                'Seit Start',
+                wert: werte.length < 2
+                    ? null
+                    : '${werte.last - werte.first >= 0 ? '+' : '−'}${_zahl1((werte.last - werte.first).abs())}',
+              ),
+            ],
           ),
           kacheln: [
             BKachel(
@@ -608,6 +823,53 @@ extension _Koerper on _HomePageState {
             _ => (vor14.last.kg - .5, vor14.last.kg + .5),
           };
     Widget seite(Widget Function() bau) => _lebendig(bau);
+
+    // New structure with more motivation, like Schlaf and Mindset (vault
+    // Umsetzung/Schlaf und Mindset Aufbau; Phillip "gut weiter"
+    // 2026-11-14). All numbers are counted from real entries.
+    final ich = widget.profile.name.trim();
+    final stark = ich.isEmpty ? 'Geschafft. Stark.' : 'Geschafft. Stark, $ich.';
+    final zielSatz = widget.profile.zielSatz;
+    final dafuer = zielSatz.isEmpty ? null : '„$zielSatz“';
+    final montag = dayKey(montagVon(today));
+    final wasserBasis = wasserZiel(u.kg, training: false);
+    final alleGegessen = [
+      if (slots.isNotEmpty)
+        for (final e in d.tage.entries)
+          if (e.value.values.where((m) => m.gegessen).length >= slots.length)
+            e.key,
+    ];
+    final genugGetrunken = [
+      for (final e in d.trinken.entries)
+        if (e.value.liter >= wasserBasis) e.key,
+    ];
+    final serieEssen = serieTage(alleGegessen, today);
+    final serieE = BSerie(
+      zahl: serieEssen.jetzt,
+      einheit: serieEssen.jetzt == 1 ? 'Tag' : 'Tage',
+      text: serieEssen.jetzt == 0
+          ? 'Startet mit deinem nächsten Eintrag'
+          : 'in Folge alle Mahlzeiten gegessen',
+      rekord: serieEssen.rekord,
+    );
+    final serieWiegen = serieWochen([
+      for (final w in _weights) dayKey(montagVon(w.datum)),
+    ], today);
+    final geschafftE = <(String, String, String)>[
+      for (final t in alleGegessen)
+        if (t.compareTo(montag) >= 0) ('Alle Mahlzeiten gegessen', t, 'c'),
+      for (final t in genugGetrunken)
+        if (t.compareTo(montag) >= 0) ('Genug getrunken', t, 'b'),
+      for (final w in _weights)
+        if (dayKey(w.datum).compareTo(montag) >= 0)
+          ('Gewicht eingetragen', dayKey(w.datum), 'a'),
+    ]..sort((a, b) => '${b.$2}${b.$3}'.compareTo('${a.$2}${a.$3}'));
+    final geschafftListe = [
+      for (final g in geschafftE.take(4)) (g.$1, tagKurz(DateTime.parse(g.$2))),
+    ];
+    final gewogenHeute = _weights.any((w) => dayKey(w.datum) == dayKey(today));
+    final fehltWasser = wasser - trink.liter;
+
     return Unterbereich(
       id: b.name,
       name: 'Ernährung',
@@ -660,6 +922,55 @@ extension _Koerper on _HomePageState {
             ],
             knopf: ('Foto machen', 'e-foto'),
             knopf2: (Icons.local_fire_department_outlined, 'e-heiss'),
+          ),
+          aufbau: BAufbau(
+            dafuer: dafuer,
+            jetzt: slots.isEmpty
+                ? const BJetzt(
+                    titel: 'Leg deine Mahlzeiten fest',
+                    text: 'Dann plane ich sie um Training und Termine.',
+                    mitte: '–',
+                    unter: 'Mahlzeiten',
+                    knopf: ('Essen heute öffnen', 'e-essen'),
+                  )
+                : naechste.isEmpty
+                ? BJetzt(
+                    fertig: true,
+                    titel: stark,
+                    text: 'Alle ${slots.length} Mahlzeiten gegessen.',
+                    knopf: ('Essen heute ansehen', 'e-essen'),
+                  )
+                : BJetzt(
+                    titel:
+                        'Als Nächstes: ${naechste.first.name} um '
+                        '${naechste.first.uhrzeit}',
+                    text:
+                        '${gegessen.length} von ${slots.length} Mahlzeiten '
+                        'gegessen. Gezählt wird nichts.',
+                    ring: gegessen.length / slots.length,
+                    mitte: '${gegessen.length}/${slots.length}',
+                    unter: 'Mahlzeiten',
+                    knopf: ('Essen eintragen', 'e-essen'),
+                  ),
+            serie: serieE,
+            naechstes: BNaechstes(
+              titel: 'Wasser heute',
+              anteil: wasser == 0 ? 0 : trink.liter / wasser,
+              text: fehltWasser <= 0
+                  ? '${literText(trink.liter)} l, geschafft.'
+                  : 'Noch ${literText(fehltWasser)} l bis '
+                        '${literText(wasser)} l.',
+            ),
+            geschafft: geschafftListe,
+            mehr: [
+              const BMehr('Foto vom Teller', ziel: 'e-foto'),
+              const BMehr('Heißhunger', ziel: 'e-heiss'),
+              BMehr(
+                'Trinken',
+                wert: '${literText(trink.liter)} l',
+                ziel: 'e-trinken',
+              ),
+            ],
           ),
           kacheln: [
             BKachel(
@@ -726,6 +1037,46 @@ extension _Koerper on _HomePageState {
             ],
             knopf: ('Einkaufsliste', 'e-einkauf'),
             knopf2: (Icons.menu_book_outlined, 'e-koch'),
+          ),
+          aufbau: BAufbau(
+            dafuer: dafuer,
+            jetzt: BJetzt(
+              titel: heuteGericht == null
+                  ? 'Koch etwas aus deinem Kochbuch'
+                  : 'Heute kochen: ${heuteGericht.name}',
+              text:
+                  'Jedes Gericht, das du kochst und bewertest, wird ein '
+                  'Blatt.',
+              ring: blaetter / variantenAb,
+              mitte: '$blaetter',
+              unter: blaetter == 1 ? 'Gericht' : 'Gerichte',
+              knopf: ('Kochbuch öffnen', 'e-koch'),
+            ),
+            serie: serieE,
+            naechstes: gesperrt.isNotEmpty
+                ? BNaechstes(
+                    titel: 'Neues Gericht freischalten',
+                    anteil: kochenGesamt(d) / gesperrt.first.freiAb!,
+                    text: 'Noch $nochKochen Mal kochen.',
+                  )
+                : BNaechstes(
+                    titel: 'Eigene Varianten',
+                    anteil: blaetter / variantenAb,
+                    text: blaetter >= variantenAb
+                        ? 'Du baust jetzt deine eigenen Varianten.'
+                        : 'Noch ${variantenAb - blaetter} '
+                              '${variantenAb - blaetter == 1 ? 'Blatt' : 'Blätter'}.',
+                  ),
+            geschafft: geschafftListe,
+            mehr: [
+              BMehr(
+                'Einkaufsliste',
+                wert: offen == 0 ? null : '$offen offen',
+                ziel: 'e-einkauf',
+              ),
+              BMehr('Dein Kochbuch', wert: '$blaetter', ziel: 'e-koch'),
+              BMehr('Rettungs-Gerichte', wert: '$rettung'),
+            ],
           ),
           kacheln: [
             BKachel(
@@ -795,6 +1146,82 @@ extension _Koerper on _HomePageState {
             ],
             knopf: ('Gewicht eintragen', 'e-ziel'),
             knopf2: (Icons.medication_outlined, 'e-supp'),
+          ),
+          aufbau: BAufbau(
+            dafuer: dafuer,
+            jetzt: suppOffen > 0 && next != null
+                ? BJetzt(
+                    titel: 'Supplement: ${next.name}',
+                    text: 'Um ${next.zeit}. Noch $suppOffen offen für heute.',
+                    ring: gen / _supplements.length,
+                    mitte: '$gen/${_supplements.length}',
+                    unter: 'genommen',
+                    knopf: ('Abhaken', 'e-supp'),
+                  )
+                : !gewogenHeute
+                ? BJetzt(
+                    titel: 'Trag dein Gewicht ein',
+                    text: 'Der Wochenschnitt zählt, nicht der einzelne Tag.',
+                    mitte: kg == null ? '–' : _HomePageState._komma(kg),
+                    unter: 'kg zuletzt',
+                    knopf: ('Gewicht eintragen', 'e-ziel'),
+                  )
+                : BJetzt(
+                    fertig: true,
+                    titel: stark,
+                    text: _supplements.isEmpty
+                        ? 'Gewicht ist für heute eingetragen.'
+                        : 'Gewicht und Supplements sind für heute erledigt.',
+                    knopf: ('kcal und Gewicht ansehen', 'e-ziel'),
+                  ),
+            serie: BSerie(
+              zahl: serieWiegen.jetzt,
+              einheit: serieWiegen.jetzt == 1 ? 'Woche' : 'Wochen',
+              text: serieWiegen.jetzt == 0
+                  ? 'Startet mit deinem nächsten Eintrag'
+                  : 'in Folge gewogen',
+              rekord: serieWiegen.rekord,
+            ),
+            naechstes: _supplements.isEmpty
+                ? BNaechstes(
+                    titel: 'Gewicht diese Woche',
+                    anteil:
+                        serieWiegen.jetzt > 0 &&
+                            _weights.any(
+                              (w) => dayKey(w.datum).compareTo(montag) >= 0,
+                            )
+                        ? 1
+                        : 0,
+                    text: 'Einmal pro Woche reicht.',
+                  )
+                : BNaechstes(
+                    titel: 'Alle Supplements heute',
+                    anteil: gen / _supplements.length,
+                    text: suppOffen == 0
+                        ? 'Alle $gen genommen.'
+                        : 'Noch $suppOffen offen.',
+                  ),
+            geschafft: geschafftListe,
+            mehr: [
+              BMehr(
+                'kcal und Gewicht',
+                wert: kg == null ? null : '${_HomePageState._komma(kg)} kg',
+                ziel: 'e-ziel',
+              ),
+              BMehr(
+                'Supplements',
+                wert: _supplements.isEmpty
+                    ? null
+                    : '$gen/${_supplements.length}',
+                ziel: 'e-supp',
+              ),
+              BMehr(
+                'In 2 Wochen',
+                wert: diff == null
+                    ? null
+                    : '${diff > 0 ? '+' : (diff < 0 ? '−' : '±')}${_HomePageState._komma(diff.abs())} kg',
+              ),
+            ],
           ),
           kacheln: [
             BKachel(
