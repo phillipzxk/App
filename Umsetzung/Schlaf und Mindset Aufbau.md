@@ -29,6 +29,10 @@ Schlaf: Morgen, Nacht, Abend. Mindset: Heute, Dranbleiben, Ruhe, Langfristig.
 
 Nichts wurde entfernt. Alle Zahlen kommen aus echten Einträgen, nichts ist erfunden.
 
+## Hellerer Stil (2026-11-14)
+
+Phillip fand den Aufbau „sehr gut“ und wollte ihn noch mehr im helleren, modernen Stil der fertigen Unterseiten („3 klar“, siehe [[Umbau]]). Seiten mit dem neuen Aufbau haben deshalb das hellere Braun mit den feinen, langsam drehenden Goldkreisen als Hintergrund und helleres Glas ohne Rand.
+
 ## Was auf welchem Reiter steht
 
 | Reiter | Jetzt dran | Serie | Nächstes Ziel |

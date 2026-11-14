@@ -630,6 +630,14 @@ class _BereichSeiteState extends State<BereichSeite>
   /// name with its ring, the gold page bar, then one picture per page.
   Widget _bildLayout(BuildContext context) {
     final seiten = t.seiten;
+    // Pages in the new structure get the lighter look of the sub pages
+    // ("3 klar"; Phillip 2026-11-14: "mehr den helleren modernen Stil").
+    if (seiten.any((s) => s.aufbau != null)) {
+      return Scaffold(
+        backgroundColor: const Color(0xFF231B14),
+        body: KlarHintergrund(child: _bildInhalt(context)),
+      );
+    }
     return Scaffold(
       backgroundColor: const Color(0xFF0F0C09),
       // Dark brown with a soft gold light from the top (draft "Bereiche
@@ -647,208 +655,210 @@ class _BereichSeiteState extends State<BereichSeite>
               stops: [0, .75],
             ),
           ),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: SafeArea(
-                bottom: false,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: _bildInhalt(context),
+        ),
+      ),
+    );
+  }
+
+  Widget _bildInhalt(BuildContext context) {
+    final seiten = t.seiten;
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 480),
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Row(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                      child: Row(
-                        children: [
-                          GestureDetector(
-                            key: const ValueKey('bereich-zurueck'),
-                            onTap: () => Navigator.of(context).maybePop(),
-                            child: Container(
-                              width: 36,
-                              height: 36,
-                              alignment: Alignment.center,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Color(0x1FFFECD2),
-                              ),
-                              child: const Icon(
-                                Icons.chevron_left,
-                                size: 22,
-                                color: Umbau.gold,
-                              ),
-                            ),
-                          ),
-                          if (widget.teile.length > 1) ...[
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _TeilPillen(
-                                teile: widget.teile,
-                                aktiv: _teil,
-                                onTap: _zuTeil,
-                              ),
-                            ),
-                          ],
-                          // One part only: where you came from, small
-                          // (draft "Bereiche als Bilder" 3).
-                          if (widget.teile.length == 1) ...[
-                            const SizedBox(width: 10),
-                            Text(
-                              widget.zurueck,
-                              style: const TextStyle(
-                                fontFamily: 'Figtree',
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                                color: Umbau.text,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(22, 14, 22, 0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  (widget.teile.length == 1
-                                          ? 'Bereich'
-                                          : widget.name)
-                                      .toUpperCase(),
-                                  style: Umbau.label.copyWith(
-                                    color: const Color(0xFFF1E6D2),
-                                  ),
-                                ),
-                                const SizedBox(height: 3),
-                                AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 300),
-                                  child: Text(
-                                    t.name,
-                                    key: ValueKey('titel-${t.id}'),
-                                    maxLines: 1,
-                                    style: const TextStyle(
-                                      fontFamily: 'Sora',
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 27,
-                                      height: 1.15,
-                                      letterSpacing: -0.6,
-                                      color: Umbau.text,
-                                    ),
-                                  ),
-                                ),
-                                // The score big in gold, counting up.
-                                GestureDetector(
-                                  key: const ValueKey('bereich-ring'),
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: widget.verlauf == null
-                                      ? null
-                                      : () => oeffneFeld(
-                                          context,
-                                          _ringKey,
-                                          widget.verlauf!,
-                                          widget.name,
-                                        ),
-                                  child: KeyedSubtree(
-                                    key: _ringKey,
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        ZaehlZahl(
-                                          key: ValueKey('ring-${t.id}'),
-                                          wert: (t.wert ?? 0).toDouble(),
-                                          leer: t.wert == null ? '–' : null,
-                                          style: const TextStyle(
-                                            fontFamily: 'Sora',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 60,
-                                            height: 1.05,
-                                            letterSpacing: -2.4,
-                                            color: Colors.white,
-                                            fontFeatures: [
-                                              FontFeature.tabularFigures(),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Flexible(
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                              bottom: 10,
-                                            ),
-                                            child: Text(
-                                              _trend(t),
-                                              style: const TextStyle(
-                                                fontFamily: 'Figtree',
-                                                fontSize: 12,
-                                                height: 1.3,
-                                                color: Color(0xFFE6D9C2),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (t.woche.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: _WochenBalken(
-                                key: ValueKey('woche-${t.id}'),
-                                woche: t.woche,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 380),
-                        child: _SegmentLeiste(
-                          key: ValueKey('seg-${t.id}'),
-                          namen: [for (final s in seiten) s.name],
-                          aktiv: _seite,
-                          onTap: _zuSeite,
+                    GestureDetector(
+                      key: const ValueKey('bereich-zurueck'),
+                      onTap: () => Navigator.of(context).maybePop(),
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        alignment: Alignment.center,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color(0x1FFFECD2),
+                        ),
+                        child: const Icon(
+                          Icons.chevron_left,
+                          size: 22,
+                          color: Umbau.gold,
                         ),
                       ),
                     ),
-                    Expanded(
-                      child: PageView(
-                        key: ValueKey('pages-${t.id}'),
-                        controller: _pages,
-                        onPageChanged: (i) => setState(() => _seite = i),
-                        children: [
-                          for (final (i, s) in seiten.indexed)
-                            _BildSeiteView(
-                              key: ValueKey('bild-${t.id}-$i'),
-                              seite: s,
-                              bereich: t.name,
-                              sichtbar: i == _seite,
-                              coachKey: i == _seite ? _coachKey : null,
-                              onCoach: widget.frag == null
-                                  ? null
-                                  : () => oeffneFeld(
-                                      context,
-                                      _coachKey,
-                                      widget.frag!(t),
-                                      t.name,
-                                    ),
-                            ),
-                        ],
+                    if (widget.teile.length > 1) ...[
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _TeilPillen(
+                          teile: widget.teile,
+                          aktiv: _teil,
+                          onTap: _zuTeil,
+                        ),
                       ),
-                    ),
+                    ],
+                    // One part only: where you came from, small
+                    // (draft "Bereiche als Bilder" 3).
+                    if (widget.teile.length == 1) ...[
+                      const SizedBox(width: 10),
+                      Text(
+                        widget.zurueck,
+                        style: const TextStyle(
+                          fontFamily: 'Figtree',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          color: Umbau.text,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
-            ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(22, 14, 22, 0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            (widget.teile.length == 1 ? 'Bereich' : widget.name)
+                                .toUpperCase(),
+                            style: Umbau.label.copyWith(
+                              color: const Color(0xFFF1E6D2),
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            child: Text(
+                              t.name,
+                              key: ValueKey('titel-${t.id}'),
+                              maxLines: 1,
+                              style: const TextStyle(
+                                fontFamily: 'Sora',
+                                fontWeight: FontWeight.w700,
+                                fontSize: 27,
+                                height: 1.15,
+                                letterSpacing: -0.6,
+                                color: Umbau.text,
+                              ),
+                            ),
+                          ),
+                          // The score big in gold, counting up.
+                          GestureDetector(
+                            key: const ValueKey('bereich-ring'),
+                            behavior: HitTestBehavior.opaque,
+                            onTap: widget.verlauf == null
+                                ? null
+                                : () => oeffneFeld(
+                                    context,
+                                    _ringKey,
+                                    widget.verlauf!,
+                                    widget.name,
+                                  ),
+                            child: KeyedSubtree(
+                              key: _ringKey,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  ZaehlZahl(
+                                    key: ValueKey('ring-${t.id}'),
+                                    wert: (t.wert ?? 0).toDouble(),
+                                    leer: t.wert == null ? '–' : null,
+                                    style: const TextStyle(
+                                      fontFamily: 'Sora',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 60,
+                                      height: 1.05,
+                                      letterSpacing: -2.4,
+                                      color: Colors.white,
+                                      fontFeatures: [
+                                        FontFeature.tabularFigures(),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Flexible(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 10,
+                                      ),
+                                      child: Text(
+                                        _trend(t),
+                                        style: const TextStyle(
+                                          fontFamily: 'Figtree',
+                                          fontSize: 12,
+                                          height: 1.3,
+                                          color: Color(0xFFE6D9C2),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (t.woche.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: _WochenBalken(
+                          key: ValueKey('woche-${t.id}'),
+                          woche: t.woche,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 380),
+                  child: _SegmentLeiste(
+                    key: ValueKey('seg-${t.id}'),
+                    namen: [for (final s in seiten) s.name],
+                    aktiv: _seite,
+                    onTap: _zuSeite,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: PageView(
+                  key: ValueKey('pages-${t.id}'),
+                  controller: _pages,
+                  onPageChanged: (i) => setState(() => _seite = i),
+                  children: [
+                    for (final (i, s) in seiten.indexed)
+                      _BildSeiteView(
+                        key: ValueKey('bild-${t.id}-$i'),
+                        seite: s,
+                        bereich: t.name,
+                        sichtbar: i == _seite,
+                        coachKey: i == _seite ? _coachKey : null,
+                        onCoach: widget.frag == null
+                            ? null
+                            : () => oeffneFeld(
+                                context,
+                                _coachKey,
+                                widget.frag!(t),
+                                t.name,
+                              ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -2226,8 +2236,10 @@ class _BildSeiteViewState extends State<_BildSeiteView>
       // A calm glass tile like on Heute (Umbau 2026-11-12).
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
-        color: Umbau.glas,
-        border: Border.all(color: Glas.edge),
+        color: widget.seite.aufbau != null ? Klar.glas : Umbau.glas,
+        border: widget.seite.aufbau != null
+            ? null
+            : Border.all(color: Glas.edge),
       ),
       child: DecoratedBox(
         decoration: const BoxDecoration(
@@ -2255,9 +2267,8 @@ class _BildSeiteViewState extends State<_BildSeiteView>
     key: key,
     padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
     decoration: BoxDecoration(
-      color: Umbau.glas,
+      color: Klar.glas,
       borderRadius: BorderRadius.circular(26),
-      border: Border.all(color: Glas.edge),
     ),
     child: child,
   );
