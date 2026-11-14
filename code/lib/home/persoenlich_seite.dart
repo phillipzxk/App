@@ -239,6 +239,59 @@ extension _Persoenlich on _HomePageState {
       ],
     );
 
+    // New structure with more motivation, like the other areas (vault
+    // Umsetzung/Schlaf und Mindset Aufbau; Phillip "ja erstell alle im
+    // gleichen stil" 2026-11-14). All numbers come from real entries.
+    final stark = name.isEmpty
+        ? 'Geschafft. Stark.'
+        : 'Geschafft. Stark, $name.';
+    final zielSatz = widget.profile.zielSatz;
+    final dafuer = zielSatz.isEmpty ? null : '„$zielSatz“';
+    final montag = dayKey(montagVon(jetzt));
+    final pflegeTage = [
+      for (final t in d.pflege.keys)
+        if (pflegeVoll(d, t)) t,
+    ];
+    final lernTage = [
+      for (final e in d.lernMinuten.entries)
+        if (e.value >= 10) e.key,
+    ];
+    BSerie serieAus(({int jetzt, int rekord}) x, String text) => BSerie(
+      zahl: x.jetzt,
+      einheit: x.jetzt == 1 ? 'Tag' : 'Tage',
+      text: x.jetzt == 0 ? 'Startet mit deinem nächsten Eintrag' : text,
+      rekord: x.rekord,
+    );
+    final seriePflege = serieAus(
+      serieTage(pflegeTage, jetzt),
+      'in Folge Pflege komplett',
+    );
+    final serieLernen = serieAus(
+      serieTage(lernTage, jetzt),
+      'in Folge 10 Minuten gelernt',
+    );
+    final geschafftPe = <(String, String, String)>[
+      for (final t in pflegeTage)
+        if (t.compareTo(montag) >= 0) ('Pflege komplett', t, 'b'),
+      for (final t in lernTage)
+        if (t.compareTo(montag) >= 0) ('10 Minuten gelernt', t, 'a'),
+      for (final x in d.umsetzen)
+        if (x.erledigt case final t? when t.compareTo(montag) >= 0)
+          ('Umgesetzt: ${x.schritt}', t.substring(0, 10), 'c'),
+    ]..sort((a, b) => '${b.$2}${b.$3}'.compareTo('${a.$2}${a.$3}'));
+    final geschafftListe = [
+      for (final g in geschafftPe.take(4))
+        (g.$1, tagKurz(DateTime.parse(g.$2))),
+    ];
+    final lernZiel = BNaechstes(
+      titel: 'Lern-Ziel heute',
+      anteil: lern / 10,
+      text: lern >= 10
+          ? '$lern Minuten, geschafft.'
+          : 'Noch ${10 - lern} Minuten.',
+    );
+    final kleineGesamt = kleineHeute + faellig.length;
+
     final seiten = [
       BSeite(
         name: 'Heute',
@@ -271,6 +324,36 @@ extension _Persoenlich on _HomePageState {
           ],
           knopf: ('Lernen starten', 'pe-lern'),
           knopf2: (Icons.mic_none, 'pe-stimme'),
+        ),
+        aufbau: BAufbau(
+          dafuer: dafuer,
+          jetzt: offen != null
+              ? BJetzt(
+                  titel: 'Pflege: $offen',
+                  text: '$morgens von ${d.morgens.length} am Morgen erledigt.',
+                  ring: morgens / d.morgens.length,
+                  mitte: '$morgens/${d.morgens.length}',
+                  unter: 'Pflege',
+                  knopf: ('Pflege abhaken', 'pe-pflege'),
+                )
+              : lern < 10
+              ? BJetzt(
+                  titel: 'Noch ${10 - lern} Minuten ${k?.skill ?? 'Lernen'}',
+                  text: 'Dann hast du dein Lern-Ziel für heute.',
+                  ring: lern / 10,
+                  mitte: '$lern/10',
+                  unter: 'Minuten',
+                  knopf: ('Lernen starten', 'pe-lern'),
+                )
+              : BJetzt(
+                  fertig: true,
+                  titel: stark,
+                  text: 'Pflege und Lern-Ziel sind für heute geschafft.',
+                  knopf: ('Weiter lernen', 'pe-lern'),
+                ),
+          serie: seriePflege,
+          naechstes: lernZiel,
+          geschafft: geschafftListe,
         ),
         kacheln: [
           BKachel(
@@ -356,6 +439,35 @@ extension _Persoenlich on _HomePageState {
           ],
           knopf: ('Foto machen', 'pe-look'),
           knopf2: (Icons.photo_camera_outlined, 'pe-stil'),
+        ),
+        aufbau: BAufbau(
+          dafuer: dafuer,
+          jetzt: look == null || look.punkte.isEmpty
+              ? const BJetzt(
+                  titel: 'Ein Foto reicht',
+                  text:
+                      'Ich zeige dir die drei kleinen Hebel, die bei dir am '
+                      'meisten ausmachen.',
+                  mitte: '0',
+                  unter: 'Hinweise',
+                  knopf: ('Foto machen', 'pe-look'),
+                )
+              : BJetzt(
+                  titel: 'Dein Hebel: ${look.punkte.first.titel}',
+                  text: '${look.punkte.length} Hinweise aus deinem Foto.',
+                  mitte: '${look.punkte.length}',
+                  unter: 'Hinweise',
+                  knopf: ('Hinweise ansehen', 'pe-look'),
+                ),
+          serie: seriePflege,
+          naechstes: BNaechstes(
+            titel: 'Look-Verlauf',
+            anteil: fotos / 2,
+            text: fotos < 2
+                ? 'Ab 2 Fortschrittsfotos siehst du den Verlauf.'
+                : '$fotos Wochen im Verlauf.',
+          ),
+          geschafft: geschafftListe,
         ),
         kacheln: [
           BKachel(
@@ -459,6 +571,48 @@ extension _Persoenlich on _HomePageState {
           ],
           knopf: ('Routine abhaken', 'pe-kleine'),
           knopf2: (Icons.add, 'pe-haut'),
+        ),
+        aufbau: BAufbau(
+          dafuer: dafuer,
+          jetzt: faellig.isNotEmpty
+              ? BJetzt(
+                  titel: '${faellig.first.name} ist heute dran',
+                  text: faellig.length == 1
+                      ? 'Eine kleine Sache mit großer Wirkung.'
+                      : 'Und ${faellig.length - 1} weitere kleine '
+                            '${faellig.length == 2 ? 'Sache' : 'Sachen'}.',
+                  ring: kleineGesamt == 0 ? null : kleineHeute / kleineGesamt,
+                  mitte: '$kleineHeute/$kleineGesamt',
+                  unter: 'heute',
+                  knopf: ('Routine abhaken', 'pe-kleine'),
+                )
+              : haut == null
+              ? const BJetzt(
+                  titel: 'Was stört dich an deiner Haut?',
+                  text: 'Daraus wird ein Plan über 8 Wochen.',
+                  mitte: '0/8',
+                  unter: 'Wochen',
+                  knopf: ('Haut-Plan starten', 'pe-haut'),
+                )
+              : BJetzt(
+                  fertig: true,
+                  titel: stark,
+                  text: 'Die kleinen Dinge sind für heute erledigt.',
+                  knopf: ('Haut-Plan ansehen', 'pe-haut'),
+                ),
+          serie: seriePflege,
+          naechstes: hw == null
+              ? const BNaechstes(
+                  titel: 'Haut-Plan',
+                  anteil: 0,
+                  text: 'Noch nicht gestartet.',
+                )
+              : BNaechstes(
+                  titel: 'Haut-Plan: 8 Wochen',
+                  anteil: hw / 8,
+                  text: 'Woche $hw von 8.',
+                ),
+          geschafft: geschafftListe,
         ),
         kacheln: [
           BKachel(
@@ -573,6 +727,45 @@ extension _Persoenlich on _HomePageState {
               ? ('Skill wählen', 'pe-kurs')
               : ('Kurs ansehen', 'pe-kurs'),
           knopf2: (Icons.add, 'pe-buecher'),
+        ),
+        aufbau: BAufbau(
+          dafuer: dafuer,
+          jetzt: lek != null
+              ? BJetzt(
+                  titel: 'Lektion ${k!.erreicht + 1}: ${lek.titel}',
+                  text: 'Dein Kurs ${k.skill}.',
+                  ring: k.erreicht / k.lektionen.length,
+                  mitte: '${k.erreicht}/${k.lektionen.length}',
+                  unter: 'Lektionen',
+                  knopf: ('Lektion ${k.erreicht + 1} starten', 'pe-kurs'),
+                )
+              : k == null
+              ? const BJetzt(
+                  titel: 'Welchen Skill willst du lernen?',
+                  text: 'Ich baue dir daraus einen Kurs in kleinen Lektionen.',
+                  mitte: '–',
+                  unter: 'Lektionen',
+                  knopf: ('Skill wählen', 'pe-kurs'),
+                )
+              : BJetzt(
+                  fertig: true,
+                  titel: stark,
+                  text: 'Dein Kurs ${k.skill} ist durch.',
+                  knopf: ('Kurs ansehen', 'pe-kurs'),
+                ),
+          serie: serieLernen,
+          naechstes: d.umsetzen.isEmpty
+              ? const BNaechstes(
+                  titel: 'Erster Schritt aus einem Buch',
+                  anteil: 0,
+                  text: 'Aus jedem Buch machen wir einen kleinen Schritt.',
+                )
+              : BNaechstes(
+                  titel: 'Wissen umsetzen',
+                  anteil: umgesetzt / d.umsetzen.length,
+                  text: '$umgesetzt von ${d.umsetzen.length} machst du schon.',
+                ),
+          geschafft: geschafftListe,
         ),
         kacheln: [
           BKachel(

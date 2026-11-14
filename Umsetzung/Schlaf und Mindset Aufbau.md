@@ -1,8 +1,8 @@
 ---
-title: Neuer Aufbau mit mehr Motivation (Schlaf, Mindset, Training, Ernährung)
+title: Neuer Aufbau mit mehr Motivation (alle Bereiche)
 status: gebaut
 datum: 2026-11-13
-tags: [umsetzung, schlaf, mindset, training, ernaehrung, motivation, aufbau]
+tags: [umsetzung, schlaf, mindset, training, ernaehrung, fokus, ausstrahlung, motivation, aufbau]
 ---
 
 # Schlaf und Mindset: neuer Aufbau
@@ -62,15 +62,32 @@ Nach dem Übernehmen von Schlaf und Mindset sagte Phillip „gut weiter“. Trai
 
 „Diese Woche geschafft“ bei Training: fertige Einheiten, trainierte Tage aus dem Check-in, neue Bestwerte. Bei Ernährung: alle Mahlzeiten gegessen, genug getrunken, Gewicht eingetragen. Trainierte Tage aus dem Check-in zählen auch für die Serie, damit sie zur Wochenansicht passt.
 
+## Fokus und Arbeit, Ausstrahlung (2026-11-14)
+
+Phillip am 2026-11-14: „ja erstell alle im gleichen stil“. Damit haben alle Bereiche denselben Aufbau im helleren Stil.
+
+| Reiter | Jetzt dran | Serie | Nächstes Ziel |
+|---|---|---|---|
+| Fokus, Heute | die eine Sache festlegen, sonst Fokus-Block starten | Tage in Folge die eine Sache erledigt | 50 Minuten im Fokus |
+| Fokus, Ziele | Hebel der Woche festlegen, sonst Zielbaum | Tage in Folge die eine Sache erledigt | nächster Meilenstein |
+| Fokus, Handy | Morgen ohne Handy | handyfreie Morgen in Folge | 7 handyfreie Morgen |
+| Fokus, Rhythmus | das Schwere in dein Hoch | Tage in Folge die eine Sache erledigt | 50 Minuten im Fokus |
+| Fokus, Routinen | Gewohnheit andocken | Tage in Folge alle Gewohnheiten | 21 Tage, dann läuft sie allein |
+| Ausstrahlung, Heute | Pflege abhaken, sonst Lernen | Tage in Folge Pflege komplett | Lern-Ziel heute |
+| Ausstrahlung, Look | Foto machen | Tage in Folge Pflege komplett | Look-Verlauf ab 2 Fotos |
+| Ausstrahlung, Pflege | kleine Sachen, die heute dran sind | Tage in Folge Pflege komplett | Haut-Plan |
+| Ausstrahlung, Wissen | Skill wählen, sonst nächste Lektion | Tage in Folge gelernt | nächster Schritt aus einem Buch |
+
+Die Liste „Mehr“ baut sich hier von selbst aus den Zahlen und Kacheln der Seite, damit nichts verloren geht.
+
 ## Stand im Code
 
-- `code/lib/bereiche/bereich_seite.dart`: `BAufbau`, `BJetzt`, `BSerie`, `BNaechstes`, `BMehr`; eine Bildseite mit `aufbau` zeigt den neuen Aufbau, ohne bleibt sie wie bisher (Fokus und Arbeit sowie Ausstrahlung sind unverändert).
+- `code/lib/bereiche/bereich_seite.dart`: `BAufbau`, `BJetzt`, `BSerie`, `BNaechstes`, `BMehr`; eine Bildseite mit `aufbau` zeigt den neuen Aufbau, ohne bleibt sie wie bisher. Ist `mehr` leer, entsteht die Liste aus den Zahlen und Kacheln der Seite.
 - `code/lib/bereiche/aufbau_logik.dart`: Serien in Tagen und Wochen, nächste Marke.
-- `code/lib/home/koerper_seite.dart` (Training, Ernährung, Schlaf) und `code/lib/home/mindset_seite.dart` füllen den Aufbau.
+- `code/lib/home/koerper_seite.dart` (Training, Ernährung, Schlaf) und `code/lib/home/mindset_seite.dart`, `code/lib/home/produktiv_seite.dart` (Fokus und Arbeit) und `code/lib/home/persoenlich_seite.dart` (Ausstrahlung) füllen den Aufbau.
 - Nebenbei behoben: der Ruhe-Knopf auf dem Reiter Ruhe startet jetzt wirklich.
 - Tests: `code/test/aufbau_test.dart`, `code/test/mindset_test.dart`.
 
 ## Noch offen
 
 - Eigene Weckerklänge und Musik für den Ruhe-Knopf (Hörproben gezeigt, noch nicht beurteilt).
-- Ob derselbe Aufbau auch für Fokus und Arbeit sowie Ausstrahlung kommen soll.

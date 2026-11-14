@@ -257,6 +257,53 @@ extension _Produktiv on _HomePageState {
       ],
     );
 
+    // New structure with more motivation, like the other areas (vault
+    // Umsetzung/Schlaf und Mindset Aufbau; Phillip "ja erstell alle im
+    // gleichen stil" 2026-11-14). All numbers come from real entries.
+    final stark = name.isEmpty
+        ? 'Geschafft. Stark.'
+        : 'Geschafft. Stark, $name.';
+    final zielSatz = widget.profile.zielSatz;
+    final dafuer = zielSatz.isEmpty ? null : '„$zielSatz“';
+    final montag = dayKey(montagVon(jetzt));
+    BSerie serieAus(({int jetzt, int rekord}) x, String einheit, String text) =>
+        BSerie(
+          zahl: x.jetzt,
+          einheit: einheit,
+          text: x.jetzt == 0 ? 'Startet mit deinem nächsten Eintrag' : text,
+          rekord: x.rekord,
+        );
+    final sFokus = serieTage([
+      for (final x in d.fokus)
+        if (x.erledigt) x.tag,
+    ], jetzt);
+    final serieFokus = serieAus(
+      sFokus,
+      sFokus.jetzt == 1 ? 'Tag' : 'Tage',
+      'in Folge die eine Sache geschafft',
+    );
+    final sFrei = serieTage(d.handyfreiTage, jetzt);
+    final geschafftP = <(String, String, String)>[
+      for (final x in d.fokus)
+        if (x.erledigt && x.tag.compareTo(montag) >= 0)
+          ('Geschafft: ${x.text}', x.tag, 'b'),
+      for (final t in d.handyfreiTage)
+        if (t.compareTo(montag) >= 0) ('Handyfreier Morgen', t, 'a'),
+    ]..sort((a, b) => '${b.$2}${b.$3}'.compareTo('${a.$2}${a.$3}'));
+    final geschafftListe = [
+      for (final g in geschafftP.take(4)) (g.$1, tagKurz(DateTime.parse(g.$2))),
+    ];
+    final fokusMin = fokusMinuten(d, heute);
+    final fokusZiel = BNaechstes(
+      titel: '50 Minuten im Fokus',
+      anteil: fokusMin / 50,
+      text: fokusMin >= 50
+          ? '$fokusMin Minuten heute, geschafft.'
+          : 'Noch ${50 - fokusMin} Minuten heute.',
+    );
+    final freiHeute = d.handyfreiTage.contains(heute);
+    final aktivTage = aktiv?.tage.length ?? 0;
+
     final seiten = [
       BSeite(
         name: 'Heute',
@@ -294,6 +341,37 @@ extension _Produktiv on _HomePageState {
           ],
           knopf: ('Fokus-Block starten', 'p-block'),
           knopf2: (Icons.edit_outlined, 'p-fokus'),
+        ),
+        aufbau: BAufbau(
+          dafuer: dafuer,
+          jetzt: f == null
+              ? const BJetzt(
+                  titel: 'Was ist heute die eine Sache?',
+                  text: 'Leg sie fest. Dann zählt heute nur sie.',
+                  mitte: '0/1',
+                  unter: 'eine Sache',
+                  knopf: ('Eine Sache festlegen', 'p-fokus'),
+                )
+              : f.erledigt
+              ? BJetzt(
+                  fertig: true,
+                  titel: stark,
+                  text:
+                      '„${f.text}“ ist geschafft. Der Rest darf leichter '
+                      'sein.',
+                  knopf: ('Fokus-Block starten', 'p-block'),
+                )
+              : BJetzt(
+                  titel: 'Heute zählt: ${f.text}',
+                  text: 'Leg es in dein Hoch, $hoch.',
+                  ring: fokusMin / 50,
+                  mitte: '$block',
+                  unter: 'Min Block',
+                  knopf: ('Fokus-Block starten', 'p-block'),
+                ),
+          serie: serieFokus,
+          naechstes: fokusZiel,
+          geschafft: geschafftListe,
         ),
         kacheln: [
           BKachel(
@@ -397,6 +475,52 @@ extension _Produktiv on _HomePageState {
           ],
           knopf: ('Meilenstein eintragen', 'b-baum'),
           knopf2: (Icons.add, 'b-hebel'),
+        ),
+        aufbau: BAufbau(
+          dafuer: dafuer,
+          jetzt: h == null
+              ? const BJetzt(
+                  titel: 'Dein Hebel der Woche',
+                  text: 'Welche eine Aktion bringt dich am weitesten?',
+                  mitte: '–',
+                  unter: 'Hebel',
+                  knopf: ('Hebel festlegen', 'b-hebel'),
+                )
+              : hebelFertig
+              ? BJetzt(
+                  fertig: true,
+                  titel: stark,
+                  text: 'Hebel der Woche geschafft: ${h.text}.',
+                  knopf: ('Meilenstein eintragen', 'b-baum'),
+                )
+              : BJetzt(
+                  titel: 'Dein Hebel: ${h.text}',
+                  text: h.punkte.isEmpty
+                      ? 'Das ist diese Woche die eine Aktion.'
+                      : '${h.erledigt} von ${h.punkte.length} Schritten '
+                            'geschafft.',
+                  ring: h.punkte.isEmpty ? null : h.erledigt / h.punkte.length,
+                  mitte: h.punkte.isEmpty
+                      ? '–'
+                      : '${h.erledigt}/${h.punkte.length}',
+                  unter: 'Hebel',
+                  knopf: ('Hebel öffnen', 'b-hebel'),
+                ),
+          serie: serieFokus,
+          naechstes: astText == null
+              ? BNaechstes(
+                  titel: ms.isEmpty ? 'Erster Meilenstein' : 'Alle erreicht',
+                  anteil: ms.isEmpty ? 0 : 1,
+                  text: ms.isEmpty
+                      ? 'Trag ein, wo du hinwillst.'
+                      : '$erreicht von ${ms.length} Meilensteinen.',
+                )
+              : BNaechstes(
+                  titel: astText,
+                  anteil: astAnt ?? erreicht / ms.length,
+                  text: '$erreicht von ${ms.length} Meilensteinen erreicht.',
+                ),
+          geschafft: geschafftListe,
         ),
         kacheln: [
           BKachel(
@@ -510,6 +634,45 @@ extension _Produktiv on _HomePageState {
           knopf: ('Handyfreie Zeit festlegen', 'p-handyfrei'),
           knopf2: (Icons.lightbulb_outline, 'p-frei'),
         ),
+        aufbau: BAufbau(
+          dafuer: dafuer,
+          jetzt: freiMin <= 0
+              ? const BJetzt(
+                  titel: 'Leg deine handyfreie Zeit fest',
+                  text: 'Der Morgen ohne Handy gehört dir.',
+                  mitte: '–',
+                  unter: 'handyfrei',
+                  knopf: ('Handyfreie Zeit festlegen', 'p-handyfrei'),
+                )
+              : freiHeute
+              ? BJetzt(
+                  fertig: true,
+                  titel: stark,
+                  text:
+                      'Handyfreier Morgen geschafft. $frei7 von 7 in dieser '
+                      'Woche.',
+                  knopf: ('Handyfreie Zeit ansehen', 'p-handyfrei'),
+                )
+              : BJetzt(
+                  titel: 'Dein Morgen ohne Handy',
+                  text:
+                      '${minText(freiMin)} nach dem Aufstehen. $frei7 von 7 '
+                      'Morgen geschafft.',
+                  ring: frei7 / 7,
+                  mitte: '$frei7/7',
+                  unter: 'Morgen',
+                  knopf: ('Handyfreie Zeit öffnen', 'p-handyfrei'),
+                ),
+          serie: serieAus(sFrei, 'Morgen', 'in Folge ohne Handy gestartet'),
+          naechstes: BNaechstes(
+            titel: '7 handyfreie Morgen',
+            anteil: frei7 / 7,
+            text: frei7 >= 7
+                ? 'Alle 7 geschafft.'
+                : 'Noch ${7 - frei7} in den letzten 7 Tagen.',
+          ),
+          geschafft: geschafftListe,
+        ),
         kacheln: [
           BKachel(
             id: 'p-spiegel',
@@ -622,6 +785,19 @@ extension _Produktiv on _HomePageState {
           knopf: ('Tag danach planen', 'p-stunden'),
           knopf2: (Icons.add, 'p-geber'),
         ),
+        aufbau: BAufbau(
+          dafuer: dafuer,
+          jetzt: BJetzt(
+            titel: 'Das Schwere in dein Hoch',
+            text: 'Heute bist du von $hoch am klarsten.',
+            mitte: '${kurz(e.hoch.$1)}–${kurz(e.hoch.$2)}',
+            unter: 'Uhr',
+            knopf: ('Tag danach planen', 'p-stunden'),
+          ),
+          serie: serieFokus,
+          naechstes: fokusZiel,
+          geschafft: geschafftListe,
+        ),
         kacheln: [
           BKachel(
             id: 'p-stunden',
@@ -693,6 +869,55 @@ extension _Produktiv on _HomePageState {
           ],
           knopf: ('Gewohnheit andocken', 'p-neu'),
           knopf2: (Icons.add, 'p-andock'),
+        ),
+        aufbau: BAufbau(
+          dafuer: dafuer,
+          jetzt: aktiv == null
+              ? const BJetzt(
+                  titel: 'Dock eine Gewohnheit an',
+                  text: 'An etwas, das du sowieso jeden Tag machst.',
+                  mitte: '0/21',
+                  unter: 'Tage',
+                  knopf: ('Gewohnheit andocken', 'p-neu'),
+                )
+              : aktiv.tage.contains(heute)
+              ? BJetzt(
+                  fertig: true,
+                  titel: stark,
+                  text:
+                      '„${aktiv.neu}“ ist für heute erledigt. Tag '
+                      '$aktivTage von 21.',
+                  knopf: ('Routinen ansehen', 'p-andock'),
+                )
+              : BJetzt(
+                  titel: aktiv.neu,
+                  text: 'Direkt nach: ${aktiv.anker}. Tag $aktivTage von 21.',
+                  ring: aktivTage / 21,
+                  mitte: '$aktivTage/21',
+                  unter: 'Tage',
+                  knopf: ('Heute abhaken', 'p-andock'),
+                ),
+          serie: BSerie(
+            zahl: stueck,
+            einheit: stueck == 1 ? 'Tag' : 'Tage',
+            text: stueck == 0
+                ? 'Startet mit deinem nächsten Eintrag'
+                : 'am Stück bei deiner Gewohnheit',
+          ),
+          naechstes: aktiv == null
+              ? const BNaechstes(
+                  titel: 'Erste Gewohnheit',
+                  anteil: 0,
+                  text: 'Nach 21 Tagen läuft sie von allein.',
+                )
+              : BNaechstes(
+                  titel: 'Läuft von allein',
+                  anteil: aktivTage / 21,
+                  text:
+                      'Noch ${math.max(0, 21 - aktivTage)} Tage, dann kommt '
+                      'die nächste.',
+                ),
+          geschafft: geschafftListe,
         ),
         kacheln: [
           BKachel(
