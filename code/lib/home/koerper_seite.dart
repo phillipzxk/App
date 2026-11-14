@@ -868,6 +868,66 @@ extension _Koerper on _HomePageState {
         ? 1
         : 2;
     Widget seite(Widget Function() bau) => _lebendig(bau);
+
+    // New structure with more motivation (vault Umsetzung/Schlaf und
+    // Mindset Aufbau, Phillip "passt" 2026-11-13). All numbers are counted
+    // from real entries.
+    final name = widget.profile.name.trim();
+    final stark = name.isEmpty
+        ? 'Geschafft. Stark.'
+        : 'Geschafft. Stark, $name.';
+    final zielSatz = widget.profile.zielSatz;
+    final dafuer = zielSatz.isEmpty ? null : '„$zielSatz“';
+    final montag = dayKey(montagVon(today));
+    final brauch = u.zeiten.stunden;
+    final serieMorgen = serieTage([for (final m in d.morgen) m.tag], today);
+    final serieNacht = serieTage([
+      for (final e in _sleep)
+        if (e.stunden >= 7) dayKey(e.datum),
+    ], today);
+    final serieAbend = serieTage([
+      for (final j in d.journal)
+        if (j.guteNacht != null || j.fertig) j.tag,
+    ], today);
+    final woche7 = [
+      for (final m in d.morgen)
+        if (tageSeit(m.tag, today) < 7) m.wert,
+    ];
+    final wertSchnitt = woche7.isEmpty
+        ? null
+        : (woche7.reduce((a, b) => a + b) / woche7.length).round();
+    final wertZiel = wertSchnitt == null
+        ? null
+        : math.min(100, (wertSchnitt ~/ 5 + 1) * 5);
+    final geschafft = <(String, String, String)>[
+      for (final m in d.morgen)
+        if (m.tag.compareTo(montag) >= 0) ...[
+          if (m.wert >= 75) ('Schlafwert ${m.wert}', m.tag, 'b'),
+          if (m.stunden >= brauch)
+            (
+              '${_HomePageState._komma(m.stunden)} Stunden geschlafen',
+              m.tag,
+              'a',
+            ),
+        ],
+      for (final j in d.journal)
+        if (j.tag.compareTo(montag) >= 0 && (j.guteNacht != null || j.fertig))
+          ('Abend-Journal komplett', j.tag, 'c'),
+    ]..sort((a, b) => '${b.$2}${b.$3}'.compareTo('${a.$2}${a.$3}'));
+    final geschafftListe = [
+      for (final g in geschafft.take(4)) (g.$1, tagKurz(DateTime.parse(g.$2))),
+    ];
+    BSerie serie(({int jetzt, int rekord}) x, String einheit, String text) =>
+        BSerie(
+          zahl: x.jetzt,
+          einheit: einheit,
+          text: x.jetzt == 0 ? 'Startet mit deinem nächsten Eintrag' : text,
+          rekord: x.rekord,
+        );
+    final wecker = u.weckzeit == null ? null : formatUhrzeit(u.weckzeit!);
+    final bettText = bz == null ? null : formatUhrzeit(bz.bett);
+    final marke = naechsteMarke(serieAbend.jetzt);
+
     return Unterbereich(
       id: b.name,
       name: 'Schlaf & Routine',
@@ -910,6 +970,56 @@ extension _Koerper on _HomePageState {
             ],
             knopf: ('Licht-Timer starten', 's-licht'),
             knopf2: (Icons.alarm, 's-wecker'),
+          ),
+          aufbau: BAufbau(
+            dafuer: dafuer,
+            jetzt: morgen == null
+                ? const BJetzt(
+                    titel: 'Wie bist du aufgewacht?',
+                    text: 'Ein Tipp, dann steht dein Schlafwert.',
+                    mitte: '–',
+                    unter: 'Schlafwert',
+                    knopf: ('Aufwachen eintragen', 's-himmel'),
+                  )
+                : BJetzt(
+                    fertig: true,
+                    titel: stark,
+                    text:
+                        'Schlafwert ${morgen.wert} heute. Jetzt 5 Minuten raus '
+                        'ins Licht, das macht dich wach.',
+                    knopf: ('Licht-Timer starten', 's-licht'),
+                  ),
+            serie: serie(serieMorgen, 'Morgen', 'in Folge eingetragen'),
+            naechstes: wertSchnitt == null
+                ? const BNaechstes(
+                    titel: 'Erster Schlafwert',
+                    anteil: 0,
+                    text: 'Trag ein, wie du aufgewacht bist.',
+                  )
+                : BNaechstes(
+                    titel: 'Schlafwert $wertZiel',
+                    anteil: wertSchnitt / wertZiel!,
+                    text: wertSchnitt >= 100
+                        ? 'Dein Schnitt der Woche liegt ganz oben.'
+                        : 'Noch ${wertZiel - wertSchnitt} '
+                              '${wertZiel - wertSchnitt == 1 ? 'Punkt' : 'Punkte'} '
+                              'im Schnitt der Woche.',
+                  ),
+            geschafft: geschafftListe,
+            mehr: [
+              BMehr('Wecker', wert: wecker, ziel: 's-wecker'),
+              const BMehr('Licht-Timer', wert: '5 Min', ziel: 's-licht'),
+              BMehr(
+                'Schlafwert',
+                wert: morgen == null ? null : '${morgen.wert}',
+              ),
+              BMehr(
+                'Geschlafen',
+                wert: morgen == null
+                    ? null
+                    : '${_HomePageState._komma(morgen.stunden)} h',
+              ),
+            ],
           ),
           kacheln: [
             BKachel(
@@ -969,6 +1079,57 @@ extension _Koerper on _HomePageState {
             ],
             knopf: ('Schlafzeiten', 's-zeiten'),
             knopf2: (Icons.hub_outlined, 's-muster'),
+          ),
+          aufbau: BAufbau(
+            dafuer: dafuer,
+            jetzt: bz == null
+                ? const BJetzt(
+                    titel: 'Leg deine Schlafzeiten fest',
+                    text: 'Daraus rechne ich jeden Abend deine Bettzeit.',
+                    mitte: '–',
+                    unter: 'Bettzeit',
+                    knopf: ('Schlafzeiten festlegen', 's-zeiten'),
+                  )
+                : BJetzt(
+                    titel: 'Heute um $bettText ins Bett',
+                    text: 'Dann passt die Nacht zu deinem Wecker.',
+                    ring: schnitt == null ? null : schnitt / brauch,
+                    mitte: schnitt == null
+                        ? '–'
+                        : _HomePageState._komma(schnitt),
+                    unter: 'Std im Schnitt',
+                    knopf: ('Schlafzeiten', 's-zeiten'),
+                  ),
+            serie: serie(
+              serieNacht,
+              serieNacht.jetzt == 1 ? 'Nacht' : 'Nächte',
+              'in Folge 7 Stunden oder mehr',
+            ),
+            naechstes: letzte.isEmpty
+                ? const BNaechstes(
+                    titel: 'Erste Nacht',
+                    anteil: 0,
+                    text: 'Nach dem ersten Morgen siehst du hier deine Nächte.',
+                  )
+                : BNaechstes(
+                    titel: 'Woche ohne kurze Nacht',
+                    anteil: (letzte.length - kurz) / 7,
+                    text: kurz == 0
+                        ? '${letzte.length} von 7 Nächten lang genug.'
+                        : '$kurz ${kurz == 1 ? 'kurze Nacht' : 'kurze Nächte'} '
+                              'in den letzten 7.',
+                  ),
+            geschafft: geschafftListe,
+            mehr: [
+              const BMehr('Schlafwert im Detail', ziel: 's-wert'),
+              BMehr('Letzte Nächte', wert: '$kurz kurz', ziel: 's-naechte'),
+              BMehr('Schlafzeiten', wert: bettText, ziel: 's-zeiten'),
+              BMehr(
+                'Erkannt bei dir',
+                wert: muster.isEmpty ? null : '${muster.length}',
+                ziel: 's-muster',
+              ),
+            ],
           ),
           kacheln: [
             BKachel(
@@ -1048,6 +1209,52 @@ extension _Koerper on _HomePageState {
             ],
             knopf: ('Gute Nacht', 's-ruhe'),
             knopf2: (Icons.wb_sunny_outlined, 's-tag'),
+          ),
+          aufbau: BAufbau(
+            dafuer: dafuer,
+            jetzt: journal?.guteNacht != null
+                ? BJetzt(
+                    fertig: true,
+                    titel: stark,
+                    text: 'Heute ist alles erledigt. Gute Nacht.',
+                  )
+                : BJetzt(
+                    titel: 'Dein Abend-Journal',
+                    text:
+                        '3 Mal dankbar, 3 Mal morgen besser. Dann Gute Nacht.',
+                    ring: (dankbar + besser) / 6,
+                    mitte: '${dankbar + besser}/6',
+                    unter: 'Sterne',
+                    knopf: ('Gute Nacht', 's-ruhe'),
+                  ),
+            serie: serie(
+              serieAbend,
+              serieAbend.jetzt == 1 ? 'Abend' : 'Abende',
+              'in Folge mit Journal',
+            ),
+            naechstes: BNaechstes(
+              titel: '$marke Abende am Stück',
+              anteil: serieAbend.jetzt / marke,
+              text: serieAbend.jetzt == 0
+                  ? 'Heute Abend ist der erste.'
+                  : 'Noch ${marke - serieAbend.jetzt} '
+                        '${marke - serieAbend.jetzt == 1 ? 'Abend' : 'Abende'}.',
+            ),
+            geschafft: geschafftListe,
+            mehr: [
+              BMehr(
+                'Abendroutine',
+                wert: _routine.isEmpty ? null : 'ab ${_routine.first.zeit}',
+                ziel: 's-routine',
+              ),
+              BMehr(
+                'Abend-Journal',
+                wert: '${dankbar + besser}/6',
+                ziel: 's-journal',
+              ),
+              const BMehr('Dein Tag vom Coach', ziel: 's-tag'),
+              BMehr('Bettzeit', wert: bettText),
+            ],
           ),
           kacheln: [
             BKachel(

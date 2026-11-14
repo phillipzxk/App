@@ -127,6 +127,89 @@ class BBild {
   final (IconData, String)? knopf2;
 }
 
+/// The one thing that counts right now, on the light tile of a page in
+/// the new structure.
+class BJetzt {
+  const BJetzt({
+    required this.titel,
+    required this.text,
+    this.ring,
+    this.mitte = '',
+    this.unter = '',
+    this.knopf,
+    this.fertig = false,
+  });
+
+  final String titel, text;
+
+  /// How full the ring is, 0..1; null leaves it empty.
+  final double? ring;
+
+  /// Short value and tiny label inside the ring.
+  final String mitte, unter;
+
+  /// Label and tile of the one button.
+  final (String, String)? knopf;
+
+  /// Done for today: the tile cheers and gold sparks fly once.
+  final bool fertig;
+}
+
+/// "Deine Serie": how often in a row it worked.
+class BSerie {
+  const BSerie({
+    required this.zahl,
+    required this.einheit,
+    required this.text,
+    this.rekord = 0,
+  });
+  final int zahl, rekord;
+  final String einheit, text;
+}
+
+/// "Nächstes Ziel": a small goal within reach.
+class BNaechstes {
+  const BNaechstes({
+    required this.titel,
+    required this.anteil,
+    required this.text,
+  });
+  final String titel, text;
+  final double anteil;
+}
+
+/// One row of the calm "Mehr" list; a tap opens tile [ziel].
+class BMehr {
+  const BMehr(this.titel, {this.wert, this.ziel});
+  final String titel;
+  final String? wert, ziel;
+}
+
+/// The new structure of a picture page (vault Umsetzung/Schlaf und Mindset
+/// Aufbau, Phillip "passt" 2026-11-13), top to bottom: coach line with the
+/// user's reason, "Jetzt dran", streak and next goal, the picture, "Diese
+/// Woche geschafft", "Mehr".
+class BAufbau {
+  const BAufbau({
+    required this.jetzt,
+    this.dafuer,
+    this.serie,
+    this.naechstes,
+    this.geschafft = const [],
+    this.mehr = const [],
+  });
+
+  /// The user's own goal or reason, shown in gold under the coach line.
+  final String? dafuer;
+  final BJetzt jetzt;
+  final BSerie? serie;
+  final BNaechstes? naechstes;
+
+  /// What worked this week: text and day.
+  final List<(String, String)> geschafft;
+  final List<BMehr> mehr;
+}
+
 /// One of the four pages of an area (segmented bar + swipe).
 class BSeite {
   const BSeite({
@@ -135,7 +218,12 @@ class BSeite {
     required this.kacheln,
     this.zeigt,
     this.bild,
+    this.aufbau,
   });
+
+  /// The new structure around the picture; without it the picture page
+  /// keeps its old order.
+  final BAufbau? aufbau;
 
   final String name;
   final String coach;
@@ -542,6 +630,14 @@ class _BereichSeiteState extends State<BereichSeite>
   /// name with its ring, the gold page bar, then one picture per page.
   Widget _bildLayout(BuildContext context) {
     final seiten = t.seiten;
+    // Pages in the new structure get the lighter look of the sub pages
+    // ("3 klar"; Phillip 2026-11-14: "mehr den helleren modernen Stil").
+    if (seiten.any((s) => s.aufbau != null)) {
+      return Scaffold(
+        backgroundColor: const Color(0xFF231B14),
+        body: KlarHintergrund(child: _bildInhalt(context)),
+      );
+    }
     return Scaffold(
       backgroundColor: const Color(0xFF0F0C09),
       // Dark brown with a soft gold light from the top (draft "Bereiche
@@ -559,208 +655,210 @@ class _BereichSeiteState extends State<BereichSeite>
               stops: [0, .75],
             ),
           ),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: SafeArea(
-                bottom: false,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: _bildInhalt(context),
+        ),
+      ),
+    );
+  }
+
+  Widget _bildInhalt(BuildContext context) {
+    final seiten = t.seiten;
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 480),
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Row(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                      child: Row(
-                        children: [
-                          GestureDetector(
-                            key: const ValueKey('bereich-zurueck'),
-                            onTap: () => Navigator.of(context).maybePop(),
-                            child: Container(
-                              width: 36,
-                              height: 36,
-                              alignment: Alignment.center,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Color(0x1FFFECD2),
-                              ),
-                              child: const Icon(
-                                Icons.chevron_left,
-                                size: 22,
-                                color: Umbau.gold,
-                              ),
-                            ),
-                          ),
-                          if (widget.teile.length > 1) ...[
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _TeilPillen(
-                                teile: widget.teile,
-                                aktiv: _teil,
-                                onTap: _zuTeil,
-                              ),
-                            ),
-                          ],
-                          // One part only: where you came from, small
-                          // (draft "Bereiche als Bilder" 3).
-                          if (widget.teile.length == 1) ...[
-                            const SizedBox(width: 10),
-                            Text(
-                              widget.zurueck,
-                              style: const TextStyle(
-                                fontFamily: 'Figtree',
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                                color: Umbau.text,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(22, 14, 22, 0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  (widget.teile.length == 1
-                                          ? 'Bereich'
-                                          : widget.name)
-                                      .toUpperCase(),
-                                  style: Umbau.label.copyWith(
-                                    color: const Color(0xFFF1E6D2),
-                                  ),
-                                ),
-                                const SizedBox(height: 3),
-                                AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 300),
-                                  child: Text(
-                                    t.name,
-                                    key: ValueKey('titel-${t.id}'),
-                                    maxLines: 1,
-                                    style: const TextStyle(
-                                      fontFamily: 'Sora',
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 27,
-                                      height: 1.15,
-                                      letterSpacing: -0.6,
-                                      color: Umbau.text,
-                                    ),
-                                  ),
-                                ),
-                                // The score big in gold, counting up.
-                                GestureDetector(
-                                  key: const ValueKey('bereich-ring'),
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: widget.verlauf == null
-                                      ? null
-                                      : () => oeffneFeld(
-                                          context,
-                                          _ringKey,
-                                          widget.verlauf!,
-                                          widget.name,
-                                        ),
-                                  child: KeyedSubtree(
-                                    key: _ringKey,
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        ZaehlZahl(
-                                          key: ValueKey('ring-${t.id}'),
-                                          wert: (t.wert ?? 0).toDouble(),
-                                          leer: t.wert == null ? '–' : null,
-                                          style: const TextStyle(
-                                            fontFamily: 'Sora',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 60,
-                                            height: 1.05,
-                                            letterSpacing: -2.4,
-                                            color: Colors.white,
-                                            fontFeatures: [
-                                              FontFeature.tabularFigures(),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Flexible(
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                              bottom: 10,
-                                            ),
-                                            child: Text(
-                                              _trend(t),
-                                              style: const TextStyle(
-                                                fontFamily: 'Figtree',
-                                                fontSize: 12,
-                                                height: 1.3,
-                                                color: Color(0xFFE6D9C2),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (t.woche.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: _WochenBalken(
-                                key: ValueKey('woche-${t.id}'),
-                                woche: t.woche,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 380),
-                        child: _SegmentLeiste(
-                          key: ValueKey('seg-${t.id}'),
-                          namen: [for (final s in seiten) s.name],
-                          aktiv: _seite,
-                          onTap: _zuSeite,
+                    GestureDetector(
+                      key: const ValueKey('bereich-zurueck'),
+                      onTap: () => Navigator.of(context).maybePop(),
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        alignment: Alignment.center,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color(0x1FFFECD2),
+                        ),
+                        child: const Icon(
+                          Icons.chevron_left,
+                          size: 22,
+                          color: Umbau.gold,
                         ),
                       ),
                     ),
-                    Expanded(
-                      child: PageView(
-                        key: ValueKey('pages-${t.id}'),
-                        controller: _pages,
-                        onPageChanged: (i) => setState(() => _seite = i),
-                        children: [
-                          for (final (i, s) in seiten.indexed)
-                            _BildSeiteView(
-                              key: ValueKey('bild-${t.id}-$i'),
-                              seite: s,
-                              bereich: t.name,
-                              sichtbar: i == _seite,
-                              coachKey: i == _seite ? _coachKey : null,
-                              onCoach: widget.frag == null
-                                  ? null
-                                  : () => oeffneFeld(
-                                      context,
-                                      _coachKey,
-                                      widget.frag!(t),
-                                      t.name,
-                                    ),
-                            ),
-                        ],
+                    if (widget.teile.length > 1) ...[
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _TeilPillen(
+                          teile: widget.teile,
+                          aktiv: _teil,
+                          onTap: _zuTeil,
+                        ),
                       ),
-                    ),
+                    ],
+                    // One part only: where you came from, small
+                    // (draft "Bereiche als Bilder" 3).
+                    if (widget.teile.length == 1) ...[
+                      const SizedBox(width: 10),
+                      Text(
+                        widget.zurueck,
+                        style: const TextStyle(
+                          fontFamily: 'Figtree',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          color: Umbau.text,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
-            ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(22, 14, 22, 0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            (widget.teile.length == 1 ? 'Bereich' : widget.name)
+                                .toUpperCase(),
+                            style: Umbau.label.copyWith(
+                              color: const Color(0xFFF1E6D2),
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            child: Text(
+                              t.name,
+                              key: ValueKey('titel-${t.id}'),
+                              maxLines: 1,
+                              style: const TextStyle(
+                                fontFamily: 'Sora',
+                                fontWeight: FontWeight.w700,
+                                fontSize: 27,
+                                height: 1.15,
+                                letterSpacing: -0.6,
+                                color: Umbau.text,
+                              ),
+                            ),
+                          ),
+                          // The score big in gold, counting up.
+                          GestureDetector(
+                            key: const ValueKey('bereich-ring'),
+                            behavior: HitTestBehavior.opaque,
+                            onTap: widget.verlauf == null
+                                ? null
+                                : () => oeffneFeld(
+                                    context,
+                                    _ringKey,
+                                    widget.verlauf!,
+                                    widget.name,
+                                  ),
+                            child: KeyedSubtree(
+                              key: _ringKey,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  ZaehlZahl(
+                                    key: ValueKey('ring-${t.id}'),
+                                    wert: (t.wert ?? 0).toDouble(),
+                                    leer: t.wert == null ? '–' : null,
+                                    style: const TextStyle(
+                                      fontFamily: 'Sora',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 60,
+                                      height: 1.05,
+                                      letterSpacing: -2.4,
+                                      color: Colors.white,
+                                      fontFeatures: [
+                                        FontFeature.tabularFigures(),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Flexible(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 10,
+                                      ),
+                                      child: Text(
+                                        _trend(t),
+                                        style: const TextStyle(
+                                          fontFamily: 'Figtree',
+                                          fontSize: 12,
+                                          height: 1.3,
+                                          color: Color(0xFFE6D9C2),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (t.woche.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: _WochenBalken(
+                          key: ValueKey('woche-${t.id}'),
+                          woche: t.woche,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 380),
+                  child: _SegmentLeiste(
+                    key: ValueKey('seg-${t.id}'),
+                    namen: [for (final s in seiten) s.name],
+                    aktiv: _seite,
+                    onTap: _zuSeite,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: PageView(
+                  key: ValueKey('pages-${t.id}'),
+                  controller: _pages,
+                  onPageChanged: (i) => setState(() => _seite = i),
+                  children: [
+                    for (final (i, s) in seiten.indexed)
+                      _BildSeiteView(
+                        key: ValueKey('bild-${t.id}-$i'),
+                        seite: s,
+                        bereich: t.name,
+                        sichtbar: i == _seite,
+                        coachKey: i == _seite ? _coachKey : null,
+                        onCoach: widget.frag == null
+                            ? null
+                            : () => oeffneFeld(
+                                context,
+                                _coachKey,
+                                widget.frag!(t),
+                                t.name,
+                              ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1943,7 +2041,18 @@ class _BildSeiteViewState extends State<_BildSeiteView>
     if (bewegungAn && widget.sichtbar && !old.sichtbar) {
       _ein.forward(from: 0);
     }
+    final fertig = widget.seite.aufbau?.jetzt.fertig ?? false;
+    final vorher = old.seite.aufbau?.jetzt.fertig ?? false;
+    if (fertig && !vorher && widget.sichtbar) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final box = _heldKey.currentContext?.findRenderObject();
+        if (!mounted || box is! RenderBox || !box.attached) return;
+        funkenBei(context, box.localToGlobal(box.size.center(Offset.zero)));
+      });
+    }
   }
+
+  final _heldKey = GlobalKey();
 
   @override
   void dispose() {
@@ -1973,80 +2082,14 @@ class _BildSeiteViewState extends State<_BildSeiteView>
   @override
   Widget build(BuildContext context) {
     final s = widget.seite;
+    if (s.aufbau case final a?) return _aufbau(a);
     final (label, ziel) = b.knopf;
     return ListView(
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 24),
       children: [
-        GestureDetector(
-          key: widget.sichtbar ? const ValueKey('bereich-coach') : null,
-          onTap: widget.onCoach,
-          child: KeyedSubtree(
-            key: widget.coachKey,
-            child: Row(
-              children: [
-                // The coach stands free, like on Heute (Umbau 2026-11-12).
-                Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: Umbau.grad,
-                  ),
-                  child: const ClipOval(
-                    child: Image(
-                      image: AssetImage('assets/images/coach.jpg'),
-                      width: 38,
-                      height: 38,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    s.coach,
-                    style: const TextStyle(
-                      fontFamily: 'Figtree',
-                      fontSize: 14.5,
-                      height: 1.4,
-                      color: Color(0xFFF1E6D2),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        _coachZeile(),
         const SizedBox(height: 12),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(30),
-          child: DecoratedBox(
-            // A calm glass tile like on Heute (Umbau 2026-11-12).
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30),
-              color: Umbau.glas,
-              border: Border.all(color: Glas.edge),
-            ),
-            child: DecoratedBox(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(0, -.2),
-                  radius: .75,
-                  colors: [Color(0x17C9A25C), Color(0x00C9A25C)],
-                ),
-              ),
-              child: AspectRatio(
-                aspectRatio: bildBreite / bildHoehe,
-                child: FittedBox(
-                  child: AnimatedBuilder(
-                    animation: Listenable.merge([_ein, _zeit]),
-                    builder: (context, _) =>
-                        b.bau(_tipp, _ein.value, _zeit.value * 60),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+        _bildKachel(),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
@@ -2122,6 +2165,465 @@ class _BildSeiteViewState extends State<_BildSeiteView>
     );
   }
 
+  Widget _coachZeile() {
+    final s = widget.seite;
+    return GestureDetector(
+      key: widget.sichtbar ? const ValueKey('bereich-coach') : null,
+      onTap: widget.onCoach,
+      child: KeyedSubtree(
+        key: widget.coachKey,
+        child: Row(
+          children: [
+            // The coach stands free, like on Heute (Umbau 2026-11-12).
+            Container(
+              padding: const EdgeInsets.all(2),
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: Umbau.grad,
+              ),
+              child: const ClipOval(
+                child: Image(
+                  image: AssetImage('assets/images/coach.jpg'),
+                  width: 38,
+                  height: 38,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    s.coach,
+                    style: const TextStyle(
+                      fontFamily: 'Figtree',
+                      fontSize: 14.5,
+                      height: 1.4,
+                      color: Color(0xFFF1E6D2),
+                    ),
+                  ),
+                  if (s.aufbau?.dafuer case final d?) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Dafür: $d',
+                      key: const ValueKey('dafuer'),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: 'Figtree',
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12.5,
+                        height: 1.35,
+                        color: Glas.label,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _bildKachel() => ClipRRect(
+    borderRadius: BorderRadius.circular(30),
+    child: DecoratedBox(
+      // A calm glass tile like on Heute (Umbau 2026-11-12).
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        color: widget.seite.aufbau != null ? Klar.glas : Umbau.glas,
+        border: widget.seite.aufbau != null
+            ? null
+            : Border.all(color: Glas.edge),
+      ),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(0, -.2),
+            radius: .75,
+            colors: [Color(0x17C9A25C), Color(0x00C9A25C)],
+          ),
+        ),
+        child: AspectRatio(
+          aspectRatio: bildBreite / bildHoehe,
+          child: FittedBox(
+            child: AnimatedBuilder(
+              animation: Listenable.merge([_ein, _zeit]),
+              builder: (context, _) =>
+                  b.bau(_tipp, _ein.value, _zeit.value * 60),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  Widget _glas({Key? key, required Widget child}) => Container(
+    key: key,
+    padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+    decoration: BoxDecoration(
+      color: Klar.glas,
+      borderRadius: BorderRadius.circular(26),
+    ),
+    child: child,
+  );
+
+  /// The new structure: one thing first, motivation next, the rest calm.
+  Widget _aufbau(BAufbau a) {
+    final j = a.jetzt;
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 24),
+      children: [
+        _coachZeile(),
+        const SizedBox(height: 12),
+        RingKachel(
+          key: const ValueKey('jetzt-dran'),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          j.fertig ? 'GESCHAFFT' : 'JETZT DRAN',
+                          style: Umbau.label.copyWith(color: Umbau.tinteWeich),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          j.titel,
+                          style: const TextStyle(
+                            fontFamily: 'Sora',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 21,
+                            height: 1.15,
+                            letterSpacing: -.3,
+                            color: Umbau.tinte,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          j.text,
+                          style: const TextStyle(
+                            fontFamily: 'Figtree',
+                            fontSize: 13.5,
+                            height: 1.4,
+                            color: Umbau.tinteWeich,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  KeyedSubtree(
+                    key: _heldKey,
+                    child: FuellRing(
+                      wert: j.fertig ? 1 : j.ring ?? 0,
+                      size: 84,
+                      dunkel: true,
+                      child: j.fertig
+                          ? const Icon(
+                              Icons.check_rounded,
+                              size: 34,
+                              color: Umbau.tinte,
+                            )
+                          : Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  j.mitte,
+                                  maxLines: 1,
+                                  style: const TextStyle(
+                                    fontFamily: 'Sora',
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 19,
+                                    height: 1.1,
+                                    color: Umbau.tinte,
+                                  ),
+                                ),
+                                if (j.unter.isNotEmpty)
+                                  Text(
+                                    j.unter.toUpperCase(),
+                                    maxLines: 1,
+                                    style: const TextStyle(
+                                      fontFamily: 'Sora',
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 7,
+                                      letterSpacing: .8,
+                                      color: Umbau.tinteWeich,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+              if (j.knopf case (final label, final ziel)) ...[
+                const SizedBox(height: 16),
+                _tipp(
+                  ziel,
+                  art: 'knopf',
+                  DunkelKnopf(label: label, onPressed: null),
+                ),
+              ],
+            ],
+          ),
+        ),
+        if (a.serie != null || a.naechstes != null) ...[
+          const SizedBox(height: 12),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (a.serie case final x?) Expanded(child: _serie(x)),
+                if (a.serie != null && a.naechstes != null)
+                  const SizedBox(width: 12),
+                if (a.naechstes case final x?) Expanded(child: _naechstes(x)),
+              ],
+            ),
+          ),
+        ],
+        const SizedBox(height: 12),
+        _bildKachel(),
+        const SizedBox(height: 12),
+        _glas(
+          key: const ValueKey('geschafft'),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('DIESE WOCHE GESCHAFFT', style: Umbau.label),
+              const SizedBox(height: 6),
+              if (a.geschafft.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    'Noch nichts diese Woche. Der erste Haken kommt mit '
+                    'deinem nächsten Eintrag.',
+                    style: Glas.tSoft.copyWith(fontSize: 13),
+                  ),
+                ),
+              for (final (i, g) in a.geschafft.indexed)
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  decoration: BoxDecoration(
+                    border: i == 0
+                        ? null
+                        : const Border(top: BorderSide(color: Umbau.linie)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 22,
+                        height: 22,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: Umbau.grad,
+                        ),
+                        child: const Icon(
+                          Icons.check_rounded,
+                          size: 15,
+                          color: Umbau.tinte,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          g.$1,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Glas.tText.copyWith(fontSize: 14),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(g.$2, style: Glas.tSoft.copyWith(fontSize: 12)),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+        if (a.mehr.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          _glas(
+            key: const ValueKey('mehr'),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('MEHR', style: Umbau.label),
+                const SizedBox(height: 4),
+                for (final (i, m) in a.mehr.indexed) _mehrZeile(m, i == 0),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _mehrZeile(BMehr m, bool erste) {
+    final zeile = Container(
+      padding: const EdgeInsets.symmetric(vertical: 13),
+      decoration: BoxDecoration(
+        border: erste
+            ? null
+            : const Border(top: BorderSide(color: Umbau.linie)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              m.titel,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Glas.tText.copyWith(fontSize: 14),
+            ),
+          ),
+          if (m.wert ?? (m.ziel == null ? '–' : null) case final w?) ...[
+            const SizedBox(width: 8),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 170),
+              child: Text(
+                w,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Glas.tSoft.copyWith(fontSize: 12.5),
+              ),
+            ),
+          ],
+          if (m.ziel != null) ...[
+            const SizedBox(width: 6),
+            Text('›', style: Glas.tSoft.copyWith(fontSize: 15)),
+          ],
+        ],
+      ),
+    );
+    return m.ziel == null ? zeile : _tipp(m.ziel!, art: 'mehr', zeile);
+  }
+
+  Widget _serie(BSerie x) => _glas(
+    key: const ValueKey('serie'),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: Text('DEINE SERIE', style: Umbau.label)),
+            SizedBox(
+              width: 30,
+              height: 40,
+              child: AnimatedBuilder(
+                animation: _ein,
+                builder: (context, _) => CustomPaint(
+                  painter: _TriebMaler(
+                    math.min(x.zahl, 6),
+                    Curves.easeOutCubic.transform(_ein.value),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        Transform.translate(
+          offset: const Offset(0, -10),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              _ZaehltHoch(
+                '${x.zahl}',
+                style: Glas.tBig.copyWith(fontSize: 30, height: 1),
+              ),
+              const SizedBox(width: 5),
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 3),
+                  child: Text(
+                    x.einheit,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Glas.tText.copyWith(fontSize: 13),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Text(x.text, style: Glas.tSoft.copyWith(fontSize: 12.5, height: 1.35)),
+        if (x.rekord > 0) ...[
+          const SizedBox(height: 6),
+          Text(
+            'Rekord ${x.rekord}',
+            style: Glas.tSoft.copyWith(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              color: Glas.label,
+            ),
+          ),
+        ],
+      ],
+    ),
+  );
+
+  Widget _naechstes(BNaechstes x) => _glas(
+    key: const ValueKey('naechstes-ziel'),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('NÄCHSTES ZIEL', style: Umbau.label),
+        const SizedBox(height: 10),
+        Text(
+          x.titel,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontFamily: 'Sora',
+            fontWeight: FontWeight.w700,
+            fontSize: 15.5,
+            height: 1.2,
+            color: Glas.text,
+          ),
+        ),
+        const SizedBox(height: 10),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(3),
+          child: SizedBox(
+            height: 5,
+            child: AnimatedBuilder(
+              animation: _ein,
+              builder: (context, _) => Stack(
+                children: [
+                  const Positioned.fill(
+                    child: ColoredBox(color: Color(0x24FFF5E6)),
+                  ),
+                  FractionallySizedBox(
+                    widthFactor:
+                        x.anteil.clamp(0.0, 1.0) *
+                        Curves.easeOutCubic.transform(_ein.value),
+                    child: const DecoratedBox(
+                      decoration: BoxDecoration(gradient: Umbau.grad),
+                      child: SizedBox.expand(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(x.text, style: Glas.tSoft.copyWith(fontSize: 12.5, height: 1.35)),
+      ],
+    ),
+  );
+
   Widget _tippZahl(BZahl z, bool erste) {
     final inhalt = Column(
       mainAxisSize: MainAxisSize.min,
@@ -2157,6 +2659,44 @@ class _BildSeiteViewState extends State<_BildSeiteView>
     );
     return z.ziel == null ? inhalt : _tipp(z.ziel!, art: 'zahl', inhalt);
   }
+}
+
+/// The small sprout of "Deine Serie": one leaf per day, six at most.
+class _TriebMaler extends CustomPainter {
+  _TriebMaler(this.blaetter, this.v);
+  final int blaetter;
+  final double v;
+
+  @override
+  void paint(Canvas c, Size s) {
+    final gold = Paint()
+      ..shader = Umbau.grad.createShader(Offset.zero & s)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6
+      ..strokeCap = StrokeCap.round;
+    final x = s.width / 2;
+    final hoehe = (s.height - 4) * (.35 + .65 * math.max(blaetter, 1) / 6) * v;
+    c.drawLine(Offset(x, s.height), Offset(x, s.height - hoehe), gold);
+    final blatt = Paint()..shader = Umbau.grad.createShader(Offset.zero & s);
+    for (var i = 0; i < blaetter; i++) {
+      final y = s.height - 6 - i * (s.height - 12) / 6;
+      if (s.height - y > hoehe) break;
+      final links = i.isEven;
+      final p = Path()
+        ..moveTo(x, y)
+        ..quadraticBezierTo(
+          x + (links ? -12 : 12),
+          y - 2,
+          x + (links ? -11 : 11),
+          y - 11,
+        )
+        ..quadraticBezierTo(x + (links ? -2 : 2), y - 9, x, y);
+      c.drawPath(p, blatt);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_TriebMaler old) => old.blaetter != blaetter || old.v != v;
 }
 
 /// A part of a picture page that opens a tile's page, grown from itself.
