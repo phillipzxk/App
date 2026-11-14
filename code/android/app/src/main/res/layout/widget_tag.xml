@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/wurzel"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="horizontal"
+    android:padding="14dp" android:background="@drawable/widget_dunkel" android:baselineAligned="false">
+    <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+        android:orientation="vertical" android:layout_marginEnd="14dp">
+    <TextView android:id="@+id/kicker" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Dein Coach" android:textAllCaps="true" android:letterSpacing="0.12" android:textSize="9sp"
+        android:fontFamily="@font/figtree_semibold" android:textColor="#E6C98F" android:maxLines="1"/>
+        <TextView android:id="@+id/coach" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="6dp" android:textSize="11.5sp" android:fontFamily="@font/figtree_regular"
+            android:textColor="#F6ECDB" android:maxLines="4" android:ellipsize="end"/>
+        <TextView android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical">
+        <FrameLayout android:layout_width="40dp" android:layout_height="40dp">
+            <ProgressBar android:id="@+id/ring" style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent" android:layout_height="match_parent"
+                android:max="100" android:progress="0" android:progressDrawable="@drawable/widget_ring_dunkel"/>
+            <TextView android:id="@+id/ring_text" android:layout_width="match_parent" android:layout_height="match_parent"
+                android:gravity="center" android:textSize="11sp" android:fontFamily="@font/sora_bold"
+                android:textColor="#E6C98F" android:text="–"/>
+        </FrameLayout>
+            <TextView android:id="@+id/schnitt" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginStart="8dp" android:textSize="10.5sp" android:fontFamily="@font/figtree_regular"
+                android:textColor="#CCF6ECDB" android:text="Dein Schnitt"/>
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+        android:orientation="vertical">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Heute dran" android:textAllCaps="true" android:letterSpacing="0.12" android:textSize="9sp"
+            android:fontFamily="@font/figtree_semibold" android:textColor="#E6C98F"/>
+        <TextView android:id="@+id/leer" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="6dp" android:textSize="11.5sp" android:fontFamily="@font/figtree_regular"
+            android:textColor="#B3F6ECDB" android:text="Öffne Groundset, dann steht hier dein Tag."/>
+        <LinearLayout android:id="@+id/zeile1" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="5dp">
+            <TextView android:id="@+id/zeile1_titel" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:textSize="11.5sp" android:fontFamily="@font/figtree_regular" android:textColor="#F6ECDB" android:maxLines="1" android:ellipsize="end"/>
+            <TextView android:id="@+id/zeile1_wert" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textSize="11.5sp" android:fontFamily="@font/figtree_semibold" android:textColor="#E6C98F" android:maxLines="1"/>
+        </LinearLayout>
+        <LinearLayout android:id="@+id/zeile2" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="5dp">
+            <TextView android:id="@+id/zeile2_titel" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:textSize="11.5sp" android:fontFamily="@font/figtree_regular" android:textColor="#F6ECDB" android:maxLines="1" android:ellipsize="end"/>
+            <TextView android:id="@+id/zeile2_wert" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textSize="11.5sp" android:fontFamily="@font/figtree_semibold" android:textColor="#E6C98F" android:maxLines="1"/>
+        </LinearLayout>
+        <LinearLayout android:id="@+id/zeile3" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="5dp">
+            <TextView android:id="@+id/zeile3_titel" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:textSize="11.5sp" android:fontFamily="@font/figtree_regular" android:textColor="#F6ECDB" android:maxLines="1" android:ellipsize="end"/>
+            <TextView android:id="@+id/zeile3_wert" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textSize="11.5sp" android:fontFamily="@font/figtree_semibold" android:textColor="#E6C98F" android:maxLines="1"/>
+        </LinearLayout>
+        <LinearLayout android:id="@+id/zeile4" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="5dp">
+            <TextView android:id="@+id/zeile4_titel" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:textSize="11.5sp" android:fontFamily="@font/figtree_regular" android:textColor="#F6ECDB" android:maxLines="1" android:ellipsize="end"/>
+            <TextView android:id="@+id/zeile4_wert" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textSize="11.5sp" android:fontFamily="@font/figtree_semibold" android:textColor="#E6C98F" android:maxLines="1"/>
+        </LinearLayout>
+        <LinearLayout android:id="@+id/zeile5" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="5dp">
+            <TextView android:id="@+id/zeile5_titel" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:textSize="11.5sp" android:fontFamily="@font/figtree_regular" android:textColor="#F6ECDB" android:maxLines="1" android:ellipsize="end"/>
+            <TextView android:id="@+id/zeile5_wert" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textSize="11.5sp" android:fontFamily="@font/figtree_semibold" android:textColor="#E6C98F" android:maxLines="1"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/wurzel"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"
+    android:padding="14dp" android:background="@drawable/widget_dunkel">
+    <TextView android:id="@+id/kicker" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Fokus der Woche" android:textAllCaps="true" android:letterSpacing="0.12" android:textSize="9sp"
+        android:fontFamily="@font/figtree_semibold" android:textColor="#E6C98F" android:maxLines="1"/>
+    <TextView android:id="@+id/titel" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="3dp" android:textSize="14.5sp" android:fontFamily="@font/sora_bold"
+        android:textColor="#F6ECDB" android:maxLines="3" android:ellipsize="end" android:text="Kein Fokus gewählt"/>
+    <LinearLayout android:id="@+id/striche" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:layout_marginTop="8dp">
+        <ImageView android:id="@+id/strich1" android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1"
+            android:layout_marginEnd="4dp" android:scaleType="fitXY" android:src="@drawable/widget_strich_aus"/>
+        <ImageView android:id="@+id/strich2" android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1"
+            android:layout_marginEnd="4dp" android:scaleType="fitXY" android:src="@drawable/widget_strich_aus"/>
+        <ImageView android:id="@+id/strich3" android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1"
+            android:layout_marginEnd="4dp" android:scaleType="fitXY" android:src="@drawable/widget_strich_aus"/>
+        <ImageView android:id="@+id/strich4" android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1"
+            android:layout_marginEnd="4dp" android:scaleType="fitXY" android:src="@drawable/widget_strich_aus"/>
+        <ImageView android:id="@+id/strich5" android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1"
+            android:layout_marginEnd="4dp" android:scaleType="fitXY" android:src="@drawable/widget_strich_aus"/>
+        <ImageView android:id="@+id/strich6" android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1"
+            android:layout_marginEnd="4dp" android:scaleType="fitXY" android:src="@drawable/widget_strich_aus"/>
+        <ImageView android:id="@+id/strich7" android:layout_width="0dp" android:layout_height="4dp" android:layout_weight="1"
+            android:layout_marginEnd="0dp" android:scaleType="fitXY" android:src="@drawable/widget_strich_aus"/>
+    </LinearLayout>
+    <TextView android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
+    <TextView android:id="@+id/knopf" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:background="@drawable/widget_pille_hell" android:paddingStart="11dp" android:paddingEnd="11dp" android:paddingTop="6dp" android:paddingBottom="6dp"
+        android:textSize="11sp" android:fontFamily="@font/figtree_semibold" android:textColor="#2A1F14" android:text="Heute geschafft"/>
+</LinearLayout>
