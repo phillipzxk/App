@@ -207,6 +207,9 @@ class BAufbau {
 
   /// What worked this week: text and day.
   final List<(String, String)> geschafft;
+
+  /// Left empty, the list is built from the numbers under the picture
+  /// and the page's tiles.
   final List<BMehr> mehr;
 }
 
@@ -2276,6 +2279,7 @@ class _BildSeiteViewState extends State<_BildSeiteView>
   /// The new structure: one thing first, motivation next, the rest calm.
   Widget _aufbau(BAufbau a) {
     final j = a.jetzt;
+    final mehr = a.mehr.isNotEmpty ? a.mehr : _mehrAuto(a);
     return ListView(
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 24),
       children: [
@@ -2338,15 +2342,23 @@ class _BildSeiteViewState extends State<_BildSeiteView>
                           : Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
-                                  j.mitte,
-                                  maxLines: 1,
-                                  style: const TextStyle(
-                                    fontFamily: 'Sora',
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 19,
-                                    height: 1.1,
-                                    color: Umbau.tinte,
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                  ),
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      j.mitte,
+                                      maxLines: 1,
+                                      style: const TextStyle(
+                                        fontFamily: 'Sora',
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 19,
+                                        height: 1.1,
+                                        color: Umbau.tinte,
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 if (j.unter.isNotEmpty)
@@ -2451,7 +2463,7 @@ class _BildSeiteViewState extends State<_BildSeiteView>
             ],
           ),
         ),
-        if (a.mehr.isNotEmpty) ...[
+        if (mehr.isNotEmpty) ...[
           const SizedBox(height: 12),
           _glas(
             key: const ValueKey('mehr'),
@@ -2460,7 +2472,15 @@ class _BildSeiteViewState extends State<_BildSeiteView>
               children: [
                 Text('MEHR', style: Umbau.label),
                 const SizedBox(height: 4),
-                for (final (i, m) in a.mehr.indexed) _mehrZeile(m, i == 0),
+                for (final (i, m) in mehr.indexed)
+                  _mehrZeile(
+                    m,
+                    i == 0,
+                    // A tile listed twice needs its own key.
+                    mehr.take(i).any((x) => x.ziel == m.ziel)
+                        ? 'mehr$i'
+                        : 'mehr',
+                  ),
               ],
             ),
           ),
@@ -2469,7 +2489,30 @@ class _BildSeiteViewState extends State<_BildSeiteView>
     );
   }
 
-  Widget _mehrZeile(BMehr m, bool erste) {
+  /// "Mehr" from what the page already has: the numbers under the picture
+  /// and every tile that is not reachable otherwise.
+  List<BMehr> _mehrAuto(BAufbau a) {
+    final zahlen = [
+      for (final z in b.zahlen)
+        BMehr(
+          z.label.isEmpty
+              ? z.label
+              : z.label[0].toUpperCase() + z.label.substring(1),
+          wert: z.wert,
+          ziel: z.ziel,
+        ),
+    ];
+    final da = {for (final z in b.zahlen) ?z.ziel, ?a.jetzt.knopf?.$2};
+    final titel = <String>{};
+    return [
+      ...zahlen,
+      for (final k in widget.seite.kacheln)
+        if (!da.contains(k.id) && titel.add(k.titel))
+          BMehr(k.titel, ziel: k.id),
+    ];
+  }
+
+  Widget _mehrZeile(BMehr m, bool erste, [String art = 'mehr']) {
     final zeile = Container(
       padding: const EdgeInsets.symmetric(vertical: 13),
       decoration: BoxDecoration(
@@ -2506,7 +2549,7 @@ class _BildSeiteViewState extends State<_BildSeiteView>
         ],
       ),
     );
-    return m.ziel == null ? zeile : _tipp(m.ziel!, art: 'mehr', zeile);
+    return m.ziel == null ? zeile : _tipp(m.ziel!, art: art, zeile);
   }
 
   Widget _serie(BSerie x) => _glas(
