@@ -306,7 +306,14 @@ void main() {
       await tippe(tester, 'wecker-schlummern-an');
       expect(feed.schlaf.wecker.aufgabe, 'schritte');
       expect(feed.schlaf.wecker.klang, 'Regen');
+      expect(feed.schlaf.wecker.tonDatei, isNull);
       expect(feed.schlaf.wecker.schlummern, isFalse);
+      await tippe(tester, 'klang-Vollgas');
+      expect(feed.schlaf.wecker.tonDatei, 'vollgas.caf');
+      await tippe(tester, 'klang-Kampfgeist');
+      expect(feed.schlaf.wecker.tonDatei, 'kampfgeist.caf');
+      await tippe(tester, 'klang-Aufstehen');
+      expect(feed.schlaf.wecker.tonDatei, 'aufstehen.caf');
 
       await tippe(tester, 'schritte-20');
       expect(feed.schlaf.wecker.schritte, 20);

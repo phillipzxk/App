@@ -33,7 +33,7 @@ Entwurf 1: https://claude.ai/artifact/RXnj4ewgZMFePxvPxsJrE5 (ein Morgen: Sonnen
 ## Noch offen
 
 - Echt testen geht erst auf Phillips iPhone (Apple-Entwicklerkonto, TestFlight).
-- Eigene Weckertöne (Vögel, Gong, Regen, Gitarre) als Tondateien; bis dahin der Standard-Weckton von Apple.
+- Die vier ruhigen Töne (Vögel, Gong, Regen, Leise Gitarre) haben noch keine Tondatei; bei ihnen klingelt der Standard-Weckton von Apple.
 
 ## Schritte echt zählen (2026-11-04)
 
@@ -53,3 +53,15 @@ Phillip hat den Entwurf https://claude.ai/artifact/AFZQvGVQsiGgvKPZZC9umn am 202
 - `code/lib/schlaf/morgen_szene.dart` für die Szene (auch auf dem Bildschirm „Du bist wach“)
 - `GroundsetSchritte` in `AppDelegate.swift` (EventChannel `groundset/schritte`)
 - `NSMotionUsageDescription` in `Info.plist`
+
+## Motivierende Wecktöne (2026-11-15)
+
+Phillip wollte motivierendere Wecktöne. Die erste Runde (Aufbruch, Trommeln, Fanfare, Sonnenaufgang, Puls) war ihm zu zahm („wecktöne mehr motivation“). Aus der zweiten Runde hat er drei gewählt: **Vollgas**, **Kampfgeist** und **Aufstehen**. Hörproben: https://claude.ai/artifact/51avrVGk7YuVFv4LCbViFu
+
+- Alle drei sind selbst erzeugt (keine fremden Rechte), gut 20 Sekunden lang und nach drei bis vier Sekunden voll da.
+- Sie stehen beim Wecker unter „Klang“ vorne, die vier ruhigen Töne bleiben dahinter wählbar.
+- Auf dem iPhone spielt der echte Wecker den gewählten Ton, auch beim Schlummern und beim Nachklingeln.
+
+Stand im Code: Tondateien in `code/ios/Runner/Toene/` (vollgas.caf, kampfgeist.caf, aufstehen.caf), `Wecker.tonDatei` in `code/lib/schlaf/schlaf_data.dart`, `weckerStellen(ton:)` in `code/lib/erinnerungen/erinnerung_dienst.dart`, `weckerTon()` in `code/ios/Runner/AppDelegate.swift`.
+
+Noch offen: auf Android bleibt der Wecker eine Mitteilung mit dem normalen Ton. In der Vorschau im Browser ist kein Ton zu hören.
