@@ -83,7 +83,7 @@ class WeckerSeite extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text('Klang', style: tTitel.copyWith(fontSize: 13.5)),
-                const Text('wird langsam lauter', style: tSoft),
+                const Text('baut sich in wenigen Sekunden auf', style: tSoft),
                 const SizedBox(height: 6),
                 Wrap(
                   spacing: 6,

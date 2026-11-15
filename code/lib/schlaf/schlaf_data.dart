@@ -146,7 +146,24 @@ class Wecker {
 
   static const schritteWahl = [20, 30, 50];
 
-  static const klaenge = ['Vögel', 'Gong', 'Regen', 'Leise Gitarre'];
+  static const klaenge = [
+    'Vollgas',
+    'Kampfgeist',
+    'Aufstehen',
+    'Vögel',
+    'Gong',
+    'Regen',
+    'Leise Gitarre',
+  ];
+
+  /// The sound file in the iPhone app for this sound; null means the
+  /// iPhone's own alarm tone (the calm ones have no file yet).
+  String? get tonDatei => switch (klang) {
+    'Vollgas' => 'vollgas.caf',
+    'Kampfgeist' => 'kampfgeist.caf',
+    'Aufstehen' => 'aufstehen.caf',
+    _ => null,
+  };
 
   Wecker copyWith({
     bool? sonne,

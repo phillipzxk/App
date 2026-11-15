@@ -49,7 +49,11 @@ abstract class ErinnerungDienst {
 
   /// Sets the real alarm (iOS 26, AlarmKit) for [zeit]; null removes it.
   /// False where there is no real alarm: then the alarm stays a reminder.
-  Future<bool> weckerStellen(DateTime? zeit, {required bool schlummern});
+  Future<bool> weckerStellen(
+    DateTime? zeit, {
+    required bool schlummern,
+    String? ton,
+  });
 
   /// Since when the alarm's task is waiting ("Aufstehen" was tapped), or
   /// null. Older than 45 minutes counts as done.
@@ -110,11 +114,17 @@ class StilleErinnerungen implements ErinnerungDienst {
 
   /// For tests: where the alarm was set, and the waiting task.
   DateTime? wecker;
+  String? weckerTon;
   DateTime? aufgabeSeit;
 
   @override
-  Future<bool> weckerStellen(DateTime? zeit, {required bool schlummern}) async {
+  Future<bool> weckerStellen(
+    DateTime? zeit, {
+    required bool schlummern,
+    String? ton,
+  }) async {
     wecker = zeit;
+    weckerTon = ton;
     return false;
   }
 
@@ -292,9 +302,21 @@ class HandyErinnerungen implements ErinnerungDienst {
   }
 
   @override
-  Future<bool> weckerStellen(DateTime? zeit, {required bool schlummern}) async {
+  Future<bool> weckerStellen(
+    DateTime? zeit, {
+    required bool schlummern,
+    String? ton,
+  }) async {
     if (!await _weckerDa()) return false;
     try {
+      // The ringing after "5 Min" and after an undone task is set in Swift
+      // (AppDelegate.swift) and reads the sound from here.
+      final p = await SharedPreferences.getInstance();
+      if (ton == null) {
+        await p.remove('wecker_ton');
+      } else {
+        await p.setString('wecker_ton', ton);
+      }
       if (zeit == null) {
         for (final id in [WeckerIds.wecker, WeckerIds.schlummern]) {
           try {
@@ -310,6 +332,7 @@ class HandyErinnerungen implements ErinnerungDienst {
         schedule: AlarmSchedule.fixed(zeit),
         tint: _gold,
         metadataKind: 'wecker',
+        sound: ton,
         stopIntent: 'aufstehen',
         secondaryIntent: schlummern ? 'schlummern' : null,
         presentation: AlarmPresentation(
@@ -337,6 +360,7 @@ class HandyErinnerungen implements ErinnerungDienst {
         schedule: AlarmSchedule.fixed(zeit.add(const Duration(minutes: 10))),
         tint: _gold,
         metadataKind: 'wecker',
+        sound: ton,
         stopIntent: 'aufstehen',
         presentation: const AlarmPresentation(
           alert: AlarmAlert(

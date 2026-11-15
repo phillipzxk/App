@@ -1,3 +1,4 @@
+import ActivityKit
 import AlarmKit
 import AppIntents
 import CoreMotion
@@ -64,6 +65,15 @@ private func aufgabeMerken() {
 @available(iOS 26.0, *)
 private let weckerGold = Color(red: 0.88, green: 0.75, blue: 0.49)
 
+/// The sound chosen in the app (written by Dart), else the iPhone's own.
+@available(iOS 26.0, *)
+private func weckerTon() -> AlertConfiguration.AlertSound {
+  if let ton = UserDefaults.standard.string(forKey: "flutter.wecker_ton"), !ton.isEmpty {
+    return .named(ton)
+  }
+  return .default
+}
+
 /// One ringing without a snooze button, [in] seconds from now.
 @available(iOS 26.0, *)
 private func klingeln(id: UUID, in sekunden: TimeInterval, titel: String, knopf: String) async {
@@ -83,7 +93,7 @@ private func klingeln(id: UUID, in sekunden: TimeInterval, titel: String, knopf:
     attributes: attributes,
     stopIntent: AufgabeIntent(),
     secondaryIntent: nil,
-    sound: .default)
+    sound: weckerTon())
   _ = try? await AlarmManager.shared.schedule(id: id, configuration: config)
 }
 

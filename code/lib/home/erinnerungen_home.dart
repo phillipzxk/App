@@ -61,6 +61,7 @@ extension _Erinnerungen on _HomePageState {
     final echt = await d.weckerStellen(
       wecker.isEmpty ? null : wecker.first.zeit,
       schlummern: _schlaf.d.wecker.schlummern,
+      ton: _schlaf.d.wecker.tonDatei,
     );
     if (echt) {
       liste = [
