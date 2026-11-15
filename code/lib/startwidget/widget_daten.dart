@@ -1,4 +1,5 @@
-import '../checkin/checkin.dart' show dayKey;
+import '../bereiche/aufbau_logik.dart';
+import '../checkin/checkin.dart';
 import '../feed/fokus.dart';
 import '../home/sonnenbogen.dart' show BogenPunkt;
 
@@ -30,44 +31,95 @@ String kernSatz(String antwort, {int max = 110}) {
   return s.length <= max ? s : '${s.substring(0, max - 1)}…';
 }
 
+/// Monday to Sunday of the week of [tag]: a day counts when it has a
+/// check-in and, while the week's focus ran on it, the focus was ticked.
+List<bool> wochenKreise(
+  List<CheckIn> checkIns,
+  Wochenfokus? fokus,
+  DateTime tag,
+) {
+  final da = {for (final c in checkIns) dayKey(c.datum)};
+  final fokusTage = {
+    if (fokus != null)
+      for (var i = 1; i <= Wochenfokus.tage; i++) fokus.tagKey(i),
+  };
+  final mo = DateTime(tag.year, tag.month, tag.day - (tag.weekday - 1));
+  return [
+    for (var i = 0; i < 7; i++)
+      () {
+        final k = dayKey(DateTime(mo.year, mo.month, mo.day + i));
+        return da.contains(k) &&
+            (!fokusTage.contains(k) || fokus!.geschafft.contains(k));
+      }(),
+  ];
+}
+
+double? _tagesSchnitt(CheckIn c) {
+  final w = c.werte.values.toList();
+  if (w.isEmpty) return null;
+  return w.reduce((a, b) => a + b) / w.length;
+}
+
+const _wochentage = [
+  'Montag',
+  'Dienstag',
+  'Mittwoch',
+  'Donnerstag',
+  'Freitag',
+  'Samstag',
+  'Sonntag',
+];
+
+/// The evening's honest comparison with yourself: today's mean score
+/// against the same weekday of the weeks before. Null unless today beats
+/// at least the last two.
+String? abendVergleich(List<CheckIn> checkIns, DateTime jetzt) {
+  final nachTag = {for (final c in checkIns) dayKey(c.datum): c};
+  final heute = nachTag[dayKey(jetzt)];
+  final h = heute == null ? null : _tagesSchnitt(heute);
+  if (h == null) return null;
+  var n = 0;
+  for (var w = 1; w <= 12; w++) {
+    final c =
+        nachTag[dayKey(DateTime(jetzt.year, jetzt.month, jetzt.day - 7 * w))];
+    final s = c == null ? null : _tagesSchnitt(c);
+    if (s == null || s >= h) break;
+    n++;
+  }
+  if (n < 2) return null;
+  return 'Dein bester ${_wochentage[jetzt.weekday - 1]} '
+      'der letzten ${n + 1} Wochen.';
+}
+
 /// The JSON for the widgets. [punkte] are today's points from "Dein Tag";
-/// getting up is left out because it is over when the day starts.
+/// getting up is left out because it is over when the day starts. [lob]
+/// is what was just done, praised until its time.
 Map<String, Object?> widgetDaten({
   required DateTime jetzt,
   required String name,
   required List<BogenPunkt> punkte,
-  required bool checkinHeute,
+  required List<CheckIn> checkIns,
   required Wochenfokus? fokus,
-  required String coachAntwort,
-  required double? schnitt,
-  required double? trend,
-  required int serie,
+  required String ziel,
+  required String grund,
+  ({String titel, DateTime bis})? lob,
 }) {
   final tag = DateTime(jetzt.year, jetzt.month, jetzt.day);
   final liste = [
     for (final p in punkte)
       if (p.art != 'Aufstehen') p,
   ]..sort((a, b) => a.minute.compareTo(b.minute));
-  String? zeitVon(String art, {String? id}) {
-    for (final p in liste) {
-      if (p.art == art && (id == null || p.id == id)) {
-        final m = p.minute % 1440;
-        return '${(m ~/ 60).toString().padLeft(2, '0')}:'
-            '${(m % 60).toString().padLeft(2, '0')}';
-      }
-    }
-    return null;
+  CheckIn? heute;
+  for (final c in checkIns) {
+    if (dayKey(c.datum) == dayKey(jetzt)) heute = c;
   }
-
-  String? trainingName;
-  for (final p in liste) {
-    if (p.art == 'Training') trainingName = p.titel;
-  }
+  final serie = serieTage([for (final c in checkIns) dayKey(c.datum)], jetzt);
   final f = fokus != null && !fokus.vorbei(jetzt) ? fokus : null;
+  final vorwoche = DateTime(jetzt.year, jetzt.month, jetzt.day - 7);
   return {
     'tag': dayKey(jetzt),
     'name': name,
-    'checkin': checkinHeute,
+    'checkin': heute != null,
     'punkte': [
       for (final p in liste)
         {
@@ -79,19 +131,22 @@ Map<String, Object?> widgetDaten({
           'erledigt': p.erledigt,
         },
     ],
-    'fokus': f == null
+    'serie': serie.jetzt,
+    'rekord': serie.rekord,
+    'wurzeln': f?.anzahlGeschafft ?? 0,
+    'lob': lob == null || !lob.bis.isAfter(jetzt)
         ? null
-        : {
-            'text': f.text,
-            'start': dayKey(f.start),
-            'geschafft': f.geschafft.toList()..sort(),
-          },
-    'coach': kernSatz(coachAntwort),
-    'schnitt': schnitt,
-    'trend': trend,
-    'serie': serie,
-    'training': trainingName,
-    'trainingZeit': zeitVon('Training'),
-    'bett': zeitVon('Schlaf', id: 'bett'),
+        : {'titel': lob.titel, 'bis': lob.bis.millisecondsSinceEpoch ~/ 1000},
+    'ziel': ziel,
+    'grund': grund,
+    'coach': kernSatz(heute?.kiAntwort ?? ''),
+    'fokus': f == null ? null : {'text': f.text, 'start': dayKey(f.start)},
+    'abend': abendVergleich(checkIns, jetzt),
+    'woche': wochenKreise(checkIns, fokus, jetzt),
+    'letzteWoche': wochenKreise(
+      checkIns,
+      fokus,
+      vorwoche,
+    ).where((x) => x).length,
   };
 }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/wurzel"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"
+    android:gravity="center" android:padding="14dp" android:background="@drawable/widget_gold">
+    <ImageView android:id="@+id/baum" android:layout_width="34dp" android:layout_height="44dp" android:scaleType="fitCenter"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp"
+        android:textSize="17sp" android:fontFamily="@font/sora_bold" android:textColor="#2A1F14" android:text="Tag komplett"/>
+    <TextView android:id="@+id/unter" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:gravity="center" android:textSize="11sp" android:fontFamily="@font/figtree_regular"
+        android:textColor="#BF2A1F14" android:maxLines="3"/>
+</LinearLayout>

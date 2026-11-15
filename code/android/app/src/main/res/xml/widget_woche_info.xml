@@ -3,8 +3,8 @@
     android:minWidth="110dp" android:minHeight="110dp"
     android:targetCellWidth="2" android:targetCellHeight="2"
     android:updatePeriodMillis="1800000"
-    android:initialLayout="@layout/widget_fokus"
-    android:previewLayout="@layout/widget_fokus"
-    android:description="@string/widget_fokus_text"
+    android:initialLayout="@layout/widget_woche"
+    android:previewLayout="@layout/widget_woche"
+    android:description="@string/widget_woche_text"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"/>
