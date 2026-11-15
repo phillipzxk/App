@@ -1,8 +1,8 @@
 part of 'home_page.dart';
 
 /// The widgets on the phone (vault Umsetzung/Widgets.md): they get fresh
-/// data a moment after anything changes, a tap on one opens the right
-/// place, and "Heute geschafft" tapped in the widget is taken over.
+/// data a moment after anything changes, and a tap on one opens the right
+/// place.
 extension _StartWidgets on _HomePageState {
   void _widgetsAn() {
     final d = widget.widgets;
@@ -26,62 +26,56 @@ extension _StartWidgets on _HomePageState {
   Future<void> _widgetSenden() async {
     final d = widget.widgets;
     if (d == null || !mounted || !_loaded) return;
-    if (await _widgetGeschafft()) return;
-    if (!mounted) return;
     final jetzt = widget.clock();
-    final wurzeln = _wurzeln(jetzt);
+    final f = _fokus;
+    final trainiert =
+        _training.einheitAm(jetzt)?.status == EinheitStatus.fertig;
+    // A finished training ticks its point of the day.
+    final punkte = [
+      for (final p in _tagesPunkte().punkte)
+        p.id == 'training' && trainiert && !p.erledigt
+            ? BogenPunkt(
+                id: p.id,
+                minute: p.minute,
+                art: p.art,
+                titel: p.titel,
+                text: p.text,
+                erledigt: true,
+              )
+            : p,
+    ];
+    // What is done right now. Something new in it is praised for an hour.
+    final fertig = <String, String>{
+      for (final p in punkte)
+        if (p.erledigt) p.id: p.titel,
+      if (trainiert) 'training': 'Dein Training',
+      if (f != null && f.heuteGeschafft(jetzt)) 'fokus': 'Dein Fokus',
+      if (_heute != null) 'checkin': 'Dein Check-in',
+    };
+    final vorher = _widgetFertig;
+    if (vorher != null && vorher.$1 == dayKey(jetzt)) {
+      for (final e in fertig.entries) {
+        if (!vorher.$2.contains(e.key)) {
+          _widgetLob = (
+            titel: e.value,
+            bis: jetzt.add(const Duration(hours: 1)),
+          );
+        }
+      }
+    }
+    _widgetFertig = (dayKey(jetzt), fertig.keys.toSet());
     await d.senden(
       widgetDaten(
         jetzt: jetzt,
         name: widget.profile.name.trim(),
-        punkte: _tagesPunkte().punkte,
-        checkinHeute: _heute != null,
-        fokus: _fokus,
-        coachAntwort: _heute?.kiAntwort ?? '',
-        schnitt: fundamentSchnitt(wurzeln),
-        trend: fundamentTrend(wurzeln),
-        serie: checkInStreak(_checkIns, jetzt),
+        punkte: punkte,
+        checkIns: _checkIns,
+        fokus: f,
+        ziel: widget.profile.zielSatz,
+        grund: widget.profile.warum,
+        lob: _widgetLob,
       ),
     );
-  }
-
-  /// Takes over "Heute geschafft" from the widget. True when something
-  /// changed (the reload sends the widgets their data again).
-  Future<bool> _widgetGeschafft() async {
-    final d = widget.widgets;
-    final f = _fokus;
-    if (d == null) return false;
-    final offen = await d.geschafftOffen();
-    if (offen.isEmpty) return false;
-    await d.geschafftErledigt();
-    if (f == null || !mounted) return false;
-    final heute = dayKey(widget.clock());
-    final tage = {for (var i = 1; i <= Wochenfokus.tage; i++) f.tagKey(i)};
-    // Earlier days are simply ticked; today gets the cheer like in the app.
-    final frueher = {
-      for (final k in offen)
-        if (k != heute && tage.contains(k) && !f.geschafft.contains(k)) k,
-    };
-    var neu = f;
-    if (frueher.isNotEmpty) {
-      neu = Wochenfokus(
-        start: f.start,
-        text: f.text,
-        geschafft: {...f.geschafft, ...frueher},
-      );
-      await widget.feed.saveFokus(neu);
-    }
-    if (offen.contains(heute) &&
-        tage.contains(heute) &&
-        !neu.heuteGeschafft(widget.clock())) {
-      await _umschalten(neu);
-      return true;
-    }
-    if (frueher.isNotEmpty) {
-      await _reload();
-      return true;
-    }
-    return false;
   }
 
   Future<void> _widgetGetippt() async {
@@ -101,6 +95,8 @@ extension _StartWidgets on _HomePageState {
         await _oeffneTag();
       case 'fokus':
         _oeffneFokus(mitte);
+      case 'mindset':
+        await _oeffneSeite(Bereich.mindset);
       default:
         break;
     }

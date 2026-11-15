@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="widget_baum_name">Dein Baum</string>
+    <string name="widget_baum_text">Wächst mit jedem Tag am Stück. Jeder geschaffte Fokus-Tag gibt eine Wurzel.</string>
     <string name="widget_jetzt_name">Jetzt dran</string>
-    <string name="widget_jetzt_text">Das Nächste aus deinem Tag und wie viel von heute geschafft ist.</string>
-    <string name="widget_fokus_name">Fokus der Woche</string>
-    <string name="widget_fokus_text">Dein Fokus mit sieben Strichen. „Heute geschafft“ geht direkt hier.</string>
-    <string name="widget_tag_name">Coach und Tag</string>
-    <string name="widget_tag_text">Der Satz deines Coachs, dein Schnitt und was heute dran ist.</string>
+    <string name="widget_jetzt_text">Das Nächste aus deinem Tag. Lobt dich, wenn etwas geschafft ist.</string>
+    <string name="widget_dafuer_name">Dafür</string>
+    <string name="widget_dafuer_text">Dein Ziel und dein Grund in deinen eigenen Worten.</string>
+    <string name="widget_coach_name">Dein Coach spricht</string>
+    <string name="widget_coach_text">Morgens ein Auftrag, abends ein ehrliches Fazit.</string>
+    <string name="widget_woche_name">Deine Woche</string>
+    <string name="widget_woche_text">Sieben Kreise, die du voll haben willst. Du gegen deine letzte Woche.</string>
 </resources>

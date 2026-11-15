@@ -3,8 +3,8 @@
     android:minWidth="250dp" android:minHeight="110dp"
     android:targetCellWidth="4" android:targetCellHeight="2"
     android:updatePeriodMillis="1800000"
-    android:initialLayout="@layout/widget_tag"
-    android:previewLayout="@layout/widget_tag"
-    android:description="@string/widget_tag_text"
+    android:initialLayout="@layout/widget_coach"
+    android:previewLayout="@layout/widget_coach"
+    android:description="@string/widget_coach_text"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"/>

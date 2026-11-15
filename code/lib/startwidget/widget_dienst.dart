@@ -11,15 +11,8 @@ abstract class WidgetDienst {
   /// Writes [daten] (see `widgetDaten`) and lets the widgets redraw.
   Future<void> senden(Map<String, Object?> daten);
 
-  /// Day keys on which "Heute geschafft" was tapped in the widget and the
-  /// app has not taken over yet.
-  Future<List<String>> geschafftOffen();
-
-  /// The app has taken them over.
-  Future<void> geschafftErledigt();
-
   /// Where a tap on a widget wants to go ("training", "ernaehrung",
-  /// "schlaf", "tag", "fokus", "heute"), until [erledigt].
+  /// "schlaf", "tag", "fokus", "warum", "heute"), until [erledigt].
   ValueListenable<String?> get getippt;
 
   void erledigt();
@@ -34,12 +27,6 @@ class KeinWidget implements WidgetDienst {
   Future<void> senden(Map<String, Object?> daten) async {}
 
   @override
-  Future<List<String>> geschafftOffen() async => const [];
-
-  @override
-  Future<void> geschafftErledigt() async {}
-
-  @override
   void erledigt() => getippt.value = null;
 }
 
@@ -47,21 +34,24 @@ class KeinWidget implements WidgetDienst {
 abstract final class WidgetNamen {
   static const gruppe = 'group.de.phillipzxk.coachApp';
   static const daten = 'groundset_widget';
-  static const offen = 'groundset_fokus_offen';
 
   /// The kinds of widgets on the iPhone.
   static const ios = [
+    'GroundsetBaum',
     'GroundsetJetzt',
-    'GroundsetFokus',
-    'GroundsetTag',
-    'GroundsetZeile',
-    'GroundsetHeuteRund',
-    'GroundsetSerieRund',
-    'GroundsetJetztBreit',
+    'GroundsetDafuer',
+    'GroundsetCoach',
+    'GroundsetWoche',
   ];
 
   /// The widget classes on Android.
-  static const android = ['JetztWidget', 'FokusWidget', 'TagWidget'];
+  static const android = [
+    'BaumWidget',
+    'JetztWidget',
+    'DafuerWidget',
+    'CoachWidget',
+    'WocheWidget',
+  ];
 }
 
 /// iPhone and Android, through the home_widget package.
@@ -117,30 +107,6 @@ class HandyWidget implements WidgetDienst {
           await HomeWidget.updateWidget(androidName: n);
         }
       }
-    } catch (_) {}
-  }
-
-  @override
-  Future<List<String>> geschafftOffen() async {
-    try {
-      await _bereit;
-      final t = await HomeWidget.getWidgetData<String>(WidgetNamen.offen);
-      return [
-        for (final k in (t ?? '').split(','))
-          if (k.trim().isNotEmpty) k.trim(),
-      ];
-    } catch (_) {
-      return const [];
-    }
-  }
-
-  @override
-  Future<void> geschafftErledigt() async {
-    try {
-      await _bereit;
-      await HomeWidget.saveWidgetData<String>(WidgetNamen.offen, '');
-      // The widget's own copy is replaced with the next [senden].
-      _zuletzt = null;
     } catch (_) {}
   }
 }

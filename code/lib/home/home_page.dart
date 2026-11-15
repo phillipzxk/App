@@ -174,6 +174,11 @@ class _HomePageState extends State<HomePage> {
   bool _loaded = false;
   Timer? _planTimer;
   Timer? _widgetTimer;
+
+  /// For the widgets' praise: what was done at the last send (day, ids)
+  /// and the newest thing done since.
+  (String, Set<String>)? _widgetFertig;
+  ({String titel, DateTime bis})? _widgetLob;
   late final AppLifecycleListener _widgetLeben = AppLifecycleListener(
     onResume: _widgetSenden,
   );

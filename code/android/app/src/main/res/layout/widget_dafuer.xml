@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/wurzel"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"
+    android:padding="14dp" android:background="@drawable/widget_dunkel">
+    <TextView android:id="@+id/kicker" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Dafür" android:textAllCaps="true" android:letterSpacing="0.12" android:textSize="9sp"
+        android:fontFamily="@font/figtree_semibold" android:textColor="#E6C98F" android:maxLines="1"/>
+    <TextView android:id="@+id/titel" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="5dp" android:textSize="14sp" android:fontFamily="@font/sora_bold"
+        android:textColor="#F6ECDB" android:maxLines="4" android:ellipsize="end"/>
+    <TextView android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textSize="10.5sp" android:fontFamily="@font/figtree_regular" android:textColor="#B3F6ECDB" android:text="Heute zahlt ein:"/>
+    <TextView android:id="@+id/unter" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:textSize="11.5sp" android:fontFamily="@font/figtree_semibold" android:textColor="#E6C98F"
+        android:maxLines="2" android:ellipsize="end"/>
+</LinearLayout>
