@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/wurzel"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/widget_dunkel">
+    <ImageView android:id="@+id/baum" android:layout_width="match_parent" android:layout_height="match_parent"
+        android:layout_marginTop="18dp" android:layout_marginBottom="18dp" android:scaleType="fitCenter"/>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+        android:orientation="vertical" android:padding="14dp">
+    <TextView android:id="@+id/kicker" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Dein Baum" android:textAllCaps="true" android:letterSpacing="0.12" android:textSize="9sp"
+        android:fontFamily="@font/figtree_semibold" android:textColor="#E6C98F" android:maxLines="1"/>
+    <TextView android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
+        <TextView android:id="@+id/unter" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textSize="10.5sp" android:fontFamily="@font/figtree_regular" android:textColor="#CCF6ECDB"
+            android:maxLines="2" android:ellipsize="end"/>
+    </LinearLayout>
+</FrameLayout>

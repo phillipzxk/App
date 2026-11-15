@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/wurzel"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"
+    android:padding="14dp" android:background="@drawable/widget_dunkel">
+    <TextView android:id="@+id/kicker" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Deine Woche" android:textAllCaps="true" android:letterSpacing="0.12" android:textSize="9sp"
+        android:fontFamily="@font/figtree_semibold" android:textColor="#E6C98F" android:maxLines="1"/>
+    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal">
+        <TextView android:id="@+id/titel" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textSize="32sp" android:fontFamily="@font/sora_bold" android:textColor="#E6C98F" android:text="0"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp"
+            android:textSize="13sp" android:fontFamily="@font/sora_bold" android:textColor="#99F6ECDB" android:text="von 7"/>
+    </LinearLayout>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:layout_marginTop="4dp">
+        <TextView android:id="@+id/kreis1" android:layout_width="15dp" android:layout_height="15dp" android:layout_marginEnd="4dp"
+            android:gravity="center" android:textSize="8sp" android:fontFamily="@font/figtree_semibold"
+            android:text="M" android:background="@drawable/widget_kreis_aus" android:textColor="#99F6ECDB"/>
+        <TextView android:id="@+id/kreis2" android:layout_width="15dp" android:layout_height="15dp" android:layout_marginEnd="4dp"
+            android:gravity="center" android:textSize="8sp" android:fontFamily="@font/figtree_semibold"
+            android:text="D" android:background="@drawable/widget_kreis_aus" android:textColor="#99F6ECDB"/>
+        <TextView android:id="@+id/kreis3" android:layout_width="15dp" android:layout_height="15dp" android:layout_marginEnd="4dp"
+            android:gravity="center" android:textSize="8sp" android:fontFamily="@font/figtree_semibold"
+            android:text="M" android:background="@drawable/widget_kreis_aus" android:textColor="#99F6ECDB"/>
+        <TextView android:id="@+id/kreis4" android:layout_width="15dp" android:layout_height="15dp" android:layout_marginEnd="4dp"
+            android:gravity="center" android:textSize="8sp" android:fontFamily="@font/figtree_semibold"
+            android:text="D" android:background="@drawable/widget_kreis_aus" android:textColor="#99F6ECDB"/>
+        <TextView android:id="@+id/kreis5" android:layout_width="15dp" android:layout_height="15dp" android:layout_marginEnd="4dp"
+            android:gravity="center" android:textSize="8sp" android:fontFamily="@font/figtree_semibold"
+            android:text="F" android:background="@drawable/widget_kreis_aus" android:textColor="#99F6ECDB"/>
+        <TextView android:id="@+id/kreis6" android:layout_width="15dp" android:layout_height="15dp" android:layout_marginEnd="4dp"
+            android:gravity="center" android:textSize="8sp" android:fontFamily="@font/figtree_semibold"
+            android:text="S" android:background="@drawable/widget_kreis_aus" android:textColor="#99F6ECDB"/>
+        <TextView android:id="@+id/kreis7" android:layout_width="15dp" android:layout_height="15dp" android:layout_marginEnd="4dp"
+            android:gravity="center" android:textSize="8sp" android:fontFamily="@font/figtree_semibold"
+            android:text="S" android:background="@drawable/widget_kreis_aus" android:textColor="#99F6ECDB"/>
+    </LinearLayout>
+    <TextView android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
+    <TextView android:id="@+id/unter" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:textSize="10.5sp" android:fontFamily="@font/figtree_regular" android:textColor="#CCF6ECDB"
+        android:maxLines="2" android:ellipsize="end"/>
+</LinearLayout>

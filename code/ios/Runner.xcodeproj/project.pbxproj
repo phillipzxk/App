@@ -19,7 +19,6 @@
 		76B38AC2210142393BAA4E8F /* Figtree-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = ACCFB33B9702528E9FB7B89B /* Figtree-Medium.ttf */; };
 		7884E8682EC3CC0700C636F2 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */; };
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
-		7B856F1BE0B0889CD8548F7B /* GeschafftIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F42014B483538C2642E57FD /* GeschafftIntent.swift */; };
 		80FA8A1A9CD2C143D109B28B /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCCDE8B6C59DF9DEBDF62BA5 /* Foundation.framework */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
@@ -81,7 +80,6 @@
 		36497D2191910C999987CE64 /* Daten.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Daten.swift; sourceTree = "<group>"; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		3ED5E8574507F3B6628CCF2F /* Widgets.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Widgets.swift; sourceTree = "<group>"; };
-		4F42014B483538C2642E57FD /* GeschafftIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GeschafftIntent.swift; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -207,7 +205,6 @@
 			isa = PBXGroup;
 			children = (
 				36497D2191910C999987CE64 /* Daten.swift */,
-				4F42014B483538C2642E57FD /* GeschafftIntent.swift */,
 				3ED5E8574507F3B6628CCF2F /* Widgets.swift */,
 				07DF011E16D6797C3664AD67 /* Info.plist */,
 				EFE60074BD816CEE60EC8744 /* GroundsetWidget.entitlements */,
@@ -404,7 +401,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				F341F270FE4D2B71051CB76C /* Daten.swift in Sources */,
-				7B856F1BE0B0889CD8548F7B /* GeschafftIntent.swift in Sources */,
 				B3BBBA1E123B9DA176924A7E /* Widgets.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

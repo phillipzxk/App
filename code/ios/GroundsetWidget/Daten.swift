@@ -7,7 +7,6 @@ import Foundation
 
 let gruppe = "group.de.phillipzxk.coachApp"
 let datenKey = "groundset_widget"
-let offenKey = "groundset_fokus_offen"
 
 struct Punkt: Codable {
   let t: Double
@@ -21,7 +20,11 @@ struct Punkt: Codable {
 struct FokusDaten: Codable {
   let text: String
   let start: String
-  var geschafft: [String]
+}
+
+struct Lob: Codable {
+  let titel: String
+  let bis: Double
 }
 
 struct WidgetDaten: Codable {
@@ -29,19 +32,20 @@ struct WidgetDaten: Codable {
   var name: String
   var checkin: Bool
   var punkte: [Punkt]
-  var fokus: FokusDaten?
-  var coach: String
-  var schnitt: Double?
-  var trend: Double?
   var serie: Int
-  var training: String?
-  var trainingZeit: String?
-  var bett: String?
+  var rekord: Int
+  var wurzeln: Int
+  var lob: Lob?
+  var ziel: String
+  var grund: String
+  var coach: String
+  var fokus: FokusDaten?
+  var abend: String?
+  var woche: [Bool]
+  var letzteWoche: Int
 }
 
 enum Speicher {
-  static var defaults: UserDefaults? { UserDefaults(suiteName: gruppe) }
-
   static func tagKey(_ d: Date) -> String {
     let f = DateFormatter()
     f.locale = Locale(identifier: "en_US_POSIX")
@@ -57,32 +61,10 @@ enum Speicher {
   }
 
   static func laden() -> WidgetDaten? {
-    guard let text = defaults?.string(forKey: datenKey),
+    guard let text = UserDefaults(suiteName: gruppe)?.string(forKey: datenKey),
       let data = text.data(using: .utf8)
     else { return nil }
     return try? JSONDecoder().decode(WidgetDaten.self, from: data)
-  }
-
-  static func speichern(_ d: WidgetDaten) {
-    guard let data = try? JSONEncoder().encode(d),
-      let text = String(data: data, encoding: .utf8)
-    else { return }
-    defaults?.set(text, forKey: datenKey)
-  }
-
-  /// "Heute geschafft" tapped in the widget: shown at once, and noted for
-  /// the app, which takes it over the next time it opens.
-  static func geschafftHeute() {
-    let heute = tagKey(Date())
-    if var d = laden(), var f = d.fokus {
-      if !f.geschafft.contains(heute) { f.geschafft.append(heute) }
-      d.fokus = f
-      speichern(d)
-    }
-    var offen = (defaults?.string(forKey: offenKey) ?? "")
-      .split(separator: ",").map(String.init)
-    if !offen.contains(heute) { offen.append(heute) }
-    defaults?.set(offen.joined(separator: ","), forKey: offenKey)
   }
 }
 
@@ -96,6 +78,8 @@ struct Lage {
     guard let d = daten else { return false }
     return d.tag == Speicher.tagKey(jetzt)
   }
+
+  var name: String { daten?.name ?? "" }
 
   var punkte: [Punkt] { aktuell ? (daten?.punkte ?? []) : [] }
 
@@ -113,67 +97,55 @@ struct Lage {
     punkte.filter { $0.erledigt || $0.zeit <= jetzt }.count + (checkin ? 1 : 0)
   }
 
-  var anteil: Double { gesamt == 0 ? 0 : Double(geschafft) / Double(gesamt) }
+  var anteil: Double { Double(geschafft) / Double(gesamt) }
 
-  // Fokus der Woche: 7 days from its start day.
-  var fokus: FokusDaten? {
-    guard let f = daten?.fokus, fokusTag(f) <= 7, fokusTag(f) >= 1 else { return nil }
-    return f
+  /// Everything of today is done.
+  var komplett: Bool { aktuell && checkin && geschafft >= gesamt }
+
+  /// What was just done, while its praise lasts.
+  var lob: String? {
+    guard aktuell, let l = daten?.lob,
+      Date(timeIntervalSince1970: l.bis) > jetzt
+    else { return nil }
+    return l.titel
   }
 
-  func fokusTag(_ f: FokusDaten) -> Int {
-    guard let s = Speicher.datum(f.start) else { return 99 }
-    let cal = Calendar.current
-    let a = cal.startOfDay(for: s)
-    let b = cal.startOfDay(for: jetzt)
-    return (cal.dateComponents([.day], from: a, to: b).day ?? 98) + 1
-  }
+  /// From 17:00 the coach looks back instead of ahead.
+  var abend: Bool { Calendar.current.component(.hour, from: jetzt) >= 17 }
 
-  func striche(_ f: FokusDaten) -> [Bool] {
-    guard let s = Speicher.datum(f.start) else { return Array(repeating: false, count: 7) }
-    return (0..<7).map { i in
-      let d = Calendar.current.date(byAdding: .day, value: i, to: s) ?? s
-      return f.geschafft.contains(Speicher.tagKey(d))
-    }
-  }
-
-  func heuteGeschafft(_ f: FokusDaten) -> Bool {
-    f.geschafft.contains(Speicher.tagKey(jetzt))
+  // The streak only holds while the data is at most a day old.
+  var serie: Int {
+    guard let d = daten, let t = Speicher.datum(d.tag) else { return 0 }
+    let tage =
+      Calendar.current.dateComponents(
+        [.day], from: Calendar.current.startOfDay(for: t),
+        to: Calendar.current.startOfDay(for: jetzt)
+      ).day ?? 9
+    if tage <= 0 { return d.serie }
+    // Yesterday's data: the streak still stands if yesterday was in it.
+    return tage == 1 && d.checkin ? d.serie : 0
   }
 
   /// The next mark a streak grows towards: 3, 7, 14, 30, then every 30.
-  var serieMarke: Int {
-    let n = daten?.serie ?? 0
-    for m in [3, 7, 14, 30] where n < m { return m }
-    return (n / 30 + 1) * 30
+  var marke: Int {
+    for m in [3, 7, 14, 30] where serie < m { return m }
+    return (serie / 30 + 1) * 30
   }
 
-  /// "Push 17:30 · Bett 22:40" for the line above the clock.
-  var zeile: String {
-    guard aktuell, let d = daten else { return "Groundset" }
-    var teile: [String] = []
-    if let t = d.training, let z = d.trainingZeit { teile.append("\(t) \(z)") }
-    if let b = d.bett { teile.append("Bett \(b)") }
-    return teile.isEmpty ? "Heute frei" : teile.joined(separator: " · ")
+  /// A mark was reached today.
+  var markeErreicht: Bool {
+    serie > 0 && ([3, 7, 14].contains(serie) || serie % 30 == 0)
   }
 
-  /// Up to [max] rows for "Heute dran": the check-in, then what comes
-  /// next; when little is left, the last things of the day.
-  func liste(_ max: Int) -> [(titel: String, wert: String, weg: Bool)] {
-    var rows: [(titel: String, wert: String, weg: Bool)] = [
-      (titel: "Check-in", wert: checkin ? "erledigt" : "offen", weg: checkin)
-    ]
-    let f = DateFormatter()
-    f.dateFormat = "HH:mm"
-    let alle = punkte
-    let platz = max - 1
-    var start = alle.firstIndex { !$0.erledigt && $0.zeit > jetzt } ?? alle.count
-    start = Swift.max(0, Swift.min(start, alle.count - platz))
-    for p in alle.dropFirst(start).prefix(platz) {
-      rows.append(
-        (titel: p.titel, wert: f.string(from: p.zeit), weg: p.erledigt || p.zeit <= jetzt))
-    }
-    return rows
+  /// "Tag 4 von 7" of the week's focus, nil without one.
+  var fokusTag: Int? {
+    guard let f = daten?.fokus, let s = Speicher.datum(f.start) else { return nil }
+    let cal = Calendar.current
+    let n =
+      (cal.dateComponents(
+        [.day], from: cal.startOfDay(for: s), to: cal.startOfDay(for: jetzt)
+      ).day ?? 98) + 1
+    return n >= 1 && n <= 7 ? n : nil
   }
 }
 
