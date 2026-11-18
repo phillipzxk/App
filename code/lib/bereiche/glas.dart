@@ -131,7 +131,11 @@ class GlasIcon extends StatelessWidget {
       ),
       border: Border.all(color: const Color(0x33FFEED7)),
     ),
-    child: Icon(icon, size: size * .5, color: farbe ?? CoachStyle.goldLight),
+    child: GlasSymbolBild(
+      icon,
+      size: size * .5,
+      farbe: farbe ?? CoachStyle.goldLight,
+    ),
   );
 }
 
@@ -311,4 +315,69 @@ class _BlobPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_BlobPainter old) => old.t != t;
+}
+
+/// The Look-Analyse has its own drawn symbol (draft "Alte Seiten neu",
+/// 2026-11-18): a head in profile as a fine gold line with a small light at
+/// the forehead. In code it is still named by this marker icon.
+const lookSymbol = Icons.face_retouching_natural;
+
+/// An icon, or for [lookSymbol] the drawn head in profile.
+class GlasSymbolBild extends StatelessWidget {
+  const GlasSymbolBild(
+    this.icon, {
+    super.key,
+    required this.size,
+    required this.farbe,
+  });
+
+  final IconData icon;
+  final double size;
+  final Color farbe;
+
+  @override
+  Widget build(BuildContext context) => icon == lookSymbol
+      ? SizedBox(
+          width: size,
+          height: size,
+          child: CustomPaint(painter: _KopfMaler(farbe)),
+        )
+      : Icon(icon, size: size, color: farbe);
+}
+
+class _KopfMaler extends CustomPainter {
+  _KopfMaler(this.farbe);
+  final Color farbe;
+
+  @override
+  void paint(Canvas canvas, Size s) {
+    // Drawn on a 36 x 36 grid, like the draft.
+    final k = s.width / 36;
+    Offset p(double x, double y) => Offset(x * k, y * k);
+    final kopf = Path()
+      ..moveTo(p(12, 31).dx, p(12, 31).dy)
+      ..lineTo(p(12, 27).dx, p(12, 27).dy)
+      ..cubicTo(9 * k, 25 * k, 7.5 * k, 21.5 * k, 7.5 * k, 17.5 * k)
+      ..cubicTo(7.5 * k, 10 * k, 12.5 * k, 5 * k, 19 * k, 5 * k)
+      ..cubicTo(24.5 * k, 5 * k, 28.5 * k, 9 * k, 28.5 * k, 14 * k)
+      ..lineTo(31 * k, 18.5 * k)
+      ..lineTo(28.5 * k, 19.5 * k)
+      ..lineTo(28.5 * k, 23 * k)
+      ..cubicTo(28.5 * k, 24.6 * k, 27.2 * k, 25.8 * k, 25.5 * k, 25.6 * k)
+      ..lineTo(23 * k, 25.3 * k)
+      ..lineTo(23 * k, 31 * k);
+    canvas.drawPath(
+      kopf,
+      Paint()
+        ..color = farbe
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.2 * k
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round,
+    );
+    canvas.drawCircle(p(20, 12), 2.4 * k, Paint()..color = farbe);
+  }
+
+  @override
+  bool shouldRepaint(_KopfMaler o) => o.farbe != farbe;
 }

@@ -473,7 +473,7 @@ extension _Persoenlich on _HomePageState {
           BKachel(
             id: 'pe-look',
             titel: 'Look-Analyse',
-            icon: Icons.face_retouching_natural,
+            icon: lookSymbol,
             groesse: KachelGroesse.hoch,
             gold: true,
             hot: look == null ? null : '${look.punkte.length} Hebel',
@@ -481,7 +481,7 @@ extension _Persoenlich on _HomePageState {
             unter: 'ohne Punktzahl, nur was du ändern kannst',
             feld: _peFeld(
               'Look-Analyse',
-              Icons.face_retouching_natural,
+              lookSymbol,
               'Keine Note fürs Gesicht. Nur die Dinge, die du selbst ändern '
                   'kannst.',
               (u) => LookSeite(u: u),
