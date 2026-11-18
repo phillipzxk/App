@@ -88,6 +88,9 @@ class EssenSeite extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: const Color(0xFF231B14),
+    // The background runs behind the bar, so no dark band cuts the label
+    // (Rundgang 2026-11-15, point 4).
+    extendBodyBehindAppBar: true,
     appBar: AppBar(
       backgroundColor: Colors.transparent,
       foregroundColor: CoachStyle.goldLight,
@@ -103,7 +106,12 @@ class EssenSeite extends StatelessWidget {
             child: ListenableBuilder(
               listenable: umfeld.stand,
               builder: (context, _) => ListView(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  MediaQuery.paddingOf(context).top + kToolbarHeight,
+                  20,
+                  40,
+                ),
                 children: [
                   TLabel(label),
                   const SizedBox(height: 4),

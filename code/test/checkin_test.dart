@@ -189,6 +189,8 @@ void main() {
     // The weakest area gets the coach's bubble.
     expect(find.byKey(const ValueKey('knoten-sagt-koerper')), findsOneWidget);
     await openBereich(tester, 'schlaf');
+    await tester.tap(find.byKey(const ValueKey('seite-Morgen')));
+    await tester.pumpAndSettle();
     expect(find.text('Zwei kurze Nächte.'), findsWidgets);
     expect(find.text('Schlaf & Routine'), findsWidgets);
   });

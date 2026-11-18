@@ -253,7 +253,11 @@ class Unterbereich {
     this.woche = const [],
     this.szene,
     this.szeneDaten = const SzeneDaten(),
+    this.startSeite = 0,
   });
+
+  /// The tab that opens first, e.g. "Abend" in the evening.
+  final int startSeite;
 
   /// The living picture on top instead of the ring (Körper parts).
   final SzeneArt? szene;
@@ -308,8 +312,13 @@ class BereichSeite extends StatefulWidget {
 class _BereichSeiteState extends State<BereichSeite>
     with TickerProviderStateMixin {
   late int _teil = widget.start.clamp(0, widget.teile.length - 1);
-  int _seite = 0;
-  late PageController _pages = PageController();
+  late int _seite = _start(_teil);
+  late PageController _pages = PageController(initialPage: _seite);
+
+  int _start(int teil) => widget.teile[teil].startSeite.clamp(
+    0,
+    widget.teile[teil].seiten.length - 1,
+  );
   final _ringKey = GlobalKey();
   final _coachKey = GlobalKey();
   final _avatarKey = GlobalKey();
@@ -402,9 +411,9 @@ class _BereichSeiteState extends State<BereichSeite>
     if (i == _teil) return;
     setState(() {
       _teil = i;
-      _seite = 0;
+      _seite = _start(i);
       _pages.dispose();
-      _pages = PageController();
+      _pages = PageController(initialPage: _seite);
     });
     _ein.forward(from: 0.25);
     _starteFlug();
@@ -1947,7 +1956,7 @@ class _TeilPillen extends StatelessWidget {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 380),
               curve: Curves.easeOutCubic,
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(999),
                 gradient: i == aktiv ? Umbau.grad : null,
@@ -1960,19 +1969,25 @@ class _TeilPillen extends StatelessWidget {
                     size: 15,
                     color: i == aktiv ? CoachStyle.goldInk : Glas.label,
                   ),
-                  const SizedBox(width: 5),
+                  const SizedBox(width: 4),
+                  // Long names like "Ernährung" shrink a little instead
+                  // of being cut (Rundgang 2026-11-15, point 6).
                   Expanded(
-                    child: Text(
-                      teile[i].name.split(' ').first,
-                      maxLines: 1,
-                      overflow: TextOverflow.fade,
-                      softWrap: false,
-                      style: Glas.tLabel.copyWith(
-                        fontSize: 12,
-                        color: i == aktiv ? CoachStyle.goldInk : Glas.soft,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        teile[i].name.split(' ').first,
+                        maxLines: 1,
+                        softWrap: false,
+                        style: Glas.tLabel.copyWith(
+                          fontSize: 12,
+                          color: i == aktiv ? CoachStyle.goldInk : Glas.soft,
+                        ),
                       ),
                     ),
                   ),
+                  if (teile[i].wert != null) const SizedBox(width: 4),
                   if (teile[i].wert != null)
                     Text(
                       '${teile[i].wert}',
@@ -2503,11 +2518,13 @@ class _BildSeiteViewState extends State<_BildSeiteView>
         ),
     ];
     final da = {for (final z in b.zahlen) ?z.ziel, ?a.jetzt.knopf?.$2};
-    final titel = <String>{};
+    // A tile whose name is already a number above is left out, so no name
+    // shows twice (Rundgang 2026-11-15, point 7).
+    final titel = <String>{for (final z in zahlen) z.titel.toLowerCase()};
     return [
       ...zahlen,
       for (final k in widget.seite.kacheln)
-        if (!da.contains(k.id) && titel.add(k.titel))
+        if (!da.contains(k.id) && titel.add(k.titel.toLowerCase()))
           BMehr(k.titel, ziel: k.id),
     ];
   }

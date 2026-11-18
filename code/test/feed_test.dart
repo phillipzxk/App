@@ -74,6 +74,10 @@ void main() {
     await openBereich(tester, 'schlaf');
     expect(find.text('KÖRPER'), findsOneWidget);
     expect(find.text('Schlaf & Routine'), findsWidgets);
+    // At 18:00 the evening page comes first, the morning is one tap away.
+    expect(find.byKey(const ValueKey('kachel-s-himmel')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('seite-Morgen')));
+    await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('kachel-s-himmel')), findsOneWidget);
 
     // Switch to Training directly at the top, then to its Woche page.

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../ernaehrung/ernaehrung_coach.dart' show fotoAufnahme;
@@ -227,13 +228,15 @@ class _WeckerKlingeltState extends State<WeckerKlingelt> {
                     ),
                   ],
                   const SizedBox(height: 16),
-                  Text(
-                    'Vorschau: Der echte Wecker kommt mit der Handy-Version.',
-                    style: tSoft.copyWith(
-                      color: const Color(0xAA1A140E),
-                      fontSize: 11,
+                  if (kIsWeb)
+                    Text(
+                      'Vorschau: Im Browser klingelt nichts, auf dem iPhone '
+                      'schon.',
+                      style: tSoft.copyWith(
+                        color: const Color(0xAA1A140E),
+                        fontSize: 11,
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),

@@ -138,7 +138,7 @@ class _HealthVerbindenSeiteState extends State<HealthVerbindenSeite>
                   ),
                 ),
                 Text(
-                  'SCHLAF & ENERGIE',
+                  'SCHLAF & ROUTINE',
                   style: tSoft.copyWith(letterSpacing: 2, fontSize: 10.5),
                 ),
                 const SizedBox(height: 2),

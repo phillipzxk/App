@@ -584,11 +584,12 @@ class _ZieleMaler extends _Maler {
     _text(
       c,
       b.skill ?? 'Skill wählen',
-      const Offset(273, 330),
-      size: 10,
+      // Stays inside the picture (Rundgang 2026-11-15, point 5).
+      const Offset(266, 330),
+      size: 9.5,
       weight: FontWeight.w600,
       color: b.skill == null ? _leise : tonFokus,
-      maxBreite: 70,
+      maxBreite: 60,
     );
     _zeile(c, 'Volles Blatt = geschafft · Leiter = dein Skill');
   }

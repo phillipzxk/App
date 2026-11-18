@@ -250,7 +250,12 @@ extension _Koerper on _HomePageState {
     final zeitHeute = trainingZeit(tag);
     final woche = _trainingsWoche();
     final gemacht = woche.where((x) => x == true).length;
-    final geplant = woche.where((x) => x != null).length;
+    // Without a plan nothing is "planned": trained days still count, but
+    // never as "4 von 4" (Rundgang 2026-11-15, point 1).
+    final geplant = _plan.isEmpty ? 0 : woche.where((x) => x != null).length;
+    // Trained today (check-in or logged), even on a free plan day.
+    final trainiertHeute = woche[heuteIndex] == true;
+    final heuteWort = frei ? (trainiertHeute ? 'trainiert' : 'frei') : name;
     final stag = stagnationFaellig(_training, planUebungen(_plan), today);
     final alle = planUebungen(_plan);
     final sport = _training.sportarten;
@@ -304,7 +309,11 @@ extension _Koerper on _HomePageState {
       for (var i = 0; i < 7; i++)
         (
           tag: const ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'][i],
-          name: woche[i] == null ? '' : shortDay(_woche.tage[i]),
+          name: woche[i] == null
+              ? ''
+              : _woche.tage[i].trim().isEmpty && woche[i] == true
+              ? 'trainiert'
+              : shortDay(_woche.tage[i]),
           zeit: switch (trainingZeit(_woche.tage[i])) {
             final m? => formatUhrzeit(m),
             null => '',
@@ -417,7 +426,9 @@ extension _Koerper on _HomePageState {
           name: 'Heute',
           coach: _coach(
             b,
-            frei
+            frei && trainiertHeute
+                ? 'Heute trainiert, das zählt mit.'
+                : frei
                 ? 'Heute ist frei. Erholung gehört zum Training.'
                 : fertig
                 ? 'Heute $name geschafft. Stark durchgezogen.'
@@ -438,7 +449,7 @@ extension _Koerper on _HomePageState {
             ),
             zahlen: [
               BZahl(leer != null ? '–' : '${heuteListe.length}', 'Übungen'),
-              BZahl(frei ? 'frei' : name, 'heute'),
+              BZahl(heuteWort, 'heute'),
               BZahl(
                 geplant == 0 ? '$gemacht' : '$gemacht/$geplant',
                 'diese Woche',
@@ -498,11 +509,7 @@ extension _Koerper on _HomePageState {
             naechstes: wocheZiel,
             geschafft: geschafftListe,
             mehr: [
-              BMehr(
-                'Training heute',
-                wert: frei ? 'frei' : name,
-                ziel: 't-heute',
-              ),
+              BMehr('Training heute', wert: heuteWort, ziel: 't-heute'),
               if (!_plan.isEmpty && !frei)
                 const BMehr('Form filmen', ziel: 't-form'),
               BMehr('Diese Woche', wert: wocheText),
@@ -612,19 +619,28 @@ extension _Koerper on _HomePageState {
               id: 't-woche',
               titel: 'Woche',
               icon: Icons.calendar_today,
-              feld: wocheF,
+              // Without a plan the week is empty: go straight to the plan
+              // editor (Rundgang 2026-11-15, point 8).
+              feld: _plan.isEmpty ? null : wocheF,
+              seite: _plan.isEmpty ? _planAnlegen : null,
             ),
             BKachel(
               id: 't-balance',
               titel: 'Hybrid-Balance',
               icon: Icons.balance,
-              feld: wocheF,
+              // Without a plan the week is empty: go straight to the plan
+              // editor (Rundgang 2026-11-15, point 8).
+              feld: _plan.isEmpty ? null : wocheF,
+              seite: _plan.isEmpty ? _planAnlegen : null,
             ),
             BKachel(
               id: 't-stag',
               titel: 'Stagnation',
               icon: Icons.timeline,
-              feld: wocheF,
+              // Without a plan the week is empty: go straight to the plan
+              // editor (Rundgang 2026-11-15, point 8).
+              feld: _plan.isEmpty ? null : wocheF,
+              seite: _plan.isEmpty ? _planAnlegen : null,
             ),
             BKachel(
               id: 't-plan',
@@ -1362,6 +1378,12 @@ extension _Koerper on _HomePageState {
       wert: _wert(b).$1,
       woche: _woche7(b),
       sub: _koerperZeile(),
+      // From 17:00 the evening comes first, not "Guten Morgen"
+      // (Rundgang 2026-11-15, point 9).
+      startSeite: switch (widget.clock().hour) {
+        >= 17 || < 4 => 2,
+        _ => 0,
+      },
       seiten: [
         BSeite(
           name: 'Morgen',
