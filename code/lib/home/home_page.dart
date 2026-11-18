@@ -59,6 +59,7 @@ import '../bereiche/aufbau_logik.dart';
 import '../bereiche/bereich_seite.dart';
 import '../bereiche/glas.dart';
 import '../bereiche/koerper_bilder.dart';
+import '../bereiche/leer_karten.dart';
 import '../ernaehrung/einkaufsliste.dart';
 import '../ernaehrung/heisshunger_seite.dart';
 import '../ernaehrung/kochbuch.dart';

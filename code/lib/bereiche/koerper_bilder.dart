@@ -1275,11 +1275,26 @@ class _KuecheMaler extends _Maler {
       });
     }
     if (b.isEmpty) {
-      _text(
-        c,
-        'Jedes Gericht, das du kochst, wird ein Blatt',
-        const Offset(151, 196),
-      );
+      // Three dashed leaf outlines show where the first dishes grow; the
+      // sentence stands once, below (draft "Leere Stellen", 2026-11-18).
+      final gestrichelt = _strich(const Color(0x8CDCCB92), 1.3);
+      for (var i = 0; i < 3; i++) {
+        final y = 290.0 - i * 60;
+        final dir = i.isOdd ? 1.0 : -1.0;
+        final x = _sx(y), e = x + dir * 36;
+        final blatt = Path()
+          ..moveTo(x, y)
+          ..quadraticBezierTo(x + dir * 14, y - 17, e, y - 6)
+          ..quadraticBezierTo(x + dir * 20, y + 9, x, y)
+          ..close();
+        _skaliert(c, Offset(x, y), _plopp(v, .4 + i * .1), () {
+          for (final m in blatt.computeMetrics()) {
+            for (var d = 0.0; d < m.length; d += 7) {
+              c.drawPath(m.extractPath(d, d + 4), gestrichelt);
+            }
+          }
+        });
+      }
     }
     if (knospe != null) {
       final x = _sx(64);

@@ -197,7 +197,18 @@ class BAufbau {
     this.naechstes,
     this.geschafft = const [],
     this.mehr = const [],
+    this.klein = false,
+    this.bildErsatz,
   });
+
+  /// "Deine Serie" and "Nächstes Ziel" as two small flat fields (e.g.
+  /// Training without a plan; Phillip 2026-11-18).
+  final bool klein;
+
+  /// Shown instead of the big picture while it would be empty
+  /// (draft "Leere Stellen", 2026-11-18).
+  /// Gets the page's tap helper, so its parts open tiles like the picture.
+  final Widget Function(BildTipp tipp)? bildErsatz;
 
   /// The user's own goal or reason, shown in gold under the coach line.
   final String? dafuer;
@@ -2347,16 +2358,18 @@ class _BildSeiteViewState extends State<_BildSeiteView>
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (a.serie case final x?) Expanded(child: _serie(x)),
+                if (a.serie case final x?)
+                  Expanded(child: a.klein ? _serieKlein(x) : _serie(x)),
                 if (a.serie != null && a.naechstes != null)
                   const SizedBox(width: 12),
-                if (a.naechstes case final x?) Expanded(child: _naechstes(x)),
+                if (a.naechstes case final x?)
+                  Expanded(child: a.klein ? _naechstesKlein(x) : _naechstes(x)),
               ],
             ),
           ),
         ],
         const SizedBox(height: 12),
-        _bildKachel(),
+        a.bildErsatz?.call(_tipp) ?? _bildKachel(),
         const SizedBox(height: 12),
         _glas(
           key: const ValueKey('geschafft'),
@@ -2566,6 +2579,59 @@ class _BildSeiteViewState extends State<_BildSeiteView>
           ),
         ],
       ],
+    ),
+  );
+
+  Widget _kleinFeld(Key key, String label, Widget inhalt) => Container(
+    key: key,
+    padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+    decoration: BoxDecoration(
+      color: Klar.glas,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(label, style: Umbau.label.copyWith(fontSize: 9)),
+        const SizedBox(height: 3),
+        inhalt,
+      ],
+    ),
+  );
+
+  Widget _serieKlein(BSerie x) => _kleinFeld(
+    const ValueKey('serie'),
+    'DEINE SERIE',
+    Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+            text: '${x.zahl} ',
+            style: const TextStyle(
+              fontFamily: 'Sora',
+              fontWeight: FontWeight.w700,
+              color: Glas.label,
+            ),
+          ),
+          TextSpan(text: x.einheit),
+          if (x.rekord > 0) TextSpan(text: ' · Rekord ${x.rekord}'),
+        ],
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: Glas.tText.copyWith(fontSize: 13),
+    ),
+  );
+
+  Widget _naechstesKlein(BNaechstes x) => _kleinFeld(
+    const ValueKey('naechstes-ziel'),
+    'NÄCHSTES ZIEL',
+    Text(
+      x.titel,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: Glas.tText.copyWith(fontSize: 13),
     ),
   );
 

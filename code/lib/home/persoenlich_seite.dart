@@ -766,6 +766,31 @@ extension _Persoenlich on _HomePageState {
                   text: '$umgesetzt von ${d.umsetzen.length} machst du schon.',
                 ),
           geschafft: geschafftListe,
+          // Skill and Wissen as two own cards (Phillip 2026-11-18:
+          // "Wissen und Skills trennen").
+          bildErsatz: (tipp) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              tipp(
+                'pe-kurs',
+                SkillKarte(
+                  skill: k?.skill,
+                  lektionen: k?.lektionen.length ?? 12,
+                  erreicht: k?.erreicht ?? 0,
+                  text: lek != null
+                      ? 'Lektion ${k!.erreicht + 1} von ${k.lektionen.length}: ${lek.titel}'
+                      : k == null
+                      ? 'Welchen Skill willst du lernen?'
+                      : 'Kurs geschafft',
+                ),
+              ),
+              const SizedBox(height: 12),
+              tipp(
+                'pe-buecher',
+                BibliothekKarte(buecher: regal, neu: (pille) => pille),
+              ),
+            ],
+          ),
         ),
         kacheln: [
           BKachel(

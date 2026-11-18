@@ -507,6 +507,16 @@ extension _Koerper on _HomePageState {
                   ),
             serie: serie,
             naechstes: wocheZiel,
+            // Without a plan: small Serie and Ziel, and the week from the
+            // check-in instead of an empty picture (draft "Leere Stellen",
+            // Phillip 2026-11-18).
+            klein: _plan.isEmpty,
+            bildErsatz: _plan.isEmpty
+                ? (tipp) => tipp(
+                    't-heute',
+                    _WocheAusCheckIn(woche: woche, heute: heuteIndex),
+                  )
+                : null,
             geschafft: geschafftListe,
             mehr: [
               BMehr('Training heute', wert: heuteWort, ziel: 't-heute'),
@@ -1753,4 +1763,85 @@ String _zahl1(double v) {
     '.',
     ',',
   );
+}
+
+/// Training without a plan: the week as 7 discs, gold where the check-in
+/// says trained.
+class _WocheAusCheckIn extends StatelessWidget {
+  const _WocheAusCheckIn({required this.woche, required this.heute});
+
+  final List<bool?> woche;
+  final int heute;
+
+  @override
+  Widget build(BuildContext context) {
+    final n = woche.where((x) => x == true).length;
+    final satz = n == 0
+        ? 'Noch keine Einheit diese Woche.'
+        : '$n ${n == 1 ? 'Einheit' : 'Einheiten'} diese Woche, aus deinem '
+              'Check-in.';
+    return Container(
+      key: const ValueKey('woche-check-in'),
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+      decoration: BoxDecoration(
+        color: Klar.glas,
+        borderRadius: BorderRadius.circular(26),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('DEINE WOCHE', style: Umbau.label),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              for (var i = 0; i < 7; i++) ...[
+                if (i > 0) const SizedBox(width: 6),
+                Expanded(
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: Container(
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: woche[i] == true ? Umbau.grad : null,
+                        color: woche[i] == true
+                            ? null
+                            : const Color(0x14FFF5E6),
+                        border: i == heute
+                            ? Border.all(color: Glas.label, width: 1.5)
+                            : null,
+                        boxShadow: woche[i] == true
+                            ? const [
+                                BoxShadow(
+                                  color: Color(0x40E0BF7E),
+                                  blurRadius: 12,
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Text(
+                        const ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'][i],
+                        style: TextStyle(
+                          fontFamily: 'Figtree',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                          color: woche[i] == true ? Umbau.tinte : Glas.soft,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            '$satz\nMit Plan stehen hier deine Übungen.',
+            textAlign: TextAlign.center,
+            style: Glas.tSoft.copyWith(fontSize: 12.5, height: 1.45),
+          ),
+        ],
+      ),
+    );
+  }
 }
