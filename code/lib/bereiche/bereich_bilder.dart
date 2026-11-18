@@ -972,7 +972,7 @@ class _RoutinenMaler extends _Maler {
   void paint(Canvas c, Size s) {
     final k = b.ketten.take(3).toList();
     final gemacht = k.where((x) => x.heute).length;
-    _lab(c, 22, 34, 'DEINE GEWOHNHEITEN', tonFokus);
+    _lab(c, 22, 34, 'DEINE ROUTINEN', tonFokus);
     if (k.isNotEmpty) {
       _text(
         c,
@@ -1054,7 +1054,7 @@ class _RoutinenMaler extends _Maler {
       );
       _text(
         c,
-        '+ Neue Gewohnheit andocken',
+        '+ Neue Routine andocken',
         Offset(151, ny + 21),
         weight: FontWeight.w600,
       );

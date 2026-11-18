@@ -838,7 +838,7 @@ extension _Produktiv on _HomePageState {
       BSeite(
         name: 'Routinen',
         coach: aktiv == null
-            ? 'Dock eine neue Gewohnheit an etwas an, das du sowieso machst.'
+            ? 'Dock eine neue Routine an etwas an, das du sowieso machst.'
             : '„${aktiv.neu}“ hält seit ${aktiv.tage.length} Tagen. Die '
                   'nächste kommt erst, wenn sie von allein läuft.',
         bild: BBild(
@@ -856,7 +856,7 @@ extension _Produktiv on _HomePageState {
                 ),
             ],
             laeuftText: laeuft.isEmpty
-                ? 'Nach 21 Tagen läuft eine Gewohnheit von allein'
+                ? 'Nach 21 Tagen läuft eine Routine von allein'
                 : 'Läuft von allein: ${laeuft.map((a) => a.neu).join(', ')}',
             tipp: tipp,
             v: v,
@@ -867,18 +867,18 @@ extension _Produktiv on _HomePageState {
             BZahl('$stueck', 'Tage am Stück', ziel: 'p-andock'),
             BZahl('${laeuft.length}', 'laufen allein', ziel: 'p-laeuft'),
           ],
-          knopf: ('Gewohnheit andocken', 'p-neu'),
+          knopf: ('Routine andocken', 'p-neu'),
           knopf2: (Icons.add, 'p-andock'),
         ),
         aufbau: BAufbau(
           dafuer: dafuer,
           jetzt: aktiv == null
               ? const BJetzt(
-                  titel: 'Dock eine Gewohnheit an',
+                  titel: 'Dock eine Routine an',
                   text: 'An etwas, das du sowieso jeden Tag machst.',
                   mitte: '0/21',
                   unter: 'Tage',
-                  knopf: ('Gewohnheit andocken', 'p-neu'),
+                  knopf: ('Routine andocken', 'p-neu'),
                 )
               : aktiv.tage.contains(heute)
               ? BJetzt(
@@ -902,11 +902,11 @@ extension _Produktiv on _HomePageState {
             einheit: stueck == 1 ? 'Tag' : 'Tage',
             text: stueck == 0
                 ? 'Startet mit deinem nächsten Eintrag'
-                : 'am Stück bei deiner Gewohnheit',
+                : 'am Stück bei deiner Routine',
           ),
           naechstes: aktiv == null
               ? const BNaechstes(
-                  titel: 'Erste Gewohnheit',
+                  titel: 'Erste Routine',
                   anteil: 0,
                   text: 'Nach 21 Tagen läuft sie von allein.',
                 )
@@ -918,11 +918,19 @@ extension _Produktiv on _HomePageState {
                       'die nächste.',
                 ),
           geschafft: geschafftListe,
+          // No routine yet: a compact card instead of the big empty
+          // picture (draft "Leere Stellen", Phillip 2026-11-18).
+          bildErsatz: glieder.isEmpty
+              ? (tipp) => RoutinenLeer(
+                  neu: (pille) => tipp('p-neu', pille),
+                  fuss: 'Nach 21 Tagen läuft eine Routine von allein.',
+                )
+              : null,
         ),
         kacheln: [
           BKachel(
             id: 'p-andock',
-            titel: 'Gewohnheit andocken',
+            titel: 'Routine andocken',
             icon: Icons.link,
             groesse: KachelGroesse.hoch,
             gold: true,
@@ -946,9 +954,9 @@ extension _Produktiv on _HomePageState {
                 : 'noch ${21 - aktiv.tage.length} Tage, dann läuft sie von '
                       'allein',
             feld: _pFeld(
-              'Gewohnheit andocken',
+              'Routine andocken',
               Icons.link,
-              'Eine Gewohnheit nach der anderen, jede an etwas, das du sowieso '
+              'Eine Routine nach der anderen, jede an etwas, das du sowieso '
                   'machst.',
               (u) => AndockSeite(u: u),
             ),
@@ -962,7 +970,7 @@ extension _Produktiv on _HomePageState {
             feld: _pFeld(
               'Neue andocken',
               Icons.add_link,
-              'Woran willst du die neue Gewohnheit hängen?',
+              'Woran willst du die neue Routine hängen?',
               (u) => NeuAndockSeite(u: u),
             ),
           ),
@@ -977,7 +985,7 @@ extension _Produktiv on _HomePageState {
             feld: _pFeld(
               'Läuft von allein',
               Icons.all_inclusive,
-              'Diese Gewohnheiten brauchen keinen Anker mehr.',
+              'Diese Routinen brauchen keinen Anker mehr.',
               (u) => LaeuftSeite(u: u),
             ),
           ),

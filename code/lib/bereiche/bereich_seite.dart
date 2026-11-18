@@ -207,7 +207,8 @@ class BAufbau {
 
   /// Shown instead of the big picture while it would be empty
   /// (draft "Leere Stellen", 2026-11-18).
-  final Widget? bildErsatz;
+  /// Gets the page's tap helper, so its parts open tiles like the picture.
+  final Widget Function(BildTipp tipp)? bildErsatz;
 
   /// The user's own goal or reason, shown in gold under the coach line.
   final String? dafuer;
@@ -2368,7 +2369,7 @@ class _BildSeiteViewState extends State<_BildSeiteView>
           ),
         ],
         const SizedBox(height: 12),
-        a.bildErsatz ?? _bildKachel(),
+        a.bildErsatz?.call(_tipp) ?? _bildKachel(),
         const SizedBox(height: 12),
         _glas(
           key: const ValueKey('geschafft'),

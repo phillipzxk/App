@@ -1131,7 +1131,7 @@ class AndockSeite extends StatelessWidget {
         return Block(
           children: [
             Text(
-              'Gerade wird keine neue Gewohnheit aufgebaut. Dock eine an etwas '
+              'Gerade wird keine neue Routine aufgebaut. Dock eine an etwas '
               'an, das du sowieso jeden Tag machst.',
               style: Glas.tSoft.copyWith(fontSize: 13.5),
             ),
@@ -1181,7 +1181,7 @@ class AndockSeite extends StatelessWidget {
             label: 'Passt zum Danach-Plan aus Mindset',
             children: [
               Text(
-                'Eine neue Gewohnheit hängt immer an etwas, das du sowieso '
+                'Eine neue Routine hängt immer an etwas, das du sowieso '
                 'machst. So musst du nicht dran denken.',
                 style: Glas.tText.copyWith(fontWeight: FontWeight.w500),
               ),
@@ -1313,7 +1313,7 @@ class LaeuftSeite extends StatelessWidget {
             children: [
               if (l.isEmpty)
                 Text(
-                  'Noch keine. Nach 21 Tagen landet eine Gewohnheit hier.',
+                  'Noch keine. Nach 21 Tagen landet eine Routine hier.',
                   style: Glas.tSoft.copyWith(fontSize: 13.5),
                 ),
               for (final a in l)

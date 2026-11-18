@@ -512,7 +512,10 @@ extension _Koerper on _HomePageState {
             // Phillip 2026-11-18).
             klein: _plan.isEmpty,
             bildErsatz: _plan.isEmpty
-                ? _WocheAusCheckIn(woche: woche, heute: heuteIndex)
+                ? (tipp) => tipp(
+                    't-heute',
+                    _WocheAusCheckIn(woche: woche, heute: heuteIndex),
+                  )
                 : null,
             geschafft: geschafftListe,
             mehr: [
