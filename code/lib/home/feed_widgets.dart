@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../ui/umbau.dart';
+
 import '../bereiche/glas.dart';
 import '../feed/feed_data.dart';
 import '../ui/coach_style.dart';
@@ -301,113 +303,79 @@ class FeedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final night = dark || (NightScope.of(context) && !darkHead && !gold);
+    // Since "Alte Seiten neu" (2026-11-18) every card is calm glass like the
+    // rest of the app: no black box, no light head. The key card of a page
+    // ([gold], [darkHead], [highlight]) gets a soft gold glass and gold edge.
+    final key = gold || darkHead || highlight;
     final i = icon;
     final head = Row(
       children: [
-        if (i != null) ...[
-          SymbolBadge(i, onDark: darkHead || night, onGold: gold || darkHead),
-          const SizedBox(width: 10),
-        ],
+        if (i != null) ...[GlasSymbol(i), const SizedBox(width: 10)],
         Expanded(
           child: Text(
             title,
-            style: gold
-                ? CoachStyle.cardTitle.copyWith(color: CoachStyle.goldInk)
-                : darkHead
-                ? CoachStyle.cardTitle.copyWith(color: CoachStyle.goldInk)
-                : night
-                ? CoachStyle.cardTitle.copyWith(color: const Color(0xFFF6EEDD))
-                : CoachStyle.cardTitle,
+            style: CoachStyle.cardTitle.copyWith(
+              color: const Color(0xFFF7EEDD),
+            ),
           ),
         ),
         ?trailing,
       ],
     );
-    final content = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (gold)
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            decoration: const BoxDecoration(gradient: CoachStyle.goldGradient),
-            child: head,
-          )
-        else if (darkHead)
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            decoration: const BoxDecoration(
-              gradient: CoachStyle.creamGradient,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(17)),
-            ),
-            child: head,
-          )
-        else
-          Container(
-            margin: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-            padding: const EdgeInsets.only(bottom: 10),
-            decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: CoachStyle.hairline)),
-            ),
-            child: head,
-          ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-          child: NightScope(
-            night: night,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: children,
-            ),
-          ),
-        ),
-      ],
-    );
-    if (gold) {
-      // The key card of an area page: metallic gold edge and gold head.
-      return Container(
-        margin: const EdgeInsets.only(bottom: 14),
-        padding: const EdgeInsets.all(1.5),
-        decoration: BoxDecoration(
-          gradient: CoachStyle.goldGradient,
-          borderRadius: BorderRadius.circular(19.5),
-          boxShadow: CoachStyle.goldGlow,
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(18),
-          child: ColoredBox(color: CoachStyle.cardBright, child: content),
-        ),
-      );
-    }
-    if (night) {
-      return Container(
-        margin: const EdgeInsets.only(bottom: 14),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF221B14), Color(0xFF16120E)],
-          ),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: CoachStyle.hairline),
-          boxShadow: dark ? CoachStyle.darkShadow : null,
-        ),
-        child: content,
-      );
-    }
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: CoachStyle.cardBright,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: highlight ? CoachStyle.goldEdge : CoachStyle.hairline,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: key
+              ? const [Color(0x24F5DFAE), Color(0x12F5DFAE)]
+              : const [Color(0x10FFF5E6), Color(0x0CFFF5E6)],
         ),
-        boxShadow: CoachStyle.cardShadowStrong,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: key ? const Color(0x33F5DFAE) : const Color(0x14FFF5E6),
+        ),
       ),
-      child: content,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            head,
+            const SizedBox(height: 12),
+            NightScope(
+              night: true,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: children,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
+}
+
+/// Small gold symbol in a rounded glass square (head of a glass card).
+class GlasSymbol extends StatelessWidget {
+  const GlasSymbol(this.icon, {super.key, this.size = 34});
+
+  final IconData icon;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: size,
+    height: size,
+    decoration: BoxDecoration(
+      color: const Color(0x1AF5DFAE),
+      borderRadius: BorderRadius.circular(size * 0.35),
+      border: Border.all(color: const Color(0x38F5DFAE)),
+    ),
+    child: Icon(icon, size: size * 0.53, color: CoachStyle.goldLight),
+  );
 }
 
 /// Small gold heading that splits "Heute" into groups.
@@ -611,15 +579,24 @@ class EditorPage extends StatelessWidget {
     required this.intro,
     required this.children,
     required this.onSave,
-    this.glas = false,
+    this.glas = true,
+    this.klar = false,
+    this.zurueck = 'Zurück',
   });
+
+  /// Warm brown page (see [CoachPage.klar]).
+  final bool klar;
+
+  /// Name on the back pill: the page you land on.
+  final String zurueck;
 
   final String title;
   final String intro;
   final List<Widget> children;
   final VoidCallback onSave;
 
-  /// Dark glass look (e.g. the training plan).
+  /// Dark glass look; since "Alte Seiten neu" (2026-11-18) the default for
+  /// every editor.
   final bool glas;
 
   @override
@@ -627,18 +604,15 @@ class EditorPage extends StatelessWidget {
     return CoachPage(
       dark: glas,
       glas: glas,
+      klar: klar,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Align(
             alignment: Alignment.centerLeft,
-            child: IconButton(
-              tooltip: 'Zurück',
-              icon: Icon(
-                Icons.arrow_back,
-                color: glas ? CoachStyle.goldLight : CoachStyle.ink,
-              ),
-              onPressed: () => Navigator.of(context).pop(),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 4, bottom: 4),
+              child: ZurueckPille(label: zurueck),
             ),
           ),
           Expanded(

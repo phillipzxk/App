@@ -1,6 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+
+import '../ui/umbau.dart';
+
 import 'package:flutter/services.dart';
 
 import '../bereiche/glas.dart';
@@ -327,11 +330,13 @@ class _Zurueck extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => TextButton.icon(
-    key: const ValueKey('konto-zurueck'),
-    onPressed: onTap,
-    icon: const Icon(Icons.chevron_left, color: Glas.label, size: 20),
-    label: Text('Zurück', style: Glas.tLabel),
+  Widget build(BuildContext context) => Align(
+    alignment: Alignment.centerLeft,
+    child: ZurueckPille(
+      key: const ValueKey('konto-zurueck'),
+      label: 'Zurück',
+      onTap: onTap,
+    ),
   );
 }
 

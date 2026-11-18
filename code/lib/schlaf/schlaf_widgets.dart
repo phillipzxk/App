@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../ui/umbau.dart';
+
 import '../checkin/checkin.dart';
 import '../data/user_profile.dart';
 import '../health/health_dienst.dart';
@@ -565,12 +567,7 @@ class SchlafSeite extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: CoachStyle.night,
     extendBodyBehindAppBar: true,
-    appBar: AppBar(
-      backgroundColor: Colors.transparent,
-      foregroundColor: CoachStyle.goldLight,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-    ),
+    appBar: zurueckBar(label.split(' · ').first),
     body: SchlafHimmel(
       phase:
           phase ??

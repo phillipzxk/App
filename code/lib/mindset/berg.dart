@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../bereiche/glas.dart';
 import '../checkin/checkin.dart';
+import '../konto/konto_ui.dart' show bewegungAn;
 import '../ui/coach_style.dart';
 import 'mindset_data.dart';
 import 'mindset_logik.dart';
@@ -26,7 +27,11 @@ class _BergMaler extends CustomPainter {
     required this.erledigt,
     required this.auswahl,
     required this.klein,
+    this.puls = 0,
   });
+
+  /// 0..1: the user's light breathes softly on the big picture.
+  final double puls;
 
   final List<Stein> steine;
   final int erledigt;
@@ -48,7 +53,17 @@ class _BergMaler extends CustomPainter {
       ..lineTo(w, h * .36)
       ..lineTo(w, h)
       ..close();
-    canvas.drawPath(hinten, Paint()..color = const Color(0xD92A2330));
+    // Brown and bronze instead of the old purple
+    // (draft "Alte Seiten neu", 2026-11-18).
+    canvas.drawPath(
+      hinten,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF4A3A27), Color(0xFF1C1611)],
+        ).createShader(Offset.zero & s),
+    );
     final vorne = Path()
       ..moveTo(0, h)
       ..lineTo(0, h * .88)
@@ -59,7 +74,15 @@ class _BergMaler extends CustomPainter {
       ..lineTo(w, h * .55)
       ..lineTo(w, h)
       ..close();
-    canvas.drawPath(vorne, Paint()..color = const Color(0xE61C171D));
+    canvas.drawPath(
+      vorne,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF6B5535), Color(0xFF2A2118)],
+        ).createShader(Rect.fromLTWH(0, h * .55, w, h * .45)),
+    );
     // Gold summit.
     final gipfel = Path()
       ..moveTo(w * .84, h * .12)
@@ -103,12 +126,12 @@ class _BergMaler extends CustomPainter {
       final sel = steine[i].id == auswahl;
       canvas.drawOval(
         Rect.fromCenter(center: c, width: r * 2.4, height: r * 1.7),
-        Paint()..color = const Color(0xFF5A5260),
+        Paint()..color = const Color(0xFF5A4630),
       );
       canvas.drawOval(
         Rect.fromCenter(center: c, width: r * 2.4, height: r * 1.7),
         Paint()
-          ..color = sel ? CoachStyle.goldLight : const Color(0xFF8A7F8C)
+          ..color = sel ? CoachStyle.goldLight : const Color(0xFF9C8058)
           ..style = PaintingStyle.stroke
           ..strokeWidth = sel ? 2 : 1.1,
       );
@@ -118,7 +141,7 @@ class _BergMaler extends CustomPainter {
           width: r * .9,
           height: r * .4,
         ),
-        Paint()..color = const Color(0xFF7B7180),
+        Paint()..color = const Color(0xFF7D6545),
       );
       if (!klein) {
         final tp = TextPainter(
@@ -148,16 +171,17 @@ class _BergMaler extends CustomPainter {
     final ich = stufe == 0
         ? p(.1, .95)
         : p(_plaetze[stufe - 1].dx - .08, _plaetze[stufe - 1].dy + .05);
+    final glanz = (klein ? 9 : 18) * (1 + .35 * puls);
     canvas.drawCircle(
       ich,
-      klein ? 9 : 18,
+      glanz,
       Paint()
         ..shader = RadialGradient(
           colors: [
             CoachStyle.goldLight.withValues(alpha: .55),
             CoachStyle.goldLight.withValues(alpha: 0),
           ],
-        ).createShader(Rect.fromCircle(center: ich, radius: klein ? 9 : 18)),
+        ).createShader(Rect.fromCircle(center: ich, radius: glanz)),
     );
     canvas.drawCircle(
       ich,
@@ -168,7 +192,10 @@ class _BergMaler extends CustomPainter {
 
   @override
   bool shouldRepaint(_BergMaler o) =>
-      o.steine != steine || o.erledigt != erledigt || o.auswahl != auswahl;
+      o.steine != steine ||
+      o.erledigt != erledigt ||
+      o.auswahl != auswahl ||
+      o.puls != puls;
 }
 
 /// The small mountain for the tile.
@@ -394,12 +421,15 @@ class _BergSeiteState extends State<BergSeite> {
                   child: Stack(
                     children: [
                       Positioned.fill(
-                        child: CustomPaint(
-                          painter: _BergMaler(
-                            steine: offen,
-                            erledigt: d.steine.length - offen.length,
-                            auswahl: s?.id,
-                            klein: false,
+                        child: _Puls(
+                          bau: (puls) => CustomPaint(
+                            painter: _BergMaler(
+                              steine: offen,
+                              erledigt: d.steine.length - offen.length,
+                              auswahl: s?.id,
+                              klein: false,
+                              puls: puls,
+                            ),
                           ),
                         ),
                       ),
@@ -453,7 +483,6 @@ class _BergSeiteState extends State<BergSeite> {
             key: const ValueKey('berg-neu'),
             label: 'Neuer Stein',
             icon: Icons.add,
-            ghost: true,
             onTap: () => setState(() {
               _neu = true;
               _coachSatz = null;
@@ -656,4 +685,38 @@ class _BergSeiteState extends State<BergSeite> {
         ),
     ];
   }
+}
+
+/// Gives its child a slow 0..1..0 value (the breathing light on the path).
+class _Puls extends StatefulWidget {
+  const _Puls({required this.bau});
+  final Widget Function(double puls) bau;
+
+  @override
+  State<_Puls> createState() => _PulsState();
+}
+
+class _PulsState extends State<_Puls> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1300),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    if (bewegungAn) _c.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _c,
+    builder: (_, _) => widget.bau(Curves.easeInOut.transform(_c.value)),
+  );
 }

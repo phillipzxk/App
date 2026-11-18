@@ -231,7 +231,7 @@ void main() {
     await openKrone(tester, 'krone-fokus');
     expect(find.text('Tag 1 von 7'), findsOneWidget);
     expect(find.text('0 von 1 Tag geschafft'), findsOneWidget);
-    await tester.pageBack();
+    await tester.tap(find.byTooltip('Zurück').last);
     await tester.pumpAndSettle();
 
     // "Heute geschafft" right in the crown field.
@@ -254,7 +254,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(feed.fokus!.heuteGeschafft(fixedNow), isFalse);
     expect(find.text('0 von 1 Tag geschafft'), findsOneWidget);
-    await tester.pageBack();
+    await tester.tap(find.byTooltip('Zurück').last);
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('coach-jubel')), findsNothing);
     expect(find.text('Heute geschafft'), findsOneWidget);

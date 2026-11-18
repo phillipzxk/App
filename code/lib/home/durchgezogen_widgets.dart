@@ -363,11 +363,7 @@ class _DurchgezogenSeiteState extends State<DurchgezogenSeite> {
     final wochen = nachWochen(_alle);
     return Scaffold(
       backgroundColor: const Color(0xFF231B14),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        foregroundColor: CoachStyle.goldLight,
-        elevation: 0,
-      ),
+      appBar: zurueckBar('Mindset'),
       body: KlarHintergrund(
         child: NightScope(
           child: ListView(

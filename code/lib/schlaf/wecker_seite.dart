@@ -215,7 +215,7 @@ class _Schalter extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(13),
               gradient: an ? CoachStyle.goldGradient : null,
-              color: an ? null : const Color(0xFF2A1F13),
+              color: an ? null : const Color(0x14FFF5E6),
               border: an ? null : Border.all(color: const Color(0x33FFF5E6)),
             ),
             child: Container(
@@ -249,15 +249,15 @@ class _Aufgabe extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InkWell(
-    borderRadius: BorderRadius.circular(14),
+    borderRadius: BorderRadius.circular(22),
     onTap: onTap,
     child: Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        color: const Color(0xCC1A140E),
+        borderRadius: BorderRadius.circular(22),
+        color: an ? const Color(0x24F5DFAE) : const Color(0x17FFF5E6),
         border: Border.all(
-          color: an ? CoachStyle.goldLight : const Color(0xFF3A2E21),
+          color: an ? const Color(0x8CE0BF7E) : const Color(0x14FFF5E6),
           width: an ? 1.5 : 1,
         ),
       ),
@@ -269,7 +269,7 @@ class _Aufgabe extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: an ? CoachStyle.goldGradient : null,
-              color: an ? null : const Color(0xFF2A1F13),
+              color: an ? null : const Color(0x1AF5DFAE),
             ),
             child: Icon(
               icon,

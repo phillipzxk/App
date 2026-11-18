@@ -116,7 +116,7 @@ void main() {
       find.textContaining('Eiweiß zum Frühstück.', findRichText: true),
       findsOneWidget,
     );
-    await tester.pageBack();
+    await tester.tap(find.byTooltip('Zurück').last);
     await tester.pumpAndSettle();
 
     await openTab(tester, 'Mindset', 'm-muster');

@@ -890,10 +890,10 @@ class _LookSeiteState extends _Seite<LookSeite> {
         art: GlasArt.gold,
         children: [
           const Center(
-            child: Icon(
-              Icons.face_retouching_natural,
+            child: GlasSymbolBild(
+              lookSymbol,
               size: 56,
-              color: CoachStyle.goldLight,
+              farbe: CoachStyle.goldLight,
             ),
           ),
           const SizedBox(height: 8),

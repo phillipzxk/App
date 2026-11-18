@@ -2,6 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../konto/konto_ui.dart' show bewegungAn;
+import '../ui/umbau.dart';
+
 import '../feed/feed_store.dart';
 import '../home/feed_widgets.dart';
 import '../ui/coach_style.dart';
@@ -43,7 +46,15 @@ Future<bool> fotoMachen(
 /// Ich.md): first photo next to the latest with the values then and now,
 /// all weeks to swipe through, and what the AI adds later.
 class FutureMePage extends StatefulWidget {
-  const FutureMePage({super.key, required this.store, required this.clock});
+  const FutureMePage({
+    super.key,
+    required this.store,
+    required this.clock,
+    this.zurueck = 'Heute',
+  });
+
+  /// Name on the back pill: the page you land on.
+  final String zurueck;
 
   final FeedStore store;
   final DateTime Function() clock;
@@ -95,15 +106,16 @@ class _FutureMePageState extends State<FutureMePage> {
   Widget build(BuildContext context) {
     final e = _e;
     return CoachPage(
+      dark: true,
+      klar: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Align(
             alignment: Alignment.centerLeft,
-            child: IconButton(
-              tooltip: 'Zurück',
-              icon: const Icon(Icons.arrow_back, color: CoachStyle.ink),
-              onPressed: () => Navigator.of(context).pop(),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 4, bottom: 4),
+              child: ZurueckPille(label: widget.zurueck),
             ),
           ),
           Expanded(
@@ -158,6 +170,7 @@ class _FutureMePageState extends State<FutureMePage> {
           ),
           const SizedBox(height: 10),
         ],
+        if (first == null) ...[const FotoRahmen(), const SizedBox(height: 14)],
         if (first == null)
           const FeedCard(
             title: 'Dein erstes Foto',
@@ -247,14 +260,18 @@ class _Leer extends StatelessWidget {
           title: 'Fortschrittsfoto',
           icon: Icons.photo_camera_outlined,
         ),
-        FeedCard(
+        const FotoRahmen(),
+        const SizedBox(height: 14),
+        const FeedCard(
           title: 'Fototag und Posen',
           icon: Icons.photo_camera_outlined,
-          children: [
-            const HintText('Fototag und Posen einmal festlegen.'),
-            const SizedBox(height: 12),
-            GhostButton(label: 'Einrichten', onPressed: onSetup),
-          ],
+          highlight: true,
+          children: [HintText('Fototag und Posen einmal festlegen.')],
+        ),
+        MainButton(
+          key: const ValueKey('foto-einrichten'),
+          label: 'Einrichten',
+          onPressed: onSetup,
         ),
       ],
     );
@@ -483,6 +500,8 @@ class _EinrichtenPageState extends State<EinrichtenPage> {
   Widget build(BuildContext context) {
     final fest = widget.current != null;
     return EditorPage(
+      zurueck: 'Fortschrittsfoto',
+      klar: true,
       title: 'Fortschrittsfoto',
       intro:
           'Einmal festlegen: an welchem Tag du dein Wochenfoto machst, welche '
@@ -494,18 +513,21 @@ class _EinrichtenPageState extends State<EinrichtenPage> {
         if (fest)
           HintText('${wochentage[_tag - 1]}. Der Fototag bleibt fest.')
         else ...[
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
+          // 7 round circles in one row, so "So" never wraps
+          // (draft "Alte Seiten neu", 2026-11-18).
+          Row(
             children: [
-              for (var d = 1; d <= 7; d++)
-                ChoiceChip(
-                  key: ValueKey('fototag-$d'),
-                  label: Text(wochentage[d - 1].substring(0, 2)),
-                  selected: _tag == d,
-                  selectedColor: CoachStyle.selectedFill,
-                  onSelected: (_) => setState(() => _tag = d),
+              for (var d = 1; d <= 7; d++) ...[
+                if (d > 1) const SizedBox(width: 6),
+                Expanded(
+                  child: _TagKreis(
+                    key: ValueKey('fototag-$d'),
+                    text: wochentage[d - 1].substring(0, 2),
+                    an: _tag == d,
+                    onTap: () => setState(() => _tag = d),
+                  ),
                 ),
+              ],
             ],
           ),
           const SizedBox(height: 6),
@@ -525,9 +547,12 @@ class _EinrichtenPageState extends State<EinrichtenPage> {
           ),
           const SizedBox(height: 8),
         ],
-        GhostButton(
-          label: 'Pose hinzufügen',
-          onPressed: () => setState(() => _posen.add(TextEditingController())),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: _PlusPille(
+            label: 'Pose hinzufügen',
+            onTap: () => setState(() => _posen.add(TextEditingController())),
+          ),
         ),
         const SizedBox(height: 6),
         const HintText(
@@ -600,6 +625,8 @@ class _AufnahmePageState extends State<AufnahmePage> {
     final fertig = e.posen.every(_bilder.containsKey);
     return EditorPage(
       title: 'Woche ${widget.lage.woche}',
+      zurueck: 'Fortschrittsfoto',
+      klar: true,
       intro: widget.erstes == null
           ? 'Dein erstes Foto. Merk dir Pose, Ort und Licht, damit du jede '
                 'Woche genauso stehst.'
@@ -688,4 +715,205 @@ class _AufnahmePageState extends State<AufnahmePage> {
       ],
     );
   }
+}
+
+/// One weekday as a round circle; the chosen one is filled gold.
+class _TagKreis extends StatelessWidget {
+  const _TagKreis({
+    super.key,
+    required this.text,
+    required this.an,
+    required this.onTap,
+  });
+
+  final String text;
+  final bool an;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    selected: an,
+    child: GestureDetector(
+      onTap: onTap,
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: an ? CoachStyle.goldGradient : null,
+            color: an ? null : const Color(0x17FFF5E6),
+            border: an ? null : Border.all(color: const Color(0x14FFF5E6)),
+            boxShadow: an
+                ? const [BoxShadow(color: Color(0x40E0BF7E), spreadRadius: 3)]
+                : null,
+          ),
+          child: Text(
+            text,
+            style: TextStyle(
+              fontFamily: 'Figtree',
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+              color: an ? CoachStyle.goldInk : const Color(0xFFCDBB98),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/// Small dashed-looking pill to add one more entry.
+class _PlusPille extends StatelessWidget {
+  const _PlusPille({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: Container(
+      height: 34,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        color: const Color(0x0FF5DFAE),
+        border: Border.all(color: const Color(0x55E0BF7E)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.add, size: 16, color: CoachStyle.goldLight),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'Figtree',
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+              color: CoachStyle.goldLight,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+/// Gold photo frame with a silhouette; the frame breathes slowly
+/// (draft "Alte Seiten neu", 2026-11-18).
+class FotoRahmen extends StatefulWidget {
+  const FotoRahmen({super.key});
+
+  @override
+  State<FotoRahmen> createState() => _FotoRahmenState();
+}
+
+class _FotoRahmenState extends State<FotoRahmen>
+    with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1600),
+    value: 1,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    if (bewegungAn) _c.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Container(
+    key: const ValueKey('foto-rahmen'),
+    height: 190,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(22),
+      color: const Color(0x40000000),
+      border: Border.all(color: const Color(0x14FFF5E6)),
+      gradient: const RadialGradient(
+        center: Alignment(0, -0.2),
+        radius: 0.8,
+        colors: [Color(0x29E0BF7E), Color(0x00E0BF7E)],
+      ),
+    ),
+    child: AnimatedBuilder(
+      animation: _c,
+      builder: (_, _) =>
+          CustomPaint(painter: _RahmenMaler(0.45 + 0.55 * _c.value)),
+    ),
+  );
+}
+
+class _RahmenMaler extends CustomPainter {
+  _RahmenMaler(this.licht);
+  final double licht;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = 128.0, h = 156.0;
+    final r = Rect.fromCenter(
+      center: size.center(Offset.zero),
+      width: w,
+      height: h,
+    );
+    final gold = const LinearGradient(
+      colors: [Color(0xFFF3DCA4), Color(0xFF9C7638)],
+    ).createShader(r);
+    final rahmen = Paint()
+      ..shader = gold
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..color = Color.fromRGBO(255, 255, 255, licht);
+    // Dashed rounded frame.
+    final pfad = Path()
+      ..addRRect(RRect.fromRectAndRadius(r, const Radius.circular(26)));
+    for (final m in pfad.computeMetrics()) {
+      for (var d = 0.0; d < m.length; d += 22) {
+        canvas.drawPath(m.extractPath(d, d + 14), rahmen);
+      }
+    }
+    final linie = Paint()
+      ..shader = gold
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    final fuell = Paint()..color = const Color(0x24E0BF7E);
+    final kopf = Offset(r.center.dx, r.top + 50);
+    canvas
+      ..drawOval(Rect.fromCenter(center: kopf, width: 40, height: 44), fuell)
+      ..drawOval(Rect.fromCenter(center: kopf, width: 40, height: 44), linie);
+    final koerper = Path()
+      ..moveTo(r.center.dx - 42, r.bottom)
+      ..cubicTo(
+        r.center.dx - 38,
+        r.bottom - 40,
+        r.center.dx - 22,
+        r.top + 96,
+        r.center.dx,
+        r.top + 96,
+      )
+      ..cubicTo(
+        r.center.dx + 22,
+        r.top + 96,
+        r.center.dx + 38,
+        r.bottom - 40,
+        r.center.dx + 42,
+        r.bottom,
+      );
+    canvas
+      ..drawPath(koerper, Paint()..color = const Color(0x1FE0BF7E))
+      ..drawPath(koerper, linie);
+  }
+
+  @override
+  bool shouldRepaint(_RahmenMaler old) => old.licht != licht;
 }

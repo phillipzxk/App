@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../ui/umbau.dart';
+
 import '../bereiche/glas.dart';
 import '../data/profile_store.dart';
 import '../data/user_profile.dart';
@@ -161,10 +163,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       children: [
         Row(
           children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back, color: Glas.soft),
-              tooltip: 'Zurück',
-              onPressed: () => setState(() {
+            ZurueckPille(
+              onTap: () => setState(() {
                 if (_index > 0) {
                   _index--;
                 } else {
@@ -172,6 +172,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                 }
               }),
             ),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 'FRAGE ${_index + 1} VON ${onboardingQuestions.length} · '

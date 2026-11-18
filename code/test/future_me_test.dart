@@ -94,7 +94,7 @@ void main() {
     await scrollTo(tester, find.byKey(const ValueKey('zukunft-karte')));
     await tester.tap(find.byKey(const ValueKey('zukunft-karte')));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(OutlinedButton, 'Einrichten'));
+    await tester.tap(find.byKey(const ValueKey('foto-einrichten')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('fototag-1')));
     await tester.enterText(

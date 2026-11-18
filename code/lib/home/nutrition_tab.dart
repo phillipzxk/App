@@ -1021,6 +1021,7 @@ class _KcalEditorState extends State<KcalEditor> {
     const missing = 'Bitte auswählen.';
     return EditorPage(
       title: 'Dein kcal-Ziel',
+      zurueck: 'Ernährung',
       intro:
           'Einmal angeben, danach passt sich dein Ziel mit jedem neuen '
           'Gewicht von selbst an.',

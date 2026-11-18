@@ -105,12 +105,7 @@ class _FormCheckSeiteState extends State<FormCheckSeite> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF231B14),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        foregroundColor: CoachStyle.goldLight,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-      ),
+      appBar: zurueckBar('Training'),
       body: KlarHintergrund(
         child: SafeArea(
           top: false,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../ui/umbau.dart';
+
 import '../bereiche/glas.dart';
 import '../erinnerungen/erinnerung_dienst.dart';
 import '../erinnerungen/erinnerung_plan.dart';
@@ -271,10 +273,9 @@ class _KontoEinstellungenState extends State<KontoEinstellungen>
           children: [
             Align(
               alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.chevron_left, color: Glas.label),
-                label: Text('Zurück', style: Glas.tLabel),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: const ZurueckPille(label: 'Einstellungen'),
               ),
             ),
             GoldSchrift(titel, style: _titelStil),
@@ -338,11 +339,12 @@ class _KontoEinstellungenState extends State<KontoEinstellungen>
         children: [
           Align(
             alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              key: const ValueKey('einstellungen-zurueck'),
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.chevron_left, color: Glas.label),
-              label: Text('Zurück', style: Glas.tLabel),
+            child: const Padding(
+              padding: EdgeInsets.only(bottom: 8),
+              child: ZurueckPille(
+                key: ValueKey('einstellungen-zurueck'),
+                label: 'Heute',
+              ),
             ),
           ),
           Auftritt(

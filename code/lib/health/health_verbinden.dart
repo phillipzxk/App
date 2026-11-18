@@ -3,8 +3,9 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+import '../ui/umbau.dart';
+
 import '../training/training_widgets.dart';
-import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import 'health_dienst.dart';
 
@@ -128,13 +129,12 @@ class _HealthVerbindenSeiteState extends State<HealthVerbindenSeite>
               children: [
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    key: const ValueKey('health-zurueck'),
-                    icon: const Icon(
-                      Icons.chevron_left,
-                      color: CoachStyle.goldLight,
+                  child: const Padding(
+                    padding: EdgeInsets.only(bottom: 12),
+                    child: ZurueckPille(
+                      key: ValueKey('health-zurueck'),
+                      label: 'Schlaf & Routine',
                     ),
-                    onPressed: () => Navigator.of(context).maybePop(),
                   ),
                 ),
                 Text(
