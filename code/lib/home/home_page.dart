@@ -618,6 +618,7 @@ class _HomePageState extends State<HomePage> {
       context,
       mitte,
       (seite) => _UnterSeite(
+        glas: true,
         child: _lebendig(
           () => NightScope(
             child: ListView(
@@ -627,6 +628,13 @@ class _HomePageState extends State<HomePage> {
                   label: germanDate(widget.clock()),
                   title: 'Fokus der Woche',
                 ),
+                if (_fokus == null || _fokus!.vorbei(widget.clock())) ...[
+                  const CoachZeile(
+                    'Drei Vorschläge für die nächsten 7 Tage. Nimm den, '
+                    'der dich am meisten weiterbringt.',
+                  ),
+                  const SizedBox(height: 14),
+                ],
                 _fokusWidget(seite),
               ],
             ),

@@ -224,12 +224,14 @@ class FokusWahl extends StatefulWidget {
 }
 
 class _FokusWahlState extends State<FokusWahl> {
-  int? _gewaehlt;
+  // The first suggestion is chosen from the start, so the gold button is
+  // never grey (draft "Alte Seiten neu", 2026-11-18).
+  int? _gewaehlt = 0;
 
   @override
   void didUpdateWidget(FokusWahl old) {
     super.didUpdateWidget(old);
-    if (old.auswahl != widget.auswahl) _gewaehlt = null;
+    if (old.auswahl != widget.auswahl) _gewaehlt = 0;
   }
 
   @override
@@ -331,8 +333,10 @@ class _FokusWahlState extends State<FokusWahl> {
             for (var i = 0; i < a.vorschlaege.length; i++) ...[
               _Option(
                 key: ValueKey('fokus-option-$i'),
+                nummer: i + 1,
                 v: a.vorschlaege[i],
                 gewaehlt: _gewaehlt == i,
+                leise: _gewaehlt != null && _gewaehlt != i,
                 onTap: () => setState(() => _gewaehlt = i),
               ),
               const SizedBox(height: 8),
@@ -355,76 +359,125 @@ class _FokusWahlState extends State<FokusWahl> {
 class _Option extends StatelessWidget {
   const _Option({
     super.key,
+    required this.nummer,
     required this.v,
     required this.gewaehlt,
+    required this.leise,
     required this.onTap,
   });
 
+  final int nummer;
   final FokusVorschlag v;
   final bool gewaehlt;
+
+  /// Another one is chosen: this one steps back a little.
+  final bool leise;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final fg = gewaehlt ? CoachStyle.goldInk : const Color(0xFFF6EEDD);
-    final sub = gewaehlt ? CoachStyle.creamInkSoft : CoachStyle.inkSoft;
     return Semantics(
       button: true,
       selected: gewaehlt,
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: onTap,
-          child: Ink(
-            padding: const EdgeInsets.fromLTRB(13, 11, 13, 11),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 250),
+          opacity: leise ? 0.55 : 1,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            padding: const EdgeInsets.fromLTRB(12, 12, 13, 12),
             decoration: BoxDecoration(
-              gradient: gewaehlt ? CoachStyle.tileGradient : null,
-              color: gewaehlt ? null : const Color(0xFF231C15),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: gewaehlt ? const Color(0xFFD4A85E) : CoachStyle.line,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: gewaehlt
+                    ? const [Color(0x29F5DFAE), Color(0x0FF5DFAE)]
+                    : const [Color(0x10FFF5E6), Color(0x10FFF5E6)],
               ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: gewaehlt
+                    ? const Color(0x8CE0BF7E)
+                    : const Color(0x14FFF5E6),
+              ),
+              boxShadow: gewaehlt
+                  ? const [BoxShadow(color: Color(0x24E0BF7E), blurRadius: 24)]
+                  : null,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        v.text,
-                        style: CoachStyle.body.copyWith(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: fg,
-                        ),
-                      ),
-                    ),
-                    if (v.behalten) ...[
-                      const SizedBox(width: 8),
-                      Text(
-                        'BEHALTEN',
-                        style: CoachStyle.body.copyWith(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.6,
-                          color: gewaehlt
-                              ? const Color(0xFF7A5A2C)
-                              : CoachStyle.gold,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-                if (v.warum.isNotEmpty) ...[
-                  const SizedBox(height: 3),
-                  Text(
-                    v.warum,
-                    style: CoachStyle.body.copyWith(fontSize: 12.5, color: sub),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  width: 24,
+                  height: 24,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: gewaehlt ? CoachStyle.goldGradient : null,
+                    border: gewaehlt
+                        ? null
+                        : Border.all(color: const Color(0x55E0BF7E)),
                   ),
-                ],
+                  child: Text(
+                    '$nummer',
+                    style: TextStyle(
+                      fontFamily: 'Sora',
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11,
+                      color: gewaehlt
+                          ? CoachStyle.goldInk
+                          : CoachStyle.goldLight,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              v.text,
+                              style: CoachStyle.body.copyWith(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFFF7EEDD),
+                              ),
+                            ),
+                          ),
+                          if (v.behalten) ...[
+                            const SizedBox(width: 8),
+                            Text(
+                              'BEHALTEN',
+                              style: CoachStyle.body.copyWith(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.6,
+                                color: CoachStyle.gold,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      if (v.warum.isNotEmpty) ...[
+                        const SizedBox(height: 3),
+                        Text(
+                          v.warum,
+                          style: CoachStyle.body.copyWith(
+                            fontSize: 12.5,
+                            color: const Color(0xFFCDBB98),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
