@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../sleep/schlafzeiten.dart';
@@ -40,7 +41,7 @@ class WeckerSeite extends StatelessWidget {
     final u = umfeld;
     return SchlafSeite(
       umfeld: u,
-      label: 'Schlaf & Energie',
+      label: 'Schlaf & Routine',
       titel: 'Dein Wecker',
       bau: (context) {
         final w = u.d.wecker;
@@ -160,13 +161,16 @@ class WeckerSeite extends StatelessWidget {
             key: const ValueKey('wecker-testen'),
             onTap: () => zeigeSchlafSeite(context, WeckerKlingelt(umfeld: u)),
           ),
-          const SizedBox(height: 14),
-          const Text(
-            'Der echte Wecker kommt mit der Handy-Version. Auf dem iPhone '
-            'erlaubt Apple fremde Wecker nur mit Einschränkungen, das prüfen '
-            'wir dann.',
-            style: tSoft,
-          ),
+          // The real alarm is built (vault Umsetzung/Echter Wecker); only
+          // the browser preview cannot ring (Rundgang 2026-11-15, point 2).
+          if (kIsWeb) ...[
+            const SizedBox(height: 14),
+            const Text(
+              'In der Vorschau im Browser klingelt nichts. Auf dem iPhone '
+              'klingelt der echte Wecker, auch im Lautlos-Modus.',
+              style: tSoft,
+            ),
+          ],
         ];
       },
     );

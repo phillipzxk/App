@@ -401,6 +401,9 @@ class _AreaCard extends StatelessWidget {
                       ],
                     ),
                   ),
+                  // Room so long answers never run under the tick
+                  // (Rundgang 2026-11-15, point 3).
+                  if (!open) const SizedBox(width: 10),
                   if (answered && !open)
                     Container(
                       width: 26,

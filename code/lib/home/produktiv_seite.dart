@@ -98,7 +98,7 @@ extension _Produktiv on _HomePageState {
     final ms = bz.meilensteine;
     final List<ZielBlatt> blaetter;
     if (ms.isEmpty) {
-      blaetter = [(name: 'Dein erster Meilenstein?', art: -1)];
+      blaetter = [(name: 'Erster Meilenstein?', art: -1)];
     } else {
       final int start = ((ast ?? ms.length) - 1).clamp(
         0,
@@ -557,7 +557,7 @@ extension _Produktiv on _HomePageState {
                     width: 110,
                     child: BusinessBaum(meilensteine: bz.meilensteine),
                   ),
-            text: astText ?? 'Dein erster Meilenstein?',
+            text: astText ?? 'Erster Meilenstein?',
             unter: astText == null
                 ? 'jeder Meilenstein ein Ast'
                 : astAnt == null

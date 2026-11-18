@@ -315,8 +315,10 @@ class _JetztLinie extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 13),
+        // Only "JETZT": the live clock right above shows the minute, so the
+        // two can never disagree (Rundgang 2026-11-15, point 10).
         Text(
-          'JETZT $zeit',
+          'JETZT',
           style: CoachStyle.goldLabel.copyWith(
             color: const Color(0xFFF0C878),
             letterSpacing: 2,

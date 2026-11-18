@@ -50,7 +50,7 @@ void main() {
     );
 
     await scrollTo(tester, find.byKey(const ValueKey('tag-jetzt')));
-    expect(find.text('JETZT 18:00'), findsOneWidget);
+    expect(find.text('JETZT'), findsOneWidget);
     // Getting up is over and comes before the line, Kino after it.
     final auf = tester.getTopLeft(find.byKey(const ValueKey('tag-aufstehen')));
     final jetzt = tester.getTopLeft(find.byKey(const ValueKey('tag-jetzt')));

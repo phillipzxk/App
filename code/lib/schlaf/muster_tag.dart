@@ -20,7 +20,7 @@ class SchlafMusterSeite extends StatelessWidget {
     final u = umfeld;
     return SchlafSeite(
       umfeld: u,
-      label: 'Schlaf & Energie',
+      label: 'Schlaf & Routine',
       titel: 'Was nur bei dir gilt',
       bau: (context) {
         final muster = sichtbareSchlafMuster(u.d);

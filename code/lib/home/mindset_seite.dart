@@ -482,7 +482,9 @@ extension _Mindset on _HomePageState {
               ? BJetzt(
                   fertig: true,
                   titel: stark,
-                  text: 'Heute durchgezogen: ${durchHeute.last.text}',
+                  // The entry already says what was done ("… durchgezogen"),
+                  // so it stands alone (Rundgang 2026-11-15, point 10).
+                  text: durchHeute.last.text,
                   knopf: ('Noch etwas eintragen', 'm-durch'),
                 )
               : BJetzt(
