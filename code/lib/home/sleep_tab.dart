@@ -687,40 +687,51 @@ class SchlafzeitenKarte extends StatelessWidget {
           last: true,
         ),
         const SizedBox(height: 8),
-        Container(
+        // A quiet sentence with a gold dot instead of a light box
+        // (draft "Alte Seiten neu", 2026-11-18).
+        Row(
           key: const ValueKey('heute-ins-bett'),
-          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-          decoration: BoxDecoration(
-            gradient: CoachStyle.tileGradient,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text.rich(
-            b == null
-                ? const TextSpan(
-                    text:
-                        'Trag ein, wann du aufstehst. Daraus rechnet '
-                        'die App jeden Abend deine Bettzeit.',
-                  )
-                : TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Heute ins Bett: ${formatUhrzeit(b.bett)}.',
-                        style: const TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                      TextSpan(
-                        text: b.termin != null
-                            ? ' Wegen deines Termins morgen früh stehst du '
-                                  'schon um ${formatUhrzeit(b.aufstehen)} auf.'
-                            : ' Ein früher Termin morgen schiebt das '
-                                  'automatisch vor.',
-                      ),
-                    ],
-                  ),
-            style: CoachStyle.body.copyWith(
-              fontSize: 13.5,
-              color: CoachStyle.goldInk,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 6,
+              height: 6,
+              margin: const EdgeInsets.only(top: 7, right: 8),
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: CoachStyle.goldLight,
+              ),
             ),
-          ),
+            Expanded(
+              child: Text.rich(
+                b == null
+                    ? const TextSpan(
+                        text:
+                            'Trag ein, wann du aufstehst. Daraus rechnet '
+                            'die App jeden Abend deine Bettzeit.',
+                      )
+                    : TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Heute ins Bett: ${formatUhrzeit(b.bett)}.',
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          TextSpan(
+                            text: b.termin != null
+                                ? ' Wegen deines Termins morgen früh stehst du '
+                                      'schon um ${formatUhrzeit(b.aufstehen)} auf.'
+                                : ' Ein früher Termin morgen schiebt das '
+                                      'automatisch vor.',
+                          ),
+                        ],
+                      ),
+                style: CoachStyle.body.copyWith(
+                  fontSize: 13.5,
+                  color: const Color(0xFFCDBB98),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
