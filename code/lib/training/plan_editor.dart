@@ -142,6 +142,7 @@ class _TrainingPlanEditorState extends State<TrainingPlanEditor> {
     ];
     return EditorPage(
       title: 'Dein Trainingsplan',
+      zurueck: 'Training',
       intro:
           'Einmal festlegen, dann läuft alles von selbst weiter. Tippe einen '
           'Tag an, gib ihm einen Namen, gern mit Uhrzeit wie „Push 17:30“, '

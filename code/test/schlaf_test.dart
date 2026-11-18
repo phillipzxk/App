@@ -226,7 +226,7 @@ void main() {
       expect(find.byKey(const ValueKey('sonnenlicht')), findsOneWidget);
       expect(diary.sleep.single.stunden, m.stunden);
 
-      await tester.pageBack();
+      await tester.tap(find.byTooltip('Zurück').last);
       await tester.pumpAndSettle();
       await openKachel(tester, 's-wert');
       expect(find.byKey(const ValueKey('schlafwert-seite')), findsOneWidget);

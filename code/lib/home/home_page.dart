@@ -1482,11 +1482,13 @@ class _HomePageState extends State<HomePage> {
   );
 
   /// The full area page with everything the old tab had.
-  Future<void> _oeffneSeite(Bereich b) => Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (_) => _UnterSeite(child: _lebendig(() => _seite(b))),
-    ),
-  );
+  Future<void> _oeffneSeite(Bereich b, {String zurueck = 'Heute'}) =>
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) =>
+              _UnterSeite(zurueck: zurueck, child: _lebendig(() => _seite(b))),
+        ),
+      );
 
   /// Today from getting up to bedtime: arc start and end (minutes, end may
   /// pass midnight) and every point with a time, for both sun arcs.
@@ -1685,13 +1687,15 @@ class _HomePageState extends State<HomePage> {
                     await widget.feed.saveMahlzeiten(n);
                     await _reload();
                   },
-                  onOpenTraining: () => _oeffneSeite(Bereich.training),
+                  onOpenTraining: () =>
+                      _oeffneSeite(Bereich.training, zurueck: 'Dein Tag'),
                   foto: _fotoTag,
-                  onOpenFoto: _oeffneZukunft,
+                  onOpenFoto: () => _oeffneZukunft(zurueck: 'Dein Tag'),
                   bettzeit: _bettzeit,
                   schlafStunden: _schlafzeiten.stunden,
                   routineAb: _routine.isEmpty ? null : _routine.first.zeit,
-                  onOpenSchlaf: () => _oeffneSeite(Bereich.schlaf),
+                  onOpenSchlaf: () =>
+                      _oeffneSeite(Bereich.schlaf, zurueck: 'Dein Tag'),
                   aufstehen: _schlafzeiten.aufstehenAm(widget.clock()),
                   mahlzeitZeiten: [
                     for (final m in _mahlzeitSlots) (m.minute, m.name),
@@ -1721,10 +1725,14 @@ class _HomePageState extends State<HomePage> {
     };
   }
 
-  Future<void> _oeffneZukunft() async {
+  Future<void> _oeffneZukunft({String zurueck = 'Heute'}) async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => FutureMePage(store: widget.feed, clock: widget.clock),
+        builder: (_) => FutureMePage(
+          store: widget.feed,
+          clock: widget.clock,
+          zurueck: zurueck,
+        ),
       ),
     );
     await _reload();
@@ -2267,8 +2275,15 @@ class _HomePageState extends State<HomePage> {
 
 /// A pushed page in the app's dark look with a back arrow.
 class _UnterSeite extends StatelessWidget {
-  const _UnterSeite({required this.child, this.glas = false});
+  const _UnterSeite({
+    required this.child,
+    this.glas = false,
+    this.zurueck = 'Heute',
+  });
   final Widget child;
+
+  /// Name on the back pill: the page you land on.
+  final String zurueck;
 
   /// Glass look with the slow gold light behind (e.g. "Dein Tag").
   final bool glas;
@@ -2277,12 +2292,7 @@ class _UnterSeite extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CoachStyle.night,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        foregroundColor: CoachStyle.goldLight,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-      ),
+      appBar: zurueckBar(zurueck),
       body: glas
           ? GlasHintergrund(child: _inhalt())
           : KlarHintergrund(child: _inhalt()),

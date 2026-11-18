@@ -178,11 +178,7 @@ class RealityCheckSeite extends StatelessWidget {
     final t = a.training;
     return Scaffold(
       backgroundColor: const Color(0xFF231B14),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        foregroundColor: CoachStyle.goldLight,
-        elevation: 0,
-      ),
+      appBar: zurueckBar('Heute'),
       body: KlarHintergrund(
         child: NightScope(
           child: ListView(

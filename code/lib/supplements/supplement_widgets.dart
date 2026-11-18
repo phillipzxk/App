@@ -268,6 +268,7 @@ class _SupplementEditorState extends State<SupplementEditor> {
   @override
   Widget build(BuildContext context) {
     return EditorPage(
+      zurueck: 'Ernährung',
       title: 'Deine Supplement-Routine',
       intro:
           'Was nimmst du, wie viel und um wie viel Uhr? Jede Einnahme gilt '

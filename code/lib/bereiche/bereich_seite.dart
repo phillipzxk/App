@@ -460,20 +460,9 @@ class _BereichSeiteState extends State<BereichSeite>
           ),
       ],
     );
-    final zurueck = InkWell(
+    final zurueck = ZurueckPille(
       key: const ValueKey('bereich-zurueck'),
-      borderRadius: BorderRadius.circular(20),
-      onTap: () => Navigator.of(context).maybePop(),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Text(
-          '‹ ${widget.zurueck}',
-          style: Glas.tLabel.copyWith(
-            fontSize: 15,
-            color: CoachStyle.goldLight,
-          ),
-        ),
-      ),
+      label: widget.zurueck,
     );
     final segment = AnimatedSwitcher(
       duration: const Duration(milliseconds: 380),
@@ -687,23 +676,9 @@ class _BereichSeiteState extends State<BereichSeite>
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                 child: Row(
                   children: [
-                    GestureDetector(
+                    ZurueckPille(
                       key: const ValueKey('bereich-zurueck'),
-                      onTap: () => Navigator.of(context).maybePop(),
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        alignment: Alignment.center,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Color(0x1FFFECD2),
-                        ),
-                        child: const Icon(
-                          Icons.chevron_left,
-                          size: 22,
-                          color: Umbau.gold,
-                        ),
-                      ),
+                      label: widget.teile.length == 1 ? widget.zurueck : null,
                     ),
                     if (widget.teile.length > 1) ...[
                       const SizedBox(width: 10),
@@ -712,20 +687,6 @@ class _BereichSeiteState extends State<BereichSeite>
                           teile: widget.teile,
                           aktiv: _teil,
                           onTap: _zuTeil,
-                        ),
-                      ),
-                    ],
-                    // One part only: where you came from, small
-                    // (draft "Bereiche als Bilder" 3).
-                    if (widget.teile.length == 1) ...[
-                      const SizedBox(width: 10),
-                      Text(
-                        widget.zurueck,
-                        style: const TextStyle(
-                          fontFamily: 'Figtree',
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                          color: Umbau.text,
                         ),
                       ),
                     ],
@@ -1703,34 +1664,9 @@ class FeldSeite extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        GestureDetector(
+                        ZurueckPille(
                           key: const ValueKey('feld-zurueck'),
-                          onTap: () => Navigator.of(context).maybePop(),
-                          child: Container(
-                            height: 34,
-                            padding: const EdgeInsets.fromLTRB(6, 0, 13, 0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(999),
-                              color: Klar.glas,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.chevron_left,
-                                  size: 20,
-                                  color: Umbau.hell,
-                                ),
-                                Text(
-                                  bereich,
-                                  style: Glas.tLabel.copyWith(
-                                    fontSize: 13,
-                                    color: Umbau.hell,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          label: bereich,
                         ),
                         const SizedBox(height: 14),
                         Padding(

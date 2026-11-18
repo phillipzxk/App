@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../ui/umbau.dart';
+
 import '../bereiche/glas.dart';
 import '../feed/feed_data.dart';
 import '../ui/coach_style.dart';
@@ -612,7 +614,11 @@ class EditorPage extends StatelessWidget {
     required this.children,
     required this.onSave,
     this.glas = false,
+    this.zurueck = 'Zurück',
   });
+
+  /// Name on the back pill: the page you land on.
+  final String zurueck;
 
   final String title;
   final String intro;
@@ -632,13 +638,9 @@ class EditorPage extends StatelessWidget {
         children: [
           Align(
             alignment: Alignment.centerLeft,
-            child: IconButton(
-              tooltip: 'Zurück',
-              icon: Icon(
-                Icons.arrow_back,
-                color: glas ? CoachStyle.goldLight : CoachStyle.ink,
-              ),
-              onPressed: () => Navigator.of(context).pop(),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 4, bottom: 4),
+              child: ZurueckPille(label: zurueck),
             ),
           ),
           Expanded(

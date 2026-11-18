@@ -158,7 +158,7 @@ extension _Koerper on _HomePageState {
               today: widget.clock(),
               einstellungen: _fotoEinstellungen,
               fotos: _wochenFotos,
-              onOpen: _oeffneZukunft,
+              onOpen: () => _oeffneZukunft(zurueck: 'Körper'),
             ),
           ],
         ),

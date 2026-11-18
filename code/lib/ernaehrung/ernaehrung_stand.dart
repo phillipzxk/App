@@ -91,12 +91,7 @@ class EssenSeite extends StatelessWidget {
     // The background runs behind the bar, so no dark band cuts the label
     // (Rundgang 2026-11-15, point 4).
     extendBodyBehindAppBar: true,
-    appBar: AppBar(
-      backgroundColor: Colors.transparent,
-      foregroundColor: CoachStyle.goldLight,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-    ),
+    appBar: zurueckBar(label.split(' · ').first),
     body: KlarHintergrund(
       child: SafeArea(
         top: false,

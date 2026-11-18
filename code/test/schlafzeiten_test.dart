@@ -104,7 +104,7 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.pageBack();
+      await tester.tap(find.byTooltip('Zurück').last);
       await tester.pumpAndSettle();
       await scrollTo(tester, find.byKey(const ValueKey('tag-bettzeit')));
       expect(find.text('22:30'), findsOneWidget);

@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../ui/umbau.dart';
+
 import '../feed/feed_store.dart';
 import '../home/feed_widgets.dart';
 import '../ui/coach_style.dart';
@@ -43,7 +45,15 @@ Future<bool> fotoMachen(
 /// Ich.md): first photo next to the latest with the values then and now,
 /// all weeks to swipe through, and what the AI adds later.
 class FutureMePage extends StatefulWidget {
-  const FutureMePage({super.key, required this.store, required this.clock});
+  const FutureMePage({
+    super.key,
+    required this.store,
+    required this.clock,
+    this.zurueck = 'Heute',
+  });
+
+  /// Name on the back pill: the page you land on.
+  final String zurueck;
 
   final FeedStore store;
   final DateTime Function() clock;
@@ -100,10 +110,9 @@ class _FutureMePageState extends State<FutureMePage> {
         children: [
           Align(
             alignment: Alignment.centerLeft,
-            child: IconButton(
-              tooltip: 'Zurück',
-              icon: const Icon(Icons.arrow_back, color: CoachStyle.ink),
-              onPressed: () => Navigator.of(context).pop(),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 4, bottom: 4),
+              child: ZurueckPille(label: widget.zurueck),
             ),
           ),
           Expanded(
@@ -483,6 +492,7 @@ class _EinrichtenPageState extends State<EinrichtenPage> {
   Widget build(BuildContext context) {
     final fest = widget.current != null;
     return EditorPage(
+      zurueck: 'Fortschrittsfoto',
       title: 'Fortschrittsfoto',
       intro:
           'Einmal festlegen: an welchem Tag du dein Wochenfoto machst, welche '
@@ -600,6 +610,7 @@ class _AufnahmePageState extends State<AufnahmePage> {
     final fertig = e.posen.every(_bilder.containsKey);
     return EditorPage(
       title: 'Woche ${widget.lage.woche}',
+      zurueck: 'Fortschrittsfoto',
       intro: widget.erstes == null
           ? 'Dein erstes Foto. Merk dir Pose, Ort und Licht, damit du jede '
                 'Woche genauso stehst.'

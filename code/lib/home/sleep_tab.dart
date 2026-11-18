@@ -938,6 +938,7 @@ class _RoutineEditorState extends State<RoutineEditor> {
   @override
   Widget build(BuildContext context) {
     return EditorPage(
+      zurueck: 'Schlaf & Routine',
       title: 'Deine Abendroutine',
       intro:
           'Was machst du ab wann am Abend? Zum Beispiel: 22:15 Handy weg, '

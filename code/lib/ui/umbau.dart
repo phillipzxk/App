@@ -963,3 +963,81 @@ class KlarPille extends StatelessWidget {
     ),
   );
 }
+
+/// The one back button of the app (draft "Alte Seiten neu", 2026-11-18):
+/// a small glass pill with a chevron and the name of the page you land on.
+/// Without a label (e.g. next to the part pills) only the chevron shows.
+class ZurueckPille extends StatelessWidget {
+  const ZurueckPille({super.key, this.label, this.onTap});
+
+  final String? label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = label;
+    // The tooltip keeps "Zurück" findable (and shows on long press).
+    return Tooltip(
+      message: 'Zurück',
+      excludeFromSemantics: true,
+      child: Semantics(
+        button: true,
+        label: l == null ? 'Zurück' : 'Zurück zu $l',
+        excludeSemantics: true,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap ?? () => Navigator.of(context).maybePop(),
+          child: Container(
+            height: 34,
+            constraints: const BoxConstraints(minWidth: 34),
+            padding: EdgeInsets.fromLTRB(
+              l == null ? 0 : 6,
+              0,
+              l == null ? 0 : 13,
+              0,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(999),
+              color: Klar.glas,
+              border: Border.all(color: const Color(0x14FFF5E6)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.chevron_left, size: 20, color: Umbau.hell),
+                if (l != null)
+                  Flexible(
+                    child: Text(
+                      l,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: 'Figtree',
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: Umbau.hell,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A transparent app bar whose only content is the [ZurueckPille].
+AppBar zurueckBar(String label) => AppBar(
+  backgroundColor: Colors.transparent,
+  elevation: 0,
+  scrolledUnderElevation: 0,
+  automaticallyImplyLeading: false,
+  titleSpacing: 16,
+  title: Align(
+    alignment: Alignment.centerLeft,
+    child: ZurueckPille(label: label),
+  ),
+);
