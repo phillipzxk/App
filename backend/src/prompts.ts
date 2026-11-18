@@ -66,7 +66,7 @@ export function profileBlock(p: Profile): string {
 Vorname: ${clip(p.name, 60)}
 Ziel und was sie dafür verändern will: ${clip(p.ziel)}
 Warum sie es gerade jetzt angeht: ${clip(p.motivation)}
-Wie jemand, der sie gut kennt, sie beschreiben würde (und ihre Stärke): ${clip(p.level)}${zeile("Körper: wo es bei Schlaf, Ernährung oder Training hakt (und was schon klappt)", p.koerper)}${zeile("Probleme beim Training (und was ihr leicht fällt)", p.training)}${zeile("Probleme mit der Ernährung (und was sie schon weiß oder angepasst hat)", p.ernaehrung)}${zeile("Probleme mit Schlaf und Energie (und wann sie sich fit fühlt)", p.schlafEnergie)}${zeile("Fokus: was ihren Fokus frisst (und wann sie am klarsten ist)", p.produktiv)}${zeile("Arbeit: wo sie bei der Arbeit steht (und was sie gerade macht: Job, Studium, Schule oder eigene Firma)", p.business)}${zeile("Ausstrahlung: woran sie an sich arbeiten will (und was sie lernen will)", p.persoenlich)}
+Wie jemand, der sie gut kennt, sie beschreiben würde (eine Stärke nur, wenn sie ausdrücklich als Stärke dasteht): ${clip(p.level)}${zeile("Körper: wo es bei Schlaf, Ernährung oder Training hakt (und was schon klappt)", p.koerper)}${zeile("Probleme beim Training (und was ihr leicht fällt)", p.training)}${zeile("Probleme mit der Ernährung (und was sie schon weiß oder angepasst hat)", p.ernaehrung)}${zeile("Probleme mit Schlaf und Energie (und wann sie sich fit fühlt)", p.schlafEnergie)}${zeile("Fokus: was ihren Fokus frisst (und wann sie am klarsten ist)", p.produktiv)}${zeile("Arbeit: wo sie bei der Arbeit steht (und was sie gerade macht: Job, Studium, Schule oder eigene Firma)", p.business)}${zeile("Ausstrahlung: woran sie an sich arbeiten will (und was sie lernen will)", p.persoenlich)}
 </nutzer>`;
 }
 
@@ -87,7 +87,7 @@ export function onboardingPrompt(p: Profile): string {
 
 ${profileBlock(p)}
 
-Schreib ihr, wie du sie gerade siehst, ohne Überschrift: 2 bis 3 Sätze (höchstens 55 Wörter), die zeigen, dass du sie verstanden hast, was sie antreibt und wo sie gerade steht. Zähl nicht alle Antworten auf, sondern zeig, was sie verbindet. Noch keine Tipps.`;
+Schreib ihr, wie du sie gerade siehst, ohne Überschrift: 2 bis 3 Sätze (höchstens 55 Wörter), die zeigen, dass du sie verstanden hast, was sie antreibt und wo sie gerade steht. Fang mit ihrem Ziel an, in ihren eigenen Worten. Zähl nicht alle Antworten auf, sondern zeig, was sie verbindet. Nenn eine Stärke nur, wenn sie selbst eine eingetragen hat, und mach aus einem Problem nie eine Stärke. Noch keine Tipps.`;
 }
 
 export function checkInPrompt(p: Profile, today: CheckIn, recent: CheckIn[]): string {

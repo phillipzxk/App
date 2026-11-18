@@ -92,49 +92,60 @@ class GlasKnopf extends StatelessWidget {
     final an = onTap != null;
     return Opacity(
       opacity: an ? 1 : .45,
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
+      // The glow sits outside the Material: inside the Ink it was cut off
+      // at the Material's square edge and looked like a clipped button.
+      child: DecoratedBox(
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Ink(
-            height: 50,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              gradient: ghost ? null : CoachStyle.goldGradient,
-              color: ghost ? const Color(0x0FFFECC8) : null,
-              border: ghost ? Border.all(color: const Color(0x38FFEECD)) : null,
-              boxShadow: ghost || !an ? null : CoachStyle.goldGlow,
-            ),
-            child: Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (icon != null) ...[
-                    Icon(
-                      icon,
-                      size: 18,
-                      color: ghost ? CoachStyle.goldLight : CoachStyle.goldInk,
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                  Flexible(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        label,
-                        style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14.5,
-                          color: ghost
-                              ? CoachStyle.goldLight
-                              : CoachStyle.goldInk,
+          boxShadow: ghost || !an ? null : CoachStyle.goldGlow,
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: onTap,
+            child: Ink(
+              height: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                gradient: ghost ? null : CoachStyle.goldGradient,
+                color: ghost ? const Color(0x0FFFECC8) : null,
+                border: ghost
+                    ? Border.all(color: const Color(0x38FFEECD))
+                    : null,
+              ),
+              child: Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (icon != null) ...[
+                      Icon(
+                        icon,
+                        size: 18,
+                        color: ghost
+                            ? CoachStyle.goldLight
+                            : CoachStyle.goldInk,
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          label,
+                          style: TextStyle(
+                            fontFamily: 'Sora',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14.5,
+                            color: ghost
+                                ? CoachStyle.goldLight
+                                : CoachStyle.goldInk,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

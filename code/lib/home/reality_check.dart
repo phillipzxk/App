@@ -6,6 +6,7 @@ import '../ui/coach_widgets.dart';
 import 'feed_widgets.dart';
 import 'fokus_widgets.dart';
 import '../ui/umbau.dart';
+import '../bereiche/glas.dart';
 
 /// Reality Check (see vault Umsetzung/Reality Check.md): on the day a focus
 /// week ends, Heute shows only this small field instead of the focus
@@ -297,20 +298,19 @@ class _Box extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: CoachStyle.cardBright,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: CoachStyle.line),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(label, style: CoachStyle.goldLabel.copyWith(fontSize: 10)),
-          ...children,
-        ],
+    // Glass like the cards below it (Rest-Rundgang 2026-11-18).
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: GlasBox(
+        padding: const EdgeInsets.all(15),
+        radius: 18,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(label, style: CoachStyle.goldLabel.copyWith(fontSize: 10)),
+            ...children,
+          ],
+        ),
       ),
     );
   }
