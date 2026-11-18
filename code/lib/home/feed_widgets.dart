@@ -579,7 +579,7 @@ class EditorPage extends StatelessWidget {
     required this.intro,
     required this.children,
     required this.onSave,
-    this.glas = false,
+    this.glas = true,
     this.zurueck = 'Zurück',
   });
 
@@ -591,7 +591,8 @@ class EditorPage extends StatelessWidget {
   final List<Widget> children;
   final VoidCallback onSave;
 
-  /// Dark glass look (e.g. the training plan).
+  /// Dark glass look; since "Alte Seiten neu" (2026-11-18) the default for
+  /// every editor.
   final bool glas;
 
   @override
