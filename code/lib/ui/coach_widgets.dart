@@ -267,9 +267,14 @@ class CoachPage extends StatelessWidget {
     required this.child,
     this.dark = false,
     this.glas = false,
+    this.klar = false,
   });
 
   final Widget child;
+
+  /// The warm brown page with fine roots, like the area pages since the
+  /// Umbau (used by Fortschrittsfoto since 2026-11-18).
+  final bool klar;
 
   /// Glass look: slow gold light blobs behind the content (like the area
   /// pages since 2026-10-29). Only with [dark].
@@ -286,7 +291,9 @@ class CoachPage extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: dark ? CoachStyle.nightGradient : CoachStyle.pageGradient,
         ),
-        child: dark && glas
+        child: klar
+            ? KlarHintergrund(child: _column())
+            : dark && glas
             ? GlasHintergrund(child: _column())
             : dark
             ? DecoratedBox(

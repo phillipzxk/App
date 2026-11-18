@@ -107,7 +107,7 @@ class _FutureMePageState extends State<FutureMePage> {
     final e = _e;
     return CoachPage(
       dark: true,
-      glas: true,
+      klar: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -501,6 +501,7 @@ class _EinrichtenPageState extends State<EinrichtenPage> {
     final fest = widget.current != null;
     return EditorPage(
       zurueck: 'Fortschrittsfoto',
+      klar: true,
       title: 'Fortschrittsfoto',
       intro:
           'Einmal festlegen: an welchem Tag du dein Wochenfoto machst, welche '
@@ -625,6 +626,7 @@ class _AufnahmePageState extends State<AufnahmePage> {
     return EditorPage(
       title: 'Woche ${widget.lage.woche}',
       zurueck: 'Fortschrittsfoto',
+      klar: true,
       intro: widget.erstes == null
           ? 'Dein erstes Foto. Merk dir Pose, Ort und Licht, damit du jede '
                 'Woche genauso stehst.'

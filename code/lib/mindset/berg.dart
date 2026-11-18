@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -99,25 +98,6 @@ class _BergMaler extends CustomPainter {
           Rect.fromLTWH(w * .78, h * .1, w * .1, h * .1),
         ),
     );
-    // A small gold star above the summit: the goal.
-    if (!klein) {
-      final m = Offset(w * .84, h * .065);
-      final stern = Path();
-      for (var i = 0; i < 10; i++) {
-        final r = i.isEven ? 8.0 : 3.4;
-        final a = -math.pi / 2 + i * math.pi / 5;
-        final q = m + Offset(math.cos(a) * r, math.sin(a) * r);
-        i == 0 ? stern.moveTo(q.dx, q.dy) : stern.lineTo(q.dx, q.dy);
-      }
-      stern.close();
-      canvas.drawPath(
-        stern,
-        Paint()
-          ..shader = CoachStyle.goldGradient.createShader(
-            Rect.fromCircle(center: m, radius: 8),
-          ),
-      );
-    }
     // Dashed path up.
     final pfad = Path()..moveTo(w * .1, h * .95);
     for (final x in _plaetze) {

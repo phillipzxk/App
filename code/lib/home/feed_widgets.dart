@@ -580,8 +580,12 @@ class EditorPage extends StatelessWidget {
     required this.children,
     required this.onSave,
     this.glas = true,
+    this.klar = false,
     this.zurueck = 'Zurück',
   });
+
+  /// Warm brown page (see [CoachPage.klar]).
+  final bool klar;
 
   /// Name on the back pill: the page you land on.
   final String zurueck;
@@ -600,6 +604,7 @@ class EditorPage extends StatelessWidget {
     return CoachPage(
       dark: glas,
       glas: glas,
+      klar: klar,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
