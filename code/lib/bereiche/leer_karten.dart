@@ -43,7 +43,6 @@ class StrichPille extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     height: 36,
     padding: const EdgeInsets.symmetric(horizontal: 14),
-    alignment: Alignment.center,
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(999),
       color: plus ? const Color(0x0FF5DFAE) : null,
@@ -53,6 +52,7 @@ class StrichPille extends StatelessWidget {
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         if (plus) ...[
           const Icon(Icons.add, size: 16, color: Glas.label),
