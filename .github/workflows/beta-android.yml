@@ -24,6 +24,7 @@ jobs:
         working-directory: code
     steps:
       - name: Werte verbergen
+        working-directory: .
         run: |
           echo "::add-mask::${{ inputs.coach_token }}"
           echo "::add-mask::${{ inputs.anon_key }}"
