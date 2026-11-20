@@ -38,6 +38,15 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    // Beta APK (vault Umsetzung/Beta.md): it is re-signed with the beta key
+    // after the build, so native libraries stay compressed and need no
+    // page alignment.
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 }
 
 kotlin {

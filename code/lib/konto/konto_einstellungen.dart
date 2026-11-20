@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../ui/umbau.dart';
+import '../beta/beta.dart';
 
 import '../bereiche/glas.dart';
 import '../erinnerungen/erinnerung_dienst.dart';
@@ -551,6 +552,19 @@ class _KontoEinstellungenState extends State<KontoEinstellungen>
               ),
             ]),
           if (_kal case final kal?) ..._kalenderGruppen(gruppe, kal),
+          gruppe(.35, 'Beta', [
+            _Zeile(
+              key: const ValueKey('feedback-geben'),
+              titel: 'Feedback geben',
+              unter: 'Was nervt, was fehlt? Geht direkt an Groundset.',
+              pfeil: true,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => FeedbackSeite(name: name),
+                ),
+              ),
+            ),
+          ]),
           gruppe(.4, 'Deine Daten', [
             _Zeile(
               key: const ValueKey('daten-herunterladen'),

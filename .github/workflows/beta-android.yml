@@ -1,0 +1,57 @@
+# Builds the Android beta app (vault Umsetzung/Beta.md). Started by hand.
+# The APK is signed afterwards with the beta key, which is not in this repo.
+name: Android-Beta bauen
+
+on:
+  workflow_dispatch:
+    inputs:
+      build:
+        description: 'Build-Nummer (steigt mit jeder Version)'
+        required: true
+      coach_token:
+        description: 'App-Token des Coach-Servers'
+        required: true
+      anon_key:
+        description: 'Öffentlicher Supabase-Schlüssel'
+        required: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: code
+    steps:
+      - name: Werte verbergen
+        run: |
+          echo "::add-mask::${{ inputs.coach_token }}"
+          echo "::add-mask::${{ inputs.anon_key }}"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: APK bauen
+        env:
+          COACH_TOKEN: ${{ inputs.coach_token }}
+          ANON_KEY: ${{ inputs.anon_key }}
+          BUILD_NR: ${{ inputs.build }}
+        run: >
+          flutter build apk --release --split-per-abi --target-platform android-arm64
+          --build-number="$BUILD_NR"
+          --dart-define=BETA_BUILD="$BUILD_NR"
+          --dart-define=COACH_URL=https://groundset-coach.pzschernack4.workers.dev
+          --dart-define=COACH_TOKEN="$COACH_TOKEN"
+          --dart-define=SUPABASE_URL=https://iuivlfkfjffltxfvtoqk.supabase.co
+          --dart-define=SUPABASE_ANON_KEY="$ANON_KEY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: groundset-beta-apk
+          path: code/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          retention-days: 7

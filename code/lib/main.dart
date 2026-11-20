@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'beta/beta.dart';
+
 import 'package:flutter/material.dart';
 
 import 'abo/abo_ablauf.dart';
@@ -150,6 +152,8 @@ class CoachApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'Figtree',
       ),
+      // Android beta: a gold card when a newer APK is waiting.
+      builder: (_, child) => BetaUpdateHinweis(child: child!),
       home: StartGate(app: this),
     );
   }
