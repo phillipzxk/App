@@ -50,6 +50,8 @@ export interface Env {
   ANTHROPIC_API_KEY: string;
   /// Shared with the app; keeps random callers from spending the credit.
   APP_TOKEN: string;
+  /// Beta feedback, one key per message (fb:<time>:<random>).
+  FEEDBACK?: KVNamespace;
 }
 
 // Chosen with Phillip on 2026-10-14: cheapest model for the test phase.
@@ -743,6 +745,20 @@ export default {
       return json({ error: "bad json" }, 400);
     }
     const profile = (body.profile ?? {}) as Profile;
+
+    if (new URL(request.url).pathname === "/feedback") {
+      const text = typeof body.text === "string" ? body.text.trim().slice(0, 4000) : "";
+      if (!text || !env.FEEDBACK) return json({ error: "empty" }, 400);
+      const eintrag = {
+        zeit: new Date().toISOString(),
+        text,
+        name: typeof body.name === "string" ? body.name.slice(0, 60) : "",
+        geraet: typeof body.geraet === "string" ? body.geraet.slice(0, 30) : "",
+        build: typeof body.build === "number" ? body.build : 0,
+      };
+      await env.FEEDBACK.put(`fb:${eintrag.zeit}:${crypto.randomUUID().slice(0, 8)}`, JSON.stringify(eintrag));
+      return json({ ok: true });
+    }
 
     let prompt: string;
     switch (new URL(request.url).pathname) {

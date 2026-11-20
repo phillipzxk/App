@@ -4,3 +4,8 @@ name = "groundset-coach"
 main = "src/index.ts"
 compatibility_date = "2026-10-01"
 compatibility_flags = ["nodejs_compat"]
+
+# Beta feedback from the app's "Feedback geben" (vault Umsetzung/Beta.md).
+[[kv_namespaces]]
+binding = "FEEDBACK"
+id = "7300b820d7074e378f593037356a98d1"
