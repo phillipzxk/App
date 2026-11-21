@@ -39,3 +39,13 @@ Entschieden mit Phillip am 2026-11-20 („jo so ist gut“). Entwurf: https://cl
 - Gebaut wird erst nach der Beta und nach Phillips OK.
 
 Siehe auch [[Beta]], [[Abo]], [[Coach-Stil]].
+
+## Ablauf (entschieden 2026-11-21, „jo ... also sehr gut“)
+Entwurf: https://claude.ai/artifact/TDxBV8yMDcAtWdTuBTLUAD
+Prinzip wie Nachrichten auf Insta, nur schöner gestaltet:
+- **Nutzer schreibt einfach** im Chat mit Phillip, kein Formular. Beim ersten Abschicken fragt die App: „Darf Phillip deine Werte sehen?“ (Erlauben und senden / Nur die Nachricht senden).
+- **Erste Nachricht = Anfrage:** Phillip nimmt sie an (wie Nachrichtenanfragen auf Insta), danach schreiben beide und der Nutzer bekommt individuelle Hilfe in der App.
+- **Phillips Seite:** gleiche App, mit seinem Konto zusätzlich „Nachrichten“: alle Chats als Übersicht (Alle / Ungelesen, goldener Punkt), Mitteilung bei jeder neuen Nachricht.
+- **Daten des Nutzers:** im Chat als Karte „… teilt ihre Woche“ (4 Ringe + Muster); antippen öffnet einen eigenen Feed: Verlauf je Bereich, Schlaf 7 Nächte, Ziel und Warum, „Fokus anpassen“. Nur was freigegeben ist.
+- **Verpasste Nachrichten:** immer als Mitteilung, auf beiden Seiten, auch wenn die App zu ist; Zahl am P in der Leiste.
+- Offen: Text zur Antwortzeit, Anzeige „Gerade voll“ wenn die Testphase-Plätze belegt sind.
