@@ -31,6 +31,7 @@ import 'kalender/kalender_dienst.dart';
 import 'konto/konto_daten.dart';
 import 'schlaf/schritt_zaehler.dart';
 import 'konto/konto_dienst.dart';
+import 'privatcoach/privatcoach_dienst.dart';
 import 'konto/konto_einstellungen.dart';
 import 'konto/konto_flow.dart';
 import 'konto/konto_web.dart';
@@ -44,6 +45,17 @@ void main() {
   final coach = coachUrl.isEmpty
       ? null
       : RemoteCoach(baseUrl: coachUrl, token: coachToken);
+  final KontoDienst konto = supabaseUrl.isEmpty
+      ? VorschauKontoDienst()
+      : SupabaseKontoDienst(
+          url: supabaseUrl,
+          key: supabaseKey,
+          anbieter: {
+            for (final a in supabaseAnbieter.split(','))
+              ?Anmeldeart.values.asNameMap()[a.trim()],
+          },
+        );
+  final kontoStore = LocalKontoStore();
   runApp(
     CoachApp(
       store: LocalProfileStore(),
@@ -53,17 +65,16 @@ void main() {
       checkInEvaluator: coach ?? const NoCheckInEvaluator(),
       feedCoach: coach ?? const NoFeedCoach(),
       splash: const Duration(milliseconds: 1500),
-      kontoDienst: supabaseUrl.isEmpty
-          ? VorschauKontoDienst()
-          : SupabaseKontoDienst(
+      kontoDienst: konto,
+      kontoStore: kontoStore,
+      privatcoach: konto is SupabaseKontoDienst
+          ? SupabasePrivatcoach(
               url: supabaseUrl,
               key: supabaseKey,
-              anbieter: {
-                for (final a in supabaseAnbieter.split(','))
-                  ?Anmeldeart.values.asNameMap()[a.trim()],
-              },
-            ),
-      kontoStore: LocalKontoStore(),
+              dienst: konto,
+              store: kontoStore,
+            )
+          : MemoryPrivatcoach(),
       aboStore: LocalAboStore(),
       aboKauf: const VorschauKauf(),
       erinnerungen: erinnerungenFuerPlattform(),
@@ -97,11 +108,15 @@ class CoachApp extends StatelessWidget {
     this.aboKauf = const VorschauKauf(),
     this.schritte = const KeinZaehler(),
     this.schrittWahl,
+    this.privatcoach,
   });
 
   /// Real steps for the alarm task (vault Umsetzung/Echter Wecker).
   final SchrittZaehler schritte;
   final SchrittWahlStore? schrittWahl;
+
+  /// The 1:1 chat with Phillip; null in tests.
+  final PrivatcoachDienst? privatcoach;
 
   /// Free week and Abo (vault Umsetzung/Abo). Null in tests: kept in memory.
   final AboStore? aboStore;
@@ -576,6 +591,7 @@ class _StartGateState extends State<StartGate> {
       kalender: widget.app.kalender,
       kalenderNeu: _kalenderNeu,
       schritte: widget.app.schritte,
+      privatcoach: widget.app.privatcoach,
     );
   }
 }
