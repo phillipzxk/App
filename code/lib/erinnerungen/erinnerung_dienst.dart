@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:alarm_kit/alarm_kit.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart' show Color;
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -61,6 +61,101 @@ abstract class ErinnerungDienst {
 
   /// The task is done: no second ringing.
   Future<void> weckerAufgabeErledigt();
+
+  /// Android: since when the alarm rings with its own screen open (the
+  /// iPhone shows Apple's own). Null when nothing rings.
+  ValueListenable<DateTime?> get klingelt;
+
+  /// Changes when the alarm was answered, so the task is checked again.
+  Listenable get weckerGeaendert;
+
+  /// The ringing screen's buttons: "Aufstehen" or "5 Min".
+  Future<void> weckerAntworten({required bool aufstehen});
+
+  /// Android: whether the alarm still needs to be allowed once (exact
+  /// time), so the app can ask first in its own words.
+  Future<bool> weckerErlaubnisFehlt();
+
+  /// Opens Android's own question for the alarm.
+  Future<void> weckerErlauben();
+}
+
+/// Ids of the Android alarm (vault Umsetzung/Android nachziehen.md); the
+/// other reminders use the numbers below.
+abstract final class AndroidWecker {
+  static const wecker = 9001;
+  static const nochmal = 9002;
+  static const nachklingeln = 9003;
+  static const payload = 'wecker|klingeln';
+  static const aufstehen = 'aufstehen';
+  static const schlummern = 'schlummern';
+
+  static const _kanal = MethodChannel('groundset/wecker');
+
+  /// Over the lock screen only while the alarm rings or its task waits.
+  static Future<void> ueberSperre(bool an) async {
+    try {
+      await _kanal.invokeMethod<void>('sperre', an);
+    } catch (_) {}
+  }
+
+  static AndroidNotificationDetails klingeln({
+    required bool mitSchlummern,
+    String knopf = 'Aufstehen',
+  }) => AndroidNotificationDetails(
+    'groundset_wecker_echt',
+    'Wecker',
+    channelDescription: 'Dein Wecker am Morgen, auch bei gesperrtem Handy',
+    importance: Importance.max,
+    priority: Priority.max,
+    category: AndroidNotificationCategory.alarm,
+    fullScreenIntent: true,
+    audioAttributesUsage: AudioAttributesUsage.alarm,
+    sound: const UriAndroidNotificationSound(
+      'content://settings/system/alarm_alert',
+    ),
+    // FLAG_INSISTENT: rings until it is answered.
+    additionalFlags: Int32List.fromList(const [4]),
+    ongoing: true,
+    autoCancel: false,
+    visibility: NotificationVisibility.public,
+    color: const Color(0xFFE0BF7E),
+    actions: [
+      if (mitSchlummern) const AndroidNotificationAction(schlummern, '5 Min'),
+      AndroidNotificationAction(aufstehen, knopf, showsUserInterface: true),
+    ],
+  );
+
+  /// Rings once more in [in_], with only the one button.
+  static Future<void> nochmalIn(
+    FlutterLocalNotificationsPlugin plugin,
+    Duration in_, {
+    int id = nochmal,
+    String titel = 'Guten Morgen',
+    String knopf = 'Aufstehen',
+  }) => plugin.zonedSchedule(
+    id: id,
+    scheduledDate: tz.TZDateTime.from(DateTime.now().add(in_), tz.UTC),
+    title: titel,
+    body: null,
+    payload: payload,
+    androidScheduleMode: AndroidScheduleMode.alarmClock,
+    notificationDetails: NotificationDetails(
+      android: klingeln(mitSchlummern: false, knopf: knopf),
+    ),
+  );
+}
+
+/// "5 Min" on the ringing alarm when the app is closed: rings once more in
+/// 5 minutes, then only with "Aufstehen" (as on the iPhone).
+@pragma('vm:entry-point')
+Future<void> weckerImHintergrund(NotificationResponse r) async {
+  if (r.actionId != AndroidWecker.schlummern) return;
+  try {
+    final plugin = FlutterLocalNotificationsPlugin();
+    await plugin.cancel(id: AndroidWecker.nochmal);
+    await AndroidWecker.nochmalIn(plugin, const Duration(minutes: 5));
+  } catch (_) {}
 }
 
 /// Written by the alarm's buttons in Swift (AppDelegate.swift).
@@ -133,6 +228,33 @@ class StilleErinnerungen implements ErinnerungDienst {
 
   @override
   Future<void> weckerAufgabeErledigt() async => aufgabeSeit = null;
+
+  final _klingelt = ValueNotifier<DateTime?>(null);
+  final _geaendert = ValueNotifier<int>(0);
+
+  /// For tests: as if the Android alarm rings now.
+  void klingeln(DateTime seit) => _klingelt.value = seit;
+
+  @override
+  ValueListenable<DateTime?> get klingelt => _klingelt;
+
+  @override
+  Listenable get weckerGeaendert => _geaendert;
+
+  @override
+  Future<void> weckerAntworten({required bool aufstehen}) async {
+    _klingelt.value = null;
+    if (aufstehen) aufgabeSeit = DateTime.now();
+    _geaendert.value++;
+  }
+
+  bool erlaubnisFehlt = false;
+
+  @override
+  Future<bool> weckerErlaubnisFehlt() async => erlaubnisFehlt;
+
+  @override
+  Future<void> weckerErlauben() async => erlaubnisFehlt = false;
 }
 
 /// The real reminders on iPhone and Android.
@@ -200,15 +322,102 @@ class HandyErinnerungen implements ErinnerungDienst {
           notificationCategories: _kategorien,
         ),
       ),
-      onDidReceiveNotificationResponse: (r) =>
-          _getippt.value = Antippen.aus(r.payload, r.actionId),
+      onDidReceiveNotificationResponse: _antwort,
+      onDidReceiveBackgroundNotificationResponse: weckerImHintergrund,
     );
     final start = await _plugin.getNotificationAppLaunchDetails();
     final r = start?.notificationResponse;
-    if (start?.didNotificationLaunchApp == true && r != null) {
-      _getippt.value = Antippen.aus(r.payload, r.actionId);
-    }
+    if (start?.didNotificationLaunchApp == true && r != null) _antwort(r);
   }();
+
+  void _antwort(NotificationResponse r) {
+    if (r.payload?.startsWith('wecker|') == true) {
+      unawaited(_weckerGetippt(r.actionId));
+      return;
+    }
+    _getippt.value = Antippen.aus(r.payload, r.actionId);
+  }
+
+  bool get _android => defaultTargetPlatform == TargetPlatform.android;
+
+  AndroidFlutterLocalNotificationsPlugin? get _androidPlugin => _plugin
+      .resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin
+      >();
+
+  final _klingelt = ValueNotifier<DateTime?>(null);
+  final _geaendert = ValueNotifier<int>(0);
+
+  @override
+  ValueListenable<DateTime?> get klingelt {
+    // Started here too: the alarm can open the app before Heute exists.
+    unawaited(_starten());
+    return _klingelt;
+  }
+
+  @override
+  Listenable get weckerGeaendert => _geaendert;
+
+  /// The Android alarm: opened by itself (full screen over the lock
+  /// screen) or a tap shows the ringing screen; a button answers it.
+  Future<void> _weckerGetippt(String? knopf) async {
+    switch (knopf) {
+      case AndroidWecker.aufstehen:
+        await weckerAntworten(aufstehen: true);
+      case AndroidWecker.schlummern:
+        await weckerAntworten(aufstehen: false);
+      default:
+        _klingelt.value = DateTime.now();
+    }
+  }
+
+  @override
+  Future<void> weckerAntworten({required bool aufstehen}) async {
+    await _starten();
+    for (final id in [AndroidWecker.wecker, AndroidWecker.nochmal]) {
+      await _plugin.cancel(id: id);
+    }
+    if (aufstehen) {
+      final p = await SharedPreferences.getInstance();
+      await p.setString(
+        weckerAufgabeKey,
+        DateTime.now().toUtc().toIso8601String(),
+      );
+      // If the task is not done within 3 minutes, it rings once more.
+      await AndroidWecker.nochmalIn(
+        _plugin,
+        const Duration(minutes: 3),
+        id: AndroidWecker.nachklingeln,
+        titel: 'Deine Aufgabe wartet',
+        knopf: 'Aufgabe machen',
+      );
+    } else {
+      await AndroidWecker.nochmalIn(_plugin, const Duration(minutes: 5));
+      await AndroidWecker.ueberSperre(false);
+    }
+    _klingelt.value = null;
+    _geaendert.value++;
+  }
+
+  @override
+  Future<bool> weckerErlaubnisFehlt() async {
+    if (!_android) return false;
+    await _starten();
+    try {
+      return !(await _androidPlugin?.canScheduleExactNotifications() ?? true);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  @override
+  Future<void> weckerErlauben() async {
+    await _starten();
+    final a = _androidPlugin;
+    await a?.requestExactAlarmsPermission();
+    await a?.requestFullScreenIntentPermission();
+    _geaendert.value++;
+  }
 
   @override
   ValueListenable<Antippen?> get getippt {
@@ -232,13 +441,18 @@ class HandyErinnerungen implements ErinnerungDienst {
           AndroidFlutterLocalNotificationsPlugin
         >();
     await android?.requestNotificationsPermission();
-    await android?.requestExactAlarmsPermission();
   }
 
   @override
   Future<void> planen(List<Erinnerung> liste) async {
     await _starten();
-    await _plugin.cancelAllPendingNotifications();
+    // The Android alarm (ids from 9000) stays; it is set by weckerStellen.
+    for (final alt in await _plugin.pendingNotificationRequests()) {
+      if (alt.id < 9000) await _plugin.cancel(id: alt.id);
+    }
+    // Without the exact-time permission Android still reminds, a little
+    // later at most.
+    final genau = !_android || !await weckerErlaubnisFehlt();
     // iOS keeps at most 64 planned reminders.
     var id = 0;
     for (final e in liste.take(60)) {
@@ -249,7 +463,9 @@ class HandyErinnerungen implements ErinnerungDienst {
         title: e.titel,
         body: e.text,
         payload: e.payload,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        androidScheduleMode: genau
+            ? AndroidScheduleMode.exactAllowWhileIdle
+            : AndroidScheduleMode.inexactAllowWhileIdle,
         notificationDetails: NotificationDetails(
           android: wecker ? _weckerKanal : _kanal,
           iOS: DarwinNotificationDetails(
@@ -307,6 +523,7 @@ class HandyErinnerungen implements ErinnerungDienst {
     required bool schlummern,
     String? ton,
   }) async {
+    if (_android) return _androidWeckerStellen(zeit, schlummern: schlummern);
     if (!await _weckerDa()) return false;
     try {
       // The ringing after "5 Min" and after an undone task is set in Swift
@@ -378,6 +595,45 @@ class HandyErinnerungen implements ErinnerungDienst {
     }
   }
 
+  /// Android: a real alarm over the notifications (full screen, alarm
+  /// sound, rings until answered). The sounds chosen for the iPhone are
+  /// not on Android; it uses the phone's own alarm sound.
+  Future<bool> _androidWeckerStellen(
+    DateTime? zeit, {
+    required bool schlummern,
+  }) async {
+    await _starten();
+    if (await weckerErlaubnisFehlt()) return false;
+    try {
+      for (final id in [AndroidWecker.wecker, AndroidWecker.nochmal]) {
+        await _plugin.cancel(id: id);
+      }
+      if (zeit == null || !zeit.isAfter(DateTime.now())) return true;
+      Future<void> stellen(int id, DateTime wann, bool mitSchlummern) =>
+          _plugin.zonedSchedule(
+            id: id,
+            scheduledDate: tz.TZDateTime.from(wann, tz.local),
+            title: 'Guten Morgen',
+            body: 'Zeit aufzustehen. Erst raus, dann Licht.',
+            payload: AndroidWecker.payload,
+            androidScheduleMode: AndroidScheduleMode.alarmClock,
+            notificationDetails: NotificationDetails(
+              android: AndroidWecker.klingeln(mitSchlummern: mitSchlummern),
+            ),
+          );
+      await stellen(AndroidWecker.wecker, zeit, schlummern);
+      // In case nothing is tapped: rings once more after 10 minutes.
+      await stellen(
+        AndroidWecker.nochmal,
+        zeit.add(const Duration(minutes: 10)),
+        false,
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   @override
   Future<DateTime?> weckerAufgabeOffen() async {
     final p = await SharedPreferences.getInstance();
@@ -389,6 +645,13 @@ class HandyErinnerungen implements ErinnerungDienst {
   Future<void> weckerAufgabeErledigt() async {
     final p = await SharedPreferences.getInstance();
     await p.remove(weckerAufgabeKey);
+    if (_android) {
+      try {
+        await _plugin.cancel(id: AndroidWecker.nachklingeln);
+      } catch (_) {}
+      await AndroidWecker.ueberSperre(false);
+      return;
+    }
     try {
       if (await _kit.isSupported()) await _kit.cancel(WeckerIds.nachklingeln);
     } catch (_) {}

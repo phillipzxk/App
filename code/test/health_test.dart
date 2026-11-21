@@ -189,7 +189,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Fertig'), findsOneWidget);
     expect(gemeldet, isTrue);
-  });
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('Verbinden klappt nicht', (tester) async {
     await tester.pumpWidget(

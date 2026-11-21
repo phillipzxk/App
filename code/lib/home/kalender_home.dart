@@ -33,10 +33,10 @@ extension _Kalender on _HomePageState {
     if (!mounted) return;
     if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
             'Ohne Erlaubnis geht es nicht. Du kannst es in den '
-            'iPhone-Einstellungen unter Groundset erlauben.',
+            '$handyName-Einstellungen unter Groundset erlauben.',
           ),
         ),
       );

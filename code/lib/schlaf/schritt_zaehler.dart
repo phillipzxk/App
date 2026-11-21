@@ -13,7 +13,7 @@ abstract class SchrittZaehler {
   Stream<int> zaehlen();
 }
 
-/// Browser preview, tests and Android for now: tapping only.
+/// Browser preview and tests: tapping only.
 class KeinZaehler implements SchrittZaehler {
   const KeinZaehler();
 
@@ -24,8 +24,9 @@ class KeinZaehler implements SchrittZaehler {
   Stream<int> zaehlen() => const Stream.empty();
 }
 
-/// The iPhone: CMPedometer in AppDelegate.swift over an event channel.
-class IphoneSchritte implements SchrittZaehler {
+/// The phone: CMPedometer in AppDelegate.swift on the iPhone, the step
+/// sensor in MainActivity.kt on Android, over the same event channel.
+class HandySchritte implements SchrittZaehler {
   static const _kanal = EventChannel('groundset/schritte');
 
   @override
@@ -38,9 +39,10 @@ class IphoneSchritte implements SchrittZaehler {
 
 SchrittZaehler schrittZaehlerFuerPlattform() {
   if (kIsWeb) return const KeinZaehler();
-  return defaultTargetPlatform == TargetPlatform.iOS
-      ? IphoneSchritte()
-      : const KeinZaehler();
+  return switch (defaultTargetPlatform) {
+    TargetPlatform.iOS || TargetPlatform.android => HandySchritte(),
+    _ => const KeinZaehler(),
+  };
 }
 
 /// The user's choice from the first time: count or tap. Null = not asked.

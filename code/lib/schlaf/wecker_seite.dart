@@ -32,7 +32,7 @@ class WeckerSeite extends StatelessWidget {
       'schritte',
       Icons.directions_walk,
       'Schritte gehen',
-      'Das iPhone zählt mit, bis du in Bewegung bist.',
+      'Dein Handy zählt mit, bis du in Bewegung bist.',
     ),
   ];
 

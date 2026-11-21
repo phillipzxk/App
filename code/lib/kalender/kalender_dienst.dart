@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../checkin/checkin.dart';
 import '../planner/planner_data.dart';
+import '../plattform/plattform.dart';
 
 /// Kalender verbinden (vault Umsetzung/Kalender verbinden.md, Phillip
 /// 2026-11-09 "yes"): one button, then the appointments come only from
@@ -95,7 +96,7 @@ abstract class KalenderDienst {
   Future<bool> anlegen(Termin t, String? kalenderId);
 }
 
-/// Tests and Android for now.
+/// Tests and other devices.
 class KeinKalender implements KalenderDienst {
   const KeinKalender();
   @override
@@ -132,15 +133,16 @@ int? parseUhrzeitText(String? s) {
   return h * 60 + min;
 }
 
-/// The iPhone: EventKit in AppDelegate.swift over a channel.
-class IphoneKalender implements KalenderDienst {
+/// The phone: EventKit in AppDelegate.swift on the iPhone, the calendar
+/// provider in MainActivity.kt on Android, over the same channel.
+class HandyKalender implements KalenderDienst {
   static const _kanal = MethodChannel('groundset/kalender');
 
   @override
   bool get moeglich => true;
 
   @override
-  String get name => 'iPhone-Kalender';
+  String get name => '$handyName-Kalender';
 
   @override
   Future<bool> verbinden() async {
@@ -250,7 +252,7 @@ class VorschauKalender implements KalenderDienst {
   bool get moeglich => true;
 
   @override
-  String get name => 'iPhone-Kalender';
+  String get name => '$handyName-Kalender';
 
   @override
   Future<bool> verbinden() async => true;
@@ -343,7 +345,8 @@ class VorschauKalender implements KalenderDienst {
 
 KalenderDienst kalenderFuerPlattform() {
   if (kIsWeb) return VorschauKalender();
-  return defaultTargetPlatform == TargetPlatform.iOS
-      ? IphoneKalender()
-      : const KeinKalender();
+  return switch (defaultTargetPlatform) {
+    TargetPlatform.iOS || TargetPlatform.android => HandyKalender(),
+    _ => const KeinKalender(),
+  };
 }

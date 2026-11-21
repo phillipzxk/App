@@ -8,9 +8,10 @@ import '../ui/umbau.dart';
 import '../training/training_widgets.dart';
 import '../ui/coach_widgets.dart';
 import 'health_dienst.dart';
+import '../plattform/plattform.dart';
 
 /// The 7 roots, one per kind of data (vault Umsetzung/Apple Health.md).
-const healthWurzeln = [
+const _alleWurzeln = [
   'Schlaf',
   'Puls',
   'HRV',
@@ -19,6 +20,14 @@ const healthWurzeln = [
   'Schritte',
   'Tageslicht',
 ];
+
+/// Android measures no daylight, so that root is left out there.
+List<String> get healthWurzeln => istAndroid
+    ? [
+        for (final w in _alleWurzeln)
+          if (w != 'Tageslicht') w,
+      ]
+    : _alleWurzeln;
 
 /// "Lass dein Handy mitreden": a heartbeat runs from the Apple Health heart
 /// down a gold stem below the ground, then the 7 roots light up one by one.
@@ -89,25 +98,29 @@ class _HealthVerbindenSeiteState extends State<HealthVerbindenSeite>
   Widget build(BuildContext context) {
     final (knopf, text) = switch (_stand) {
       _Stand.offen => (
-        'Mit Apple Health verbinden',
-        'Dein iPhone und deine Uhr messen jede Nacht mit. Verbunden fließt das '
+        'Mit $healthName verbinden',
+        'Dein $handyName und deine Uhr messen jede Nacht mit. Verbunden fließt das '
             'in deine Wurzeln. Groundset liest nur und schreibt nichts.',
       ),
       _Stand.laeuft => (
         'Verbinden …',
-        'Gleich fragt dich Apple, was Groundset lesen darf. Du kannst jede '
+        'Gleich fragt dich $systemName, was Groundset lesen darf. Du kannst jede '
             'Art einzeln an- oder ausschalten.',
       ),
       _Stand.verbunden => (
         'Fertig',
         'Verbunden. Ab jetzt fließen deine Werte in den Schlafwert und zu '
-            'deinem Coach. Ändern kannst du das jederzeit in der Health-App '
-            'unter Teilen, Apps, Groundset.',
+            'deinem Coach. Ändern kannst du das jederzeit in '
+            '${istAndroid ? 'Health Connect unter App-Berechtigungen' : 'der Health-App unter Teilen, Apps'}, '
+            'Groundset.',
       ),
       _Stand.fehler => (
         'Nochmal versuchen',
-        'Das hat nicht geklappt. Auf diesem Gerät gibt es Apple Health '
-            'vielleicht nicht, zum Beispiel auf manchen iPads.',
+        istAndroid
+            ? 'Das hat nicht geklappt. Falls Health Connect fehlt, öffnet sich '
+                  'der Play Store. Danach nochmal versuchen.'
+            : 'Das hat nicht geklappt. Auf diesem Gerät gibt es Apple Health '
+                  'vielleicht nicht, zum Beispiel auf manchen iPads.',
       ),
     };
     return Scaffold(

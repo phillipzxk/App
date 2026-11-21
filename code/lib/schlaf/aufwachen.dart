@@ -70,7 +70,7 @@ class _WeckerKlingeltState extends State<WeckerKlingelt> {
           MaterialPageRoute<void>(
             builder: (c) => SchrittWeg(
               ziel: u.d.wecker.schritte,
-              zaehler: schrittZaehlerFuerPlattform(),
+              zaehler: u.schritte,
               wahl: const LocalSchrittWahl(),
               clock: u.jetzt,
               onFertig: (_, _) => Navigator.of(c).pop(),

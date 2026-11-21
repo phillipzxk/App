@@ -15,6 +15,7 @@ import '../ui/coach_widgets.dart';
 import 'schlaf_coach.dart';
 import 'schlaf_data.dart';
 import 'schlaf_logik.dart';
+import 'schritt_zaehler.dart';
 
 /// Holds the Schlaf & Energie data, saves every change and tells the pages.
 class SchlafStand extends ChangeNotifier {
@@ -55,7 +56,11 @@ class SchlafUmfeld {
     this.termine = const [],
     this.health,
     this.onHealthVerbunden,
+    this.schritte = const KeinZaehler(),
   });
+
+  /// Real steps for the test alarm's task.
+  final SchrittZaehler schritte;
 
   /// Apple Health (vault Umsetzung/Apple Health.md), null without.
   final HealthDienst? health;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../feed/feed_data.dart';
 import '../health/health_verbinden.dart';
+import '../plattform/plattform.dart';
 import '../health/nacht_wurzel.dart';
 import '../schlaf/abend.dart';
 import '../schlaf/aufwachen.dart';
@@ -1013,7 +1014,7 @@ class MehrDatenKarte extends StatelessWidget {
         ? 'Verbunden'
         : moeglich
         ? 'Verbinden'
-        : 'Auf dem iPhone';
+        : 'Auf dem Handy';
     return TKarte(
       key: const ValueKey('mehr-daten'),
       child: Column(
@@ -1021,24 +1022,41 @@ class MehrDatenKarte extends StatelessWidget {
         children: [
           const TLabel('Mehr Daten für deinen Schlafwert'),
           const SizedBox(height: 6),
-          _zeile(
-            'Apple Health',
-            'Schlaf, Puls, HRV, Trainings, Gewicht, Schritte, Tageslicht',
-            apple,
-            gold: moeglich,
-            key: const ValueKey('apple-health'),
-            onTap: onApple,
-          ),
-          _zeile(
-            'Deine Uhr oder dein Ring',
-            'Apple Watch, Garmin, Oura und andere kommen über Apple Health',
-            verbunden ? 'Verbunden' : 'über Health',
-          ),
-          _zeile(
-            'Google Health Connect',
-            'für Android-Handys und Uhren',
-            'Android-Version',
-          ),
+          if (istAndroid) ...[
+            _zeile(
+              'Health Connect',
+              'Schlaf, Puls, HRV, Trainings, Gewicht, Schritte',
+              apple,
+              gold: moeglich,
+              key: const ValueKey('apple-health'),
+              onTap: onApple,
+            ),
+            _zeile(
+              'Deine Uhr oder dein Ring',
+              'Samsung Health, Fitbit, Garmin, Oura und andere kommen über '
+                  'Health Connect',
+              verbunden ? 'Verbunden' : 'über Health Connect',
+            ),
+          ] else ...[
+            _zeile(
+              'Apple Health',
+              'Schlaf, Puls, HRV, Trainings, Gewicht, Schritte, Tageslicht',
+              apple,
+              gold: moeglich,
+              key: const ValueKey('apple-health'),
+              onTap: onApple,
+            ),
+            _zeile(
+              'Deine Uhr oder dein Ring',
+              'Apple Watch, Garmin, Oura und andere kommen über Apple Health',
+              verbunden ? 'Verbunden' : 'über Health',
+            ),
+            _zeile(
+              'Google Health Connect',
+              'für Android-Handys und Uhren',
+              'Android-Version',
+            ),
+          ],
           const SizedBox(height: 4),
           Text(
             verbunden
