@@ -9,8 +9,10 @@ import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import '../mindset/mindset_ui.dart' show CoachZeile;
 import '../ui/logo.dart';
+import '../konto/konto_ui.dart' show bewegungAn;
 import 'onboarding_evaluator.dart';
 import 'onboarding_questions.dart';
+import 'start_saetze.dart';
 
 /// The onboarding: first the user's name, then seven questions (one per
 /// area since 2026-10-31) answered by
@@ -99,6 +101,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         ),
         _Phase.summary => _Summary(
           summary: _profile.zusammenfassung,
+          start: startSaetze(_profile),
           onContinue: () => widget.onFinished(_profile),
         ),
       },
@@ -273,34 +276,169 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
 }
 
 class _Summary extends StatelessWidget {
-  const _Summary({required this.summary, required this.onContinue});
+  const _Summary({
+    required this.summary,
+    required this.start,
+    required this.onContinue,
+  });
 
   final String summary;
+  final List<StartSatz> start;
   final VoidCallback onContinue;
 
   @override
   Widget build(BuildContext context) {
+    final text = summary.isNotEmpty
+        ? summary
+        : 'Deine Antworten sind gespeichert. Deine persönliche '
+              'Auswertung kommt bald, sobald dein Coach freigeschaltet ist.';
+    // The text types itself in, then the areas spring in one by one.
+    final tippZeit = (text.length * 22).clamp(800, 3200);
+    final ab = (tippZeit / 80).round();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 12),
-        const Text('DEIN START', style: CoachStyle.goldLabel),
-        const SizedBox(height: 12),
-        GoldSchrift('So sehe ich dich gerade', style: CoachStyle.question),
-        const SizedBox(height: 20),
-        GlasBox(
-          art: GlasArt.gold,
-          padding: const EdgeInsets.all(18),
-          child: CoachZeile(
-            summary.isNotEmpty
-                ? summary
-                : 'Deine Antworten sind gespeichert. Deine persönliche '
-                      'Auswertung kommt bald, sobald dein Coach '
-                      'freigeschaltet ist.',
+        Expanded(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              const SizedBox(height: 12),
+              const Text('DEIN START', style: CoachStyle.goldLabel),
+              const SizedBox(height: 12),
+              GoldSchrift(
+                'So sehe ich dich gerade',
+                style: CoachStyle.question,
+              ),
+              const SizedBox(height: 18),
+              GlasBox(
+                art: GlasArt.gold,
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const CoachAvatar(size: 34),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _Getippt(
+                        key: const ValueKey('start-text'),
+                        text: text,
+                        dauer: Duration(milliseconds: tippZeit),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 22),
+              Einflug(
+                platz: ab,
+                child: const Text('DAMIT STARTEN WIR', style: Umbau.label),
+              ),
+              const SizedBox(height: 10),
+              GlasBox(
+                key: const ValueKey('start-bereiche'),
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                child: Column(
+                  children: [
+                    for (var i = 0; i < start.length; i++)
+                      Einflug(
+                        platz: ab + 1 + i * 2,
+                        child: _StartZeile(start[i], linie: i > 0),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
           ),
         ),
-        const Spacer(),
-        MainButton(label: "Los geht's", gold: true, onPressed: onContinue),
+        Einflug(
+          platz: ab + 2 + start.length * 2,
+          child: MainButton(
+            label: "Los geht's",
+            gold: true,
+            onPressed: onContinue,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// One area with its start sentence: gold ring with the icon, the area
+/// name small above, the sentence below; a hairline between rows.
+class _StartZeile extends StatelessWidget {
+  const _StartZeile(this.s, {required this.linie});
+
+  final StartSatz s;
+  final bool linie;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(vertical: 12),
+    decoration: BoxDecoration(
+      border: linie ? const Border(top: BorderSide(color: Umbau.linie)) : null,
+    ),
+    child: Row(
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: CoachStyle.goldBright, width: 1.4),
+          ),
+          child: Icon(s.icon, size: 17, color: Umbau.gold),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(s.name.toUpperCase(), style: Umbau.label),
+              const SizedBox(height: 3),
+              Text(
+                s.satz,
+                style: const TextStyle(
+                  fontFamily: 'Figtree',
+                  fontSize: 14,
+                  height: 1.4,
+                  color: Umbau.text,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Text that types itself in once; the full text keeps the size.
+class _Getippt extends StatelessWidget {
+  const _Getippt({super.key, required this.text, required this.dauer});
+
+  final String text;
+  final Duration dauer;
+
+  static const _stil = TextStyle(
+    fontFamily: 'Figtree',
+    fontSize: 15,
+    height: 1.5,
+    color: Umbau.text,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    if (!bewegungAn) return Text(text, style: _stil);
+    return Stack(
+      children: [
+        Opacity(opacity: 0, child: Text(text, style: _stil)),
+        TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: dauer,
+          builder: (context, v, _) =>
+              Text(text.substring(0, (v * text.length).round()), style: _stil),
+        ),
       ],
     );
   }

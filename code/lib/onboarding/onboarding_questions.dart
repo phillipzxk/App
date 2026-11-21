@@ -93,6 +93,7 @@ final List<OnboardingQuestion> onboardingQuestions = [
       'Ich will endlich mein Potenzial ausschöpfen',
     ],
     fieldLabel: 'Was ist dein wahrer Grund?',
+    coach: 'Das ist dein Warum. Ich zeige es dir, wenn es mal zäh wird.',
     apply: (p, a) => p.copyWith(motivation: a),
   ),
   OnboardingQuestion(
@@ -105,6 +106,7 @@ final List<OnboardingQuestion> onboardingQuestions = [
       'Hat in letzter Zeit schon einiges verändert',
     ],
     fieldLabel: 'Und was würde diese Person als deine Stärke nennen?',
+    coach: 'Damit weiß ich, wo ich bei dir ansetze.',
     apply: (p, a) => p.copyWith(level: a),
   ),
   OnboardingQuestion(

@@ -8,6 +8,7 @@ import '../ui/coach_style.dart';
 import 'mindset_data.dart';
 import 'mindset_logik.dart';
 import 'mindset_ui.dart';
+import '../konto/konto_ui.dart' show bewegungAn;
 
 /// The Lebensrad as a pentagon: gold = now, dashed = 3 months ago.
 class _RadMaler extends CustomPainter {
@@ -551,24 +552,9 @@ class _ZieleSeiteState extends State<ZieleSeite> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 10),
-          Center(
-            child: Container(
-              width: 96,
-              height: 96,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    Color(0xFFFFF1CF),
-                    Color(0xAAE0BF7E),
-                    Color(0x00E0BF7E),
-                  ],
-                  stops: [0, .35, 1],
-                ),
-              ),
-            ),
-          ),
+          const SizedBox(height: 6),
+          ZielSteine(ziele: d.ziele),
+          const SizedBox(height: 6),
           Block(
             children: [
               if (d.ziele.isEmpty)
@@ -664,4 +650,204 @@ class _ZieleSeiteState extends State<ZieleSeite> {
       );
     },
   );
+}
+
+const _bereichIcons = {
+  'Körper': Icons.fitness_center,
+  'Fokus & Arbeit': Icons.bolt,
+  'Ausstrahlung': Icons.person_outline,
+  'Mindset': Icons.landscape,
+};
+
+/// The Lebensziele as gold stones at the very bottom of the roots; from
+/// each stone a root grows up to its area (Rundgang proposal 7, Phillip
+/// 2026-11-21). Goals without an area grow a short root that fades.
+class ZielSteine extends StatelessWidget {
+  const ZielSteine({super.key, required this.ziele});
+
+  final List<Lebensziel> ziele;
+
+  static const _hoehe = 230.0;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, c) {
+      final w = c.maxWidth;
+      final gezeigt = ziele.take(4).toList();
+      double bx(int i) => w * (i + .5) / radBereiche.length;
+      // Each stone gets an equal share of the width, its name fits under it.
+      double sx(int i) => w * (i + .5) / gezeigt.length;
+      final breit = gezeigt.isEmpty
+          ? 120.0
+          : math.min(130.0, w / gezeigt.length - 8);
+      final ziel = [
+        for (final z in gezeigt)
+          radBereiche.contains(z.bereich) ? radBereiche.indexOf(z.bereich) : -1,
+      ];
+      return SizedBox(
+        key: const ValueKey('ziel-steine'),
+        height: _hoehe,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: bewegungAn ? 0 : 1, end: 1),
+          duration: const Duration(milliseconds: 1800),
+          curve: Curves.easeOutCubic,
+          builder: (context, v, _) => Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: _SteinMaler(
+                    v: v,
+                    bereiche: [for (var i = 0; i < 4; i++) Offset(bx(i), 22)],
+                    steine: [
+                      for (var i = 0; i < gezeigt.length; i++)
+                        Offset(sx(i), _hoehe - 58),
+                    ],
+                    ziel: ziel,
+                  ),
+                ),
+              ),
+              for (var i = 0; i < radBereiche.length; i++)
+                Positioned(
+                  left: bx(i) - 18,
+                  top: 4,
+                  width: 36,
+                  height: 36,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFF2B221A),
+                      border: Border.all(
+                        color: ziel.contains(i)
+                            ? CoachStyle.goldBright
+                            : const Color(0x40E0BF7E),
+                        width: 1.3,
+                      ),
+                    ),
+                    child: Icon(
+                      _bereichIcons[radBereiche[i]],
+                      size: 16,
+                      color: ziel.contains(i)
+                          ? CoachStyle.goldBright
+                          : const Color(0x66E0BF7E),
+                    ),
+                  ),
+                ),
+              if (gezeigt.isEmpty)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 4,
+                  child: Text(
+                    'Hier liegt bald dein erster Stein.',
+                    textAlign: TextAlign.center,
+                    style: Glas.tSoft.copyWith(fontSize: 12.5),
+                  ),
+                ),
+              for (var i = 0; i < gezeigt.length; i++)
+                Positioned(
+                  left: sx(i) - breit / 2,
+                  width: breit,
+                  bottom: 0,
+                  child: Opacity(
+                    opacity: v,
+                    child: Text(
+                      gezeigt[i].text,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Glas.tText.copyWith(fontSize: 12, height: 1.3),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+class _SteinMaler extends CustomPainter {
+  _SteinMaler({
+    required this.v,
+    required this.bereiche,
+    required this.steine,
+    required this.ziel,
+  });
+
+  final double v;
+  final List<Offset> bereiche;
+  final List<Offset> steine;
+  final List<int> ziel;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final wurzel = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 1.6;
+    for (var i = 0; i < steine.length; i++) {
+      final s = steine[i] - const Offset(0, 12);
+      final hatZiel = ziel[i] >= 0;
+      final e = hatZiel ? bereiche[ziel[i]] + const Offset(0, 18) : null;
+      final ende = e ?? Offset(s.dx + (i.isEven ? 24 : -24), s.dy - 70);
+      final path = Path()
+        ..moveTo(s.dx, s.dy)
+        ..cubicTo(
+          s.dx + (i.isEven ? -10 : 10),
+          s.dy - (s.dy - ende.dy) * .45,
+          ende.dx,
+          ende.dy + (s.dy - ende.dy) * .45,
+          ende.dx,
+          ende.dy,
+        );
+      wurzel.shader = LinearGradient(
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+        colors: hatZiel
+            ? const [Color(0xFFE0BF7E), Color(0x99F3DCA6)]
+            : const [Color(0xAAE0BF7E), Color(0x00E0BF7E)],
+      ).createShader(Rect.fromPoints(s, ende));
+      for (final m in path.computeMetrics()) {
+        canvas.drawPath(m.extractPath(0, m.length * v), wurzel);
+      }
+    }
+    for (final s in steine) {
+      final r = Rect.fromCenter(center: s, width: 54, height: 30);
+      canvas.drawOval(
+        r.shift(const Offset(0, 4)),
+        Paint()
+          ..color = const Color(0x66000000)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+      );
+      canvas.drawOval(
+        r,
+        Paint()
+          ..shader = const RadialGradient(
+            center: Alignment(-.3, -.4),
+            colors: [Color(0xFFFFF3D6), Color(0xFFE2C48A), Color(0xFF9C7740)],
+            stops: [0, .55, 1],
+          ).createShader(r),
+      );
+    }
+    if (steine.isEmpty) {
+      final r = Rect.fromCenter(
+        center: Offset(size.width / 2, size.height - 58),
+        width: 54,
+        height: 30,
+      );
+      canvas.drawOval(
+        r,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.2
+          ..color = const Color(0x55E0BF7E),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_SteinMaler o) =>
+      o.v != v || o.steine.length != steine.length || o.ziel != ziel;
 }

@@ -74,6 +74,82 @@ class _TrainingsModusState extends State<TrainingsModus> {
     setState(() => _pause = s.pauseFuer != null && _ex < s.logs.length);
   }
 
+  /// "Satz zurück": takes back the last ticked set and goes back to it.
+  void _zurueck() {
+    var e = _ex, k = _satz - 1;
+    if (k < 0) {
+      e = _ex - 1;
+      if (e < 0) return;
+      k = s.logs[e].saetze.length - 1;
+    }
+    if (s.logs[e].saetze[k].fertig) s.abhaken(e, k);
+    s.pauseStopp();
+    setState(() {
+      _ex = e;
+      _satz = k;
+      _pause = false;
+    });
+  }
+
+  /// The small "Satz zurück" pill under the rest.
+  Widget _zurueckKnopf() => Center(
+    child: InkWell(
+      key: const ValueKey('modus-satz-zurueck'),
+      borderRadius: BorderRadius.circular(99),
+      onTap: _zurueck,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(12, 7, 14, 7),
+        decoration: BoxDecoration(
+          color: Klar.glas,
+          borderRadius: BorderRadius.circular(99),
+          border: Border.all(color: const Color(0x24FFF5E6)),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.undo_rounded, size: 15, color: Umbau.gold),
+            SizedBox(width: 6),
+            Text(
+              'Satz zurück',
+              style: TextStyle(
+                fontFamily: 'Figtree',
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: Umbau.gold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  /// "Wie war …?" only after the last set of an exercise.
+  Widget _gefuehl(int gi) {
+    final g = s.logs[gi];
+    return Column(
+      children: [
+        Text('Wie war ${g.name}?', style: tSoft),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            for (final f in const ['leicht', 'passt', 'schwer']) ...[
+              Expanded(
+                child: TChip(
+                  f,
+                  key: ValueKey('modus-gefuehl-$f'),
+                  an: g.gefuehl == f,
+                  onTap: () => s.gefuehl(gi, f),
+                ),
+              ),
+              if (f != 'schwer') const SizedBox(width: 6),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+
   void _aendern(bool menge, double d) {
     final v = menge
         ? s.logs[_ex].saetze[_satz].menge
@@ -128,6 +204,12 @@ class _TrainingsModusState extends State<TrainingsModus> {
         style: tSoft,
         textAlign: TextAlign.center,
       ),
+      if (s.logs.isNotEmpty) ...[
+        const SizedBox(height: 22),
+        _gefuehl(s.logs.length - 1),
+        const SizedBox(height: 12),
+        _zurueckKnopf(),
+      ],
       const SizedBox(height: 24),
       MainButton(
         key: const ValueKey('modus-uebersicht'),
@@ -140,8 +222,6 @@ class _TrainingsModusState extends State<TrainingsModus> {
   Widget _pausen() {
     final l = s.logs[_ex];
     final u = s.plan[_ex];
-    final g = s.logs[(_satz == 0 && _ex > 0) ? _ex - 1 : _ex];
-    final gi = (_satz == 0 && _ex > 0) ? _ex - 1 : _ex;
     return Column(
       children: [
         _kopf('Pause'),
@@ -165,24 +245,12 @@ class _TrainingsModusState extends State<TrainingsModus> {
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 14),
-        Text('Wie war ${g.name}?', style: tSoft),
-        const SizedBox(height: 6),
-        Row(
-          children: [
-            for (final f in const ['leicht', 'passt', 'schwer']) ...[
-              Expanded(
-                child: TChip(
-                  f,
-                  key: ValueKey('modus-gefuehl-$f'),
-                  an: g.gefuehl == f,
-                  onTap: () => s.gefuehl(gi, f),
-                ),
-              ),
-              if (f != 'schwer') const SizedBox(width: 6),
-            ],
-          ],
-        ),
+        const SizedBox(height: 12),
+        _zurueckKnopf(),
+        if (_satz == 0 && _ex > 0) ...[
+          const SizedBox(height: 18),
+          _gefuehl(_ex - 1),
+        ],
         const Spacer(),
         TGhost(
           'Pause überspringen',

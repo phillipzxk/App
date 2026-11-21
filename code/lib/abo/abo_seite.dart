@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../bereiche/glas.dart';
@@ -318,7 +319,7 @@ class _AboSeiteState extends State<AboSeite> with TickerProviderStateMixin {
                         const SizedBox(height: 8),
                         Text(
                           '${_plan.kurz}. Jederzeit kündbar, bezahlt wird '
-                          'über Apple.',
+                          'über ${bezahltUeber()}.',
                           textAlign: TextAlign.center,
                           style: Glas.tSoft.copyWith(fontSize: 11.5),
                         ),
@@ -829,17 +830,18 @@ class _PreisFeld extends StatelessWidget {
                 gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
+                  // Pure gold, no orange (Rundgang proposal 9).
                   colors: [
-                    Color(0xFFFFEAC0),
-                    Color(0xFFF4C46F),
-                    Color(0xFFE8894A),
+                    Color(0xFFF8E9C6),
+                    Color(0xFFE9CC92),
+                    Color(0xFFCFA968),
                   ],
-                  stops: [0, .45, 1],
+                  stops: [0, .55, 1],
                 ),
                 borderRadius: BorderRadius.circular(19),
                 boxShadow: const [
                   BoxShadow(
-                    color: Color(0x59F08A4B),
+                    color: Color(0x40E2C48A),
                     blurRadius: 28,
                     offset: Offset(0, 8),
                   ),
@@ -1422,3 +1424,7 @@ class _DankeRing extends CustomPainter {
   @override
   bool shouldRepaint(_DankeRing old) => old.t != t;
 }
+
+/// Who takes the payment: Google Play on Android, Apple everywhere else.
+String bezahltUeber() =>
+    defaultTargetPlatform == TargetPlatform.android ? 'Google Play' : 'Apple';
