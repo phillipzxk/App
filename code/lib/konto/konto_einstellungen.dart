@@ -17,6 +17,7 @@ import 'konto_dienst.dart';
 import 'konto_ui.dart';
 import 'konto_web.dart';
 import 'sicherung.dart';
+import '../plattform/plattform.dart';
 
 /// "Konto und Sicherung" (Entwurf 2, Bildschirm 4): state of the backup,
 /// account, the two switches, own data, sign out and delete. Everything
@@ -536,13 +537,15 @@ class _KontoEinstellungenState extends State<KontoEinstellungen>
               ),
             ]),
           if (widget.health case final h? when h.moeglich)
-            gruppe(.38, 'Apple Health', [
+            gruppe(.38, healthName, [
               _Zeile(
                 key: const ValueKey('konto-health'),
-                titel: 'Apple Health',
-                unter:
-                    'Schlaf, Puls, HRV, Trainings, Gewicht, Schritte und '
-                    'Tageslicht. Groundset liest nur.',
+                titel: healthName,
+                unter: istAndroid
+                    ? 'Schlaf, Puls, HRV, Trainings, Gewicht und Schritte. '
+                          'Groundset liest nur.'
+                    : 'Schlaf, Puls, HRV, Trainings, Gewicht, Schritte und '
+                          'Tageslicht. Groundset liest nur.',
                 pfeil: true,
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
@@ -628,7 +631,7 @@ class _KontoEinstellungenState extends State<KontoEinstellungen>
       setState(
         () => _meldung =
             'Ohne Erlaubnis geht es nicht. Du kannst es in den '
-            'iPhone-Einstellungen unter Groundset erlauben.',
+            '$handyName-Einstellungen unter Groundset erlauben.',
       );
       return;
     }

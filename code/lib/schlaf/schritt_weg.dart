@@ -10,6 +10,7 @@ import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import 'morgen_szene.dart';
 import 'schritt_zaehler.dart';
+import '../plattform/plattform.dart';
 
 /// The step task of the alarm (vault Umsetzung/Echter Wecker, "Schritte
 /// echt zählen", Entwurf 3): a morning scene in the app colours, every step
@@ -245,7 +246,9 @@ class _SchrittWegState extends State<SchrittWeg> with TickerProviderStateMixin {
               ),
               const SizedBox(height: 8),
               Text(
-                'Danach fragt das iPhone einmal nach „Bewegung und Fitness“.',
+                istAndroid
+                    ? 'Danach fragt Android einmal nach „Körperliche Aktivität“.'
+                    : 'Danach fragt das iPhone einmal nach „Bewegung und Fitness“.',
                 style: tSoft.copyWith(fontSize: 11.5),
               ),
             ],

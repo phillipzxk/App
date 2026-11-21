@@ -7,6 +7,7 @@ import '../schlaf/schlaf_logik.dart';
 import '../training/training_widgets.dart';
 import '../ui/coach_style.dart';
 import 'health_daten.dart';
+import '../plattform/plattform.dart';
 
 /// "Deine Nacht als Wurzel" (vault Umsetzung/Apple Health.md, Entwurf 2):
 /// the ground line is the night from falling asleep (left) to waking up
@@ -243,12 +244,12 @@ class NachtKarte extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Row(
+        Row(
           children: [
-            Expanded(child: TLabel('Deine Nacht als Wurzel')),
-            Icon(Icons.favorite, size: 14, color: Color(0xFFFF2D55)),
-            SizedBox(width: 4),
-            Text('Apple Health', style: tSoft),
+            const Expanded(child: TLabel('Deine Nacht als Wurzel')),
+            const Icon(Icons.favorite, size: 14, color: Color(0xFFFF2D55)),
+            const SizedBox(width: 4),
+            Text(healthName, style: tSoft),
           ],
         ),
         const SizedBox(height: 4),
@@ -263,7 +264,7 @@ class NachtKarte extends StatelessWidget {
         Text(
           nacht.mitPhasen
               ? 'Je tiefer die Wurzel, desto tiefer hast du geschlafen.'
-              : 'Ohne Uhr misst das iPhone nur, wann du geschlafen hast, '
+              : 'Ohne Uhr misst das $handyName nur, wann du geschlafen hast, '
                     'nicht wie tief.',
           style: tSoft,
         ),

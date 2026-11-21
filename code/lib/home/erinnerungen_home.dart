@@ -2,15 +2,96 @@ part of 'home_page.dart';
 
 /// Reminders from Heute (vault Umsetzung/Erinnerungen.md): planned anew a
 /// moment after anything changes, and a tap on one opens the right place.
+const _weckerGefragtKey = 'wecker_android_gefragt';
+
 extension _Erinnerungen on _HomePageState {
   void _erinnerungenAn() {
     final d = widget.erinnerungen;
     if (d == null) return;
     d.getippt.addListener(_getippt);
     widget.erinnerungenNeu?.addListener(_erinnerungenSpaeter);
-    unawaited(d.erlaubnisFragen());
+    unawaited(d.erlaubnisFragen().then((_) => _weckerErlaubnis()));
     // A tap that opened the app waits until Heute is loaded.
     WidgetsBinding.instance.addPostFrameCallback((_) => _getippt());
+  }
+
+  /// Android asks once for the alarm (exact time, over the lock screen),
+  /// first in the app's words (vault Umsetzung/Android nachziehen.md).
+  Future<void> _weckerErlaubnis() async {
+    final d = widget.erinnerungen;
+    if (d == null || !await d.weckerErlaubnisFehlt() || !mounted) return;
+    final p = await SharedPreferences.getInstance();
+    if (p.getBool(_weckerGefragtKey) ?? false) return;
+    await p.setBool(_weckerGefragtKey, true);
+    if (!mounted) return;
+    final ja = await showDialog<bool>(
+      context: context,
+      barrierColor: const Color(0xB3000000),
+      builder: (c) => Dialog(
+        backgroundColor: const Color(0xFF2F2620),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(26),
+          side: const BorderSide(color: Color(0x38E0BF7E)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(22, 22, 22, 14),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Groundset als Wecker erlauben?',
+                style: TextStyle(
+                  fontFamily: 'Sora',
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFFF4EBDD),
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Damit dein Wecker pünktlich klingelt, auch wenn das Handy '
+                'gesperrt ist.',
+                style: TextStyle(
+                  fontFamily: 'Figtree',
+                  fontSize: 14,
+                  height: 1.45,
+                  color: Color(0xFFB9AC97),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    key: const ValueKey('wecker-erlauben-spaeter'),
+                    onPressed: () => Navigator.of(c).pop(false),
+                    child: const Text(
+                      'Später',
+                      style: TextStyle(color: Color(0xFFB9AC97)),
+                    ),
+                  ),
+                  TextButton(
+                    key: const ValueKey('wecker-erlauben'),
+                    onPressed: () => Navigator.of(c).pop(true),
+                    child: const Text(
+                      'Erlauben',
+                      style: TextStyle(
+                        color: Color(0xFFF3D79A),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (ja != true) return;
+    await d.weckerErlauben();
+    _erinnerungenSpaeter();
   }
 
   void _erinnerungenAus() {

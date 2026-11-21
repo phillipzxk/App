@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../checkin/checkin.dart';
 import '../data/diary_store.dart';
@@ -97,6 +98,8 @@ import '../kalender/kalender_logik.dart';
 import '../health/health_logik.dart';
 import '../startwidget/widget_daten.dart';
 import '../startwidget/widget_dienst.dart';
+import '../plattform/plattform.dart';
+import '../schlaf/schritt_zaehler.dart';
 
 part 'koerper_seite.dart';
 part 'erinnerungen_home.dart';
@@ -122,6 +125,7 @@ class HomePage extends StatefulWidget {
     required this.onRestartOnboarding,
     this.onKonto,
     this.erinnerungen,
+    this.schritte = const KeinZaehler(),
     this.erinnerungenNeu,
     this.widgets,
     this.health,
@@ -153,6 +157,9 @@ class HomePage extends StatefulWidget {
 
   /// Reminders on the phone (vault Umsetzung/Erinnerungen); null in tests.
   final ErinnerungDienst? erinnerungen;
+
+  /// Real steps for the alarm's task (iPhone and Android).
+  final SchrittZaehler schritte;
 
   /// Ticks when the reminder settings changed.
   final Listenable? erinnerungenNeu;
@@ -915,6 +922,7 @@ class _HomePageState extends State<HomePage> {
           if (parseUhrzeit(t.zeit ?? '') case final m?) (m, t.text),
       ],
       health: widget.health,
+      schritte: widget.schritte,
       onHealthVerbunden: () => _healthHolen(sofort: true),
     );
   }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'beta/beta.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'abo/abo_ablauf.dart';
 import 'abo/abo_daten.dart';
@@ -21,6 +22,7 @@ import 'startwidget/widget_dienst.dart';
 import 'feed/feed_data.dart';
 import 'feed/feed_store.dart';
 import 'schlaf/wecker_aufgabe.dart';
+import 'schlaf/wecker_klingelt.dart';
 import 'training/training_data.dart' show istTrainingstag;
 import 'home/home_page.dart';
 import 'health/health_dienst.dart';
@@ -345,10 +347,25 @@ class _StartGateState extends State<StartGate> {
       );
     }
     _load();
+    // The Android alarm's own screen (vault Umsetzung/Android nachziehen).
+    widget.app.erinnerungen?.klingelt.addListener(_klingeltGeaendert);
+    widget.app.erinnerungen?.weckerGeaendert.addListener(_pruefeWecker);
+  }
+
+  bool _schlummern = true;
+
+  Future<void> _klingeltGeaendert() async {
+    if (widget.app.erinnerungen?.klingelt.value != null) {
+      final schlaf = await widget.app.feed.loadSchlaf();
+      _schlummern = schlaf.wecker.schlummern;
+    }
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
+    widget.app.erinnerungen?.klingelt.removeListener(_klingeltGeaendert);
+    widget.app.erinnerungen?.weckerGeaendert.removeListener(_pruefeWecker);
     _splashTimer?.cancel();
     _leben.dispose();
     _erinnerungenNeu.dispose();
@@ -483,6 +500,20 @@ class _StartGateState extends State<StartGate> {
         onFertig: (_) => _load(),
       );
     }
+    final d = widget.app.erinnerungen;
+    if (d != null && d.klingelt.value != null) {
+      return WeckerKlingeltSeite(
+        key: const ValueKey('wecker-klingelt'),
+        name: profile.name,
+        clock: widget.app.clock,
+        schlummern: _schlummern,
+        onAntwort: (aufstehen) async {
+          await d.weckerAntworten(aufstehen: aufstehen);
+          // "5 Min": back to sleep, the app goes away.
+          if (!aufstehen) await SystemNavigator.pop();
+        },
+      );
+    }
     final wecker = _weckerAufgabe;
     if (wecker != null) {
       return WeckerAufgabe(
@@ -544,6 +575,7 @@ class _StartGateState extends State<StartGate> {
       health: widget.app.health,
       kalender: widget.app.kalender,
       kalenderNeu: _kalenderNeu,
+      schritte: widget.app.schritte,
     );
   }
 }

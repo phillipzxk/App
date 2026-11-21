@@ -45,6 +45,8 @@ dependencies:
   speech_to_text: ^7.5.0
   home_widget: ^0.10.0
   url_launcher: ^6.3.3
+  # Health Connect on Android (vault Umsetzung/Android nachziehen.md).
+  health: 13.3.2
 
 dev_dependencies:
   flutter_test:

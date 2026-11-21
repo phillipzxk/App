@@ -3,10 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../checkin/checkin.dart';
+import 'health_android.dart';
 import 'health_daten.dart';
 
 /// Reads Apple Health (vault Umsetzung/Apple Health.md). Only reads,
-/// never writes. Google Health Connect comes with the Android version.
+/// never writes. On Android the same over Health Connect (vault
+/// Umsetzung/Android nachziehen.md), without daylight.
 abstract class HealthDienst {
   /// Whether this device can connect at all (iPhone; the browser preview
   /// shows example data).
@@ -24,7 +26,7 @@ abstract class HealthDienst {
 
 const _verbundenKey = 'health_verbunden';
 
-/// Tests and Android for now: no Health.
+/// Tests and other devices: no Health.
 class KeinHealth implements HealthDienst {
   const KeinHealth();
 
@@ -41,8 +43,9 @@ class KeinHealth implements HealthDienst {
   Future<HealthTag?> lesen(DateTime heute) async => null;
 }
 
-/// The iPhone: HealthKit in AppDelegate.swift over a channel.
-class AppleHealth implements HealthDienst {
+/// The iPhone: HealthKit in AppDelegate.swift over a channel. Android is
+/// [HealthConnect] in health_android.dart.
+class HandyHealth implements HealthDienst {
   static const _kanal = MethodChannel('groundset/health');
 
   @override
@@ -170,7 +173,9 @@ HealthTag beispielTag(DateTime heute) {
 
 HealthDienst healthFuerPlattform() {
   if (kIsWeb) return VorschauHealth();
-  return defaultTargetPlatform == TargetPlatform.iOS
-      ? AppleHealth()
-      : const KeinHealth();
+  return switch (defaultTargetPlatform) {
+    TargetPlatform.iOS => HandyHealth(),
+    TargetPlatform.android => HealthConnect(),
+    _ => const KeinHealth(),
+  };
 }
