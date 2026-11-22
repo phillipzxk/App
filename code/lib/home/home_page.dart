@@ -100,6 +100,9 @@ import '../startwidget/widget_daten.dart';
 import '../startwidget/widget_dienst.dart';
 import '../plattform/plattform.dart';
 import '../schlaf/schritt_zaehler.dart';
+import '../privatcoach/privatcoach_daten.dart';
+import '../privatcoach/privatcoach_dienst.dart';
+import '../privatcoach/privatcoach_seiten.dart';
 
 part 'koerper_seite.dart';
 part 'erinnerungen_home.dart';
@@ -134,7 +137,11 @@ class HomePage extends StatefulWidget {
     this.aboTag,
     this.coachStill = false,
     this.onAbo,
+    this.privatcoach,
   });
+
+  /// The 1:1 chat with Phillip (vault Umsetzung/Privatcoach); null in tests.
+  final PrivatcoachDienst? privatcoach;
 
   /// Free week (vault Umsetzung/Abo): its day for the counter, null after
   /// it. [coachStill]: without Abo the coach card is grey from Monday to
@@ -275,6 +282,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    _chatTimer?.cancel();
     _heuteScroll.dispose();
     _healthLeben.dispose();
     if (widget.kalender != null) _kalenderLeben.dispose();
@@ -307,6 +315,19 @@ class _HomePageState extends State<HomePage> {
     if (widget.health != null) _healthLeben;
     if (widget.kalender != null) _kalenderLeben;
     widget.kalenderNeu?.addListener(_reload);
+    if (widget.privatcoach != null) {
+      _chatPruefen().then((_) {
+        // Opened from a chat notification (…/?chat=…): straight to the chat.
+        if (!_ausMitteilung && Uri.base.queryParameters.containsKey('chat')) {
+          _ausMitteilung = true;
+          if (mounted) _chatOeffnen();
+        }
+      });
+      _chatTimer = Timer.periodic(
+        const Duration(seconds: 30),
+        (_) => _chatPruefen(),
+      );
+    }
   }
 
   /// Pages opened from Heute (coach, focus) rebuild with every change too.
@@ -2119,6 +2140,85 @@ class _HomePageState extends State<HomePage> {
     await _reload();
   }
 
+  // MARK: Privatcoach (vault Umsetzung/Privatcoach)
+
+  Timer? _chatTimer;
+  static bool _ausMitteilung = false;
+  CoachChat? _meinChat;
+  bool _istCoach = false;
+  int _chatUngelesen = 0;
+
+  Future<void> _chatPruefen() async {
+    final d = widget.privatcoach;
+    if (d == null) return;
+    try {
+      final coach = await d.istCoach();
+      final chat = coach ? null : await d.meinChat();
+      final ungelesen = coach
+          ? (await d.alleChats()).fold<int>(0, (a, c) => a + c.ungelesen)
+          : chat?.ungelesen ?? 0;
+      if (!mounted) return;
+      setState(() {
+        _istCoach = coach;
+        _meinChat = chat;
+        _chatUngelesen = ungelesen;
+      });
+    } catch (_) {}
+  }
+
+  /// What Phillip sees when the user shares the values.
+  Future<GeteilteWerte> _geteilteWerte() async {
+    final today = widget.clock();
+    final naechte = [for (final e in _sleep.reversed.take(7)) e.stunden]
+        .reversed
+        .toList();
+    final erster = _checkIns.isEmpty
+        ? null
+        : _checkIns.map((c) => c.datum).reduce((a, b) => a.isBefore(b) ? a : b);
+    final f = _fokusLaeuft ? _fokus : null;
+    final ziel = widget.profile.zielSatz.trim();
+    final warum = widget.profile.warum.trim();
+    return GeteilteWerte(
+      bereiche: [
+        for (final b in _wurzeln(today))
+          WertBereich(name: b.name, wert: b.wert, diff: b.diff, woche: b.woche),
+      ],
+      muster: sichtbareMuster(_muster).firstOrNull?.text,
+      schlafStunden: [
+        for (var i = 0; i < 7 - naechte.length; i++) null,
+        ...naechte,
+      ],
+      fokus: f?.text,
+      ziel: ziel.isEmpty ? null : ziel,
+      warum: warum.isEmpty ? null : warum,
+      seitTagen: erster == null ? null : today.difference(erster).inDays + 1,
+    );
+  }
+
+  Future<void> _chatOeffnen() async {
+    final d = widget.privatcoach;
+    if (d == null) return;
+    final ich = await d.ich() ?? '';
+    if (!mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => _istCoach
+            ? PostEingang(dienst: d, clock: widget.clock)
+            : ChatSeite(
+                dienst: d,
+                chatId: ich,
+                name: widget.profile.name,
+                werte: _geteilteWerte,
+                clock: widget.clock,
+              ),
+      ),
+    );
+    await _chatPruefen();
+  }
+
+  /// The "P" sits in the bar once Phillip accepted, or on his own account.
+  bool get _pInLeiste => _istCoach || _meinChat?.status == ChatStatus.aktiv;
+
   Widget _zweiSeiten(Widget heute, DateTime today) {
     final fundament = FundamentSeite(
       key: ValueKey('fundament-$_fundamentMal'),
@@ -2186,10 +2286,27 @@ class _HomePageState extends State<HomePage> {
                   onTap: () => _schnellEintrag(),
                   onHalten: () => _schnellEintrag(sofort: true),
                 ),
+                if (widget.privatcoach != null && _pInLeiste) ...[
+                  const SizedBox(width: 10),
+                  LeistenP(
+                    onTap: _chatOeffnen,
+                    ungelesen: _chatUngelesen,
+                    alsCoach: _istCoach,
+                  ),
+                ],
               ],
             ),
           ),
         ),
+        if (widget.privatcoach != null && !_pInLeiste)
+          Positioned(
+            right: 18 + MediaQuery.paddingOf(context).right,
+            bottom: 96 + MediaQuery.paddingOf(context).bottom,
+            child: PrivatcoachEcke(
+              onTap: _chatOeffnen,
+              ungelesen: _chatUngelesen,
+            ),
+          ),
       ],
     );
   }
