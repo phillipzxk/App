@@ -26,4 +26,8 @@ Echtes 1:1 Coaching mit Phillip direkt in der App. Ablauf mit Phillip abgestimmt
 ## Stand im Code
 - Server (Supabase): Tabellen `coach_rollen`, `coach_einstellungen`, `coach_chats`, `coach_nachrichten`, privater Speicher `coach-audio`; siehe `backend/supabase/schema.sql`.
 - App: `code/lib/privatcoach/` (Daten, Dienst, Seiten), eingebaut in Heute.
-- Noch offen: Benachrichtigungen (Web Push, Android über Firebase, E-Mail nach 15 Minuten ungelesen), Sprachnachrichten, Phillips Konto als Coach eintragen.
+- Phillips Konto ist Coach (2026-11-22, automatisch bei der Anmeldung über eine vorgemerkte Adresse).
+- Benachrichtigungen (2026-11-22): Web Push über die Supabase-Funktion `coach-benachrichtigen`, ausgelöst bei jeder neuen Nachricht. Im Chat und im Posteingang ein Feld „An“; auf dem iPhone nur aus der Home-Bildschirm-App. Tippen auf die Mitteilung öffnet den Chat.
+- E-Mail nach 15 Minuten ungelesen: läuft alle 5 Minuten. Ohne eigene Domain kann Resend nur an Phillips Adresse senden.
+- Sprachnachrichten: erstmal nicht (Phillip 2026-11-22).
+- Noch offen: Push in der Android-App (braucht ein kostenloses Firebase-Projekt) und in der iPhone-App (braucht den Apple-Entwickler-Account).

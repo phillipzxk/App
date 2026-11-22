@@ -252,3 +252,71 @@ end $$;
 drop trigger if exists coach_vorgemerkt on auth.users;
 create trigger coach_vorgemerkt after insert on auth.users
   for each row execute function public.coach_vorgemerkt();
+
+-- 5. Notifications for the Privatcoach chat --------------------------------
+create extension if not exists pg_net;
+create extension if not exists pg_cron;
+
+-- Web Push subscriptions, one per browser/phone. Written only via RPC.
+create table if not exists public.coach_push (
+  endpoint text primary key,
+  user_id uuid not null references auth.users on delete cascade,
+  p256dh text not null,
+  auth text not null,
+  erstellt timestamptz not null default now()
+);
+alter table public.coach_push enable row level security;
+
+alter table public.coach_nachrichten add column if not exists erinnert timestamptz;
+
+-- Private settings for the database itself (no policies: nobody reads it
+-- through the API). Holds the hook secret, set by hand, never in this file.
+create table if not exists public.coach_intern (schluessel text primary key, wert text not null);
+alter table public.coach_intern enable row level security;
+
+create or replace function public.coach_push_an(p_endpoint text, p_p256dh text, p_auth text)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null then raise exception 'anmelden'; end if;
+  insert into coach_push(endpoint, user_id, p256dh, auth)
+  values (p_endpoint, auth.uid(), p_p256dh, p_auth)
+  on conflict (endpoint) do update
+    set user_id = auth.uid(), p256dh = excluded.p256dh, auth = excluded.auth, erstellt = now();
+end $$;
+
+create or replace function public.coach_push_aus(p_endpoint text)
+returns void language sql security definer set search_path = public as $$
+  delete from coach_push where endpoint = p_endpoint and user_id = auth.uid();
+$$;
+
+grant execute on function public.coach_push_an(text, text, text) to authenticated;
+grant execute on function public.coach_push_aus(text) to authenticated;
+
+create or replace function public.coach_hook(p_body jsonb)
+returns void language plpgsql security definer set search_path = public as $$
+declare g text;
+begin
+  select wert into g from coach_intern where schluessel = 'hook_geheim';
+  if g is null then return; end if;
+  perform net.http_post(
+    url := 'https://iuivlfkfjffltxfvtoqk.supabase.co/functions/v1/coach-benachrichtigen',
+    body := p_body,
+    headers := jsonb_build_object('Content-Type', 'application/json', 'x-geheim', g)
+  );
+end $$;
+revoke execute on function public.coach_hook(jsonb) from public, anon, authenticated;
+
+create or replace function public.coach_neu_melden() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  perform coach_hook(jsonb_build_object('art', 'neu', 'id', new.id));
+  return new;
+end $$;
+drop trigger if exists coach_neu_melden on public.coach_nachrichten;
+create trigger coach_neu_melden after insert on public.coach_nachrichten
+  for each row execute function public.coach_neu_melden();
+
+-- Every 5 minutes: e-mail for messages unread for 15 minutes.
+select cron.unschedule(jobid) from cron.job where jobname = 'coach-verpasst';
+select cron.schedule('coach-verpasst', '*/5 * * * *',
+  $$select public.coach_hook('{"art":"verpasst"}'::jsonb)$$);

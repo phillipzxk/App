@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../konto/konto_ui.dart' show bewegungAn;
 import '../ui/umbau.dart';
 import 'privatcoach_daten.dart';
+import 'chat_push.dart';
 import 'privatcoach_dienst.dart';
 
 /// The pages of the Privatcoach (vault Umsetzung/Phillip dazuholen.md,
@@ -297,9 +298,11 @@ class ChatSeite extends StatefulWidget {
     this.werte,
     this.clock = DateTime.now,
     this.abholen = const Duration(seconds: 5),
+    this.push = const ChatPush(),
   });
 
   final PrivatcoachDienst dienst;
+  final ChatPush push;
   final String chatId;
 
   /// The user's own name (sent with the first message), or on Phillip's
@@ -497,6 +500,12 @@ class _ChatSeiteState extends State<ChatSeite> {
                     text:
                         'Anfrage gesendet. Phillip schaut sie sich selbst an '
                         'und meldet sich hier.',
+                  ),
+                if (chat != null)
+                  PushHinweis(
+                    dienst: widget.dienst,
+                    push: widget.push,
+                    alsCoach: widget.alsCoach,
                   ),
               ],
             ),
@@ -814,6 +823,109 @@ class _Hinweis extends StatelessWidget {
   );
 }
 
+/// "Sag mir Bescheid": switches on notifications for the chat. Hidden
+/// when they are on or not possible on this device.
+class PushHinweis extends StatefulWidget {
+  const PushHinweis({
+    super.key,
+    required this.dienst,
+    required this.push,
+    this.alsCoach = false,
+  });
+  final PrivatcoachDienst dienst;
+  final ChatPush push;
+  final bool alsCoach;
+
+  @override
+  State<PushHinweis> createState() => _PushHinweisState();
+}
+
+class _PushHinweisState extends State<PushHinweis> {
+  late PushStand _stand = widget.push.stand();
+  bool _laeuft = false;
+  bool _fertig = false;
+
+  Future<void> _an() async {
+    if (_laeuft) return;
+    setState(() => _laeuft = true);
+    var ok = false;
+    try {
+      ok = await widget.push.an(widget.dienst);
+    } catch (_) {}
+    if (!mounted) return;
+    setState(() {
+      _laeuft = false;
+      _fertig = ok;
+      _stand = ok ? PushStand.erlaubt : widget.push.stand();
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Already allowed: renew the subscription quietly (new device, new key).
+    if (_stand == PushStand.erlaubt) widget.push.an(widget.dienst);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_fertig) {
+      return const _Hinweis(
+        key: ValueKey('push-fertig'),
+        text: 'Benachrichtigungen sind an.',
+      );
+    }
+    final text = switch (_stand) {
+      PushStand.frage =>
+        widget.alsCoach
+            ? 'Damit du keine Nachricht verpasst.'
+            : 'Damit du siehst, wenn Phillip antwortet.',
+      PushStand.homescreen =>
+        'Für Benachrichtigungen: in Safari auf Teilen tippen, dann „Zum '
+            'Home-Bildschirm“, und Groundset von dort öffnen.',
+      PushStand.blockiert =>
+        'Benachrichtigungen sind blockiert. Du kannst sie in den '
+            'Einstellungen deines Handys für Groundset erlauben.',
+      _ => null,
+    };
+    if (text == null) return const SizedBox.shrink();
+    return Container(
+      key: const ValueKey('push-hinweis'),
+      margin: const EdgeInsets.only(top: 14),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      decoration: BoxDecoration(
+        color: Klar.glas,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Umbau.linie),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.notifications_active_outlined,
+            color: Umbau.gold,
+            size: 22,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: Umbau.klein.copyWith(fontSize: 13, color: Umbau.text),
+            ),
+          ),
+          if (_stand == PushStand.frage) ...[
+            const SizedBox(width: 10),
+            _GoldKnopf(
+              key: const ValueKey('push-an'),
+              text: _laeuft ? '…' : 'An',
+              onTap: _an,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 /// Phillip's focus for the user ("Von Phillip angepasst").
 class _FokusKarte extends StatelessWidget {
   const _FokusKarte({required this.fokus});
@@ -1036,7 +1148,7 @@ class WerteKarte extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  '${name.isEmpty ? 'Geteilte Woche' : 'Woche von $name'}',
+                  name.isEmpty ? 'Geteilte Woche' : 'Woche von $name',
                   style: const TextStyle(
                     fontFamily: 'Sora',
                     fontWeight: FontWeight.w700,
@@ -1463,8 +1575,10 @@ class PostEingang extends StatefulWidget {
     required this.dienst,
     this.clock = DateTime.now,
     this.abholen = const Duration(seconds: 8),
+    this.push = const ChatPush(),
   });
   final PrivatcoachDienst dienst;
+  final ChatPush push;
   final DateTime Function() clock;
   final Duration abholen;
 
@@ -1514,6 +1628,7 @@ class _PostEingangState extends State<PostEingang> {
           name: c.name,
           alsCoach: true,
           clock: widget.clock,
+          push: widget.push,
         ),
       ),
     );
@@ -1583,6 +1698,7 @@ class _PostEingangState extends State<PostEingang> {
                 onTap: () => _oeffnen(c),
               ),
             ),
+          PushHinweis(dienst: widget.dienst, push: widget.push, alsCoach: true),
         ],
       ),
     );

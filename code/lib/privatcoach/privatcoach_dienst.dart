@@ -51,6 +51,9 @@ abstract class PrivatcoachDienst {
 
   /// Marks what the other side wrote as read.
   Future<void> gelesen(String chat);
+
+  /// Saves this device's Web Push subscription for the signed-in person.
+  Future<void> pushSpeichern(String endpoint, String p256dh, String auth);
 }
 
 /// Over Supabase with the account from Konto und Sicherung.
@@ -233,6 +236,14 @@ class SupabasePrivatcoach implements PrivatcoachDienst {
       await _rpc('coach_gelesen', {'p_chat': chat});
     } catch (_) {}
   }
+
+  @override
+  Future<void> pushSpeichern(String endpoint, String p256dh, String auth) =>
+      _rpc('coach_push_an', {
+        'p_endpoint': endpoint,
+        'p_p256dh': p256dh,
+        'p_auth': auth,
+      });
 }
 
 /// Tests and the preview without a server: everything in memory. [coach]
@@ -378,6 +389,16 @@ class MemoryPrivatcoach implements PrivatcoachDienst {
   @override
   Future<void> fokusSetzen(String chat, String fokus) async =>
       _status(chat, chats[chat]!.status, fokus: fokus);
+
+  /// Saved push subscriptions (tests).
+  final push = <String>[];
+
+  @override
+  Future<void> pushSpeichern(
+    String endpoint,
+    String p256dh,
+    String auth,
+  ) async => push.add(endpoint);
 
   @override
   Future<void> gelesen(String chat) async {

@@ -1,6 +1,7 @@
 import 'package:coach_app/data/user_profile.dart';
 import 'package:coach_app/ui/umbau.dart';
 import 'package:coach_app/main.dart';
+import 'package:coach_app/privatcoach/chat_push.dart';
 import 'package:coach_app/privatcoach/privatcoach_daten.dart';
 import 'package:coach_app/privatcoach/privatcoach_dienst.dart';
 import 'package:coach_app/privatcoach/privatcoach_seiten.dart';
@@ -39,7 +40,63 @@ Future<void> _ende(WidgetTester tester) async {
   await tester.pumpWidget(const SizedBox());
 }
 
+class _Push extends ChatPush {
+  _Push(this.wert);
+  PushStand wert;
+
+  @override
+  PushStand stand() => wert;
+
+  @override
+  Future<bool> an(PrivatcoachDienst dienst) async {
+    await dienst.pushSpeichern('https://push.example/1', 'p', 'a');
+    wert = PushStand.erlaubt;
+    return true;
+  }
+}
+
 void main() {
+  testWidgets('notifications: one tap switches them on', (tester) async {
+    final d = MemoryPrivatcoach(id: 'u1', clock: () => _jetzt);
+    d.schreiben('u1', 'Hallo', vonCoach: false, name: 'Max');
+    await _zeige(
+      tester,
+      ChatSeite(
+        dienst: d,
+        chatId: 'u1',
+        name: 'Max',
+        clock: () => _jetzt,
+        push: _Push(PushStand.frage),
+      ),
+    );
+    expect(
+      find.text('Damit du siehst, wenn Phillip antwortet.'),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const ValueKey('push-an')));
+    await tester.pumpAndSettle();
+    expect(d.push, ['https://push.example/1']);
+    expect(find.byKey(const ValueKey('push-fertig')), findsOneWidget);
+    await _ende(tester);
+  });
+
+  testWidgets('iPhone in Safari: hint to the home screen, no button', (
+    tester,
+  ) async {
+    final d = MemoryPrivatcoach(coach: true, id: 'p', clock: () => _jetzt);
+    await _zeige(
+      tester,
+      PostEingang(
+        dienst: d,
+        clock: () => _jetzt,
+        push: _Push(PushStand.homescreen),
+      ),
+    );
+    expect(find.byKey(const ValueKey('push-hinweis')), findsOneWidget);
+    expect(find.byKey(const ValueKey('push-an')), findsNothing);
+    await _ende(tester);
+  });
+
   testWidgets('first message asks about the values and opens a request', (
     tester,
   ) async {

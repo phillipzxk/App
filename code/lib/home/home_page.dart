@@ -316,7 +316,13 @@ class _HomePageState extends State<HomePage> {
     if (widget.kalender != null) _kalenderLeben;
     widget.kalenderNeu?.addListener(_reload);
     if (widget.privatcoach != null) {
-      _chatPruefen();
+      _chatPruefen().then((_) {
+        // Opened from a chat notification (…/?chat=…): straight to the chat.
+        if (!_ausMitteilung && Uri.base.queryParameters.containsKey('chat')) {
+          _ausMitteilung = true;
+          if (mounted) _chatOeffnen();
+        }
+      });
       _chatTimer = Timer.periodic(
         const Duration(seconds: 30),
         (_) => _chatPruefen(),
@@ -2137,6 +2143,7 @@ class _HomePageState extends State<HomePage> {
   // MARK: Privatcoach (vault Umsetzung/Privatcoach)
 
   Timer? _chatTimer;
+  static bool _ausMitteilung = false;
   CoachChat? _meinChat;
   bool _istCoach = false;
   int _chatUngelesen = 0;
