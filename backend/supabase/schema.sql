@@ -236,3 +236,19 @@ drop policy if exists "Sprachnachricht hochladen" on storage.objects;
 create policy "Sprachnachricht hochladen" on storage.objects
   for insert to authenticated
   with check (bucket_id = 'coach-audio' and ((storage.foldername(name))[1] = auth.uid()::text or public.ist_coach()));
+
+-- Coach role on sign-up: emails are added to coach_vormerkung by hand
+-- (never in this file); the trigger gives that account the coach role.
+create table if not exists public.coach_vormerkung (email text primary key);
+alter table public.coach_vormerkung enable row level security;
+create or replace function public.coach_vorgemerkt() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if exists (select 1 from public.coach_vormerkung v where lower(v.email) = lower(new.email)) then
+    insert into public.coach_rollen(user_id) values (new.id) on conflict do nothing;
+  end if;
+  return new;
+end $$;
+drop trigger if exists coach_vorgemerkt on auth.users;
+create trigger coach_vorgemerkt after insert on auth.users
+  for each row execute function public.coach_vorgemerkt();
