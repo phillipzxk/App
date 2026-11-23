@@ -257,5 +257,14 @@ Deno.serve(async (req) => {
     return Response.json({ ok: await pushen(data as Nachricht) });
   }
   if (b.art === "verpasst") return Response.json({ ok: await verpasst() });
+  if (b.art === "fcmtest") {
+    // Checks the Firebase key without sending anything.
+    try {
+      const sa = await fcmKonto();
+      return Response.json({ ok: sa && (await fcmToken(sa)) ? 1 : 0 });
+    } catch (_) {
+      return Response.json({ ok: 0 });
+    }
+  }
   return new Response("?", { status: 400 });
 });
