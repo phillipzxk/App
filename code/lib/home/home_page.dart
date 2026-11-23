@@ -100,6 +100,7 @@ import '../startwidget/widget_daten.dart';
 import '../startwidget/widget_dienst.dart';
 import '../plattform/plattform.dart';
 import '../schlaf/schritt_zaehler.dart';
+import '../privatcoach/chat_push.dart';
 import '../privatcoach/privatcoach_daten.dart';
 import '../privatcoach/privatcoach_dienst.dart';
 import '../privatcoach/privatcoach_seiten.dart';
@@ -322,6 +323,16 @@ class _HomePageState extends State<HomePage> {
           _ausMitteilung = true;
           if (mounted) _chatOeffnen();
         }
+      });
+      // Android: the app was opened by tapping a chat notification.
+      const ChatPush().geoeffnet().then((c) {
+        if (c != null && !_ausMitteilung && mounted) {
+          _ausMitteilung = true;
+          _chatOeffnen();
+        }
+      });
+      const ChatPush().beiTippen((_) {
+        if (mounted) _chatOeffnen();
       });
       _chatTimer = Timer.periodic(
         const Duration(seconds: 30),

@@ -21,3 +21,9 @@ Future<String?> pushAn(String schluessel) async {
     return null;
   }
 }
+
+Future<String> pushPruefen() async => pushStatus();
+
+/// In the browser a tapped notification opens …/?chat=…
+Future<String?> pushGeoeffnet() async => null;
+void pushBeiTippen(void Function(String chat) wenn) {}

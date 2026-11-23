@@ -51,6 +51,98 @@ async function empfaenger(n: Nachricht): Promise<string[]> {
   return n.von === "coach" ? [n.chat] : await coaches();
 }
 
+
+// MARK: Android (Firebase Cloud Messaging, HTTP v1)
+
+const b64url = (b: Uint8Array | string) =>
+  btoa(typeof b === "string" ? b : String.fromCharCode(...b))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+let fcmZugang: { token: string; bis: number } | null = null;
+
+async function fcmKonto() {
+  const roh = Deno.env.get("FCM_SERVICE_ACCOUNT");
+  return roh ? JSON.parse(roh) as {
+    client_email: string;
+    private_key: string;
+    project_id: string;
+  } : null;
+}
+
+async function fcmToken(sa: { client_email: string; private_key: string }) {
+  if (fcmZugang && fcmZugang.bis > Date.now() + 60_000) return fcmZugang.token;
+  const jetzt = Math.floor(Date.now() / 1000);
+  const kopf = b64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const inhalt = b64url(JSON.stringify({
+    iss: sa.client_email,
+    scope: "https://www.googleapis.com/auth/firebase.messaging",
+    aud: "https://oauth2.googleapis.com/token",
+    iat: jetzt,
+    exp: jetzt + 3600,
+  }));
+  const pem = sa.private_key.replace(/-----[^-]+-----/g, "").replace(/\s/g, "");
+  const der = Uint8Array.from(atob(pem), (c) => c.charCodeAt(0));
+  const schluessel = await crypto.subtle.importKey(
+    "pkcs8",
+    der,
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const sig = new Uint8Array(
+    await crypto.subtle.sign(
+      "RSASSA-PKCS1-v1_5",
+      schluessel,
+      new TextEncoder().encode(`${kopf}.${inhalt}`),
+    ),
+  );
+  const r = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+      assertion: `${kopf}.${inhalt}.${b64url(sig)}`,
+    }),
+  });
+  const j = await r.json();
+  fcmZugang = { token: j.access_token, bis: Date.now() + j.expires_in * 1000 };
+  return fcmZugang.token;
+}
+
+/// True when sent; false when the token is gone (row gets deleted).
+async function fcmSenden(
+  token: string,
+  titel: string,
+  text: string,
+  chat: string,
+): Promise<boolean | null> {
+  const sa = await fcmKonto();
+  if (!sa) return null;
+  const r = await fetch(
+    `https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${await fcmToken(sa)}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: {
+          token,
+          notification: { title: titel, body: text },
+          data: { chat },
+          android: {
+            priority: "high",
+            notification: { tag: "groundset-chat", color: "#E2C48A" },
+          },
+        },
+      }),
+    },
+  );
+  if (r.ok) return true;
+  return r.status === 404 || r.status === 400 ? false : null;
+}
+
 async function pushen(n: Nachricht) {
   const an = await empfaenger(n);
   if (an.length === 0) return 0;
@@ -64,7 +156,16 @@ async function pushen(n: Nachricht) {
     url: `${APP}/?chat=${n.von === "coach" ? "1" : n.chat}`,
   });
   let ok = 0;
+  const chat = n.von === "coach" ? "1" : n.chat;
   for (const a of abos ?? []) {
+    if (a.endpoint.startsWith("fcm:")) {
+      const r = await fcmSenden(a.endpoint.slice(4), titel, kurz(n), chat);
+      if (r === true) ok++;
+      if (r === false) {
+        await db.from("coach_push").delete().eq("endpoint", a.endpoint);
+      }
+      continue;
+    }
     try {
       await webpush.sendNotification(
         { endpoint: a.endpoint, keys: { p256dh: a.p256dh, auth: a.auth } },

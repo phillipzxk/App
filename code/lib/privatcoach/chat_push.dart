@@ -28,8 +28,20 @@ enum PushStand {
 class ChatPush {
   const ChatPush();
 
-  PushStand stand() =>
-      PushStand.values.asNameMap()[plattform.pushStatus()] ?? PushStand.aus;
+  PushStand stand() => _als(plattform.pushStatus());
+
+  /// Like [stand], but also asks the phone (Android) without a dialog.
+  Future<PushStand> pruefen() async => _als(await plattform.pushPruefen());
+
+  static PushStand _als(String s) =>
+      PushStand.values.asNameMap()[s] ?? PushStand.aus;
+
+  /// The chat a tapped notification opened the app with ("1" = own chat).
+  Future<String?> geoeffnet() => plattform.pushGeoeffnet();
+
+  /// Called when a notification is tapped while the app runs.
+  void beiTippen(void Function(String chat) wenn) =>
+      plattform.pushBeiTippen(wenn);
 
   /// Asks for permission and saves the subscription on the server.
   Future<bool> an(PrivatcoachDienst dienst) async {

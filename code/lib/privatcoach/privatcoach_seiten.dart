@@ -863,8 +863,12 @@ class _PushHinweisState extends State<PushHinweis> {
   @override
   void initState() {
     super.initState();
-    // Already allowed: renew the subscription quietly (new device, new key).
-    if (_stand == PushStand.erlaubt) widget.push.an(widget.dienst);
+    widget.push.pruefen().then((s) {
+      if (!mounted) return;
+      if (s != _stand) setState(() => _stand = s);
+      // Already allowed: renew the subscription quietly (new device, key).
+      if (s == PushStand.erlaubt) widget.push.an(widget.dienst);
+    });
   }
 
   @override

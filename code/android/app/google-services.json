@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1003961504232",
+    "project_id": "groundset-1c94e",
+    "storage_bucket": "groundset-1c94e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1003961504232:android:964bb7ad67e5d47933d45d",
+        "android_client_info": {
+          "package_name": "de.phillipzxk.coach_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3AOToy5Zh1dZ8lFEJouaw70ylAr9CEf0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

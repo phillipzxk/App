@@ -48,6 +48,9 @@ class _Push extends ChatPush {
   PushStand stand() => wert;
 
   @override
+  Future<PushStand> pruefen() async => wert;
+
+  @override
   Future<bool> an(PrivatcoachDienst dienst) async {
     await dienst.pushSpeichern('https://push.example/1', 'p', 'a');
     wert = PushStand.erlaubt;
