@@ -189,7 +189,9 @@ class TodayTab extends StatelessWidget {
     return NightScope(
       child: ListView(
         controller: scroll,
-        padding: const EdgeInsets.fromLTRB(22, 14, 22, 120),
+        // Room at the end so the Privatcoach "P" never covers the last tile
+        // (Rundgang 2026-11-26).
+        padding: const EdgeInsets.fromLTRB(22, 14, 22, 210),
         children: [
           Einflug(
             child: Row(

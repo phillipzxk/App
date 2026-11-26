@@ -7,12 +7,20 @@ class Muster {
     required this.schritt,
     required this.von,
     required this.nach,
+    this.kurz = '',
     this.abgelehnt = false,
   });
 
   /// Day the coach found it.
   final DateTime datum;
   final String text;
+
+  /// The same pattern as one short sentence that fits the field on Heute
+  /// (Rundgang 2026-11-26); empty for older patterns.
+  final String kurz;
+
+  /// What Heute shows: the short sentence, else the full one.
+  String get heuteText => kurz.trim().isNotEmpty ? kurz.trim() : text;
 
   /// The counter-step ("Dein Gegenschritt").
   final String schritt;
@@ -31,6 +39,7 @@ class Muster {
     schritt: schritt,
     von: von,
     nach: nach,
+    kurz: kurz,
     abgelehnt: true,
   );
 
@@ -40,6 +49,7 @@ class Muster {
     'schritt': schritt,
     'von': von,
     'nach': nach,
+    if (kurz.isNotEmpty) 'kurz': kurz,
     'abgelehnt': abgelehnt,
   };
 
@@ -49,6 +59,7 @@ class Muster {
     schritt: json['schritt'] as String? ?? '',
     von: json['von'] as String? ?? '',
     nach: json['nach'] as String? ?? '',
+    kurz: json['kurz'] as String? ?? '',
     abgelehnt: json['abgelehnt'] == true,
   );
 }

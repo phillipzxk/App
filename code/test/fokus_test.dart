@@ -210,13 +210,28 @@ void main() {
     final (feed, coach) = await _open(tester);
     expect(coach.calls, 1);
     expect(coach.letzter, isNull);
-    expect(find.text('3 Vorschläge ›'), findsOneWidget);
-    await openKrone(tester, 'krone-fokus');
+    // The three suggestions stand right in the tile on Heute
+    // (Rundgang 2026-11-26): one tap picks one.
+    expect(find.byKey(const ValueKey('fokus-vorschlaege')), findsOneWidget);
+    await scrollTo(tester, find.text('Eiweiß zum Frühstück'));
+    await tester.tap(find.text('Eiweiß zum Frühstück'));
+    await tester.pumpAndSettle();
+    expect(feed.fokus!.text, 'Eiweiß zum Frühstück');
+    // "Rückgängig" brings the three back.
+    await tester.tap(find.byKey(const ValueKey('fokus-rueckgaengig')));
+    await tester.pumpAndSettle();
+    expect(feed.fokus, isNull);
+    expect(feed.fokusAuswahl, isNotNull);
+    expect(find.byKey(const ValueKey('fokus-vorschlaege')), findsOneWidget);
+
+    // Tapping the tile outside the three still opens the page.
+    await tester.tap(find.text('FOKUS DER WOCHE'));
+    await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('fokus-wahl')), findsOneWidget);
     expect(find.text('FOKUS DER WOCHE · WÄHL EINEN'), findsOneWidget);
     expect(find.byKey(const ValueKey('fokus-rueckblick')), findsNothing);
 
-    await tester.tap(find.text('Eiweiß zum Frühstück'));
+    await tester.tap(find.text('Eiweiß zum Frühstück').last);
     await tester.pumpAndSettle();
     await scrollTo(tester, find.byKey(const ValueKey('fokus-start')));
     await tester.tap(find.byKey(const ValueKey('fokus-start')));

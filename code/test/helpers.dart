@@ -205,7 +205,7 @@ class MemoryFeedStore implements FeedStore {
   Future<Wochenfokus?> loadFokus() async => fokus;
 
   @override
-  Future<void> saveFokus(Wochenfokus f) async => fokus = f;
+  Future<void> saveFokus(Wochenfokus? f) async => fokus = f;
 
   @override
   Future<FokusAuswahl?> loadFokusAuswahl() async => fokusAuswahl;

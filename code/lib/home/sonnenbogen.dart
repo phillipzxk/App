@@ -1091,9 +1091,77 @@ class _HeuteBogenState extends State<HeuteBogen>
           },
         ),
         const SizedBox(height: 8),
-        CustomPaint(
-          size: const Size(double.infinity, 22),
-          painter: _TagLinie(this),
+        if (_fehlend.isEmpty)
+          CustomPaint(
+            size: const Size(double.infinity, 22),
+            painter: _TagLinie(this),
+          )
+        else
+          _mitZeichen(),
+      ],
+    );
+  }
+
+  /// Getting up, training and bed: the three things every day has.
+  static const _zeichen = [
+    ('Aufstehen', 'Aufstehen', Icons.wb_sunny_outlined),
+    ('Training', 'Training', Icons.fitness_center),
+    ('Schlaf', 'Bett', Icons.bedtime_outlined),
+  ];
+
+  /// Names of the three that are not entered yet.
+  List<String> get _fehlend {
+    final da = {for (final p in widget.punkte) p.art};
+    return [
+      for (final (art, name, _) in _zeichen)
+        if (!da.contains(art)) name,
+    ];
+  }
+
+  /// While the day is not fully planned: the three signs sit dashed on
+  /// the line and turn solid once entered; below it what is still open
+  /// (Rundgang 2026-11-26).
+  Widget _mitZeichen() {
+    final da = {for (final p in widget.punkte) p.art};
+    const stellen = [.1, .55, .9];
+    return Column(
+      key: const ValueKey('heute-zeichen'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 40,
+          child: LayoutBuilder(
+            builder: (context, c) => Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned.fill(
+                  child: CustomPaint(painter: _TagLinie(this, punkte: false)),
+                ),
+                for (final (i, (art, name, icon)) in _zeichen.indexed)
+                  Positioned(
+                    left: c.maxWidth * stellen[i] - 18,
+                    top: 2,
+                    child: _Zeichen(
+                      key: ValueKey('zeichen-$art'),
+                      icon: icon,
+                      an: da.contains(art),
+                      name: name,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          'Noch offen: ${_fehlend.join(', ')}',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontFamily: 'Figtree',
+            fontSize: 12,
+            color: Color(0xB32A1D0D),
+          ),
         ),
       ],
     );
@@ -1257,8 +1325,11 @@ class _HeuteBogenState extends State<HeuteBogen>
 
 /// The day as one line: every point of today a dot, the sun at now.
 class _TagLinie extends CustomPainter {
-  _TagLinie(this.s) : super(repaint: s._bild);
+  _TagLinie(this.s, {this.punkte = true}) : super(repaint: s._bild);
   final _HeuteBogenState s;
+
+  /// false: no dots, the three signs sit on the line instead.
+  final bool punkte;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1276,7 +1347,7 @@ class _TagLinie extends CustomPainter {
       spur..color = const Color(0x2E2A1D0D),
     );
     canvas.drawLine(Offset(0, y), Offset(jetzt, y), spur..color = tinte);
-    for (final p in s.widget.punkte) {
+    for (final p in punkte ? s.widget.punkte : const <BogenPunkt>[]) {
       final x = wo(p.minute);
       canvas.drawCircle(
         Offset(x, y),
@@ -1581,4 +1652,71 @@ class _HeuteMaler extends CustomPainter {
 
   @override
   bool shouldRepaint(_HeuteMaler old) => true;
+}
+
+/// One of the three signs on the gold "Heute dran" tile: dashed while
+/// missing, solid ink once entered.
+class _Zeichen extends StatelessWidget {
+  const _Zeichen({
+    super.key,
+    required this.icon,
+    required this.an,
+    required this.name,
+  });
+  final IconData icon;
+  final bool an;
+  final String name;
+
+  static const _tinte = Color(0xFF2A1D0D);
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: an ? '$name eingetragen' : '$name noch offen',
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: an ? _tinte : const Color(0x59FFF6E1),
+      ),
+      child: CustomPaint(
+        painter: an ? null : const _Gestrichelt(),
+        child: Icon(
+          icon,
+          size: 18,
+          color: an ? const Color(0xFFF4DBA6) : const Color(0x992A1D0D),
+        ),
+      ),
+    ),
+  );
+}
+
+class _Gestrichelt extends CustomPainter {
+  const _Gestrichelt();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final r = size.shortestSide / 2 - .8;
+    final c = size.center(Offset.zero);
+    final p = Paint()
+      ..color = const Color(0x8C2A1D0D)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6
+      ..strokeCap = StrokeCap.round;
+    const n = 14;
+    for (var i = 0; i < n; i++) {
+      final a = i * 2 * math.pi / n;
+      canvas.drawArc(
+        Rect.fromCircle(center: c, radius: r),
+        a,
+        math.pi / n,
+        false,
+        p,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_Gestrichelt old) => false;
 }

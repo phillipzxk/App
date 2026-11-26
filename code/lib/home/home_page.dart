@@ -465,6 +465,26 @@ class _HomePageState extends State<HomePage> {
     await _reload();
   }
 
+  /// What was there before a focus was picked right on Heute, so
+  /// "Rückgängig" can bring the choice back (only until the app closes).
+  ({Wochenfokus? fokus, FokusAuswahl auswahl})? _fokusVorher;
+
+  Future<void> _waehleFokusHeute(FokusVorschlag v) async {
+    final a = _fokusAuswahl;
+    if (a == null) return;
+    _fokusVorher = (fokus: _fokus, auswahl: a);
+    await _starteFokus(v);
+  }
+
+  Future<void> _fokusZurueck() async {
+    final v = _fokusVorher;
+    if (v == null) return;
+    _fokusVorher = null;
+    await widget.feed.saveFokus(v.fokus);
+    await widget.feed.saveFokusAuswahl(v.auswahl);
+    await _reload();
+  }
+
   /// Ticks today's focus on or off; ticking on lets the coach cheer.
   Future<void> _umschalten(Wochenfokus f) async {
     final neu = f.umschalten(widget.clock());
@@ -608,6 +628,15 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
+          if (_fokusVorher != null && !geschafft) ...[
+            const SizedBox(height: 8),
+            GestureDetector(
+              key: const ValueKey('fokus-rueckgaengig'),
+              behavior: HitTestBehavior.opaque,
+              onTap: _fokusZurueck,
+              child: const Text('Rückgängig', style: klein),
+            ),
+          ],
         ],
       );
     }
@@ -628,6 +657,62 @@ class _HomePageState extends State<HomePage> {
       );
     }
     final laedt = _fokusLaedt || !_fokusVersucht;
+    final vorschlaege = _fokusAuswahl?.vorschlaege ?? const <FokusVorschlag>[];
+    // The suggestions right in the tile, one tap picks one
+    // (Rundgang 2026-11-26).
+    if (!laedt && vorschlaege.isNotEmpty) {
+      return Column(
+        key: const ValueKey('fokus-vorschlaege'),
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('FOKUS DER WOCHE', style: label),
+          const SizedBox(height: 4),
+          for (final (i, v) in vorschlaege.take(3).indexed)
+            GestureDetector(
+              key: ValueKey('fokus-vorschlag-$i'),
+              behavior: HitTestBehavior.opaque,
+              onTap: () => _waehleFokusHeute(v),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  border: i == 0
+                      ? null
+                      : const Border(top: BorderSide(color: Umbau.linie)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 14,
+                      height: 14,
+                      margin: const EdgeInsets.only(top: 1, right: 8),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Umbau.gold, width: 1.5),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        v.text,
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: 'Figtree',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12.5,
+                          height: 1.3,
+                          color: Umbau.text,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      );
+    }
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,

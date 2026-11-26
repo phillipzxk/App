@@ -89,7 +89,9 @@ abstract class FeedStore {
 
   /// The current focus of the week (or the one that just ended).
   Future<Wochenfokus?> loadFokus();
-  Future<void> saveFokus(Wochenfokus fokus);
+
+  /// null removes it (taking back a choice).
+  Future<void> saveFokus(Wochenfokus? fokus);
 
   /// Suggestions waiting for a choice; null clears them.
   Future<FokusAuswahl?> loadFokusAuswahl();
@@ -374,8 +376,13 @@ class LocalFeedStore implements FeedStore {
   }
 
   @override
-  Future<void> saveFokus(Wochenfokus fokus) =>
-      _write(_fokusKey, fokus.toJson());
+  Future<void> saveFokus(Wochenfokus? fokus) async {
+    if (fokus == null) {
+      await (await SharedPreferences.getInstance()).remove(_fokusKey);
+    } else {
+      await _write(_fokusKey, fokus.toJson());
+    }
+  }
 
   @override
   Future<FokusAuswahl?> loadFokusAuswahl() async {

@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 
 import '../feed/muster.dart';
@@ -101,43 +103,14 @@ class HeuteFelder extends StatelessWidget {
           ],
         ),
       if (muster case final m?)
-        GestureDetector(
+        _MusterZeile(
           key: const ValueKey('muster-feld'),
-          behavior: HitTestBehavior.opaque,
-          onTap: onOpenMuster,
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      musterNeu ? 'NEUES MUSTER' : 'DEINE MUSTER',
-                      style: _label,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      m.text,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: _text,
-                    ),
-                    if (m.schritt.trim().isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        'Gegenschritt: ${m.schritt.trim()}',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: _leise,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Text('›', style: TextStyle(fontSize: 18, color: _gold)),
-            ],
-          ),
+          muster: m,
+          neu: musterNeu,
+          onOpen: onOpenMuster,
+          label: _label,
+          text: _text,
+          leise: _leise,
         ),
       if (_hatHealth)
         Column(
@@ -195,31 +168,128 @@ class HeuteFelder extends StatelessWidget {
           ],
         ),
     ];
+    // Denser glass than the other tiles: the glowing roots behind it must
+    // not run through the text (Rundgang 2026-11-26).
     return Einflug(
       platz: 3,
-      child: Container(
-        key: const ValueKey('heute-felder'),
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: Umbau.glas,
-          borderRadius: BorderRadius.circular(Umbau.radius),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(Umbau.radius),
+        child: BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+          child: Container(
+            key: const ValueKey('heute-felder'),
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: const Color(0xD92A2119),
+              borderRadius: BorderRadius.circular(Umbau.radius),
+              border: Border.all(color: const Color(0x0DFFF5E6)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (var i = 0; i < teile.length; i++) ...[
+                  if (i > 0)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 14),
+                      child: SizedBox(
+                        height: 1,
+                        child: ColoredBox(color: Umbau.linie),
+                      ),
+                    ),
+                  teile[i],
+                ],
+              ],
+            ),
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (var i = 0; i < teile.length; i++) ...[
-              if (i > 0)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 14),
-                  child: SizedBox(
-                    height: 1,
-                    child: ColoredBox(color: Umbau.linie),
+      ),
+    );
+  }
+}
+
+/// The newest pattern on Heute: one short sentence that fits completely.
+/// Tapping shows the counter-step and a way to all patterns
+/// (Rundgang 2026-11-26).
+class _MusterZeile extends StatefulWidget {
+  const _MusterZeile({
+    super.key,
+    required this.muster,
+    required this.neu,
+    required this.onOpen,
+    required this.label,
+    required this.text,
+    required this.leise,
+  });
+  final Muster muster;
+  final bool neu;
+  final VoidCallback? onOpen;
+  final TextStyle label;
+  final TextStyle text;
+  final TextStyle leise;
+
+  @override
+  State<_MusterZeile> createState() => _MusterZeileState();
+}
+
+class _MusterZeileState extends State<_MusterZeile> {
+  bool _offen = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final m = widget.muster;
+    final schritt = m.schritt.trim();
+    const gold = Color(0xFFE2BD7A);
+    const knopf = TextStyle(
+      fontFamily: 'Sora',
+      fontWeight: FontWeight.w600,
+      fontSize: 12,
+      color: gold,
+    );
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => schritt.isEmpty
+          ? widget.onOpen?.call()
+          : setState(() => _offen = !_offen),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.neu ? 'NEUES MUSTER' : 'DEINE MUSTER',
+            style: widget.label,
+          ),
+          const SizedBox(height: 4),
+          Text(m.heuteText, style: widget.text),
+          const SizedBox(height: 8),
+          if (schritt.isNotEmpty)
+            Text(
+              _offen ? 'Gegenschritt' : 'Gegenschritt ›',
+              key: const ValueKey('muster-gegenschritt'),
+              style: knopf,
+            ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 260),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topLeft,
+            child: !_offen
+                ? const SizedBox(width: double.infinity)
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 4),
+                      Text(schritt, style: widget.leise),
+                      if (widget.onOpen != null) ...[
+                        const SizedBox(height: 10),
+                        GestureDetector(
+                          key: const ValueKey('muster-alle'),
+                          behavior: HitTestBehavior.opaque,
+                          onTap: widget.onOpen,
+                          child: const Text('Alle Muster ›', style: knopf),
+                        ),
+                      ],
+                    ],
                   ),
-                ),
-              teile[i],
-            ],
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

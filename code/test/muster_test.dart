@@ -109,7 +109,12 @@ void main() {
     expect(find.text('NEUES MUSTER'), findsOneWidget);
     expect(find.byKey(const ValueKey('muster-karte')), findsNothing);
 
+    // One tap shows the counter-step, the next leads to all patterns
+    // (Rundgang 2026-11-26).
     await tester.tap(feld);
+    await tester.pumpAndSettle();
+    await scrollTo(tester, find.byKey(const ValueKey('muster-alle')));
+    await tester.tap(find.byKey(const ValueKey('muster-alle')));
     await tester.pumpAndSettle();
     expect(find.text('Deine Muster'), findsWidgets);
     expect(
