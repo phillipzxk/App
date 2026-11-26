@@ -188,13 +188,14 @@ Suche EIN klares Muster: einen Zusammenhang zwischen zwei Bereichen (Training, E
 
 Wenn es ein Muster gibt:
 - "text": ein Satz, konkret, mit Zahlen aus ihren Tagen (z. B. "4 von 5 Mal"), in Du-Form, höchstens 25 Wörter.
+- "kurz": dasselbe Muster als ganz kurzer Satz für die kleine Karte auf Heute, in Du-Form, höchstens 10 Wörter, ohne Zahlen (z. B. "Nach guten Nächten isst du strukturiert, nach schlechten kaum.").
 - "schritt": ein konkreter Gegenschritt in einem Satz, kein Standard-Tipp, höchstens 20 Wörter.
 - "von" und "nach": die beiden Bereiche, z. B. "Schlaf" und "Ernährung".
 
 Antworte nur mit JSON, ohne weiteren Text, entweder
 {"muster": null}
 oder
-{"muster": {"text": "...", "schritt": "...", "von": "...", "nach": "..."}}`;
+{"muster": {"text": "...", "kurz": "...", "schritt": "...", "von": "...", "nach": "..."}}`;
 }
 
 export type LetzterFokus = {

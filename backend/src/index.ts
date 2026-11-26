@@ -125,7 +125,7 @@ const LABELS = ["Training", "Ernährung", "Schlaf", "Mindset"];
 /// One pattern with text and step, or null when the model saw nothing clear.
 export function parseMuster(
   raw: string,
-): { text: string; schritt: string; von: string; nach: string } | null {
+): { text: string; kurz: string; schritt: string; von: string; nach: string } | null {
   const start = raw.indexOf("{");
   const end = raw.lastIndexOf("}");
   if (start < 0 || end <= start) return null;
@@ -137,9 +137,10 @@ export function parseMuster(
     if (!m) return null;
     const text = typeof m.text === "string" ? m.text.trim().slice(0, 300) : "";
     const schritt = typeof m.schritt === "string" ? m.schritt.trim().slice(0, 300) : "";
+    const kurz = typeof m.kurz === "string" ? m.kurz.trim().slice(0, 120) : "";
     if (!text || !schritt) return null;
     const area = (v: unknown) => (typeof v === "string" && LABELS.includes(v.trim()) ? v.trim() : "");
-    return { text, schritt, von: area(m.von), nach: area(m.nach) };
+    return { text, kurz, schritt, von: area(m.von), nach: area(m.nach) };
   } catch {
     return null;
   }

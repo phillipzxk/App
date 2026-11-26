@@ -263,7 +263,7 @@ class FotoFeld extends StatelessWidget {
         (lage.status == FotoStatus.heute ||
             lage.status == FotoStatus.nachholen);
     final (titel, unter) = switch (lage?.status) {
-      null => ('Festlegen ›', 'Fototag'),
+      null => ('Fototag wählen ›', ''),
       FotoStatus.heute => ('Heute dran ›', 'Woche ${lage!.woche}'),
       FotoStatus.nachholen => ('Nachholen ›', 'Woche ${lage!.woche}'),
       FotoStatus.spaeter => (
@@ -297,7 +297,7 @@ class FotoFeld extends StatelessWidget {
             const SizedBox(height: 3),
             Text(
               titel,
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: 'Sora',
@@ -309,17 +309,18 @@ class FotoFeld extends StatelessWidget {
                     : const Color(0xFFF6ECDB),
               ),
             ),
-            Text(
-              unter,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontFamily: 'Figtree',
-                fontSize: 11.5,
-                height: 1.3,
-                color: Color(0xFFCDBB9D),
+            if (unter.isNotEmpty)
+              Text(
+                unter,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: 'Figtree',
+                  fontSize: 11.5,
+                  height: 1.3,
+                  color: Color(0xFFCDBB9D),
+                ),
               ),
-            ),
           ],
         ),
       );

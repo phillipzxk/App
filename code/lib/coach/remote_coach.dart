@@ -200,6 +200,7 @@ class RemoteCoach
       schritt: schritt,
       von: (m['von'] as String? ?? '').trim(),
       nach: (m['nach'] as String? ?? '').trim(),
+      kurz: (m['kurz'] as String? ?? '').trim(),
     );
   }
 

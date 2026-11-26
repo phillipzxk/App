@@ -332,7 +332,7 @@ class FundamentVorschau extends StatelessWidget {
     final unter = [
       if (t != null) trendText(t),
       if (schwach != null) '${schwach.name} braucht dich',
-    ].join(' · ');
+    ].join('\n');
     return GlasKachel(
       key: const ValueKey('fundament-vorschau'),
       platz: 6,
@@ -356,7 +356,7 @@ class FundamentVorschau extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   unter.isEmpty ? 'Alle Bereiche im Blick' : unter,
-                  maxLines: 2,
+                  maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: Umbau.klein,
                 ),
