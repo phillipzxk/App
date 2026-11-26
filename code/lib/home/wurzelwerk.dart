@@ -60,7 +60,7 @@ List<Offset> _lagenGross(int n) => [
 ];
 
 /// Space per area in the big version.
-const _abstandGross = 280.0;
+const _abstandGross = 150.0;
 
 /// Room at the bottom for the life goals.
 const _zieleHoehe = 230.0;
@@ -652,7 +652,12 @@ class Wurzelwerk extends StatefulWidget {
     this.hoehe = 600,
     this.gross = false,
     this.lebensziele,
+    this.zeige,
   });
+
+  /// Set to an area id to scroll to its capsule and let its root light up
+  /// once without opening it (numbers on the Fundament tile).
+  final ValueNotifier<String?>? zeige;
 
   final List<WurzelBereich> bereiche;
   final Future<void> Function(String id, Offset mitte) onOpen;
@@ -697,6 +702,11 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
   );
   int _wahl = -1;
   bool _offen = false;
+
+  /// The light runs only to show where an area sits, nothing opens.
+  bool _nurZeigen = false;
+  final _kapseln = <int, GlobalKey>{};
+  GlobalKey _kapsel(int i) => _kapseln.putIfAbsent(i, GlobalKey.new);
   Offset? _funkenWo;
   _Geo? _geo;
   final _box = GlobalKey();
@@ -716,8 +726,21 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
         }
       }
     });
+    widget.zeige?.addListener(_zeigeBereich);
     _licht.addStatusListener((s) async {
       if (s != AnimationStatus.completed || _wahl < 0 || _offen) return;
+      if (_nurZeigen) {
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        if (!mounted) return;
+        _funken.value = 0;
+        await _licht.reverse();
+        if (!mounted) return;
+        setState(() {
+          _wahl = -1;
+          _nurZeigen = false;
+        });
+        return;
+      }
       _offen = true;
       final i = _wahl;
       final box = _box.currentContext?.findRenderObject() as RenderBox?;
@@ -739,6 +762,10 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
   void didUpdateWidget(Wurzelwerk old) {
     super.didUpdateWidget(old);
     if (old.wurzeln != widget.wurzeln) _geo = null;
+    if (old.zeige != widget.zeige) {
+      old.zeige?.removeListener(_zeigeBereich);
+      widget.zeige?.addListener(_zeigeBereich);
+    }
     if (widget.jubelTick > old.jubelTick) {
       _funkenWo = _geo == null
           ? null
@@ -748,8 +775,30 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
     }
   }
 
+  Future<void> _zeigeBereich() async {
+    final id = widget.zeige?.value;
+    if (id == null) return;
+    widget.zeige!.value = null;
+    final i = widget.bereiche.indexWhere((b) => b.id == id);
+    final ctx = _kapsel(i).currentContext;
+    if (i < 0 || ctx == null || _wahl >= 0) return;
+    await Scrollable.ensureVisible(
+      ctx,
+      alignment: .5,
+      duration: const Duration(milliseconds: 650),
+      curve: Curves.easeInOutCubic,
+    );
+    if (!mounted || _wahl >= 0) return;
+    setState(() {
+      _wahl = i;
+      _nurZeigen = true;
+    });
+    _licht.forward(from: 0);
+  }
+
   @override
   void dispose() {
+    widget.zeige?.removeListener(_zeigeBereich);
     _zeit.dispose();
     _licht.dispose();
     _funken.dispose();
@@ -910,7 +959,8 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
     final detail = b.teile.isNotEmpty
         ? b.teile.join(' · ')
         : b.infos.isNotEmpty
-        ? [for (final (t, x) in b.infos) '$t $x'].join(' · ')
+        // Only the first info, so the line fits (Rundgang 2026-11-26).
+        ? '${b.infos.first.$1} ${b.infos.first.$2}'
         : (b.grund ?? '');
     // The capsule springs open when the growing roots reach it.
     final warte = _lebendig ? 350 + 2600 * z.dy / _geo!.size.height : 0.0;
@@ -986,7 +1036,7 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
                 child: Text(
                   sagt ? 'Hier hängt es gerade.' : detail,
                   key: sagt ? ValueKey('knoten-sagt-${b.id}') : null,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Figtree',
@@ -1031,6 +1081,7 @@ class _WurzelwerkState extends State<Wurzelwerk> with TickerProviderStateMixin {
                 behavior: HitTestBehavior.opaque,
                 onTap: () => _tippen(i),
                 child: ClipRRect(
+                  key: _kapsel(i),
                   borderRadius: BorderRadius.circular(46),
                   child: BackdropFilter(
                     filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),

@@ -1429,7 +1429,7 @@ class _HomePageState extends State<HomePage> {
         diff: kd,
         grund: schwach == null ? null : _heute?.gruende[schwach.name],
         woche: kWoche,
-        teile: const ['Training', 'Ernährung', 'Schlaf & Routine'],
+        teile: const ['Training', 'Essen', 'Schlaf'],
       ),
       WurzelBereich(
         id: 'produktiv',
@@ -1439,7 +1439,7 @@ class _HomePageState extends State<HomePage> {
         diff: diff(pWoche).$2,
         woche: pWoche,
         grund: pf == null
-            ? 'Noch keine Sache festgelegt, die heute zählt.'
+            ? 'Noch nichts festgelegt'
             : pf.erledigt
             ? 'Die eine Sache heute ist geschafft.'
             : null,
@@ -1531,26 +1531,10 @@ class _HomePageState extends State<HomePage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(
-              child: Container(
-                width: 30,
-                height: 30,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: Umbau.grad,
-                  boxShadow: [
-                    BoxShadow(color: Color(0x80F0D79E), blurRadius: 24),
-                  ],
-                ),
-              ),
-            ),
+            // A gold stone instead of an empty circle (Rundgang
+            // 2026-11-26), like the life goal stones in the roots.
+            const Center(child: GoldStein()),
             const SizedBox(height: 10),
-            const Text(
-              'Ganz unten',
-              textAlign: TextAlign.center,
-              style: Umbau.klein,
-            ),
-            const SizedBox(height: 2),
             const GoldMaske(
               child: Text(
                 'Deine Lebensziele',
