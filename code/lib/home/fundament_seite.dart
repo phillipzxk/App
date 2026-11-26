@@ -43,7 +43,7 @@ String komma(double v) => v.toStringAsFixed(1).replaceAll('.', ',');
 
 /// The second page: header with the mean score, below the root system that
 /// grows in from the top each time the page opens.
-class FundamentSeite extends StatelessWidget {
+class FundamentSeite extends StatefulWidget {
   const FundamentSeite({
     super.key,
     required this.bereiche,
@@ -68,7 +68,25 @@ class FundamentSeite extends StatelessWidget {
   final Widget? lebensziele;
 
   @override
+  State<FundamentSeite> createState() => _FundamentSeiteState();
+}
+
+class _FundamentSeiteState extends State<FundamentSeite> {
+  /// Tapping a number in the gold tile scrolls to that capsule and lets
+  /// its root light up (Rundgang 2026-11-26).
+  final _zeige = ValueNotifier<String?>(null);
+
+  @override
+  void dispose() {
+    _zeige.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final bereiche = widget.bereiche;
+    final name = widget.name;
+    final onKonto = widget.onKonto;
     final s = fundamentSchnitt(bereiche);
     final t = fundamentTrend(bereiche);
     return NightScope(
@@ -98,7 +116,7 @@ class FundamentSeite extends StatelessWidget {
                       if (onKonto != null)
                         KontoKnopfKlein(
                           initiale: name.isEmpty ? '' : name[0].toUpperCase(),
-                          onTap: onKonto!,
+                          onTap: onKonto,
                         ),
                     ],
                   ),
@@ -156,45 +174,53 @@ class FundamentSeite extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(width: 10),
+                      // Closer together so "Mindset" fits (Rundgang
+                      // 2026-11-26); each number jumps to its capsule.
                       Expanded(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            for (final b in bereiche)
-                              Flexible(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(left: 13),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        b.wert?.toString() ?? '–',
-                                        style: const TextStyle(
-                                          fontFamily: 'Sora',
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 21,
-                                          height: 1.1,
-                                          color: Umbau.tinte,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerRight,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              for (final b in bereiche)
+                                GestureDetector(
+                                  key: ValueKey('schnitt-${b.id}'),
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () => _zeige.value = b.id,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 9),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          b.wert?.toString() ?? '–',
+                                          style: const TextStyle(
+                                            fontFamily: 'Sora',
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 21,
+                                            height: 1.1,
+                                            color: Umbau.tinte,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        kurzName(b.name),
-                                        maxLines: 1,
-                                        softWrap: false,
-                                        overflow: TextOverflow.fade,
-                                        style: const TextStyle(
-                                          fontFamily: 'Sora',
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 9,
-                                          color: Umbau.tinteWeich,
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          kurzName(b.name),
+                                          maxLines: 1,
+                                          softWrap: false,
+                                          style: const TextStyle(
+                                            fontFamily: 'Sora',
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 9,
+                                            color: Umbau.tinteWeich,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -208,12 +234,13 @@ class FundamentSeite extends StatelessWidget {
             dauer: const Duration(milliseconds: 2600),
             child: Wurzelwerk(
               bereiche: bereiche,
-              onOpen: onOpen,
-              streak: streak,
-              wurzeln: wurzeln,
-              jubelTick: jubelTick,
+              onOpen: widget.onOpen,
+              streak: widget.streak,
+              wurzeln: widget.wurzeln,
+              jubelTick: widget.jubelTick,
               gross: true,
-              lebensziele: lebensziele,
+              lebensziele: widget.lebensziele,
+              zeige: _zeige,
             ),
           ),
         ],
@@ -510,4 +537,60 @@ class GlasLeiste extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A small gold stone with a soft glow: the life goals at the end of the
+/// tap root (Rundgang 2026-11-26).
+class GoldStein extends StatelessWidget {
+  const GoldStein({super.key, this.breite = 40});
+  final double breite;
+
+  @override
+  Widget build(BuildContext context) => CustomPaint(
+    size: Size(breite, breite * .72),
+    painter: const _GoldSteinMaler(),
+  );
+}
+
+class _GoldSteinMaler extends CustomPainter {
+  const _GoldSteinMaler();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width, h = size.height;
+    final stein = Path()
+      ..moveTo(w * .08, h * .62)
+      ..cubicTo(w * .02, h * .30, w * .26, h * .04, w * .52, h * .06)
+      ..cubicTo(w * .80, h * .08, w * 1.0, h * .30, w * .96, h * .60)
+      ..cubicTo(w * .92, h * .90, w * .62, h * 1.0, w * .40, h * .96)
+      ..cubicTo(w * .20, h * .92, w * .12, h * .80, w * .08, h * .62)
+      ..close();
+    canvas.drawPath(
+      stein.shift(const Offset(0, 2)),
+      Paint()
+        ..color = const Color(0x80F0D79E)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
+    );
+    final r = Offset.zero & size;
+    canvas.drawPath(
+      stein,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFFBE7B8), Color(0xFFE2B874), Color(0xFFA9783A)],
+          stops: [0, .5, 1],
+        ).createShader(r),
+    );
+    // A soft highlight top left.
+    canvas.drawOval(
+      Rect.fromLTWH(w * .24, h * .16, w * .30, h * .20),
+      Paint()
+        ..color = const Color(0x66FFFFFF)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_GoldSteinMaler old) => false;
 }
