@@ -43,11 +43,30 @@ void _schiene(Canvas c, double x, double y, double w, {double h = 8}) {
 
 /// Big title with a small line under it, centred.
 void _titelB(Canvas c, String t, String u, double y) {
+  // Long titles get smaller until they fit, so nothing is cut
+  // (Rundgang 2026-11-28).
+  var size = 21.0;
+  while (size > 14) {
+    final tp = TextPainter(
+      text: TextSpan(
+        text: t,
+        style: TextStyle(
+          fontFamily: 'Sora',
+          fontSize: size,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout();
+    if (tp.width <= 280) break;
+    size -= 1;
+  }
   _text(
     c,
     t,
     Offset(151, y),
-    size: 21,
+    size: size,
     sora: true,
     weight: FontWeight.w700,
     color: _ink,
@@ -496,7 +515,7 @@ class _ZieleMaler extends _Maler {
             ..close();
           c.drawPath(knospe, Paint()..color = _fuell);
           c.drawPath(knospe, _strich(tonFokus, 1.4));
-          _text(
+          final gross = _text(
             c,
             bl.name,
             Offset(x + 14, y - 1),
@@ -505,11 +524,12 @@ class _ZieleMaler extends _Maler {
             color: tonFokus,
             align: TextAlign.left,
             maxBreite: 100,
+            zeilen: 2,
           );
           _text(
             c,
             'dein großes Ziel',
-            Offset(x + 14, y + 12),
+            Offset(x + 14, y + 12 + gross),
             size: 9.5,
             color: _leise,
             align: TextAlign.left,
@@ -540,7 +560,7 @@ class _ZieleMaler extends _Maler {
         }
         final al = dir > 0 ? TextAlign.left : TextAlign.right;
         final mb = dir > 0 ? 250 - (e + 7) : e - 7 - 8;
-        _text(
+        final mehr = _text(
           c,
           bl.name,
           Offset(e + dir * 7, y - 2),
@@ -549,6 +569,7 @@ class _ZieleMaler extends _Maler {
           color: bl.art == 1 ? _goldHell : _ink,
           align: al,
           maxBreite: mb,
+          zeilen: 2,
         );
         _text(
           c,
@@ -557,7 +578,7 @@ class _ZieleMaler extends _Maler {
             1 => 'als Nächstes',
             _ => 'später',
           },
-          Offset(e + dir * 7, y + 11),
+          Offset(e + dir * 7, y + 11 + mehr),
           size: 9.5,
           color: bl.art == 1 ? tonFokus : _leise,
           align: al,

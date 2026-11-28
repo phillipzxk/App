@@ -259,7 +259,7 @@ extension _Persoenlich on _HomePageState {
     BSerie serieAus(({int jetzt, int rekord}) x, String text) => BSerie(
       zahl: x.jetzt,
       einheit: x.jetzt == 1 ? 'Tag' : 'Tage',
-      text: x.jetzt == 0 ? 'Startet mit deinem nächsten Eintrag' : text,
+      text: x.jetzt == 0 ? 'mit Pflege komplett' : text,
       rekord: x.rekord,
     );
     final seriePflege = serieAus(
@@ -291,6 +291,23 @@ extension _Persoenlich on _HomePageState {
           : 'Noch ${10 - lern} Minuten.',
     );
     final kleineGesamt = kleineHeute + faellig.length;
+    // Today as rows like on the other areas (Rundgang 2026-11-28): the
+    // morning care steps and the learning goal.
+    final tagZeilen = <(String, String, bool)>[
+      for (final x in schritte)
+        (x.name, x.fertig ? 'erledigt' : 'morgens', x.fertig),
+      ('${k?.skill ?? 'Lernen'}', '$lern von 10 Min', lern >= 10),
+    ];
+    final zeigen = tagZeilen.take(4).toList();
+    final ersteOffen = zeigen.indexWhere((z) => !z.$3);
+    final zeilenTeil = (
+      zeilen: [for (final z in zeigen) (z.$1, z.$2)],
+      haken: [for (final z in zeigen) z.$3],
+      hell: ersteOffen < 0 ? null : ersteOffen,
+      weitere: tagZeilen.length > 4
+          ? '+ ${tagZeilen.length - 4} weitere'
+          : null,
+    );
 
     final seiten = [
       BSeite(
@@ -335,6 +352,11 @@ extension _Persoenlich on _HomePageState {
                   mitte: '$morgens/${d.morgens.length}',
                   unter: 'Pflege',
                   knopf: ('Pflege abhaken', 'pe-pflege'),
+                  zeilen: zeilenTeil.zeilen,
+                  haken: zeilenTeil.haken,
+                  hell: zeilenTeil.hell,
+                  weitere: zeilenTeil.weitere,
+                  zeilenZiel: 'pe-pflege',
                 )
               : lern < 10
               ? BJetzt(
@@ -344,6 +366,11 @@ extension _Persoenlich on _HomePageState {
                   mitte: '$lern/10',
                   unter: 'Minuten',
                   knopf: ('Lernen starten', 'pe-lern'),
+                  zeilen: zeilenTeil.zeilen,
+                  haken: zeilenTeil.haken,
+                  hell: zeilenTeil.hell,
+                  weitere: zeilenTeil.weitere,
+                  zeilenZiel: 'pe-lern',
                 )
               : BJetzt(
                   fertig: true,
@@ -459,6 +486,7 @@ extension _Persoenlich on _HomePageState {
                   unter: 'Hinweise',
                   knopf: ('Hinweise ansehen', 'pe-look'),
                 ),
+          mitUnterbau: false,
           serie: seriePflege,
           naechstes: BNaechstes(
             titel: 'Look-Verlauf',
@@ -600,6 +628,7 @@ extension _Persoenlich on _HomePageState {
                   text: 'Die kleinen Dinge sind für heute erledigt.',
                   knopf: ('Haut-Plan ansehen', 'pe-haut'),
                 ),
+          mitUnterbau: false,
           serie: seriePflege,
           naechstes: hw == null
               ? const BNaechstes(
@@ -753,6 +782,7 @@ extension _Persoenlich on _HomePageState {
                   text: 'Dein Kurs ${k.skill} ist durch.',
                   knopf: ('Kurs ansehen', 'pe-kurs'),
                 ),
+          mitUnterbau: false,
           serie: serieLernen,
           naechstes: d.umsetzen.isEmpty
               ? const BNaechstes(

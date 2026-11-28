@@ -270,7 +270,7 @@ extension _Produktiv on _HomePageState {
         BSerie(
           zahl: x.jetzt,
           einheit: einheit,
-          text: x.jetzt == 0 ? 'Startet mit deinem nächsten Eintrag' : text,
+          text: x.jetzt == 0 ? 'mit der einen Sache geschafft' : text,
           rekord: x.rekord,
         );
     final sFokus = serieTage([
@@ -304,6 +304,29 @@ extension _Produktiv on _HomePageState {
     final freiHeute = d.handyfreiTage.contains(heute);
     final aktivTage = aktiv?.tage.length ?? 0;
 
+    // Where the day stands against the high, so the cards do not send
+    // the user into a high that is already over (Rundgang 2026-11-28).
+    final minJetzt = jetzt.hour * 60 + jetzt.minute;
+    final hochVorbei = minJetzt >= e.hoch.$2 % 1440;
+    final imHoch = !hochVorbei && minJetzt >= e.hoch.$1 % 1440;
+    final hochSatz = hochVorbei
+        ? 'Dein Hoch ist vorbei. Ein kurzer Block geht noch.'
+        : imHoch
+        ? 'Du bist gerade in deinem Hoch, bis '
+              '${formatUhrzeit(e.hoch.$2 % 1440)}.'
+        : 'Leg es in dein Hoch, $hoch.';
+    // Today as rows like on the other areas: the one thing, the focus
+    // minutes, the routines and the phone-free morning.
+    final tagZeilen = <(String, String, bool)>[
+      ('Fokus-Block', '$fokusMin von 50 Min', fokusMin >= 50),
+      for (final a in d.andocken.where((a) => !a.laeuft))
+        (a.neu, 'Tag ${a.tage.length}/21', a.tage.contains(heute)),
+      if (freiMin > 0)
+        ('Handyfreier Morgen', freiHeute ? 'geschafft' : 'verpasst', freiHeute),
+    ];
+    final zeigen = tagZeilen.take(4).toList();
+    final ersteOffen = zeigen.indexWhere((z) => !z.$3);
+
     final seiten = [
       BSeite(
         name: 'Heute',
@@ -312,7 +335,7 @@ extension _Produktiv on _HomePageState {
             : f.erledigt
             ? 'Die eine Sache ist geschafft. Der Rest darf leichter sein.'
             : '${name.isEmpty ? '' : '$name, '}heute zählt nur „${f.text}“. '
-                  'Leg es in dein Hoch, $hoch.',
+                  '$hochSatz',
         bild: BBild(
           bau: (tipp, v, t) => FokusHeuteBild(
             sache: f?.text,
@@ -363,11 +386,22 @@ extension _Produktiv on _HomePageState {
                 )
               : BJetzt(
                   titel: 'Heute zählt: ${f.text}',
-                  text: 'Leg es in dein Hoch, $hoch.',
+                  text: hochSatz,
                   ring: fokusMin / 50,
                   mitte: '$block',
                   unter: 'Min Block',
                   knopf: ('Fokus-Block starten', 'p-block'),
+                  zeilen: [for (final z in zeigen) (z.$1, z.$2)],
+                  haken: [for (final z in zeigen) z.$3],
+                  hell: ersteOffen < 0 ? null : ersteOffen,
+                  leise: {
+                    for (final (i, z) in zeigen.indexed)
+                      if (z.$2 == 'verpasst') i,
+                  },
+                  weitere: tagZeilen.length > 4
+                      ? '+ ${tagZeilen.length - 4} weitere'
+                      : null,
+                  zeilenZiel: 'p-fokus',
                 ),
           serie: serieFokus,
           naechstes: fokusZiel,
@@ -506,6 +540,7 @@ extension _Produktiv on _HomePageState {
                   unter: 'Hebel',
                   knopf: ('Hebel öffnen', 'b-hebel'),
                 ),
+          mitUnterbau: false,
           serie: serieFokus,
           naechstes: astText == null
               ? BNaechstes(
@@ -663,6 +698,7 @@ extension _Produktiv on _HomePageState {
                   unter: 'Morgen',
                   knopf: ('Handyfreie Zeit öffnen', 'p-handyfrei'),
                 ),
+          mitUnterbau: false,
           serie: serieAus(sFrei, 'Morgen', 'in Folge ohne Handy gestartet'),
           naechstes: BNaechstes(
             titel: '7 handyfreie Morgen',
@@ -788,12 +824,17 @@ extension _Produktiv on _HomePageState {
         aufbau: BAufbau(
           dafuer: dafuer,
           jetzt: BJetzt(
-            titel: 'Das Schwere in dein Hoch',
-            text: 'Heute bist du von $hoch am klarsten.',
+            titel: hochVorbei
+                ? 'Morgen wieder: das Schwere ins Hoch'
+                : 'Das Schwere in dein Hoch',
+            text: hochVorbei
+                ? 'Heute warst du von $hoch am klarsten.'
+                : 'Heute bist du von $hoch am klarsten.',
             mitte: '${kurz(e.hoch.$1)}–${kurz(e.hoch.$2)}',
             unter: 'Uhr',
             knopf: ('Tag danach planen', 'p-stunden'),
           ),
+          mitUnterbau: false,
           serie: serieFokus,
           naechstes: fokusZiel,
           geschafft: geschafftListe,
@@ -897,6 +938,7 @@ extension _Produktiv on _HomePageState {
                   unter: 'Tage',
                   knopf: ('Heute abhaken', 'p-andock'),
                 ),
+          mitUnterbau: false,
           serie: BSerie(
             zahl: stueck,
             einheit: stueck == 1 ? 'Tag' : 'Tage',
