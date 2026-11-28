@@ -314,6 +314,15 @@ extension _Mindset on _HomePageState {
       serieWort.jetzt == 1 ? 'Tag' : 'Tage',
       'in Folge Wort gehalten',
     );
+    // At 0 the series still says what counts (Rundgang 2026-11-28).
+    final serieWortH = serieWortK.zahl == 0
+        ? BSerie(
+            zahl: 0,
+            einheit: 'Tage',
+            text: 'mit gehaltenem Wort',
+            rekord: serieWortK.rekord,
+          )
+        : serieWortK;
     final wortWert = w.vorgenommen == 0
         ? null
         : '${w.gehalten}/${w.vorgenommen}';
@@ -375,7 +384,7 @@ extension _Mindset on _HomePageState {
                   unter: 'Start',
                   knopf: ('2 Minuten starten', 'm-berg'),
                 ),
-          serie: serieWortK,
+          serie: serieWortH,
           naechstes: d.steine.isEmpty
               ? const BNaechstes(
                   titel: 'Erster Stein',
@@ -495,6 +504,7 @@ extension _Mindset on _HomePageState {
                   unter: 'diese Woche',
                   knopf: ('Durchgezogen eintragen', 'm-durch'),
                 ),
+          mitUnterbau: false,
           serie: serie(
             serieDurch,
             serieDurch.jetzt == 1 ? 'Woche' : 'Wochen',
@@ -632,6 +642,7 @@ extension _Mindset on _HomePageState {
                   unter: 'Start',
                   knopf: ('Ruhe-Knopf starten', 'm-ruhe'),
                 ),
+          mitUnterbau: false,
           serie: serie(
             serieRuhe,
             serieRuhe.jetzt == 1 ? 'Tag' : 'Tage',
@@ -764,6 +775,7 @@ extension _Mindset on _HomePageState {
                   unter: 'Lebensrad',
                   knopf: ('Dein Warum', 'm-warum'),
                 ),
+          mitUnterbau: false,
           serie: serieWortK,
           naechstes: rad == null
               ? const BNaechstes(

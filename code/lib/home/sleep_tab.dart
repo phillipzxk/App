@@ -683,7 +683,7 @@ class SchlafzeitenKarte extends StatelessWidget {
         zeile(
           'schlaf-stunden',
           'Schlaf pro Nacht',
-          '${formatStunden(zeiten.stunden)} Std.',
+          '${formatStunden(zeiten.stunden)} Stunden',
           () => _stunden(context),
           last: true,
         ),

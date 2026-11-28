@@ -58,6 +58,7 @@ enum _Phase { questions, reading, reply }
 class _CheckInFlowState extends State<CheckInFlow> {
   _Phase _phase = _Phase.questions;
   CheckIn? _saved;
+  CheckIn? _gestern;
   late final _picked = <String, String>{...widget.vorgemerkt};
   final _note = TextEditingController();
   late int? _open = _nextOpen(-1);
@@ -98,8 +99,14 @@ class _CheckInFlowState extends State<CheckInFlow> {
     if (werte != null) checkIn = checkIn.withWerte(werte);
     await widget.store.saveCheckIn(checkIn);
     if (!mounted) return;
+    final g = DateTime(
+      widget.today.year,
+      widget.today.month,
+      widget.today.day - 1,
+    );
     setState(() {
       _saved = checkIn;
+      _gestern = recent.where((c) => dayKey(c.datum) == dayKey(g)).lastOrNull;
       _phase = _Phase.reply;
     });
   }
@@ -126,6 +133,7 @@ class _CheckInFlowState extends State<CheckInFlow> {
             _saved!.persoenlich,
             _saved!.mindset,
           ],
+          werte: bereichWerte(_saved!, _gestern),
           onDone: () => widget.onFinished(_saved!),
         ),
       },
@@ -175,6 +183,11 @@ class _CheckInFlowState extends State<CheckInFlow> {
                     card: checkInCards[i],
                     open: _open == i,
                     picked: _picked,
+                    ausDeinemTag: checkInCards[i].rows.every(
+                      (r) =>
+                          widget.vorgemerkt[r.topic] != null &&
+                          widget.vorgemerkt[r.topic] == _picked[r.topic],
+                    ),
                     onToggle: () =>
                         setState(() => _open = _open == i ? null : i),
                     onPick: (row, option) => setState(() {
@@ -326,9 +339,13 @@ class _AreaCard extends StatelessWidget {
     required this.picked,
     required this.onToggle,
     required this.onPick,
+    this.ausDeinemTag = false,
   });
 
   final CheckInCard card;
+
+  /// Every answer was picked from what the user entered during the day.
+  final bool ausDeinemTag;
   final bool open;
   final Map<String, String> picked;
   final VoidCallback onToggle;
@@ -343,7 +360,9 @@ class _AreaCard extends StatelessWidget {
     final answered = answers.length == card.rows.length;
     final sub = open
         ? card.question
-        : (answers.isEmpty ? 'Noch offen' : answers.join(' · '));
+        : (answers.isEmpty
+              ? 'Noch offen'
+              : '${answers.join(' · ')}${ausDeinemTag ? ' · aus deinem Tag' : ''}');
     return GlasBox(
       art: open ? GlasArt.gold : GlasArt.normal,
       padding: EdgeInsets.zero,
@@ -462,7 +481,12 @@ class _AreaCard extends StatelessWidget {
                             ),
                           LayoutBuilder(
                             builder: (context, box) {
-                              final drei = row.options.length == 3;
+                              final drei =
+                                  row.options.length == 3 &&
+                                  _woerterPassen(
+                                    row.options,
+                                    (box.maxWidth - 16) / 3 - 16,
+                                  );
                               final width = drei
                                   ? (box.maxWidth - 16) / 3
                                   : (box.maxWidth - 8) / 2;
@@ -497,6 +521,29 @@ class _AreaCard extends StatelessWidget {
 }
 
 /// One answer to tap; metallic gold when picked.
+/// True when no single word of [labels] is wider than [breite], so a
+/// chip never breaks inside a word ("Alles durchg|ezogen").
+bool _woerterPassen(List<String> labels, double breite) {
+  for (final l in labels) {
+    for (final w in l.split(' ')) {
+      final tp = TextPainter(
+        text: TextSpan(
+          text: w,
+          style: CoachStyle.body.copyWith(
+            fontSize: 13.5,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      final zu = tp.width > breite;
+      tp.dispose();
+      if (zu) return false;
+    }
+  }
+  return true;
+}
+
 class _Chip extends StatelessWidget {
   const _Chip({
     required this.label,
@@ -568,7 +615,11 @@ class CheckInReply extends StatefulWidget {
     required this.reply,
     required this.onDone,
     this.antworten = const [],
+    this.werte = const [],
   });
+
+  /// The four areas' new values, shown under the reply once it is written.
+  final List<BereichWert> werte;
 
   final String reply;
   final VoidCallback onDone;
@@ -629,7 +680,14 @@ class _CheckInReplyState extends State<CheckInReply>
         AnimatedBuilder(
           animation: _flug,
           builder: (context, _) => SizedBox(
-            height: 96,
+            // The answers fly into the card, then their space closes so
+            // the reply and the values sit higher (Rundgang 2026-11-28).
+            height:
+                96 *
+                (1 -
+                    Curves.easeInOut.transform(
+                      ((_flug.value - 0.75) / 0.25).clamp(0.0, 1.0),
+                    )),
             child: Wrap(
               spacing: 6,
               runSpacing: 6,
@@ -699,9 +757,152 @@ class _CheckInReplyState extends State<CheckInReply>
             );
           },
         ),
+        if (widget.werte.isNotEmpty) ...[
+          const SizedBox(height: 18),
+          AnimatedBuilder(
+            animation: _tipp,
+            builder: (context, _) => Opacity(
+              opacity: ((_tipp.value - 0.4) / 0.3).clamp(0.0, 1.0),
+              child: Text(
+                widget.werte.any((w) => w.diff != null)
+                    ? 'DEINE WERTE · KLEIN: ZU GESTERN'
+                    : 'DEINE WERTE HEUTE, VON 10',
+                style: CoachStyle.goldLabel.copyWith(
+                  fontFamily: 'Sora',
+                  fontSize: 9.5,
+                  letterSpacing: 1.4,
+                  color: CoachStyle.beigeLabel,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          AnimatedBuilder(
+            animation: _tipp,
+            builder: (context, _) => Row(
+              children: [
+                for (var k = 0; k < widget.werte.length; k++) ...[
+                  if (k > 0) const SizedBox(width: 8),
+                  Expanded(
+                    child: Builder(
+                      builder: (context) {
+                        final e = Curves.easeOutCubic.transform(
+                          ((_tipp.value - 0.5 - k * 0.1) / 0.3).clamp(0.0, 1.0),
+                        );
+                        return Opacity(
+                          opacity: e,
+                          child: Transform.translate(
+                            offset: Offset(0, 14 * (1 - e)),
+                            child: _WertKachel(w: widget.werte[k], an: e),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
         const Spacer(),
         MainButton(label: 'Fertig', gold: true, onPressed: widget.onDone),
       ],
+    );
+  }
+}
+
+/// One area's value after the check-in: Körper is the average of
+/// Training, Ernährung and Schlaf, like on Heute.
+typedef BereichWert = ({String name, int wert, int? diff});
+
+List<BereichWert> bereichWerte(CheckIn heute, CheckIn? gestern) {
+  int? koerper(Map<String, int> w) {
+    final l = [
+      for (final k in const ['training', 'ernaehrung', 'schlaf']) ?w[k],
+    ];
+    return l.isEmpty ? null : (l.reduce((a, b) => a + b) / l.length).round();
+  }
+
+  int? wert(Map<String, int> w, String k) => k == 'koerper' ? koerper(w) : w[k];
+  return [
+    for (final (name, k) in const [
+      ('Körper', 'koerper'),
+      ('Fokus', 'produktiv'),
+      ('Ausstrahlung', 'persoenlich'),
+      ('Mindset', 'mindset'),
+    ])
+      if (wert(heute.werte, k) case final w?)
+        (
+          name: name,
+          wert: w,
+          diff: gestern == null
+              ? null
+              : switch (wert(gestern.werte, k)) {
+                  final g? => w - g,
+                  null => null,
+                },
+        ),
+  ];
+}
+
+class _WertKachel extends StatelessWidget {
+  const _WertKachel({required this.w, required this.an});
+
+  final BereichWert w;
+
+  /// 0..1 while it comes in, the number counts up with it.
+  final double an;
+
+  @override
+  Widget build(BuildContext context) {
+    final d = w.diff;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(6, 12, 6, 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        color: const Color(0x0DFFECDC),
+        border: Border.all(color: Glas.edge),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GoldText(
+                '${(w.wert * an).round()}',
+                style: CoachStyle.question.copyWith(fontSize: 26, height: 1),
+              ),
+              if (d != null) ...[
+                const SizedBox(width: 3),
+                Text(
+                  d == 0 ? '±0' : '${d > 0 ? '+' : '−'}${d.abs()}',
+                  style: CoachStyle.body.copyWith(
+                    fontSize: 11.5,
+                    height: 1,
+                    fontWeight: FontWeight.w700,
+                    color: d > 0
+                        ? CoachStyle.goldLight
+                        : const Color(0xFF8F8270),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 7),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              w.name,
+              style: CoachStyle.body.copyWith(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: CoachStyle.cream,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

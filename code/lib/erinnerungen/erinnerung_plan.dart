@@ -12,10 +12,10 @@ import '../training/training_logik.dart';
 /// "übernehmen" 2026-11-01). Each one can be switched off on its own.
 enum ErinnerungArt {
   wecker('Wecker', 'zu deiner Aufstehzeit'),
-  checkin('Check-in am Morgen', '20 Min. nach dem Aufstehen'),
+  checkin('Check-in am Morgen', '20 Minuten nach dem Aufstehen'),
   supplements('Supplements', 'zu deinen Uhrzeiten'),
-  termine('Termine', '30 Min. vorher'),
-  training('Training', '1 Std. vorher'),
+  termine('Termine', '30 Minuten vorher'),
+  training('Training', '1 Stunde vorher'),
   fokus('Fokus am Abend', '20:00, nur wenn offen'),
   abend('Abendroutine', 'zum Start, aus deiner Bettzeit'),
   foto('Fototag', 'an deinem Fototag'),

@@ -12,6 +12,7 @@ import 'checkin/checkin.dart';
 import 'checkin/checkin_evaluator.dart';
 import 'checkin/checkin_flow.dart';
 import 'training/training_logik.dart';
+import 'checkin/checkin_vormerkung.dart';
 import 'coach/remote_coach.dart';
 import 'data/diary_store.dart';
 import 'data/profile_store.dart';
@@ -415,9 +416,17 @@ class _StartGateState extends State<StartGate> {
     final today = dayKey(widget.app.clock());
     final training = await widget.app.feed.loadTraining();
     final vorgemerkt = checkInVormerkung(training, widget.app.clock());
+    final schlaf = await widget.app.feed.loadSchlaf();
+    final persoenlich = await widget.app.feed.loadPersoenlich();
+    final schlafVor = schlafVormerkung(schlaf.morgenAm(today));
+    final ausVor = ausstrahlungVormerkung(persoenlich, widget.app.clock());
     if (!mounted) return;
     setState(() {
-      _vorgemerkt = {'Training': ?vorgemerkt};
+      _vorgemerkt = {
+        'Training': ?vorgemerkt,
+        'Schlaf': ?schlafVor,
+        'Ausstrahlung': ?ausVor,
+      };
       _profile = profile;
       _konto = konto;
       _abo = abo;

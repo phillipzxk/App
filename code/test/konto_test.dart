@@ -192,7 +192,7 @@ void main() {
     final j = DateTime(2026, 11, 1, 12);
     expect(
       formatZuletzt(j.subtract(const Duration(minutes: 2)), j),
-      'vor 2 Min.',
+      'vor 2 Minuten',
     );
     expect(formatZuletzt(null, j), 'noch nie');
   });

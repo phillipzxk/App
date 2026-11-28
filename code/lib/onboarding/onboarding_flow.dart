@@ -8,8 +8,7 @@ import '../data/user_profile.dart';
 import '../ui/coach_style.dart';
 import '../ui/coach_widgets.dart';
 import '../mindset/mindset_ui.dart' show CoachZeile;
-import '../ui/logo.dart';
-import '../konto/konto_ui.dart' show bewegungAn;
+import '../konto/konto_ui.dart' show bewegungAn, KontoWortmarke, WachsendesLogo;
 import 'onboarding_evaluator.dart';
 import 'onboarding_questions.dart';
 import 'start_saetze.dart';
@@ -113,9 +112,32 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       key: const ValueKey('name'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 12),
-        const Align(alignment: Alignment.centerLeft, child: LogoMark(size: 56)),
-        const SizedBox(height: 16),
+        // The first screen greets with the logo growing itself, like the
+        // account screen, and the one sentence of what Groundset is
+        // (Rundgang 2026-11-28). It shrinks while the keyboard is open.
+        Expanded(
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(
+                children: [
+                  const WachsendesLogo(size: 130),
+                  const KontoWortmarke(),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: 300,
+                    child: Text(
+                      'Ein Coach, der dein Training, Essen, Schlaf und deinen '
+                      'Kopf zusammen sieht.',
+                      textAlign: TextAlign.center,
+                      style: CoachStyle.body.copyWith(color: Glas.soft),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
         const Text('BEVOR WIR STARTEN', style: CoachStyle.goldLabel),
         const SizedBox(height: 12),
         GoldSchrift('Wie heißt du?', style: CoachStyle.question),
@@ -131,7 +153,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           einzeilig: true,
           onChanged: (_) => setState(() {}),
         ),
-        const Spacer(),
+        const SizedBox(height: 20),
         MainButton(
           gold: true,
           label: 'Weiter',

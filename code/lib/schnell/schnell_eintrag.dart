@@ -269,16 +269,19 @@ List<Gegenfrage> gegenfragen({
       ),
     );
   }
-  final drin = {
-    for (final e in eintraege)
-      if (e.art == 'mahlzeit') e.text('mahlzeit'),
-  };
+  // The slots the spoken meals will fill, worked out the same way as when
+  // they are filed, so the coach never asks about a meal just named.
+  final belegt = {...gegessen};
+  for (final e in eintraege) {
+    if (e.art != 'mahlzeit') continue;
+    final m = slotFuer(e, mahlzeiten, belegt, jetzt);
+    if (m != null) belegt.add(m.id);
+  }
   for (final m in mahlzeiten) {
     if (out.length >= 2) break;
-    if (m.snack || gegessen.contains(m.id)) continue;
+    if (m.snack || belegt.contains(m.id)) continue;
     if (jetzt < m.minute + 120) continue;
     final wort = _wort(m.id);
-    if (drin.contains(wort)) continue;
     out.add(
       Gegenfrage(
         id: 'mahlzeit-${m.id}',
@@ -295,6 +298,50 @@ List<Gegenfrage> gegenfragen({
     );
   }
   return out.take(2).toList();
+}
+
+/// The meal word of an entry; when the coach left it out or wrote it
+/// differently ("Mittagessen"), it is read from the title.
+String _mahlzeitWort(SchnellEintrag e) {
+  final roh = '${e.text('mahlzeit') ?? ''} ${e.titel}'.toLowerCase();
+  if (roh.contains('früh') || roh.contains('frueh')) return 'fruehstueck';
+  if (roh.contains('mittag')) return 'mittag';
+  if (roh.contains('abend')) return 'abend';
+  return e.text('mahlzeit') ?? 'snack';
+}
+
+/// The coach's short line over the cards, with its count matched to the
+/// cards really shown ("Hab ich, vier Sachen." over two cards).
+String zahlAngleichen(String satz, int n) {
+  const worte = [
+    'keine',
+    'eine',
+    'zwei',
+    'drei',
+    'vier',
+    'fünf',
+    'sechs',
+    'sieben',
+    'acht',
+    'neun',
+    'zehn',
+  ];
+  final re = RegExp(
+    r'\b(eine|einen|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|\d+)'
+    r'(\s+)(Sachen|Sache|Dinge|Ding|Einträge|Eintrag)\b',
+    caseSensitive: false,
+  );
+  return satz.replaceAllMapped(re, (m) {
+    final eintrag = m[3]!.toLowerCase().startsWith('eintr');
+    final nomen = eintrag
+        ? (n == 1 ? 'Eintrag' : 'Einträge')
+        : (n == 1 ? 'Sache' : 'Sachen');
+    var w = n == 1 && eintrag ? 'einen' : (n < worte.length ? worte[n] : '$n');
+    if (m[1]![0] != m[1]![0].toLowerCase()) {
+      w = w[0].toUpperCase() + w.substring(1);
+    }
+    return '$w${m[2]}$nomen';
+  });
 }
 
 String _wort(String id) => switch (id) {
@@ -329,7 +376,7 @@ MahlzeitSlot? slotFuer(
       if (!gegessen.contains(m.id)) m,
   ];
   if (offen.isEmpty) return null;
-  final wort = e.text('mahlzeit') ?? 'snack';
+  final wort = _mahlzeitWort(e);
   for (final m in offen) {
     if (_wort(m.id) == wort && (wort != 'snack' || m.snack)) return m;
   }

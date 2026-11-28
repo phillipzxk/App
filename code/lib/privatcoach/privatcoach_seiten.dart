@@ -1407,7 +1407,7 @@ class _GeteilteWerteSeiteState extends State<GeteilteWerteSeite> {
 
 String _stunden(double h) {
   final m = (h * 60).round();
-  return '${m ~/ 60}:${(m % 60).toString().padLeft(2, '0')} Std.';
+  return '${m ~/ 60}:${(m % 60).toString().padLeft(2, '0')} Stunden';
 }
 
 class _GlasZeile extends StatelessWidget {

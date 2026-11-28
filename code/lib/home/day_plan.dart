@@ -34,7 +34,15 @@ class DayPlanCard extends StatelessWidget {
     this.mahlzeitZeiten = const [],
     this.kalender,
     this.onKalenderVerbinden,
+    this.extra = const [],
   });
+
+  /// More timed rows from the sun arc: supplements, the evening routine
+  /// and the coach's points. Minutes may pass 1440 after midnight.
+  final List<
+    ({int minute, String art, String titel, String? text, bool erledigt})
+  >
+  extra;
 
   /// Kalender verbinden (vault Umsetzung/Kalender verbinden.md): the
   /// calendar's name ("iPhone-Kalender") once connected. Then the
@@ -110,6 +118,12 @@ class DayPlanCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // The day comes first, setting it up below (Rundgang
+          // 2026-11-28).
+          ..._zeitstrahl(heute, meals),
+          const SizedBox(height: 16),
+          Text('Termine und Mahlzeiten', style: Glas.tLabel),
+          const SizedBox(height: 8),
           if (kalender case final k?)
             _KalenderVerbunden(name: k, heute: heute.length)
           else ...[
@@ -125,8 +139,6 @@ class DayPlanCard extends StatelessWidget {
             kcalZiel: kcalZiel,
             onTap: () => _pickMahlzeiten(context),
           ),
-          const SizedBox(height: 10),
-          ..._zeitstrahl(heute, meals),
           if (demnaechst.isNotEmpty) ...[
             const SizedBox(height: 14),
             Text('Nächste Termine', style: Glas.tLabel),
@@ -162,10 +174,15 @@ extension on DayPlanCard {
     final grund = t != null
         ? 'Morgen früh: ${t.text}. Darum schon um ${formatUhrzeit(b.aufstehen)} raus.'
         : 'Morgen um ${formatUhrzeit(b.aufstehen)} raus, '
-              '${formatStunden(schlafStunden)} Std. Schlaf.';
-    // Only when the routine starts before bedtime (same evening).
+              '${formatStunden(schlafStunden)} Stunden Schlaf.';
+    // Only when the routine starts before bedtime (same evening) and has
+    // no row of its own.
     final ab = parseUhrzeit(routineAb ?? '');
-    final routine = ab != null && ab < b.bett && b.bett - ab <= 180
+    final routine =
+        ab != null &&
+            ab < b.bett &&
+            b.bett - ab <= 180 &&
+            !extra.any((x) => x.titel == 'Abendroutine')
         ? '\nAbendroutine ab ${formatUhrzeit(ab)}.'
         : '';
     return _PlanRow(
@@ -241,7 +258,7 @@ extension on DayPlanCard {
         frei ? null : trZeit,
         (v) => _PlanRow(
           key: const ValueKey('tag-training'),
-          zeit: trZeit == null || frei ? '–' : formatUhrzeit(trZeit),
+          zeit: trZeit == null || frei ? 'heute' : formatUhrzeit(trZeit),
           art: 'Training',
           hell: true,
           titel: frei ? 'Heute frei' : shortDay(training),
@@ -250,6 +267,18 @@ extension on DayPlanCard {
           vorbei: v,
         ),
       ),
+      for (final x in extra)
+        (
+          x.minute,
+          (v) => _PlanRow(
+            key: ValueKey('tag-extra-${x.minute}-${x.titel}'),
+            zeit: formatUhrzeit(x.minute % 1440),
+            art: x.art,
+            titel: x.titel,
+            text: x.text,
+            vorbei: v || x.erledigt,
+          ),
+        ),
       if (mahlzeitZeiten.isEmpty)
         (
           null,
@@ -276,15 +305,22 @@ extension on DayPlanCard {
       out.add(_JetztLinie(zeit: formatUhrzeit(jetzt)));
     }
 
+    // Rows without a time sit right under "Jetzt": they are still open
+    // today, not after the last appointment (Rundgang 2026-11-28).
+    void jetztMitOffenen() {
+      if (linie) return;
+      jetztLinie();
+      for (final (_, bau) in ohneZeit) {
+        out.add(bau(false));
+      }
+    }
+
     for (final (m, bau) in mitZeit) {
       final vorbei = m! <= jetzt;
-      if (!vorbei) jetztLinie();
+      if (!vorbei) jetztMitOffenen();
       out.add(bau(vorbei));
     }
-    jetztLinie();
-    for (final (_, bau) in ohneZeit) {
-      out.add(bau(false));
-    }
+    jetztMitOffenen();
     out.add(_bettRow());
     return out;
   }

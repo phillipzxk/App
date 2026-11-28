@@ -391,7 +391,7 @@ class _KontoEinstellungenState extends State<KontoEinstellungen>
                             ),
                             Text(
                               _stand.zuletzt == null
-                                  ? 'Tipp auf „Jetzt sichern“'
+                                  ? 'Bisher nur auf diesem Handy.'
                                   : '${formatZuletzt(_stand.zuletzt, jetzt)} · '
                                         '${formatGroesse(_stand.bytes)}',
                               key: const ValueKey('sicherung-zuletzt'),
@@ -478,7 +478,7 @@ class _KontoEinstellungenState extends State<KontoEinstellungen>
               key: const ValueKey('abo-zeile'),
               titel: 'Abo',
               unter:
-                  'Kündigen und ändern geht über den App Store bzw. Google '
+                  'Kündigen und ändern geht über den App Store oder Google '
                   'Play.',
               hinten: widget.abo ?? 'Beta: kostenlos',
               pfeil: widget.onAbo != null,

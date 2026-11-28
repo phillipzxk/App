@@ -184,8 +184,11 @@ String formatZuletzt(DateTime? t, DateTime jetzt) {
   if (t == null) return 'noch nie';
   final d = jetzt.difference(t);
   if (d.inMinutes < 1) return 'gerade eben';
-  if (d.inMinutes < 60) return 'vor ${d.inMinutes} Min.';
-  if (d.inHours < 24) return 'vor ${d.inHours} Std.';
+  if (d.inMinutes < 60) {
+    return d.inMinutes == 1 ? 'vor 1 Minute' : 'vor ${d.inMinutes} Minuten';
+  }
+  if (d.inHours < 24)
+    return d.inHours == 1 ? 'vor 1 Stunde' : 'vor ${d.inHours} Stunden';
   if (d.inDays == 1) return 'gestern';
   return 'am ${t.day}.${t.month}.';
 }

@@ -109,7 +109,7 @@ void main() {
       await scrollTo(tester, find.byKey(const ValueKey('tag-bettzeit')));
       expect(find.text('22:30'), findsOneWidget);
       expect(
-        find.textContaining('Morgen um 6:30 raus, 8 Std. Schlaf.'),
+        find.textContaining('Morgen um 6:30 raus, 8 Stunden Schlaf.'),
         findsOneWidget,
       );
     },
