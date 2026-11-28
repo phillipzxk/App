@@ -111,9 +111,7 @@ final List<OnboardingQuestion> onboardingQuestions = [
   ),
   OnboardingQuestion(
     topic: 'Körper',
-    question:
-        'Wie geht es deinem Körper gerade? Wo hakt es bei Schlaf, Ernährung '
-        'oder Training?',
+    question: 'Wo hakt es gerade bei Schlaf, Essen oder Training?',
     options: const [
       'Ich schlafe schlecht ein oder wache nachts auf',
       'Ich bin morgens nicht erholt',
