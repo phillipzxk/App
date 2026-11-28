@@ -115,6 +115,15 @@ double _text(
 void _zeile(Canvas c, String s) =>
     _text(c, s, const Offset(151, 342), color: _leise);
 
+/// "6,8" or "7": one decimal at most.
+String _zahl1(double v) {
+  final r = (v * 10).round() / 10;
+  return (r == r.roundToDouble() ? r.toInt().toString() : '$r').replaceAll(
+    '.',
+    ',',
+  );
+}
+
 void _glow(Canvas c, Offset m, double r, Color farbe) => c.drawCircle(
   m,
   r,
@@ -1813,10 +1822,21 @@ class MorgenBild extends StatelessWidget {
     required this.tipp,
     required this.v,
     required this.t,
+    this.wert,
+    this.wie = '',
+    this.unter = '',
+    this.teile = const [],
   });
 
   /// Light minutes reached, 0..1.
   final double licht;
+
+  /// After the morning entry: the sleep score, the answer ("Frisch
+  /// aufgewacht"), a small line and the four parts. The picture then shows
+  /// the answer instead of asking again (Rundgang 2026-11-28).
+  final int? wert;
+  final String wie, unter;
+  final List<(String, int)> teile;
 
   /// 0 frisch, 1 okay, 2 gerädert, null not yet.
   final int? gewaehlt;
@@ -1825,7 +1845,9 @@ class MorgenBild extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _Brett(
-    maler: _MorgenMaler(v, t, licht, gewaehlt),
+    maler: wert == null
+        ? _MorgenMaler(v, t, licht, gewaehlt)
+        : _MorgenFertigMaler(v, t, wert!, wie, unter, teile),
     punkte: [
       (
         const Rect.fromLTWH(0, 0, bildBreite, bildHoehe),
@@ -1962,8 +1984,131 @@ class _MorgenMaler extends _Maler {
   }
 }
 
-/// Last night as a moon arc from bedtime to wake time with the sleep
-/// value in the middle; below seven moons for the last nights.
+/// The morning after the entry: a low sunrise on top, below the answer
+/// with the sleep score and its four parts as bars, and which part pulls
+/// the score down today.
+class _MorgenFertigMaler extends _Maler {
+  _MorgenFertigMaler(
+    super.v,
+    super.t,
+    this.wert,
+    this.wie,
+    this.unter,
+    this.teile,
+  );
+  final int wert;
+  final String wie, unter;
+  final List<(String, int)> teile;
+
+  @override
+  void paint(Canvas c, Size s) {
+    const himmel = Rect.fromLTWH(0, 0, 302, 128);
+    c.drawRRect(
+      RRect.fromRectAndRadius(himmel, const Radius.circular(18)),
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF140F0A), Color(0xFF7A5C2C), Color(0xFFE3BC74)],
+          stops: [0, .7, 1],
+        ).createShader(himmel),
+    );
+    _sterne(c, 12, const Rect.fromLTWH(0, 0, 302, 70), t);
+    final hoch = Curves.easeOutCubic.transform(_teil(v, 0, .7));
+    final sm = Offset(151, 124 + (1 - hoch) * 30);
+    c.save();
+    c.clipRRect(RRect.fromRectAndRadius(himmel, const Radius.circular(18)));
+    _glow(c, sm, 44, const Color(0x73F7CF92));
+    c.drawCircle(
+      sm,
+      22,
+      Paint()
+        ..shader = const RadialGradient(
+          colors: [Color(0xFFFFF6E2), Color(0xFFF7CF92)],
+        ).createShader(Rect.fromCircle(center: sm, radius: 22)),
+    );
+    c.restore();
+
+    // The answer: score in a gold circle, then the words.
+    const m = Offset(30, 166);
+    c.drawCircle(m, 22, Paint()..shader = _goldR(m, 22));
+    _text(
+      c,
+      '$wert',
+      m + const Offset(0, 6),
+      size: 16,
+      sora: true,
+      weight: FontWeight.w700,
+      color: _goldInk,
+    );
+    _text(
+      c,
+      wie,
+      const Offset(62, 162),
+      size: 15,
+      sora: true,
+      weight: FontWeight.w700,
+      color: _ink,
+      align: TextAlign.left,
+      maxBreite: 236,
+    );
+    _text(
+      c,
+      unter,
+      const Offset(62, 180),
+      size: 11,
+      color: _soft,
+      align: TextAlign.left,
+      maxBreite: 236,
+    );
+
+    final f = Curves.easeOutCubic.transform(_teil(v, .3, 1));
+    for (final (i, (name, w)) in teile.take(4).indexed) {
+      final y = 214.0 + i * 25;
+      _text(
+        c,
+        name,
+        Offset(8, y + 4),
+        size: 11,
+        color: _soft,
+        align: TextAlign.left,
+        maxBreite: 90,
+      );
+      final bahn = Rect.fromLTWH(100, y - 3, 158, 6);
+      c.drawRRect(
+        RRect.fromRectAndRadius(bahn, const Radius.circular(3)),
+        Paint()..color = const Color(0x1FFFF0DC),
+      );
+      final voll = Rect.fromLTWH(
+        100,
+        y - 3,
+        158 * (w / 100).clamp(0.0, 1.0) * f,
+        6,
+      );
+      c.drawRRect(
+        RRect.fromRectAndRadius(voll, const Radius.circular(3)),
+        Paint()..shader = _goldLinear(bahn),
+      );
+      _text(
+        c,
+        '$w',
+        Offset(294, y + 4),
+        size: 11,
+        sora: true,
+        weight: FontWeight.w600,
+        color: _ink,
+        align: TextAlign.right,
+      );
+    }
+    if (teile.isNotEmpty) {
+      final schwach = teile.reduce((a, b) => b.$2 < a.$2 ? b : a);
+      _zeile(c, '${schwach.$1} zieht deinen Wert heute nach unten');
+    }
+  }
+}
+
+/// Tonight as a moon arc from bedtime to wake time with the planned hours
+/// in the middle; below seven moons with the hours of the last nights.
 class NachtBild extends StatelessWidget {
   const NachtBild({
     super.key,
@@ -2085,7 +2230,7 @@ class _NachtMaler extends _Maler {
     for (var i = 0; i < n.length && i < 7; i++) {
       final (h, tag) = n[i];
       final x = 151 + (i - (math.min(n.length, 7) - 1) / 2) * 37;
-      const y = 286.0;
+      const y = 278.0;
       final q = _plopp(v, .35 + i * .06);
       if (q <= 0) continue;
       final kurz = h < 6.5;
@@ -2111,17 +2256,26 @@ class _NachtMaler extends _Maler {
                       Rect.fromCircle(center: Offset(x, y), radius: r),
                     )),
       );
+      // The hours under every moon (Rundgang 2026-11-28).
+      _text(
+        c,
+        _zahl1(h),
+        Offset(x, 308),
+        size: 11,
+        sora: true,
+        weight: FontWeight.w600,
+        color: i == n.length - 1 ? tonSchlaf : (kurz ? _soft : _ink),
+      );
       _text(
         c,
         tag,
-        Offset(x, 312),
-        size: 10.5,
-        weight: FontWeight.w600,
-        color: i == n.length - 1 ? tonSchlaf : _soft,
+        Offset(x, 322),
+        size: 10,
+        color: i == n.length - 1 ? tonSchlaf : _leise,
       );
       c.restore();
     }
-    _zeile(c, 'Großer, heller Mond = lange Nacht');
+    _zeile(c, 'Stunden pro Nacht · blass = unter 6,5 h');
   }
 }
 
