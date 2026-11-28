@@ -713,14 +713,33 @@ class _TrainingTabState extends State<TrainingTab> {
     final heuteTf = tf != null && tf.tag == dayKey(_heute) ? tf : null;
     final alle = s.logs.fold<int>(0, (a, l) => a + l.saetze.length);
     final fertig = s.logs.fold<int>(0, (a, l) => a + l.fertige.length);
-    final begonnen = s.logs.where((l) => l.fertige.isNotEmpty).length;
     final wahl = _wahl.clamp(0, s.logs.length - 1);
     final jetzt = DateTime.now();
     final zeit = trainingZeit(widget.plan.tage[_planTag!]);
     final bis = zeit != null && dayKey(jetzt) == dayKey(_heute)
         ? zeit - jetzt.hour * 60 - jetzt.minute
         : null;
+    // One coach bubble on top: today's form plus how the fields work
+    // (Rundgang 2026-11-28, point 4).
+    const felder =
+        'Die Felder sind schon mit dem Ziel ausgefüllt. Du änderst nur, was '
+        'anders war.';
     return [
+      Padding(
+        key: const ValueKey('tagesform'),
+        padding: const EdgeInsets.only(bottom: 14),
+        child: _tagesformLaedt
+            ? const CoachBlase(
+                label: 'Deine Tagesform',
+                text: 'Ich schaue auf deine Nacht …',
+              )
+            : heuteTf != null && heuteTf.satz.isNotEmpty
+            ? CoachBlase(
+                label: 'Deine Tagesform',
+                text: '${heuteTf.satz} $felder',
+              )
+            : const CoachBlase(text: felder),
+      ),
       RingKachel(
         key: const ValueKey('training-held'),
         child: Column(
@@ -750,17 +769,17 @@ class _TrainingTabState extends State<TrainingTab> {
                           color: Umbau.tinte,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        bis != null && bis > 0 && fertig == 0
-                            ? 'startet in ${bis ~/ 60 > 0 ? '${bis ~/ 60} Std ' : ''}${bis % 60} Min'
-                            : '$begonnen von ${s.logs.length} Übungen begonnen',
-                        style: const TextStyle(
-                          fontFamily: 'Figtree',
-                          fontSize: 13.5,
-                          color: Umbau.tinteWeich,
+                      if (bis != null && bis > 0 && fertig == 0) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          'startet in ${bis ~/ 60 > 0 ? '${bis ~/ 60} Std ' : ''}${bis % 60} Min',
+                          style: const TextStyle(
+                            fontFamily: 'Figtree',
+                            fontSize: 13.5,
+                            color: Umbau.tinteWeich,
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),
@@ -796,19 +815,13 @@ class _TrainingTabState extends State<TrainingTab> {
                 ),
               ],
             ),
-            const SizedBox(height: 14),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: [
-                KlarPille(
-                  '${s.logs.length} ${s.logs.length == 1 ? 'Übung' : 'Übungen'}',
-                  dunkel: true,
-                ),
-                if (heuteTf?.aktiv != null)
-                  const KlarPille('Vom Coach angepasst', dunkel: true),
-              ],
-            ),
+            if (heuteTf?.aktiv != null) ...[
+              const SizedBox(height: 14),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: KlarPille('Vom Coach angepasst', dunkel: true),
+              ),
+            ],
             if (!_skipOffen) ...[
               const SizedBox(height: 14),
               DunkelKnopf(
@@ -821,20 +834,6 @@ class _TrainingTabState extends State<TrainingTab> {
         ),
       ),
       const SizedBox(height: 14),
-      if (_tagesformLaedt)
-        const Padding(
-          padding: EdgeInsets.only(bottom: 14),
-          child: CoachBlase(
-            label: 'Deine Tagesform',
-            text: 'Ich schaue auf deine Nacht …',
-          ),
-        )
-      else if (heuteTf != null && heuteTf.satz.isNotEmpty)
-        Padding(
-          key: const ValueKey('tagesform'),
-          padding: const EdgeInsets.only(bottom: 14),
-          child: CoachBlase(label: 'Deine Tagesform', text: heuteTf.satz),
-        ),
       if (heuteTf?.aktiv case final a?)
         TKarte(
           key: const ValueKey('anpassung'),
