@@ -273,7 +273,9 @@ class _SchnellBlattState extends State<SchnellBlatt> {
     final fragen = widget.gegenfragen(a.eintraege);
     setState(() {
       _laedt = false;
-      _satz = a.satz;
+      _satz = a.satz == null
+          ? null
+          : zahlAngleichen(a.satz!, a.eintraege.length + fragen.length);
       _karten = [
         for (final e in a.eintraege) _Karte(e),
         for (final g in fragen) _Karte(g.ja, gegen: g),
@@ -462,21 +464,22 @@ class _SchnellBlattState extends State<SchnellBlatt> {
             ),
           ),
           const SizedBox(height: 8),
-          SizedBox(
-            height: 40,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: widget.vorschlaege.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 8),
-              itemBuilder: (_, i) => _Rein(
-                verzoegerung: Duration(milliseconds: 80 + i * 70),
-                child: _VorschlagChip(
-                  key: ValueKey('vorschlag-$i'),
-                  v: widget.vorschlaege[i],
-                  onTap: () => _nimm(widget.vorschlaege[i]),
+          // All starts visible at once, none cut at the edge (Rundgang
+          // 2026-11-28).
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (var i = 0; i < widget.vorschlaege.length; i++)
+                _Rein(
+                  verzoegerung: Duration(milliseconds: 80 + i * 70),
+                  child: _VorschlagChip(
+                    key: ValueKey('vorschlag-$i'),
+                    v: widget.vorschlaege[i],
+                    onTap: () => _nimm(widget.vorschlaege[i]),
+                  ),
                 ),
-              ),
-            ),
+            ],
           ),
         ],
       ],
@@ -739,7 +742,7 @@ class _VorschlagChipState extends State<_VorschlagChip> {
     child: AnimatedContainer(
       duration: const Duration(milliseconds: 260),
       curve: Curves.easeOut,
-      padding: const EdgeInsets.fromLTRB(10, 0, 13, 0),
+      padding: const EdgeInsets.fromLTRB(10, 9, 13, 9),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: _an
