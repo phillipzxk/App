@@ -69,7 +69,9 @@ Shader _goldLinear(Rect r) => const LinearGradient(
 ).createShader(r);
 
 /// Text centred (or left/right) on [p], where p.dy is the baseline.
-void _text(
+/// Paints [s] with its first baseline on [p]; returns how much taller
+/// than one line it got (0 for one line).
+double _text(
   Canvas c,
   String s,
   Offset p, {
@@ -80,6 +82,7 @@ void _text(
   TextAlign align = TextAlign.center,
   double abstand = 0,
   double maxBreite = 290,
+  int zeilen = 1,
 }) {
   final tp = TextPainter(
     text: TextSpan(
@@ -90,11 +93,12 @@ void _text(
         fontWeight: weight,
         color: color,
         letterSpacing: abstand,
-        height: 1,
+        height: zeilen > 1 ? 1.15 : 1,
       ),
     ),
     textDirection: TextDirection.ltr,
-    maxLines: 1,
+    textAlign: align == TextAlign.center ? TextAlign.center : align,
+    maxLines: zeilen,
     ellipsis: '…',
   )..layout(maxWidth: maxBreite);
   final x = switch (align) {
@@ -104,6 +108,8 @@ void _text(
   };
   final base = tp.computeDistanceToActualBaseline(TextBaseline.alphabetic);
   tp.paint(c, Offset(x, p.dy - base));
+  final metrics = tp.computeLineMetrics();
+  return metrics.length < 2 ? 0 : tp.height - metrics.first.height;
 }
 
 void _zeile(Canvas c, String s) =>
@@ -1117,12 +1123,23 @@ class _EssenMaler extends _Maler {
           stops: [0, .45, 1],
         ).createShader(const Rect.fromLTWH(14, 0, 274, 200)),
     );
+    // A meal right at "jetzt" gets one label together with it, below the
+    // point, instead of two labels on top of each other (Rundgang
+    // 2026-11-28).
+    final jetztPunkt = _aufKurve(14 + jetzt.clamp(0.0, 1.0) * 274);
+    String? nahZeit;
+    for (final (pos, _, zeit) in m) {
+      if ((_aufKurve(14 + pos.clamp(0.0, 1.0) * 274) - jetztPunkt).distance <
+          28) {
+        nahZeit = zeit;
+      }
+    }
     final sonne = _teil(v, .45, .9);
     if (sonne > 0) {
       final sm = _aufKurve(14 + jetzt.clamp(0.0, 1.0) * 274 * sonne);
       _glow(c, sm, 14, const Color(0x59F5DFAE));
       c.drawCircle(sm, 5, Paint()..color = const Color(0xFFFFF6E2));
-      if (sonne >= 1) {
+      if (sonne >= 1 && nahZeit == null) {
         _text(
           c,
           'jetzt',
@@ -1156,7 +1173,18 @@ class _EssenMaler extends _Maler {
             1,
           ),
         );
-        _text(c, zeit, p + const Offset(0, -19), size: 10);
+        if (zeit == nahZeit) {
+          _text(
+            c,
+            'jetzt · $zeit',
+            p + const Offset(0, 28),
+            size: 10.5,
+            weight: FontWeight.w700,
+            color: _goldHell,
+          );
+        } else {
+          _text(c, zeit, p + const Offset(0, -19), size: 10);
+        }
       });
     }
     c.save();
@@ -1357,7 +1385,12 @@ class _KuecheMaler extends _Maler {
           ),
         );
         final al = dir > 0 ? TextAlign.left : TextAlign.right;
-        _text(
+        // Room up to the board edge, so no name is cut at the side.
+        final platz = (dir > 0 ? bildBreite - 6 - (e + 8) : e - 8 - 6)
+            .clamp(60.0, 112.0)
+            .toDouble();
+        // The whole name, on two lines when needed (Rundgang 2026-11-28).
+        final mehr = _text(
           c,
           g.name,
           Offset(e + dir * 8, y - 2),
@@ -1365,7 +1398,8 @@ class _KuecheMaler extends _Maler {
           weight: FontWeight.w600,
           color: g.heute ? _goldHell : _ink,
           align: al,
-          maxBreite: 96,
+          maxBreite: platz,
+          zeilen: 2,
         );
         _text(
           c,
@@ -1374,11 +1408,11 @@ class _KuecheMaler extends _Maler {
               : g.voll
               ? 'Basis'
               : 'Rettung',
-          Offset(e + dir * 8, y + 12),
+          Offset(e + dir * 8, y + 12 + mehr),
           size: 9.5,
           color: g.heute ? tonErnaehrung : _leise,
           align: al,
-          maxBreite: 96,
+          maxBreite: platz,
         );
       });
     }

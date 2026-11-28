@@ -836,6 +836,19 @@ extension _Koerper on _HomePageState {
     final eintraege = d.tag(dayKey(today));
     final gegessen = slots.where((s) => eintraege[s.id]?.gegessen == true);
     final naechste = slots.where((s) => eintraege[s.id]?.gegessen != true);
+    final minuteNun = today.hour * 60 + today.minute;
+    // The meal due now: the first open one that is not long past, else
+    // the last open one (Rundgang 2026-11-28, point 1).
+    final dran =
+        naechste.where((s) => s.minute + 90 >= minuteNun).firstOrNull ??
+        naechste.lastOrNull;
+    final verpasst = <int>{
+      for (final (i, s) in slots.indexed)
+        if (eintraege[s.id]?.gegessen != true &&
+            dran != null &&
+            s.minute < dran.minute)
+          i,
+    };
     final blaetter = kochbuchBlaetter(d);
     final rettung = d.gerichte.where((g) => g.quelle == 'coach').length;
     // The plant shows open dishes, cooked ones first; one rescue dish
@@ -908,7 +921,7 @@ extension _Koerper on _HomePageState {
       zahl: serieEssen.jetzt,
       einheit: serieEssen.jetzt == 1 ? 'Tag' : 'Tage',
       text: serieEssen.jetzt == 0
-          ? 'Startet mit deinem nächsten Eintrag'
+          ? 'mit allen Mahlzeiten'
           : 'in Folge alle Mahlzeiten gegessen',
       rekord: serieEssen.rekord,
     );
@@ -1001,16 +1014,27 @@ extension _Koerper on _HomePageState {
                     knopf: ('Essen heute ansehen', 'e-essen'),
                   )
                 : BJetzt(
-                    titel:
-                        'Als Nächstes: ${naechste.first.name} um '
-                        '${naechste.first.uhrzeit}',
-                    text:
-                        '${gegessen.length} von ${slots.length} Mahlzeiten '
-                        'gegessen. Gezählt wird nichts.',
+                    titel: '${dran!.name} um ${dran.uhrzeit}',
+                    text: 'Ohne Kalorienzählen.',
                     ring: gegessen.length / slots.length,
                     mitte: '${gegessen.length}/${slots.length}',
                     unter: 'Mahlzeiten',
                     knopf: ('Essen eintragen', 'e-essen'),
+                    zeilen: [
+                      for (final (i, s) in slots.indexed)
+                        (
+                          verpasst.contains(i)
+                              ? '${s.name} · nachtragen'
+                              : s.name,
+                          s.uhrzeit,
+                        ),
+                    ],
+                    haken: [
+                      for (final s in slots) eintraege[s.id]?.gegessen == true,
+                    ],
+                    hell: slots.indexOf(dran),
+                    leise: verpasst,
+                    zeilenZiel: 'e-essen',
                   ),
             serie: serieE,
             naechstes: BNaechstes(
@@ -1022,14 +1046,11 @@ extension _Koerper on _HomePageState {
                         '${literText(wasser)} l.',
             ),
             geschafft: geschafftListe,
-            mehr: [
-              const BMehr('Foto vom Teller', ziel: 'e-foto'),
-              const BMehr('Heißhunger', ziel: 'e-heiss'),
-              BMehr(
-                'Trinken',
-                wert: '${literText(trink.liter)} l',
-                ziel: 'e-trinken',
-              ),
+            // Only what the picture cannot open: Foto and Heißhunger
+            // (Rundgang 2026-11-28; Trinken sits in the glass).
+            mehr: const [
+              BMehr('Foto vom Teller', ziel: 'e-foto'),
+              BMehr('Heißhunger', ziel: 'e-heiss'),
             ],
           ),
           kacheln: [
@@ -1128,15 +1149,8 @@ extension _Koerper on _HomePageState {
                               '${variantenAb - blaetter == 1 ? 'Blatt' : 'Blätter'}.',
                   ),
             geschafft: geschafftListe,
-            mehr: [
-              BMehr(
-                'Einkaufsliste',
-                wert: offen == 0 ? null : '$offen offen',
-                ziel: 'e-einkauf',
-              ),
-              BMehr('Dein Kochbuch', wert: '$blaetter', ziel: 'e-koch'),
-              BMehr('Rettungs-Gerichte', wert: '$rettung'),
-            ],
+            mitUnterbau: false,
+            mitMehr: false,
           ),
           kacheln: [
             BKachel(
@@ -1255,33 +1269,15 @@ extension _Koerper on _HomePageState {
                     text: 'Einmal pro Woche reicht.',
                   )
                 : BNaechstes(
-                    titel: 'Alle Supplements heute',
+                    titel: 'Alle ${_supplements.length} Kapseln',
                     anteil: gen / _supplements.length,
                     text: suppOffen == 0
                         ? 'Alle $gen genommen.'
-                        : 'Noch $suppOffen offen.',
+                        : 'Noch $suppOffen offen heute.',
                   ),
             geschafft: geschafftListe,
-            mehr: [
-              BMehr(
-                'kcal und Gewicht',
-                wert: kg == null ? null : '${_HomePageState._komma(kg)} kg',
-                ziel: 'e-ziel',
-              ),
-              BMehr(
-                'Supplements',
-                wert: _supplements.isEmpty
-                    ? null
-                    : '$gen/${_supplements.length}',
-                ziel: 'e-supp',
-              ),
-              BMehr(
-                'In 2 Wochen',
-                wert: diff == null
-                    ? null
-                    : '${diff > 0 ? '+' : (diff < 0 ? '−' : '±')}${_HomePageState._komma(diff.abs())} kg',
-              ),
-            ],
+            mitUnterbau: false,
+            mitMehr: false,
           ),
           kacheln: [
             BKachel(

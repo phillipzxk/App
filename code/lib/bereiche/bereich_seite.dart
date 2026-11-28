@@ -141,7 +141,21 @@ class BJetzt {
     this.zeilen = const [],
     this.weitere,
     this.zeilenZiel,
+    this.haken = const [],
+    this.hell,
+    this.leise = const {},
   });
+
+  /// Per row: true = done (filled circle), false = open (empty circle);
+  /// left empty, rows have no circle (Ernährung meals; Rundgang
+  /// 2026-11-28).
+  final List<bool> haken;
+
+  /// The row that is due now, on a light band.
+  final int? hell;
+
+  /// Rows written quieter, e.g. a missed meal.
+  final Set<int> leise;
 
   final String titel, text;
 
@@ -2499,43 +2513,87 @@ class _BildSeiteViewState extends State<_BildSeiteView>
 
   /// Today's rows on the light tile, at most four plus "+ N weitere".
   Widget _jetztZeilen(BJetzt j) {
-    Widget zeile(String a, String b, {bool leise = false}) => Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: Color(0x2E50371A))),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              a,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontFamily: 'Figtree',
-                fontWeight: leise ? FontWeight.w500 : FontWeight.w600,
-                fontSize: 14,
-                color: leise ? Umbau.tinteWeich : Umbau.tinte,
+    Widget zeile(
+      String a,
+      String b, {
+      bool leise = false,
+      bool? haken,
+      bool hell = false,
+      bool linie = true,
+    }) => CustomPaint(
+      // The band reaches 10 px past the text on both sides, so the
+      // texts stay in line with the other rows.
+      painter: hell ? const _Band() : null,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          border: hell || !linie
+              ? null
+              : const Border(top: BorderSide(color: Color(0x2E50371A))),
+        ),
+        child: Row(
+          children: [
+            if (haken != null) ...[
+              Container(
+                width: 15,
+                height: 15,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: haken ? Umbau.tinte : null,
+                  border: Border.all(
+                    color: haken ? Umbau.tinte : Umbau.tinteWeich,
+                    width: 1.4,
+                  ),
+                ),
+                child: haken
+                    ? const Icon(
+                        Icons.check,
+                        size: 10,
+                        color: Color(0xFFF5DDB0),
+                      )
+                    : null,
+              ),
+              const SizedBox(width: 10),
+            ],
+            Expanded(
+              child: Text(
+                a,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: 'Figtree',
+                  fontWeight: leise ? FontWeight.w500 : FontWeight.w600,
+                  fontSize: 14,
+                  color: leise ? Umbau.tinteWeich : Umbau.tinte,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Text(
-            b,
-            style: const TextStyle(
-              fontFamily: 'Figtree',
-              fontSize: 13.5,
-              color: Umbau.tinteWeich,
+            const SizedBox(width: 10),
+            Text(
+              b,
+              style: const TextStyle(
+                fontFamily: 'Figtree',
+                fontSize: 13.5,
+                color: Umbau.tinteWeich,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
     final inhalt = Column(
       key: const ValueKey('jetzt-zeilen'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final (a, b) in j.zeilen) zeile(a, b),
+        for (final (i, (a, b)) in j.zeilen.indexed)
+          zeile(
+            a,
+            b,
+            leise: j.leise.contains(i),
+            haken: i < j.haken.length ? j.haken[i] : null,
+            hell: j.hell == i,
+            linie: j.hell == null || i != j.hell! + 1,
+          ),
         if (j.weitere case final w?) zeile(w, '›', leise: true),
       ],
     );
@@ -2617,18 +2675,22 @@ class _BildSeiteViewState extends State<_BildSeiteView>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(child: Text('DEINE SERIE', style: Umbau.label)),
+            // The sprout grows from the first day on; at 0 the place
+            // stays empty instead of a lone stroke (Rundgang 2026-11-28).
             SizedBox(
               width: 30,
               height: 40,
-              child: AnimatedBuilder(
-                animation: _ein,
-                builder: (context, _) => CustomPaint(
-                  painter: _TriebMaler(
-                    math.min(x.zahl, 6),
-                    Curves.easeOutCubic.transform(_ein.value),
-                  ),
-                ),
-              ),
+              child: x.zahl == 0
+                  ? null
+                  : AnimatedBuilder(
+                      animation: _ein,
+                      builder: (context, _) => CustomPaint(
+                        painter: _TriebMaler(
+                          math.min(x.zahl, 6),
+                          Curves.easeOutCubic.transform(_ein.value),
+                        ),
+                      ),
+                    ),
             ),
           ],
         ),
@@ -2965,4 +3027,21 @@ class _WochenBalken extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Light band behind the row that is due now.
+class _Band extends CustomPainter {
+  const _Band();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final r = Rect.fromLTWH(-10, 0, size.width + 20, size.height);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(r, const Radius.circular(12)),
+      Paint()..color = const Color(0x47FFFFFF),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_Band old) => false;
 }
