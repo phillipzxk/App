@@ -1671,7 +1671,7 @@ class _HomePageState extends State<HomePage> {
             titel: x.name,
             text: [
               if (x.menge.isNotEmpty) x.menge,
-              if (_genommen.contains(x.id)) 'genommen ✓',
+              if (_genommen.contains(x.id)) 'genommen',
             ].join(' · '),
             erledigt: _genommen.contains(x.id),
           ),
@@ -1817,6 +1817,22 @@ class _HomePageState extends State<HomePage> {
                   aufstehen: _schlafzeiten.aufstehenAm(widget.clock()),
                   mahlzeitZeiten: [
                     for (final m in _mahlzeitSlots) (m.minute, m.name),
+                  ],
+                  // Supplements, Abendroutine and the coach's points from
+                  // the sun arc, so the list shows what the countdown
+                  // names (Rundgang 2026-11-28).
+                  extra: [
+                    for (final p in _tagesPunkte().punkte)
+                      if (p.id.startsWith('supp-') ||
+                          p.id == 'routine' ||
+                          p.id.startsWith('coach-'))
+                        (
+                          minute: p.minute,
+                          art: p.art == 'Supplement' ? 'Kapsel' : p.art,
+                          titel: p.titel,
+                          text: (p.text ?? '').isEmpty ? null : p.text,
+                          erledigt: p.erledigt,
+                        ),
                   ],
                   kalender: _kalenderVerbunden ? widget.kalender!.name : null,
                   onKalenderVerbinden: widget.kalender?.moeglich == true
