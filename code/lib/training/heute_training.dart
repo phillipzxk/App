@@ -71,25 +71,24 @@ class UebungKarte extends StatelessWidget {
                   children: [
                     Text(u.name, style: tTitel.copyWith(fontSize: 18)),
                     const SizedBox(height: 1),
-                    Text.rich(
-                      TextSpan(
-                        style: tSoft,
-                        children: [
-                          TextSpan(
-                            text: ziel.letztes == null
-                                ? 'Erstes Mal · '
-                                : 'Letztes Mal ${satzText(art, ziel.letztes!)} · ',
-                          ),
-                          TextSpan(
-                            text: 'Ziel heute $zielText',
-                            style: const TextStyle(
-                              color: CoachStyle.goldLight,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
+                    // Last time and today's target in lines of their own,
+                    // so nothing wraps alone (Rundgang 2026-11-28).
+                    Text(
+                      ziel.letztes == null
+                          ? 'Erstes Mal'
+                          : 'Letztes Mal ${satzText(art, ziel.letztes!)}',
+                      key: ValueKey('letztes-$i'),
+                      style: tSoft,
                     ),
+                    if (zielText.isNotEmpty)
+                      Text(
+                        'Ziel heute $zielText',
+                        key: ValueKey('ziel-heute-$i'),
+                        style: tSoft.copyWith(
+                          color: CoachStyle.goldLight,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -120,10 +119,10 @@ class UebungKarte extends StatelessWidget {
               child: Row(
                 children: [
                   SizedBox(
-                    width: 48,
+                    width: 86,
                     child: Text(
-                      'Aufw.',
-                      style: tSoft.copyWith(color: CoachStyle.nightMuted),
+                      'Aufwärmen',
+                      style: tSoft.copyWith(color: CoachStyle.inkSoft),
                     ),
                   ),
                   Expanded(
@@ -236,42 +235,48 @@ class UebungKarte extends StatelessWidget {
               ),
             ),
           const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
+          // The small buttons as one row of signs (Rundgang 2026-11-28).
+          Row(
             children: [
-              TChip(
-                '+ Satz',
-                key: ValueKey('satz-dazu-$i'),
-                an: false,
-                klein: true,
-                onTap: () => session.satzDazu(i),
-              ),
-              if (l.saetze.length > 1)
-                TChip(
-                  '– Satz',
-                  key: ValueKey('satz-weg-$i'),
-                  an: false,
-                  klein: true,
-                  onTap: () => session.satzWeg(i),
+              for (final (n, k) in [
+                _Knopf(
+                  key: ValueKey('satz-dazu-$i'),
+                  icon: Icons.add_rounded,
+                  label: 'Satz',
+                  onTap: () => session.satzDazu(i),
                 ),
-              if (u.pause > 0) KlarPille('Pause ${mmss(u.pause)}'),
-              if (onForm != null)
-                TChip(
-                  'Form filmen',
-                  key: ValueKey('form-$i'),
-                  an: false,
-                  klein: true,
-                  onTap: onForm,
+                if (l.saetze.length > 1)
+                  _Knopf(
+                    key: ValueKey('satz-weg-$i'),
+                    icon: Icons.remove_rounded,
+                    label: 'Satz',
+                    onTap: () => session.satzWeg(i),
+                  ),
+                if (u.pause > 0)
+                  _Knopf(
+                    icon: Icons.timer_outlined,
+                    label: 'Pause ${mmss(u.pause)}',
+                  ),
+                if (onForm != null)
+                  _Knopf(
+                    key: ValueKey('form-$i'),
+                    icon: Icons.videocam_outlined,
+                    label: 'Filmen',
+                    onTap: onForm,
+                  ),
+                _Knopf(
+                  key: ValueKey('verlauf-$i'),
+                  icon: Icons.show_chart_rounded,
+                  label: 'Verlauf',
+                  onTap: onVerlauf,
                 ),
-              TChip(
-                'Verlauf ›',
-                key: ValueKey('verlauf-$i'),
-                an: false,
-                klein: true,
-                onTap: onVerlauf,
-              ),
+              ].indexed)
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(left: n == 0 ? 0 : 6),
+                    child: k,
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 12),
@@ -316,6 +321,48 @@ class UebungKarte extends StatelessWidget {
       ),
     );
   }
+}
+
+/// One small button of the exercise card: sign above, word below.
+class _Knopf extends StatelessWidget {
+  const _Knopf({
+    super.key,
+    required this.icon,
+    required this.label,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    behavior: HitTestBehavior.opaque,
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: Klar.glas,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 19, color: CoachStyle.goldLight),
+          const SizedBox(height: 3),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              maxLines: 1,
+              style: tSoft.copyWith(fontSize: 11),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 /// Small gold bars: how the exercise went the last times.

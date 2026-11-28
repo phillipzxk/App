@@ -138,9 +138,22 @@ class BJetzt {
     this.unter = '',
     this.knopf,
     this.fertig = false,
+    this.zeilen = const [],
+    this.weitere,
+    this.zeilenZiel,
   });
 
   final String titel, text;
+
+  /// Short rows under the title, name and value (Training: today's
+  /// exercises with their target; Rundgang 2026-11-28).
+  final List<(String, String)> zeilen;
+
+  /// Last row when not all fit, e.g. "+ 3 weitere Übungen".
+  final String? weitere;
+
+  /// Tile the rows open on tap.
+  final String? zeilenZiel;
 
   /// How full the ring is, 0..1; null leaves it empty.
   final double? ring;
@@ -199,7 +212,21 @@ class BAufbau {
     this.mehr = const [],
     this.klein = false,
     this.bildErsatz,
+    this.mitBild = true,
+    this.mitUnterbau = true,
+    this.mitMehr = true,
   });
+
+  /// False leaves out the big picture (Training Heute, whose exercises
+  /// stand in "Jetzt dran"; Rundgang 2026-11-28).
+  final bool mitBild;
+
+  /// False leaves out Serie, Nächstes Ziel and "Diese Woche geschafft",
+  /// so they show on one page only (Training; Rundgang 2026-11-28).
+  final bool mitUnterbau;
+
+  /// False leaves out the "Mehr" list.
+  final bool mitMehr;
 
   /// "Deine Serie" and "Nächstes Ziel" as two small flat fields (e.g.
   /// Training without a plan; Phillip 2026-11-18).
@@ -1658,7 +1685,11 @@ class FeldSeite extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bloecke = [CoachBlase(text: feld.coach), ...feld.inhalt(context)];
+    final bloecke = [
+      // An empty coach line leaves the bubble to the page itself.
+      if (feld.coach.isNotEmpty) CoachBlase(text: feld.coach),
+      ...feld.inhalt(context),
+    ];
     return Scaffold(
       backgroundColor: const Color(0xFF231B14),
       body: KlarHintergrund(
@@ -2241,7 +2272,11 @@ class _BildSeiteViewState extends State<_BildSeiteView>
   /// The new structure: one thing first, motivation next, the rest calm.
   Widget _aufbau(BAufbau a) {
     final j = a.jetzt;
-    final mehr = a.mehr.isNotEmpty ? a.mehr : _mehrAuto(a);
+    final mehr = !a.mitMehr
+        ? const <BMehr>[]
+        : a.mehr.isNotEmpty
+        ? a.mehr
+        : _mehrAuto(a);
     return ListView(
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 24),
       children: [
@@ -2275,16 +2310,18 @@ class _BildSeiteViewState extends State<_BildSeiteView>
                             color: Umbau.tinte,
                           ),
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          j.text,
-                          style: const TextStyle(
-                            fontFamily: 'Figtree',
-                            fontSize: 13.5,
-                            height: 1.4,
-                            color: Umbau.tinteWeich,
+                        if (j.text.isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            j.text,
+                            style: const TextStyle(
+                              fontFamily: 'Figtree',
+                              fontSize: 13.5,
+                              height: 1.4,
+                              color: Umbau.tinteWeich,
+                            ),
                           ),
-                        ),
+                        ],
                       ],
                     ),
                   ),
@@ -2341,6 +2378,10 @@ class _BildSeiteViewState extends State<_BildSeiteView>
                   ),
                 ],
               ),
+              if (j.zeilen.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                _jetztZeilen(j),
+              ],
               if (j.knopf case (final label, final ziel)) ...[
                 const SizedBox(height: 16),
                 _tipp(
@@ -2352,7 +2393,7 @@ class _BildSeiteViewState extends State<_BildSeiteView>
             ],
           ),
         ),
-        if (a.serie != null || a.naechstes != null) ...[
+        if (a.mitUnterbau && (a.serie != null || a.naechstes != null)) ...[
           const SizedBox(height: 12),
           IntrinsicHeight(
             child: Row(
@@ -2368,65 +2409,11 @@ class _BildSeiteViewState extends State<_BildSeiteView>
             ),
           ),
         ],
-        const SizedBox(height: 12),
-        a.bildErsatz?.call(_tipp) ?? _bildKachel(),
-        const SizedBox(height: 12),
-        _glas(
-          key: const ValueKey('geschafft'),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('DIESE WOCHE GESCHAFFT', style: Umbau.label),
-              const SizedBox(height: 6),
-              if (a.geschafft.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    'Noch nichts diese Woche. Der erste Haken kommt mit '
-                    'deinem nächsten Eintrag.',
-                    style: Glas.tSoft.copyWith(fontSize: 13),
-                  ),
-                ),
-              for (final (i, g) in a.geschafft.indexed)
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 11),
-                  decoration: BoxDecoration(
-                    border: i == 0
-                        ? null
-                        : const Border(top: BorderSide(color: Umbau.linie)),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 22,
-                        height: 22,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: Umbau.grad,
-                        ),
-                        child: const Icon(
-                          Icons.check_rounded,
-                          size: 15,
-                          color: Umbau.tinte,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          g.$1,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: Glas.tText.copyWith(fontSize: 14),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(g.$2, style: Glas.tSoft.copyWith(fontSize: 12)),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ),
+        if (a.mitBild) ...[
+          const SizedBox(height: 12),
+          a.bildErsatz?.call(_tipp) ?? _bildKachel(),
+        ],
+        if (a.mitUnterbau) ...[const SizedBox(height: 12), _geschafft(a)],
         if (mehr.isNotEmpty) ...[
           const SizedBox(height: 12),
           _glas(
@@ -2451,6 +2438,109 @@ class _BildSeiteViewState extends State<_BildSeiteView>
         ],
       ],
     );
+  }
+
+  Widget _geschafft(BAufbau a) => _glas(
+    key: const ValueKey('geschafft'),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('DIESE WOCHE GESCHAFFT', style: Umbau.label),
+        const SizedBox(height: 6),
+        if (a.geschafft.isEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              'Noch nichts diese Woche. Der erste Haken kommt mit '
+              'deinem nächsten Eintrag.',
+              style: Glas.tSoft.copyWith(fontSize: 13),
+            ),
+          ),
+        for (final (i, g) in a.geschafft.indexed)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 11),
+            decoration: BoxDecoration(
+              border: i == 0
+                  ? null
+                  : const Border(top: BorderSide(color: Umbau.linie)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 22,
+                  height: 22,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: Umbau.grad,
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    size: 15,
+                    color: Umbau.tinte,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    g.$1,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Glas.tText.copyWith(fontSize: 14),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(g.$2, style: Glas.tSoft.copyWith(fontSize: 12)),
+              ],
+            ),
+          ),
+      ],
+    ),
+  );
+
+  /// Today's rows on the light tile, at most four plus "+ N weitere".
+  Widget _jetztZeilen(BJetzt j) {
+    Widget zeile(String a, String b, {bool leise = false}) => Container(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: Color(0x2E50371A))),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              a,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: 'Figtree',
+                fontWeight: leise ? FontWeight.w500 : FontWeight.w600,
+                fontSize: 14,
+                color: leise ? Umbau.tinteWeich : Umbau.tinte,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            b,
+            style: const TextStyle(
+              fontFamily: 'Figtree',
+              fontSize: 13.5,
+              color: Umbau.tinteWeich,
+            ),
+          ),
+        ],
+      ),
+    );
+    final inhalt = Column(
+      key: const ValueKey('jetzt-zeilen'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final (a, b) in j.zeilen) zeile(a, b),
+        if (j.weitere case final w?) zeile(w, '›', leise: true),
+      ],
+    );
+    final ziel = j.zeilenZiel;
+    return ziel == null ? inhalt : _tipp(ziel, art: 'zeilen', inhalt);
   }
 
   /// "Mehr" from what the page already has: the numbers under the picture

@@ -696,8 +696,10 @@ class _WocheMaler extends _Maler {
 }
 
 /// One exercise's best weights as gold columns, one per training; every
-/// record grows a sprout on its column.
-class TrainingVerlaufBild extends StatelessWidget {
+/// record grows a sprout on its column. Every column carries its value,
+/// three numbers sit on top, and a tapped column shows that day's sets
+/// (Rundgang 2026-11-28, point 3).
+class TrainingVerlaufBild extends StatefulWidget {
   const TrainingVerlaufBild({
     super.key,
     required this.uebungen,
@@ -707,6 +709,7 @@ class TrainingVerlaufBild extends StatelessWidget {
     required this.tipp,
     required this.v,
     required this.t,
+    this.details = const [],
   });
 
   /// Up to three exercises as chips, the first is shown.
@@ -715,20 +718,60 @@ class TrainingVerlaufBild extends StatelessWidget {
 
   /// Under each column, e.g. "3.11." or "heute".
   final List<String> labels;
+
+  /// What was done that day, one per value.
+  final List<String> details;
   final String einheit;
   final BildTipp tipp;
   final double v, t;
 
   @override
-  Widget build(BuildContext context) => _Brett(
-    maler: _VerlaufMaler(v, t, uebungen, werte, labels, einheit),
-    punkte: [
-      (
-        const Rect.fromLTWH(0, 0, bildBreite, bildHoehe),
-        tipp('t-kurve', _flaeche()),
+  State<TrainingVerlaufBild> createState() => _TrainingVerlaufBildState();
+}
+
+class _TrainingVerlaufBildState extends State<TrainingVerlaufBild> {
+  /// Index into the shown columns; null = the newest.
+  int? _wahl;
+
+  @override
+  Widget build(BuildContext context) {
+    final w = widget.werte;
+    final n = math.min(w.length, 8);
+    final wahl = (_wahl ?? n - 1).clamp(0, math.max(0, n - 1)).toInt();
+    final schritt = n < 2 ? 0.0 : math.min(33.0, 240 / (n - 1));
+    final x0 = 151 - (n - 1) * schritt / 2;
+    final d = widget.details;
+    final dn = d.length > 8 ? d.sublist(d.length - 8) : d;
+    return _Brett(
+      maler: _VerlaufMaler(
+        widget.v,
+        widget.t,
+        widget.uebungen,
+        w,
+        widget.labels,
+        widget.einheit,
+        wahl,
+        wahl < dn.length ? dn[wahl] : '',
       ),
-    ],
-  );
+      punkte: [
+        (
+          const Rect.fromLTWH(0, 0, bildBreite, bildHoehe),
+          widget.tipp('t-kurve', _flaeche()),
+        ),
+        if (n >= 2)
+          for (var i = 0; i < n; i++)
+            (
+              Rect.fromLTWH(x0 + i * schritt - schritt / 2, 112, schritt, 222),
+              GestureDetector(
+                key: ValueKey('saeule-$i'),
+                behavior: HitTestBehavior.opaque,
+                onTap: () => setState(() => _wahl = i),
+                child: _flaeche(),
+              ),
+            ),
+      ],
+    );
+  }
 }
 
 String _zahl(double w) {
@@ -745,15 +788,56 @@ class _VerlaufMaler extends _Maler {
     this.werte,
     this.labels,
     this.einheit,
+    this.wahl,
+    this.detail,
   );
   final List<String> namen;
   final List<double> werte;
   final List<String> labels;
   final String einheit;
+  final int wahl;
+  final String detail;
+
+  @override
+  bool shouldRepaint(_Maler old) =>
+      super.shouldRepaint(old) ||
+      old is! _VerlaufMaler ||
+      old.wahl != wahl ||
+      old.detail != detail ||
+      old.werte != werte;
+
+  /// One small number box on top: value and what it means.
+  void _box(Canvas c, double x, String wert, String label) {
+    final r = RRect.fromRectAndRadius(
+      Rect.fromLTWH(x, 54, 86, 46),
+      const Radius.circular(12),
+    );
+    c.drawRRect(r, Paint()..color = const Color(0x33000000));
+    _text(
+      c,
+      wert,
+      Offset(x + 43, 76),
+      size: 15,
+      sora: true,
+      weight: FontWeight.w700,
+      color: tonTraining,
+      maxBreite: 80,
+    );
+    _text(c, label, Offset(x + 43, 92), size: 9.5, maxBreite: 80);
+  }
 
   @override
   void paint(Canvas c, Size s) {
-    if (namen.isNotEmpty) _pillen(c, namen.take(3).toList(), 0);
+    // Only as many chips as fit the board, so none is cut at the edge.
+    final chips = <String>[];
+    var breite = 0.0;
+    for (final n in namen.take(3)) {
+      final b = n.length * 6.4 + 26 + (chips.isEmpty ? 0 : 6);
+      if (chips.isNotEmpty && breite + b > 290) break;
+      chips.add(n);
+      breite += b;
+    }
+    if (chips.isNotEmpty) _pillen(c, chips, 0);
     final mit = einheit.isEmpty ? '' : ' $einheit';
     if (werte.length < 2) {
       _text(
@@ -767,10 +851,14 @@ class _VerlaufMaler extends _Maler {
       );
       _text(
         c,
-        'Nach dem zweiten Training wachsen hier deine Säulen',
+        werte.isEmpty
+            ? 'Nach dem ersten Training wächst hier deine erste Säule'
+            : 'Noch 1 Training, dann siehst du deine Kurve',
         const Offset(151, 180),
       );
-      _zeile(c, 'Eine Säule pro Training · Trieb = Rekord');
+      if (detail.isNotEmpty) {
+        _text(c, detail, const Offset(151, 342), color: _ink, maxBreite: 280);
+      }
       return;
     }
     final w = werte.length > 8 ? werte.sublist(werte.length - 8) : werte;
@@ -778,28 +866,23 @@ class _VerlaufMaler extends _Maler {
     final hi = werte.reduce(math.max);
     final lo = w.reduce(math.min), top = w.reduce(math.max);
     final spanne = top - lo;
-    final neu =
-        werte.last >= hi &&
-        werte.sublist(0, werte.length - 1).every((x) => x < werte.last);
-    _text(
-      c,
-      '${_zahl(hi)}$mit',
-      const Offset(22, 82),
-      size: 26,
-      sora: true,
-      weight: FontWeight.w700,
-      color: _ink,
-      align: TextAlign.left,
-    );
+    var rekorde = 0;
+    var bisher = werte.first;
+    for (final x in werte.skip(1)) {
+      if (x > bisher) {
+        rekorde++;
+        bisher = x;
+      }
+    }
     final plus = werte.last - werte.first;
-    _text(
+    _box(
       c,
-      '${neu ? 'neuer Rekord' : 'dein Rekord'} · '
-      '${plus >= 0 ? '+' : '−'}${_zahl(plus.abs())}$mit seit Start',
-      const Offset(22, 100),
-      color: tonTraining,
-      align: TextAlign.left,
+      12,
+      '${plus >= 0 ? '+' : '−'}${_zahl(plus.abs())}$mit',
+      'seit Start',
     );
+    _box(c, 108, '${_zahl(hi)}$mit', 'Bestwert');
+    _box(c, 204, '$rekorde', rekorde == 1 ? 'Rekord' : 'Rekorde');
     c.drawLine(
       const Offset(16, 300),
       const Offset(286, 300),
@@ -850,13 +933,30 @@ class _VerlaufMaler extends _Maler {
         );
         c.restore();
       }
+      if (i == wahl) {
+        c.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromLTWH(x - 13, 297 - hVoll, 26, hVoll + 6),
+            const Radius.circular(9),
+          ),
+          _strich(const Color(0xFFF5DFAE), 1.4),
+        );
+      }
+      _text(
+        c,
+        _zahl(w[i]),
+        Offset(x, 314),
+        size: 10,
+        weight: FontWeight.w700,
+        color: i == wahl ? tonTraining : _ink,
+        maxBreite: schritt + 4,
+      );
       _text(
         c,
         i < lab.length ? lab[i] : '',
-        Offset(x, 318),
-        size: 10,
-        weight: FontWeight.w600,
-        color: letzt ? tonTraining : _soft,
+        Offset(x, 327),
+        size: 8.5,
+        color: i == wahl ? tonTraining : _leise,
         maxBreite: schritt + 4,
       );
       if (rekord) {
@@ -883,7 +983,15 @@ class _VerlaufMaler extends _Maler {
         });
       }
     }
-    _zeile(c, 'Eine Säule pro Training · Trieb = Rekord');
+    _text(
+      c,
+      detail.isEmpty ? 'Säule antippen = genau sehen' : detail,
+      const Offset(151, 347),
+      size: 10.5,
+      weight: FontWeight.w600,
+      color: detail.isEmpty ? _leise : _ink,
+      maxBreite: 290,
+    );
   }
 }
 

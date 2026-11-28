@@ -230,7 +230,7 @@ class StagnationsKarte extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          TLabel('Stagnations-Check · $uebung'),
+          TLabel('Hier hängst du fest · $uebung'),
           const SizedBox(height: 6),
           Text(
             'Seit 3 Wochen bei $seit. Was meinst du, woran es liegt?',

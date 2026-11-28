@@ -169,6 +169,13 @@ extension _Koerper on _HomePageState {
   // ---------------------------------------------------------------- Training
 
   /// Sets and target of a planned exercise, e.g. "4×8 · 62,5 kg".
+  /// Today's target of an exercise, e.g. "87,5 kg × 6", as the session
+  /// prefills it; the plan line when there is none yet.
+  String _zielHeute(PlanUebung u, DateTime heute) {
+    final z = zielFuer(u, _training, heute);
+    return z.saetze.isEmpty ? _zielText(u) : satzText(u.art, z.saetze.first);
+  }
+
   static String _zielText(PlanUebung u) {
     final wdh = u.modus == WdhModus.rir
         ? 'bis kurz vor Schluss'
@@ -202,6 +209,32 @@ extension _Koerper on _HomePageState {
               .reduce(math.max),
         ),
   ];
+
+  /// What was done on one day of an exercise, for the tapped column on
+  /// Fortschritt, e.g. "Do 26.11. · 4 Sätze · 87,5 kg × 6, 6, 6, 5"
+  /// (Rundgang 2026-11-28, point 3).
+  String _tagDetail(String name, DateTime tag) {
+    final logs = [
+      for (final (t, l) in _training.verlauf(name))
+        if (dayKey(t) == dayKey(tag)) l,
+    ];
+    final saetze = [for (final l in logs) ...l.fertige];
+    final datum = '${tagKurz(tag)} ${tag.day}.${tag.month}.';
+    if (logs.isEmpty || saetze.isEmpty) return datum;
+    final art = logs.first.art;
+    final gewichte = {for (final x in saetze) x.wert};
+    final text =
+        gewichte.length == 1 &&
+            gewichte.first != null &&
+            (art == UebungArt.gewicht || art == UebungArt.zusatzgewicht)
+        ? '${satzText(art, SatzWert(gewichte.first, null)).split(' × ').first}'
+              ' × ${saetze.map((x) => x.menge == null ? '–' : _zahl1(x.menge!)).join(', ')}'
+        : saetze
+              .map((x) => satzText(art, SatzWert(x.wert, x.menge)))
+              .join(', ');
+    final n = saetze.length;
+    return '$datum · $n ${n == 1 ? 'Satz' : 'Sätze'} · $text';
+  }
 
   Unterbereich _teilTraining() {
     const b = Bereich.training;
@@ -264,9 +297,28 @@ extension _Koerper on _HomePageState {
       for (final n in {..._training.geloggteUebungen, ...alle})
         if (_bestwerte(n).isNotEmpty) n,
     ];
-    final zeigeUebung = mitVerlauf.isNotEmpty
-        ? mitVerlauf.first
+    // Fortschritt opens with the exercise that has the most entries
+    // (Rundgang 2026-11-28, point 3).
+    final meiste = [...mitVerlauf]
+      ..sort((a, b) => _bestwerte(b).length.compareTo(_bestwerte(a).length));
+    final zeigeUebung = meiste.isNotEmpty
+        ? meiste.first
         : (alle.isEmpty ? null : alle.first);
+    // "Hier hängst du fest": the exercise and where it stands (no word
+    // "Stagnation" any more, Phillip 2026-11-28).
+    String? festText;
+    if (stag != null) {
+      final h = _training.verlauf(stag);
+      festText = h.isEmpty || h.last.$2.bester == null
+          ? '$stag: seit 3 Wochen gleich'
+          : '$stag: seit 3 Wochen bei '
+                '${satzText(h.last.$2.art, h.last.$2.bester!)}';
+    }
+    final tf = _training.tagesform;
+    final tagesform =
+        tf != null && tf.tag == dayKey(today) && tf.satz.isNotEmpty
+        ? tf.satz
+        : tagesformOhneCoach(_heute);
     final werte = zeigeUebung == null
         ? const <double>[]
         : _bestwerte(zeigeUebung);
@@ -284,8 +336,9 @@ extension _Koerper on _HomePageState {
       'heute',
       'Training heute',
       Icons.fitness_center,
-      'Die Felder sind schon mit dem Ziel ausgefüllt. Du änderst nur, was '
-          'anders war.',
+      // The page brings its own bubble with today's form (Rundgang
+      // 2026-11-28, point 4).
+      '',
     );
     final wocheF = f(
       'woche',
@@ -432,7 +485,14 @@ extension _Koerper on _HomePageState {
                 ? 'Heute ist frei. Erholung gehört zum Training.'
                 : fertig
                 ? 'Heute $name geschafft. Stark durchgezogen.'
-                : 'Heute $name. Die Ziele sind schon eingetragen.',
+                // Today's form instead of repeating the card (Rundgang
+                // 2026-11-28, point 1).
+                : tagesform ??
+                      (_heute == null
+                          ? 'Nach dem Check-in sage ich dir, wie du heute '
+                                'rangehst.'
+                          : 'Gut erholt. Heute kannst du die Ziele voll '
+                                'angehen.'),
           ),
           bild: BBild(
             bau: (tipp, v, t) => TrainingHeuteBild(
@@ -494,10 +554,22 @@ extension _Koerper on _HomePageState {
                   )
                 : BJetzt(
                     titel: 'Heute: $name',
-                    text: [
-                      if (zeitHeute != null) 'Um ${formatUhrzeit(zeitHeute)}.',
-                      'Die Ziele sind schon eingetragen.',
-                    ].join(' '),
+                    text: zeitHeute == null
+                        ? ''
+                        : 'Um ${formatUhrzeit(zeitHeute)}.',
+                    // At most four exercises, so the card never gets long
+                    // (Phillip 2026-11-28).
+                    zeilen: planHeute.isEmpty
+                        ? [for (final u in heuteListe.take(4)) (u.name, u.ziel)]
+                        : [
+                            for (final u in planHeute.take(4))
+                              (u.name, _zielHeute(u, today)),
+                          ],
+                    weitere: heuteListe.length > 4
+                        ? '+ ${heuteListe.length - 4} weitere '
+                              '${heuteListe.length == 5 ? 'Übung' : 'Übungen'}'
+                        : null,
+                    zeilenZiel: 't-heute',
                     ring: heuteListe.isEmpty
                         ? null
                         : fertigeUebungen / heuteListe.length,
@@ -518,12 +590,10 @@ extension _Koerper on _HomePageState {
                   )
                 : null,
             geschafft: geschafftListe,
-            mehr: [
-              BMehr('Training heute', wert: heuteWort, ziel: 't-heute'),
-              if (!_plan.isEmpty && !frei)
-                const BMehr('Form filmen', ziel: 't-form'),
-              BMehr('Diese Woche', wert: wocheText),
-            ],
+            // The exercises stand in "Jetzt dran", so the picture with
+            // the discs and the "Mehr" list go (Rundgang 2026-11-28).
+            mitBild: _plan.isEmpty,
+            mitMehr: false,
           ),
           kacheln: [
             BKachel(
@@ -550,7 +620,8 @@ extension _Koerper on _HomePageState {
         BSeite(
           name: 'Woche',
           coach: stag != null
-              ? '$stag Tipp unten auf Stagnation, dann schauen wir zusammen.'
+              ? 'Bei $stag hängst du seit 3 Wochen fest. Tipp auf „Zusammen '
+                    'ansehen“, dann schauen wir drauf.'
               : geplant == 0
               ? 'Leg einmal deinen Plan an. Dann siehst du hier deine Woche.'
               : '$gemacht von $geplant geschafft. Verschiebt sich etwas, sage '
@@ -569,8 +640,8 @@ extension _Koerper on _HomePageState {
                 ziel: 't-balance',
               ),
               BZahl(
-                stag == null ? 'keine' : 'prüfen',
-                'Stagnation',
+                stag == null ? 'nichts' : 'ansehen',
+                'hängt fest',
                 ziel: 't-stag',
               ),
             ],
@@ -581,8 +652,8 @@ extension _Koerper on _HomePageState {
             dafuer: dafuer,
             jetzt: stag != null
                 ? BJetzt(
-                    titel: 'Stagnation prüfen',
-                    text: stag,
+                    titel: 'Hier hängst du fest',
+                    text: festText!,
                     mitte: wocheText,
                     unter: 'Einheiten',
                     knopf: ('Zusammen ansehen', 't-stag'),
@@ -606,23 +677,10 @@ extension _Koerper on _HomePageState {
                     unter: 'Einheiten',
                     knopf: ('Plan ändern', 't-plan'),
                   ),
-            serie: serie,
-            naechstes: wocheZiel,
-            geschafft: geschafftListe,
-            mehr: [
-              const BMehr('Woche im Detail', ziel: 't-woche'),
-              BMehr(
-                'Hybrid-Balance',
-                wert: sport.isEmpty ? null : sport.join(', '),
-                ziel: 't-balance',
-              ),
-              BMehr(
-                'Stagnation',
-                wert: stag == null ? 'keine' : 'prüfen',
-                ziel: 't-stag',
-              ),
-              const BMehr('Sportarten', ziel: 't-sport'),
-            ],
+            // Serie, Ziel and "Geschafft" only on Heute, no "Mehr"
+            // (Rundgang 2026-11-28, point 2).
+            mitUnterbau: false,
+            mitMehr: false,
           ),
           kacheln: [
             BKachel(
@@ -645,7 +703,7 @@ extension _Koerper on _HomePageState {
             ),
             BKachel(
               id: 't-stag',
-              titel: 'Stagnation',
+              titel: 'Hier hängst du fest',
               icon: Icons.timeline,
               // Without a plan the week is empty: go straight to the plan
               // editor (Rundgang 2026-11-15, point 8).
@@ -693,6 +751,13 @@ extension _Koerper on _HomePageState {
                       ? 'heute'
                       : '${tag.day}.${tag.month}.',
               ],
+              details: [
+                for (final (tag, _)
+                    in zeigeUebung == null
+                        ? const <(DateTime, double)>[]
+                        : _bestwerteMitTag(zeigeUebung))
+                  _tagDetail(zeigeUebung!, tag),
+              ],
               einheit: kg ? 'kg' : '',
               tipp: tipp,
               v: v,
@@ -725,39 +790,8 @@ extension _Koerper on _HomePageState {
               unter: kg ? 'Rekord kg' : 'Rekord',
               knopf: ('Nächstes Ziel vorschlagen', 't-selbst'),
             ),
-            serie: serie,
-            naechstes: rekord == null || zeigeUebung == null
-                ? const BNaechstes(
-                    titel: 'Erster Bestwert',
-                    anteil: 0,
-                    text: 'Trag dein erstes Training ein.',
-                  )
-                : BNaechstes(
-                    titel: '$zeigeUebung: neuer Bestwert',
-                    anteil: rekord == 0 ? 0 : werte.last / rekord,
-                    text: werte.last >= rekord
-                        ? 'Zuletzt dein Bestwert. Jetzt eins drauf.'
-                        : 'Zuletzt ${_zahl1(werte.last)}, Bestwert '
-                              '${_zahl1(rekord)}${kg ? ' kg' : ''}.',
-                  ),
-            geschafft: geschafftListe,
-            mehr: [
-              const BMehr('Übungen im Verlauf', ziel: 't-kurve'),
-              BMehr(
-                'Rekorde',
-                wert: rekord == null
-                    ? null
-                    : '${_zahl1(rekord)}${kg ? ' kg' : ''}',
-                ziel: 't-rekorde',
-              ),
-              const BMehr('Form-Videos', ziel: 't-videos'),
-              BMehr(
-                'Seit Start',
-                wert: werte.length < 2
-                    ? null
-                    : '${werte.last - werte.first >= 0 ? '+' : '−'}${_zahl1((werte.last - werte.first).abs())}',
-              ),
-            ],
+            mitUnterbau: false,
+            mitMehr: false,
           ),
           kacheln: [
             BKachel(
